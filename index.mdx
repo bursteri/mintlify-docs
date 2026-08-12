@@ -1,40 +1,29 @@
 ---
-title: "PlainRouter"
-description: "Connect AI agents to your advertising accounts and route first-party conversion signals."
+title: "PlainRouter documentation"
+description: "Guides for setting up PlainRouter and collecting first-party website signals."
 ---
 
-PlainRouter gives AI agents secure, permissioned access to advertising accounts through the Model Context Protocol (MCP). It also collects first-party conversion signals and delivers them to connected destinations.
+Welcome to the PlainRouter help center. These guides help you set up your account, configure first-party signal collection, and troubleshoot your installation.
 
-Use PlainRouter to:
+If this is your first visit, begin with onboarding. It takes you from account creation to an active Signals pixel.
 
-- Connect Codex, Claude, and other MCP-compatible clients to an advertising account.
-- Keep account access behind a browser-based authorization flow.
-- Collect first-party conversion events through your own collection hostname.
-- Send conversion signals to supported advertising platforms.
-
-<CardGroup cols={2}>
-  <Card title="Start onboarding" icon="sparkles" href="/onboarding">
-    Set up your workspace, connect an AI agent, and start collecting first-party signals.
-  </Card>
-  <Card title="Connect an AI agent" icon="plug" href="/quickstart">
-    Add PlainRouter to an MCP client and authorize an advertising account.
+<CardGroup cols={1}>
+  <Card title="Start onboarding" icon="rocket" href="/onboarding">
+    Create your account, prepare your collection domain, and activate your first Signals pixel.
   </Card>
 </CardGroup>
 
-## How it works
+## Browse the guides
 
-<Steps>
-  <Step title="Connect your account">
-    Sign in to PlainRouter and connect a supported advertising account through OAuth.
-  </Step>
-  <Step title="Authorize your agent">
-    Add the PlainRouter MCP server to your client. The browser authorization flow lets you choose which account the agent can access.
-  </Step>
-  <Step title="Route conversion signals">
-    Configure a signal tracker to collect browser events and deliver approved conversions to your connected destination.
-  </Step>
-</Steps>
+<CardGroup cols={2}>
+  <Card title="Onboarding" icon="list-checks" href="/onboarding">
+    Follow the complete first-time setup from registration through activation.
+  </Card>
+  <Card title="Install the Signals pixel" icon="code" href="/signals/install-pixel">
+    Review snippet placement, verification, and troubleshooting.
+  </Card>
+</CardGroup>
 
 <Note>
-  PlainRouter limits each agent connection to the account and permissions you authorize. You can revoke access from your dashboard.
+  Already have an account? Open the [PlainRouter dashboard](https://plainrouter.com/dashboard) to continue setup.
 </Note>

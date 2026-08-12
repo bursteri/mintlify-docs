@@ -23,8 +23,7 @@
         "group": "Get started",
         "pages": [
           "index",
-          "onboarding",
-          "quickstart"
+          "onboarding"
         ]
       },
       {
@@ -59,13 +58,7 @@
   "contextual": {
     "options": [
       "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
+      "view"
     ]
   }
 }

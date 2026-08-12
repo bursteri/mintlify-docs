@@ -1,30 +1,21 @@
 ---
 title: "Get started with PlainRouter"
-description: "Set up your workspace, connect an AI agent, and collect your first website signal."
+description: "Set up your workspace and collect your first website signal."
 ---
 
-Welcome to PlainRouter. This guide takes you from a new account to your first working connection.
+Welcome to PlainRouter. This guide takes you from a new account to an active first-party Signals pixel.
 
-PlainRouter has two starting paths:
-
-<CardGroup cols={2}>
-  <Card title="Connect an AI agent" icon="bot" href="/quickstart">
-    Authorize Codex or another MCP-compatible client to work with an advertising account.
-  </Card>
-  <Card title="Collect website signals" icon="radio" href="/signals/install-pixel">
-    Add a first-party collection domain and install the Signals pixel on your website.
-  </Card>
-</CardGroup>
-
-You can complete either path first. Set up both when you want your AI workflow and conversion measurement in the same workspace.
+<Card title="What you will accomplish" icon="circle-check">
+  Create your account, confirm your workspace, connect a first-party collection domain, and verify the Signals pixel on your live website.
+</Card>
 
 ## Before you begin
 
-Start with the access required for the path you plan to complete:
+Before you begin, you need:
 
 - An email address you can verify.
-- Access to a supported advertising account for the AI-agent path.
-- Access to your website and DNS provider for the Signals path.
+- Access to your website's shared `<head>` template or site-wide code settings.
+- Access to the DNS provider for your website domain.
 
 ## Set up your account
 
@@ -41,35 +32,9 @@ Start with the access required for the path you plan to complete:
   </Step>
 </Steps>
 
-## Connect your AI client
-
-Use this path when you want to manage advertising work from Codex or another MCP-compatible client.
-
-<Steps>
-  <Step title="Add PlainRouter to your client">
-    In Codex, run:
-
-    ```bash
-    codex mcp add plainrouter --url https://plainrouter.com/mcp
-    ```
-
-    For another MCP client, add `https://plainrouter.com/mcp` as a remote server URL.
-  </Step>
-  <Step title="Authorize an advertising account">
-    Start a PlainRouter action from your client. When the browser authorization page opens, sign in and choose the advertising account this connection may access.
-
-    PlainRouter scopes the connection to the account and permissions you approve.
-  </Step>
-  <Step title="Check the connection">
-    Ask your agent to retrieve the connected advertising account context. Confirm that it returns the account you selected.
-
-    See [Connect an AI agent](/quickstart) for the focused connection guide.
-  </Step>
-</Steps>
-
 ## Set up Signals
 
-Use this path when you want to collect first-party conversion events from your website.
+Signals collects first-party conversion events from your website through a collection subdomain you control.
 
 <Steps>
   <Step title="Start your first signal">
@@ -97,9 +62,8 @@ Use this path when you want to collect first-party conversion events from your w
 
 ## Confirm your setup
 
-Your first PlainRouter session is complete when the parts you chose are working:
+Your initial PlainRouter setup is complete when:
 
-- Your AI client returns the advertising account you authorized.
 - **Signals** shows your signal as **Active** after receiving the first `PageView`.
 - Your workspace name clearly identifies the client, brand, or market it contains.
 
