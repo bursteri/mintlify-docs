@@ -26,7 +26,16 @@
           "quickstart"
         ]
       }
-    ]
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Homepage",
+          "href": "https://plainrouter.com",
+          "icon": "house"
+        }
+      ]
+    }
   },
   "logo": {
     "light": "/logo/light.svg",
