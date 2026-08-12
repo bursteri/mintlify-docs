@@ -23,12 +23,13 @@
         "group": "Get started",
         "pages": [
           "index",
-          "onboarding"
+          "quickstart"
         ]
       },
       {
         "group": "Signals",
         "pages": [
+          "signals/configure-dns",
           "signals/install-pixel"
         ]
       }
@@ -53,6 +54,11 @@
       "type": "button",
       "label": "Dashboard",
       "href": "https://plainrouter.com/dashboard"
+    }
+  },
+  "footer": {
+    "socials": {
+      "linkedin": "https://www.linkedin.com/company/ivyandion"
     }
   },
   "contextual": {
