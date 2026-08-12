@@ -1,0 +1,106 @@
+---
+title: "Get started with PlainRouter"
+description: "Set up your workspace, connect an AI agent, and collect your first website signal."
+---
+
+Welcome to PlainRouter. This guide takes you from a new account to your first working connection.
+
+PlainRouter has two starting paths:
+
+<CardGroup cols={2}>
+  <Card title="Connect an AI agent" icon="bot" href="/quickstart">
+    Authorize Codex or another MCP-compatible client to work with an advertising account.
+  </Card>
+  <Card title="Collect website signals" icon="radio" href="/signals/install-pixel">
+    Add a first-party collection domain and install the Signals pixel on your website.
+  </Card>
+</CardGroup>
+
+You can complete either path first. Set up both when you want your AI workflow and conversion measurement in the same workspace.
+
+## Before you begin
+
+Start with the access required for the path you plan to complete:
+
+- An email address you can verify.
+- Access to a supported advertising account for the AI-agent path.
+- Access to your website and DNS provider for the Signals path.
+
+## Set up your account
+
+<Steps>
+  <Step title="Create your account">
+    [Create a PlainRouter account](https://plainrouter.com/register), then verify your email address.
+
+    PlainRouter creates a personal team and a default workspace for you. A workspace keeps one client, brand, or market and its connected resources together.
+  </Step>
+  <Step title="Name your workspace">
+    Open the [PlainRouter dashboard](https://plainrouter.com/dashboard), then go to **Settings** → **Workspace**.
+
+    Give the workspace a name your team will recognize, such as the client, brand, or market name. You can create and switch workspaces later when you need to separate access or data.
+  </Step>
+</Steps>
+
+## Connect your AI client
+
+Use this path when you want to manage advertising work from Codex or another MCP-compatible client.
+
+<Steps>
+  <Step title="Add PlainRouter to your client">
+    In Codex, run:
+
+    ```bash
+    codex mcp add plainrouter --url https://plainrouter.com/mcp
+    ```
+
+    For another MCP client, add `https://plainrouter.com/mcp` as a remote server URL.
+  </Step>
+  <Step title="Authorize an advertising account">
+    Start a PlainRouter action from your client. When the browser authorization page opens, sign in and choose the advertising account this connection may access.
+
+    PlainRouter scopes the connection to the account and permissions you approve.
+  </Step>
+  <Step title="Check the connection">
+    Ask your agent to retrieve the connected advertising account context. Confirm that it returns the account you selected.
+
+    See [Connect an AI agent](/quickstart) for the focused connection guide.
+  </Step>
+</Steps>
+
+## Set up Signals
+
+Use this path when you want to collect first-party conversion events from your website.
+
+<Steps>
+  <Step title="Start your first signal">
+    In the dashboard, open **Signals** and click **New signal** or **Set up your first signal**.
+
+    Enter a collection subdomain that you control, such as `collect.example.com`. Do not include `https://`.
+  </Step>
+  <Step title="Add the DNS records">
+    Copy the DNS records from PlainRouter into your DNS provider. Keep the setup screen open or return to it from **Signals**.
+
+    DNS validation can take several minutes. If the records remain pending, click **Retry validation** after your provider has published them.
+  </Step>
+  <Step title="Install the Signals pixel">
+    When the collection domain becomes active, copy the generated snippet and add it immediately before the closing `</head>` tag on every page of your website.
+
+    Deploy the change and visit the live site. The pixel sends an anonymous, cookieless `PageView`, and PlainRouter completes setup automatically after receiving it.
+
+    See [Install the Signals pixel](/signals/install-pixel) for code placement and troubleshooting.
+  </Step>
+</Steps>
+
+<Note>
+  Signal setup is optional and resumable. Closing the setup screen does not remove your collection domain or log you out.
+</Note>
+
+## Confirm your setup
+
+Your first PlainRouter session is complete when the parts you chose are working:
+
+- Your AI client returns the advertising account you authorized.
+- **Signals** shows your signal as **Active** after receiving the first `PageView`.
+- Your workspace name clearly identifies the client, brand, or market it contains.
+
+You can now return to the [dashboard](https://plainrouter.com/dashboard) and continue working from the workspace you created.

@@ -1,0 +1,79 @@
+---
+title: "Install the Signals pixel"
+description: "Add the PlainRouter Signals pixel to your website and verify the installation."
+---
+
+The Signals pixel collects first-party browser events through your collection domain. PlainRouter gives each signal tracker a unique snippet with its publishable key and collection URL.
+
+## Before you begin
+
+You need:
+
+- A collection domain that shows as active in PlainRouter.
+- Access to the shared `<head>` template or site-wide code injection setting for your website.
+- Permission to deploy changes to the domain connected to your signal tracker.
+
+## Install the pixel
+
+<Steps>
+  <Step title="Copy your snippet">
+    Open **Signals**, continue setup, and find **Set up Signals pixel**.
+
+    Click **Copy code**. Use the complete snippet exactly as PlainRouter provides it. Its key and script URL are unique to your signal tracker.
+  </Step>
+  <Step title="Add it to every page">
+    Paste the snippet immediately before the closing `</head>` tag in your site-wide layout.
+
+    Your snippet follows this structure:
+
+    ```html
+    <script>
+      window.signal = window.signal || function () {
+        (window.signal.q = window.signal.q || []).push(arguments);
+      };
+      signal("init", { key: "YOUR_PUBLISHABLE_KEY" });
+    </script>
+    <script async src="https://YOUR_COLLECTION_DOMAIN/s/v2.js"></script>
+    ```
+
+    Keep the initialization block before the asynchronous script. This preserves commands that run while the pixel is loading.
+  </Step>
+  <Step title="Deploy and visit your site">
+    Publish the change, then open any page on the connected website.
+
+    The pixel sends an anonymous, cookieless `PageView` when it loads. PlainRouter detects this event and completes setup automatically.
+  </Step>
+</Steps>
+
+<Note>
+  You can close the setup screen after deployment. Reopen **Signals** later to check the signal tracker status.
+</Note>
+
+## Verify the installation
+
+If setup does not complete, open your browser's developer tools and reload the page:
+
+1. Select the **Network** tab.
+2. Search for `v2.js` and confirm it loads from your collection domain.
+3. Search for `events` and confirm the browser sends a request to `/v1/events` on the same domain.
+
+Both requests should return a successful `2xx` response.
+
+## Troubleshoot
+
+### The script does not load
+
+- Confirm the snippet appears in the rendered page source.
+- Clear your site cache or CDN cache after deploying.
+- Disable content blockers while testing.
+- If your site uses a Content Security Policy, allow your collection domain in `script-src`. The initialization block must also follow your site's nonce or hash policy for inline scripts.
+
+### The event request is blocked
+
+- Allow your collection domain in the `connect-src` directive of your Content Security Policy.
+- Confirm you installed the snippet on a domain allowed by the signal tracker.
+- Confirm the publishable key and script URL came from the same PlainRouter snippet.
+
+### Setup still shows as incomplete
+
+Visit a live page where the new snippet is present. Preview environments, cached pages, and pages on a different domain do not verify the production signal tracker.

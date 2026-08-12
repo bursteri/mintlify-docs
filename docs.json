@@ -23,7 +23,14 @@
         "group": "Get started",
         "pages": [
           "index",
+          "onboarding",
           "quickstart"
+        ]
+      },
+      {
+        "group": "Signals",
+        "pages": [
+          "signals/install-pixel"
         ]
       }
     ],
