@@ -1,47 +1,44 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Connect an MCP-compatible AI client to PlainRouter."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+This guide connects your AI client to PlainRouter and authorizes access to one advertising account.
 
 ## Prerequisites
 
-Before you begin, you must have:
+Before you begin, you need:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- A [PlainRouter account](https://plainrouter.com/register).
+- A supported advertising account you are allowed to manage.
+- Codex or another client that supports remote MCP servers and OAuth.
 
-## Get started
+## Connect your client
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Add the PlainRouter MCP server">
+    In Codex, run:
 
     ```bash
-    npm install your-package
+    codex mcp add plainrouter --url https://plainrouter.com/mcp
     ```
+
+    For another MCP client, add `https://plainrouter.com/mcp` as a remote server URL.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+  <Step title="Authorize access">
+    Start the connection from your MCP client. PlainRouter opens a browser authorization page.
 
-    ```bash
-    your-cli init
-    ```
+    Sign in, choose the advertising account you want the agent to use, and approve the requested access.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
-
-    ```bash
-    your-cli start
-    ```
+  <Step title="Verify the connection">
+    Ask your agent to retrieve the connected advertising account context. A successful response identifies the account authorized for that connection.
   </Step>
 </Steps>
 
 <Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
-
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+  PlainRouter does not grant an agent access to every account in your workspace. Each authorization is scoped to the account you select.
 </Tip>
+
+## Next step
+
+Open the [PlainRouter dashboard](https://plainrouter.com/dashboard) to configure your workspace, connect a destination, or install a first-party signal tracker.

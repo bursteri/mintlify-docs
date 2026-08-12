@@ -26,21 +26,7 @@
           "quickstart"
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "API reference",
-          "href": "https://plainrouter.com/api/docs",
-          "icon": "braces"
-        },
-        {
-          "anchor": "GitHub",
-          "href": "https://github.com/bursteri/plainrouter",
-          "icon": "github"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",
@@ -48,20 +34,6 @@
     "href": "https://plainrouter.com"
   },
   "navbar": {
-    "links": [
-      {
-        "label": "Pricing",
-        "href": "https://plainrouter.com/pricing"
-      },
-      {
-        "label": "Security",
-        "href": "https://plainrouter.com/security"
-      },
-      {
-        "label": "Support",
-        "href": "mailto:hello@plainrouter.com"
-      }
-    ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
@@ -79,10 +51,5 @@
       "cursor",
       "vscode"
     ]
-  },
-  "footer": {
-    "socials": {
-      "github": "https://github.com/bursteri/plainrouter"
-    }
   }
 }

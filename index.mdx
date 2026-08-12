@@ -1,20 +1,40 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: "PlainRouter"
+description: "Connect AI agents to your advertising accounts and route first-party conversion signals."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+PlainRouter gives AI agents secure, permissioned access to advertising accounts through the Model Context Protocol (MCP). It also collects first-party conversion signals and delivers them to connected destinations.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+Use PlainRouter to:
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+- Connect Codex, Claude, and other MCP-compatible clients to an advertising account.
+- Keep account access behind a browser-based authorization flow.
+- Collect first-party conversion events through your own collection hostname.
+- Send conversion signals to supported advertising platforms.
+
+<CardGroup cols={2}>
+  <Card title="Connect an AI agent" icon="plug" href="/quickstart">
+    Add PlainRouter to an MCP client and authorize an advertising account.
+  </Card>
+  <Card title="Open the dashboard" icon="layout-dashboard" href="https://plainrouter.com/dashboard">
+    Configure your workspace, signal tracker, and destinations.
+  </Card>
+</CardGroup>
+
+## How it works
+
+<Steps>
+  <Step title="Connect your account">
+    Sign in to PlainRouter and connect a supported advertising account through OAuth.
+  </Step>
+  <Step title="Authorize your agent">
+    Add the PlainRouter MCP server to your client. The browser authorization flow lets you choose which account the agent can access.
+  </Step>
+  <Step title="Route conversion signals">
+    Configure a signal tracker to collect browser events and deliver approved conversions to your connected destination.
+  </Step>
+</Steps>
+
+<Note>
+  PlainRouter limits each agent connection to the account and permissions you authorize. You can revoke access from your dashboard.
+</Note>
