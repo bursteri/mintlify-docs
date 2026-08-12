@@ -1,0 +1,10 @@
+.nav-logo {
+  height: 2.25rem !important;
+  width: auto;
+}
+
+@media (min-width: 1024px) {
+  .nav-logo {
+    height: 2.5rem !important;
+  }
+}
