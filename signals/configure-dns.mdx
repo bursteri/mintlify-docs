@@ -3,53 +3,51 @@ title: "Configure DNS and CNAME"
 description: "Connect a first-party collection subdomain to PlainRouter and complete DNS validation."
 ---
 
-PlainRouter collects Signals through a subdomain you control, such as `collect.example.com`. Connecting this collection domain requires a CNAME record and one or more TXT records.
+PlainRouter collects Signals through a subdomain you control, such as `collect.example.com`. Connecting this collection domain requires one CNAME record.
 
 The change applies only to the collection subdomain. It does not move your website, email, or root domain to PlainRouter.
 
-## How the records work
+## How the CNAME works
 
 | Record | Purpose |
 | --- | --- |
-| `CNAME` | Routes the collection subdomain to PlainRouter. |
-| `TXT` | Verifies domain ownership and enables HTTPS for the collection subdomain. |
+| `CNAME` | Routes the collection subdomain to PlainRouter so Cloudflare can validate ownership and provision HTTPS automatically. |
 
 <Warning>
-  Add every record exactly as shown in PlainRouter. The names and values displayed in your setup are specific to your collection domain.
+  Add the CNAME exactly as shown in PlainRouter. The name and value displayed in your setup are specific to your collection domain.
 </Warning>
+
+<Note>
+  You do not need to create a Cloudflare Worker Route or configure application routing. PlainRouter registers the collection hostname automatically after DNS and HTTPS validation succeeds.
+</Note>
 
 ## Before you begin
 
 You need:
 
 - Access to the DNS provider that manages your website domain.
-- Permission to add CNAME and TXT records.
+- Permission to add a CNAME record.
 - A collection subdomain that is not already used by another service.
 
 You can identify the active DNS provider by checking where your domain's nameservers are managed. This may be different from the company where you registered the domain.
 
-## Add the DNS records
+## Add the CNAME record
 
 <Steps>
   <Step title="Open the DNS configuration">
     In PlainRouter, open **Signals** and continue setup.
 
-    After you enter your collection domain, PlainRouter displays a table containing the exact **Type**, **Name**, and **Value** for each required record.
-  </Step>
-  <Step title="Add the TXT records">
-    In your DNS provider, create each TXT record shown by PlainRouter.
-
-    Copy each **Name** and **Value** separately. Do not add quotation marks unless your DNS provider adds them automatically.
+    After you enter your collection domain, PlainRouter displays the exact **Type**, **Name**, and **Value** for the required CNAME.
   </Step>
   <Step title="Add the CNAME record">
-    Create the CNAME using the collection domain as its name and the PlainRouter target as its value.
+    In your DNS provider, create the CNAME using the collection domain as its name and the PlainRouter target as its value.
 
     Enter only the hostname in the value field. Do not include `https://`, a path, or a trailing slash.
   </Step>
   <Step title="Save and validate">
-    Save the records and return to PlainRouter.
+    Save the CNAME and return to PlainRouter.
 
-    TXT records are typically validated within five minutes. If setup remains pending after five minutes, click **Retry validation**.
+    CNAME changes are typically detected within five minutes. Cloudflare then validates ownership and provisions HTTPS automatically. If setup remains pending after five minutes, click **Retry validation**.
   </Step>
 </Steps>
 
@@ -59,7 +57,7 @@ DNS providers use different labels for the same fields:
 
 | PlainRouter | Other common labels | What to enter |
 | --- | --- | --- |
-| **Type** | Record type | `CNAME` or `TXT` |
+| **Type** | Record type | `CNAME` |
 | **Name** | Host, hostname, alias | The record name shown in PlainRouter |
 | **Value** | Target, points to, content | The record value shown in PlainRouter |
 | TTL | Time to live | Use **Auto** or the provider default |
@@ -67,14 +65,14 @@ DNS providers use different labels for the same fields:
 Some providers automatically append your root domain to the **Name** field. If entering `collect.example.com` produces `collect.example.com.example.com`, enter only the host portion, such as `collect`.
 
 <Tip>
-  Use the copy button beside each DNS name and value in PlainRouter. This avoids missing characters in verification tokens.
+  Use the copy buttons beside the CNAME name and value in PlainRouter. This avoids typing mistakes.
 </Tip>
 
 ## Confirm activation
 
-PlainRouter validates both ownership and HTTPS before activating the collection domain. Keep the setup screen open, or return later through **Signals**.
+PlainRouter validates ownership and HTTPS automatically after the CNAME points to PlainRouter. Keep the setup screen open, or return later through **Signals**.
 
-When validation succeeds, PlainRouter automatically moves setup to **Set up Signals pixel**. Keep the CNAME and TXT records in place after activation.
+When validation succeeds, PlainRouter automatically moves setup to **Set up Signals pixel**. Keep the CNAME in place after activation.
 
 ## Troubleshoot validation
 
@@ -85,22 +83,15 @@ When validation succeeds, PlainRouter automatically moves setup to **Set up Sign
 - Check that you edited the DNS zone used by your domain's active nameservers.
 - If your DNS provider adds the root domain automatically, make sure the record name is not duplicated.
 
-### The TXT records do not validate
-
-- Confirm you added every TXT record shown in PlainRouter.
-- Compare the complete name and value, including underscores, hyphens, and dots.
-- Remove quotation marks you entered manually if your provider stores them as part of the value.
-- Wait for cached DNS responses to expire, then click **Retry validation** again.
-
 ### HTTPS validation fails
 
-HTTPS becomes available only after the ownership and certificate TXT records are visible publicly.
+HTTPS becomes available after the collection hostname points to PlainRouter and Cloudflare completes automatic validation.
 
 If PlainRouter reports a CAA conflict, review the CAA records on your domain and allow the certificate authority named in the validation error. If you do not manage those restrictions, ask your DNS administrator to update them.
 
 ### Setup is still pending
 
-DNS updates can take longer than the provider's dashboard suggests. Leave the records in place and retry after several minutes. Changing the values repeatedly restarts the validation process.
+DNS updates can take longer than the provider's dashboard suggests. Leave the CNAME in place and retry after several minutes. Changing the value repeatedly restarts the validation process.
 
 ## Next step
 
