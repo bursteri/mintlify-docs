@@ -1,0 +1,87 @@
+---
+title: "Actions overview"
+description: "Understand how agents turn Signals evidence into governed, human-reviewed recommendations."
+---
+
+Actions is PlainRouter's governed recommendation workflow. An authorized AI agent can read the approved account's Signals context, explain a proposed change, and place it in your approval queue.
+
+<Warning>
+  The current release is strictly **Suggest only**. Approving a recommendation records approval as `approved_without_execution`. PlainRouter does not write the change to Meta.
+</Warning>
+
+## The review loop
+
+<Steps>
+  <Step title="A person authorizes one account">
+    During MCP authorization, you choose the exact advertising account the agent may access. PlainRouter binds the connection to that account rather than accepting an account ID from the agent.
+  </Step>
+  <Step title="The agent reads Signals context">
+    The agent starts with account state, then reads Signal health and stored performance when relevant. All three reads carry the same workspace, account, destination, and dataset scope.
+  </Step>
+  <Step title="The agent proposes a batch">
+    Each batch includes one or more typed actions, a plain-language rationale, exact evidence fields, a stable idempotency key, and a human-supplied target.
+  </Step>
+  <Step title="PlainRouter applies policy">
+    Static safeguards can block the proposal. Checks that require unavailable live account or target state are labeled unavailable rather than guessed.
+  </Step>
+  <Step title="A person decides">
+    A pending proposal appears in **Approval queue**. You can approve it or reject it with an optional reason.
+  </Step>
+  <Step title="The decision becomes audit history">
+    PlainRouter records the proposal, policy result, evidence provenance, and human decision in a tamper-evident audit chain.
+  </Step>
+</Steps>
+
+## Supported proposal types
+
+| Action | Target | Required parameters |
+| --- | --- | --- |
+| Adjust budget | Ad account, campaign, ad set, or ad | New daily budget in the account currency's minor unit. |
+| Set status | Ad account, campaign, ad set, or ad | `active` or `paused`. |
+| Duplicate ad with creative | Ad | Creative-library asset reference and required initial `paused` status. |
+| Upload asset | Ad account, campaign, ad set, or ad | Durable staged asset reference, image or video type, filename, and SHA-256 digest. |
+
+These are proposal shapes. Their presence in a recommendation does not mean PlainRouter executed the action.
+
+## Evidence boundaries
+
+The current Signals reads provide aggregate account and dataset evidence:
+
+- Authorized account, workspace, connection, Signal, and destination identity.
+- First-party event activity and diagnostics.
+- Meta delivery outcomes.
+- Stored Event Match Quality snapshots.
+- Stored gateway-versus-Meta conversion reconciliation.
+
+They do not provide live Marketing API state for budget, spend, campaign status, learning phase, or target-level performance.
+
+<Note>
+  A human-supplied campaign, ad set, or ad ID establishes only which target the recommendation refers to. It does not prove that target's current state.
+</Note>
+
+## Suggest-only decisions
+
+| Decision | Result |
+| --- | --- |
+| Approve | The batch and its actions become **Approved without execution**. No execution job is dispatched. |
+| Reject | The batch and its actions become **Rejected**. The optional reason is recorded. |
+| Policy block | The batch becomes **Blocked** and does not enter the pending review flow. |
+
+Approved-without-execution recommendations do not increase the **Landed** count.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Connect an agent" icon="bot" href="/actions/connect-agent">
+    Authorize an MCP client for one advertising account.
+  </Card>
+  <Card title="Review proposals" icon="inbox" href="/actions/review-proposals">
+    Read evidence, policy results, and action details before deciding.
+  </Card>
+  <Card title="Configure policy" icon="shield-check" href="/actions/policies-and-safety">
+    Set hard workspace boundaries and understand current availability.
+  </Card>
+  <Card title="Read the audit log" icon="history" href="/actions/audit-log">
+    Trace each proposal and decision to its actor.
+  </Card>
+</CardGroup>

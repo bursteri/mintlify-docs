@@ -29,8 +29,29 @@
       {
         "group": "Signals",
         "pages": [
+          "signals/overview",
           "signals/configure-dns",
-          "signals/install-pixel"
+          "signals/install-pixel",
+          "signals/track-events",
+          "signals/connect-meta",
+          "signals/health-and-performance"
+        ]
+      },
+      {
+        "group": "Actions",
+        "pages": [
+          "actions/overview",
+          "actions/connect-agent",
+          "actions/review-proposals",
+          "actions/policies-and-safety",
+          "actions/audit-log"
+        ]
+      },
+      {
+        "group": "Agent reference",
+        "pages": [
+          "reference/mcp-tools",
+          "reference/statuses-and-terms"
         ]
       }
     ],

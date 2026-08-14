@@ -1,0 +1,106 @@
+---
+title: "Statuses and terms"
+description: "Reference for the Signals and Actions states shown in PlainRouter."
+---
+
+## Signal health
+
+| API value | UI label | Meaning |
+| --- | --- | --- |
+| `setup_required` | Setup required | Signal collection or hostname activation is incomplete. |
+| `awaiting_data` | Awaiting data | Setup is active, but no event has been recorded. |
+| `active_unmeasured` | Measurement pending | Events exist, but required delivery, EMQ, or reconciliation measurements are incomplete. |
+| `needs_attention` | Needs attention | At least one warning or critical diagnostic is active. |
+| `healthy` | Healthy | Event activity and all required measurement categories are recent and have no active warning. |
+
+## Signal infrastructure
+
+### Signal tracker
+
+| Value | Meaning |
+| --- | --- |
+| `pending` | Setup has started but is not fully active. |
+| `active` | The tracker can receive events. |
+| `inactive` | The tracker is not active. |
+
+### Collection hostname
+
+| Value | Meaning |
+| --- | --- |
+| `pending_validation` | PlainRouter is waiting for DNS or certificate validation. |
+| `active` | The hostname and HTTPS certificate are active. |
+| `failed` | Hostname provisioning or validation failed. |
+| `deactivated` | The hostname is no longer active. |
+
+## Destination delivery
+
+| Value | Category | Meaning |
+| --- | --- | --- |
+| `queued` | Pending | Waiting for destination delivery. |
+| `sent` | Pending | Sent and awaiting the destination result. |
+| `retrying` | Pending | Retrying a transient failure. |
+| `accepted` | Accepted | Meta accepted the event. |
+| `failed:auth` | Failed | Meta rejected the access token. |
+| `failed:permanent` | Failed | A non-retryable payload or destination error occurred. |
+| `failed:unknown` | Failed | Delivery stopped after an unclassified failure. |
+| `expired` | Terminal | The event is outside Meta's seven-day freshness window. |
+| `skipped:consent` | Terminal | Advertising user-data consent was denied. |
+| `skipped:no_destination` | Terminal | No active destination was configured. |
+| `skipped:duplicate` | Terminal | The destination had already received the event. |
+
+The dashboard's acceptance-rate denominator includes recent non-test deliveries in the delivery ledger. Its pending count groups `queued`, `sent`, and `retrying`. Its failed count groups the three `failed:*` states.
+
+## Performance measurability
+
+| Status | Reason | Meaning |
+| --- | --- | --- |
+| `measurable` | `null` | At least one report exists in the requested window and the latest report is recent. |
+| `not_measurable` | `no_history` | No usable reconciliation report exists for the requested window. |
+| `not_measurable` | `stale_history` | The latest reconciliation report is more than 48 hours old. |
+
+## Policy decisions
+
+| Value | Meaning |
+| --- | --- |
+| `require_approval` | A person must decide in the approval queue. |
+| `block` | At least one safeguard prevents the proposal from proceeding. |
+| `allow` | Policy permits execution in an execution-enabled mode. This is not the current suggest-only path. |
+
+## Action batch statuses
+
+| Value | Meaning |
+| --- | --- |
+| `pending` | Waiting for human approval. |
+| `approved_without_execution` | Human-approved suggest-only recommendation. Terminal and not executed. |
+| `rejected` | Human-rejected recommendation. Terminal. |
+| `blocked` | Stopped by policy or a safety condition. Terminal. |
+| `approved` | Approved for an execution-enabled path. Not used by current suggest-only approvals. |
+| `auto_approved` | Automatically approved by an execution-enabled policy mode. |
+| `executing` | An execution-enabled batch is in progress. |
+| `completed` | All actions completed and verified. |
+| `failed` | Execution failed. |
+| `rolled_back` | Prior state was restored after failure or anomaly. |
+| `rollback_incomplete` | At least one attempted restoration failed and needs attention. |
+
+## Core terms
+
+<AccordionGroup>
+  <Accordion title="Gateway-verified">
+    A conversion counted as accepted through PlainRouter's stored delivery and reconciliation records. It does not mean independently audited business revenue.
+  </Accordion>
+  <Accordion title="Meta-reported">
+    A conversion count captured in a stored reconciliation report from Meta for the connected dataset and report date.
+  </Accordion>
+  <Accordion title="Observed gap">
+    Gateway-verified count minus Meta-reported count. It is a count difference, not CPA or incrementality.
+  </Accordion>
+  <Accordion title="Evidence provenance">
+    The source tool, scope, exact fields, observation time, window, and measurability recorded with an Actions proposal.
+  </Accordion>
+  <Accordion title="Human-supplied target">
+    A platform entity selected by a person. It establishes selection only and does not prove current target state.
+  </Accordion>
+  <Accordion title="Suggest only">
+    The supported Actions mode in which every proposal requires human review and approval terminates without execution.
+  </Accordion>
+</AccordionGroup>

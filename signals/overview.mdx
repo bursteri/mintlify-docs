@@ -1,0 +1,79 @@
+---
+title: "Signals overview"
+description: "Understand how PlainRouter collects, delivers, and measures first-party conversion signals."
+---
+
+Signals is PlainRouter's first-party conversion measurement layer. It receives website events through a collection subdomain you control, records what happened, and can deliver consented events to a connected Meta dataset.
+
+<Card title="The short version" icon="route">
+  Your website sends one event to PlainRouter. PlainRouter records it, adds trusted request context at the edge, and routes eligible events to the destinations you connect.
+</Card>
+
+## How data moves
+
+<Steps>
+  <Step title="The browser records an event">
+    The Signals pixel sends an automatic `PageView`. Your site can also call `signalq("track", ...)` for purchases, leads, checkouts, and custom events.
+  </Step>
+  <Step title="Your collection domain receives it">
+    Requests go to a first-party hostname such as `collect.example.com`. PlainRouter validates the publishable key and website origin before accepting the event.
+  </Step>
+  <Step title="PlainRouter stores the event">
+    PlainRouter records the canonical event, consent state, delivery state, and the trusted network context added by the collection edge.
+  </Step>
+  <Step title="Eligible events reach Meta">
+    When you connect a Meta dataset and grant advertising consent, PlainRouter sends the server event through Conversions API. The managed browser Pixel sends a paired copy with the same event ID for deduplication.
+  </Step>
+  <Step title="Stored measurements become health evidence">
+    The Signals dashboard combines the event ledger, delivery ledger, stored Event Match Quality snapshots, and daily reconciliation reports. It does not make a live Meta Marketing API call when the page loads.
+  </Step>
+</Steps>
+
+## What Signals measures
+
+| Area | What it tells you |
+| --- | --- |
+| Event activity | How many events PlainRouter received and when the last event arrived. |
+| Delivery acceptance | Whether non-test events were accepted, failed, or remain pending for the connected destination. |
+| Match quality | The latest stored Meta Event Match Quality score and its recent trend. |
+| Reconciliation | The difference between gateway-verified accepted conversions and Meta-reported conversions in stored daily reports. |
+| Diagnostics | Which setup, activity, delivery, quality, or freshness condition needs attention. |
+
+<Warning>
+  Signals health and reconciliation are account- or dataset-level measurements. They do not provide campaign, ad set, ad, spend, budget, learning-phase, or target-level CPA state.
+</Warning>
+
+## Consent behavior
+
+Signals separates anonymous measurement from advertising delivery:
+
+| Consent | Collection behavior | Identifier behavior | Destination delivery |
+| --- | --- | --- | --- |
+| `pending` | Records anonymous events. | Does not write or send visitor, user, or click identifiers. | Skipped. |
+| `granted` | Records events. | Creates first-party identifiers and includes permitted hashed identity and click data. | Eligible for connected destinations. |
+| `denied` | Records anonymous events. | Clears PlainRouter identifiers and excludes identity data. | Skipped. |
+
+Connect your consent-management platform by calling `signalq("consent", state)` whenever the visitor's choice changes. See [Track events and consent](/signals/track-events) for examples.
+
+## Browser and server deduplication
+
+When Meta is connected, one `signalq("track", ...)` call can produce both a managed browser Pixel event and a server-side Conversions API event. PlainRouter assigns the same UUID to both copies so Meta can deduplicate them.
+
+Do not keep a separate Pixel or CAPI integration sending the same events to the same dataset after you validate the managed setup. Duplicate integrations can inflate reporting.
+
+## Setup path
+
+<CardGroup cols={2}>
+  <Card title="Configure DNS" icon="network" href="/signals/configure-dns">
+    Connect a first-party collection hostname.
+  </Card>
+  <Card title="Install the pixel" icon="code" href="/signals/install-pixel">
+    Add the generated v2 snippet to every page.
+  </Card>
+  <Card title="Track events" icon="mouse-pointer-click" href="/signals/track-events">
+    Add consent, identity, and conversion events.
+  </Card>
+  <Card title="Connect Meta" icon="plug" href="/signals/connect-meta">
+    Select the destination ad account and dataset.
+  </Card>
+</CardGroup>

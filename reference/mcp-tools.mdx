@@ -1,0 +1,213 @@
+---
+title: "MCP tools"
+description: "Reference for the four account-scoped tools exposed by the PlainRouter MCP server."
+---
+
+PlainRouter MCP server version `0.2.0` exposes exactly four tools. All use the advertising account selected by the person during OAuth authorization.
+
+| Tool | Type | Purpose |
+| --- | --- | --- |
+| `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
+| `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation from stored measurements. |
+| `get_performance` | Read-only, idempotent | Read a 1–90 day stored gateway-versus-Meta comparison. |
+| `propose-actions` | Idempotent write to PlainRouter | Submit an evidence-backed recommendation to policy and approval. |
+
+<Warning>
+  `propose-actions` creates a PlainRouter recommendation. In the current **Suggest only** release, approving it does not execute an ad-platform change.
+</Warning>
+
+## Shared authorization and scope
+
+The read tools require an active principal with `ad-account.read`. `propose-actions` also requires `actions.propose`.
+
+Scoped responses identify:
+
+```json
+{
+  "workspace_id": 42,
+  "account_id": 91,
+  "destination_id": "01J...",
+  "dataset_id": "1234567890"
+}
+```
+
+`destination_id` and `dataset_id` are `null` until the authorized account has a matching destination. The caller cannot provide a different account ID.
+
+## `get_account_state`
+
+Call this first in every account-specific workflow. It returns:
+
+- Agent ID, name, and granted permissions.
+- Shared scope.
+- Advertising account ID, platform-native ID, name, platform, currency, timezone, and status.
+- Workspace ID and name.
+- Platform connection status and expiry.
+- Signal ID, status, collection domain, and connected destination.
+- Available capability flags.
+- Response generation time.
+
+Current capability flags are intentionally explicit:
+
+```json
+{
+  "signal_health": true,
+  "verified_performance": true,
+  "marketing_api_reads": false,
+  "writes": false
+}
+```
+
+`verified_performance` becomes true only when the matching destination is active. It describes stored reconciliation availability, not live target performance.
+
+## `get_signal_health`
+
+This tool accepts no input. It returns the shared scope plus:
+
+- Overall status, label, and summary.
+- Signal, hostname, Meta connection, and dataset state.
+- Event counts for 24 hours, seven days, and all time.
+- Last event time.
+- Accepted, failed, pending, and total non-test deliveries from the last 24 hours.
+- Delivery acceptance rate.
+- Latest Event Match Quality score, week-over-week change, alert state, measurement time, and recent history.
+- A seven-day stored performance comparison by default.
+- Structured diagnostics.
+- Data-source names and response generation time.
+
+The tool reads `event_ledger`, `delivery_ledger`, `emq_snapshots`, and `reconciliation_reports`. It reports `marketing_api_called: false`.
+
+## `get_performance`
+
+Use this tool for a stored reconciliation window.
+
+### Input
+
+| Field | Type | Required | Rules |
+| --- | --- | --- | --- |
+| `days` | Integer | No | From 1 to 90. Default is 7. |
+
+```json
+{
+  "days": 30
+}
+```
+
+### Output
+
+The response includes:
+
+- Shared scope.
+- Requested period with `days`, `since`, and `until`.
+- Measurability state.
+- Gateway-verified accepted count.
+- Meta-reported count.
+- Observed gap.
+- Alignment percentage.
+- Number of alert days.
+- Latest report date.
+- Totals grouped by event.
+- Daily report rows.
+- `data_source: "stored_reconciliation_reports"`.
+- `marketing_api_called: false`.
+- Response generation time.
+
+### Measurability
+
+```json
+{
+  "status": "measurable",
+  "reason": null,
+  "report_count": 7,
+  "latest_report_at": "2026-08-14T00:00:00+00:00",
+  "stale_after_hours": 48,
+  "counts_semantics": "observed_reconciliation_counts",
+  "quantitative_citations_allowed": true
+}
+```
+
+Possible non-measurable reasons are `no_history` and `stale_history`. When `quantitative_citations_allowed` is false, an agent must not cite count, gap, alignment, alert-day, daily, or by-event values as proposal evidence.
+
+## `propose-actions`
+
+This tool validates the action shapes, captures fresh evidence provenance, evaluates policy, and creates one batch.
+
+### Top-level input
+
+| Field | Rules |
+| --- | --- |
+| `actions` | 1–25 typed action objects. |
+| `rationale` | Required plain-language batch rationale, up to 4,000 characters. |
+| `idempotency_key` | Required stable retry key, up to 64 characters. |
+| `evidence` | 1–3 source declarations. |
+| `target_source` | Must be `human_supplied`. |
+
+Each evidence declaration contains:
+
+```json
+{
+  "source_tool": "get_signal_health",
+  "fields_used": [
+    "status",
+    "delivery.acceptance_rate",
+    "diagnostics"
+  ]
+}
+```
+
+`source_tool` must be `get_account_state`, `get_signal_health`, or `get_performance`. Every field path must exist in a freshly captured response.
+
+### Action object
+
+Every action has this common shape:
+
+```json
+{
+  "type": "set_status",
+  "target_entity": {
+    "type": "campaign",
+    "id": "120012345",
+    "name": "Prospecting"
+  },
+  "params": {
+    "status": "paused"
+  },
+  "rationale": "Pause the human-selected campaign for manual review."
+}
+```
+
+Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
+
+### Action parameters
+
+<AccordionGroup>
+  <Accordion title="adjust_budget">
+    Requires `new_daily_budget_minor`, a positive integer in the account currency's minor unit. For example, `4900` means 49.00 for a two-decimal currency.
+  </Accordion>
+  <Accordion title="set_status">
+    Requires `status` equal to `active` or `paused`.
+  </Accordion>
+  <Accordion title="duplicate_ad_with_creative">
+    Requires `asset_id` and `status: "paused"`. An optional `name_suffix` can identify the duplicate.
+  </Accordion>
+  <Accordion title="upload_asset">
+    Requires `staged_asset_id`, `asset_type` (`image` or `video`), `filename`, and a lowercase 64-character `content_sha256`. Optional fields include detected `mime_type` and positive `size_bytes`.
+  </Accordion>
+</AccordionGroup>
+
+### Evidence restrictions
+
+PlainRouter rejects evidence paths that claim campaign, ad set, ad, target, CPA, spend, budget, or learning-phase state from aggregate Signals reads.
+
+It also rejects:
+
+- Unknown source tools.
+- Field paths absent from the cited response.
+- Quantitative performance fields from non-measurable history.
+- A target source other than `human_supplied`.
+- Proposals from a connection without `actions.propose`.
+
+### Response
+
+The response includes the batch ID, scope, evidence provenance, status, policy decision and reasons, approval requirement, queue URL, proposer, rationale, and normalized action records.
+
+Evidence provenance records the source service, scope level, exact fields, observation time, reporting window, measurability, and the target-selection boundary.

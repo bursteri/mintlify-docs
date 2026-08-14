@@ -1,0 +1,66 @@
+---
+title: "Audit log"
+description: "Trace action proposals, policy decisions, and human outcomes in the workspace audit chain."
+---
+
+Open **Audit log** from the PlainRouter sidebar to review the chronological history of Actions activity for the current workspace.
+
+## What an audit event contains
+
+Each event records:
+
+- Event type and plain-language summary.
+- Actor type and actor name.
+- Related proposal batch and action, when applicable.
+- Structured event payload.
+- Creation time.
+- Event hash and the previous event hash.
+
+The hash link creates a tamper-evident chain. The first event has no previous hash. Every later event points to the stored hash of the event before it.
+
+## Current suggest-only events
+
+The most important events in the current workflow are:
+
+| Event | Meaning |
+| --- | --- |
+| Proposal created | An authorized agent submitted an evidence-backed batch. |
+| Policy evaluated | PlainRouter required approval or blocked one or more actions. |
+| `batch.recommendation_approved` | A person approved a suggest-only recommendation. No execution followed. |
+| `batch.rejected` | A person rejected the recommendation, with an optional reason. |
+
+<Note>
+  The audit UI can represent execution, verification, outcome, and rollback events for future execution-enabled workflows. Their presence in the interface does not mean those operations are active in the current release.
+</Note>
+
+## Use the log during review
+
+Use the audit log to answer:
+
+- Which agent created the proposal?
+- Which account and workspace did it concern?
+- What did policy decide?
+- Which person approved or rejected it?
+- When did each transition happen?
+- Was a suggest-only approval clearly recorded without execution?
+- Does each event link to the previous stored hash?
+
+## Investigate an unexpected proposal
+
+<Steps>
+  <Step title="Confirm the actor">
+    Find the proposal-created event and note the agent name and time.
+  </Step>
+  <Step title="Confirm scope">
+    Compare the batch's account and evidence provenance with the account you intended to authorize.
+  </Step>
+  <Step title="Read the policy result">
+    Identify static blocking reasons and unavailable dynamic checks.
+  </Step>
+  <Step title="Trace the decision">
+    Find the approval or rejection event and confirm the named person and terminal status.
+  </Step>
+  <Step title="Revoke access if necessary">
+    If the agent should no longer have access, revoke its PlainRouter connection. Revocation disables its principal and OAuth tokens.
+  </Step>
+</Steps>

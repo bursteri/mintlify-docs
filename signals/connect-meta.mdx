@@ -1,0 +1,76 @@
+---
+title: "Connect Meta"
+description: "Connect a Meta ad account and dataset for managed browser and server event delivery."
+---
+
+Connect Meta to send consented Signals events to one dataset through both the managed browser Pixel and Meta Conversions API.
+
+## Before you begin
+
+You need:
+
+- An active Signal and collection domain.
+- Workspace-owner access in PlainRouter.
+- Access to the required Meta Business assets, ad account, and dataset.
+- Permission to grant PlainRouter access to those assets.
+
+## Connect the destination
+
+<Steps>
+  <Step title="Open Meta setup">
+    Open **Signals**. In the Signal health header, click **Connect Meta**.
+  </Step>
+  <Step title="Authorize Meta">
+    Click **Connect Meta** and complete Meta's authorization flow.
+
+    PlainRouter requests the business assets required to configure and operate the destination. Access tokens stay on the server and never enter the browser snippet or publishable-key configuration.
+  </Step>
+  <Step title="Choose an ad account">
+    Select the Meta ad account associated with the website and dataset.
+  </Step>
+  <Step title="Choose a dataset">
+    Select the **Meta dataset / Pixel** that should receive this Signal's browser and server events, then click **Connect Meta dataset**.
+  </Step>
+  <Step title="Confirm the destination">
+    PlainRouter shows **Destination active** with the dataset ID and ad-account name. Return to **Signals** to monitor delivery and measurement health.
+  </Step>
+</Steps>
+
+<Warning>
+  Remove other Pixel or CAPI integrations that send the same events to this dataset after validating PlainRouter. Multiple independent integrations can create duplicate conversions.
+</Warning>
+
+## How managed delivery works
+
+After consent is granted:
+
+1. The Signals browser library fetches the public dataset ID from your first-party collector.
+2. It loads Meta's browser library and sends the browser event.
+3. PlainRouter sends the matching server event through Conversions API.
+4. Both copies use the same event ID so Meta can deduplicate them.
+
+If the Meta browser library is blocked, server delivery can still continue. If browser configuration is temporarily unavailable, server collection continues and the browser Pixel is skipped.
+
+## Refresh available assets
+
+If a new ad account or dataset does not appear, click **Reconnect Meta to refresh assets** and complete authorization again. This refreshes the assets PlainRouter can list without exposing the access token.
+
+## Troubleshoot
+
+### No datasets appear
+
+- Confirm the selected Meta user can access the dataset.
+- Confirm the dataset belongs to or is shared with the relevant Business portfolio.
+- Reconnect Meta to refresh assets.
+- Try the intended ad account again after the refresh.
+
+### Browser Pixel events do not appear
+
+- Confirm advertising consent is `granted`.
+- Check whether a content blocker prevents `connect.facebook.net` from loading.
+- Allow the Meta script in your Content Security Policy.
+- Confirm the connected dataset ID is the one you are inspecting.
+
+### Server delivery needs attention
+
+Open **Signals** and review **Delivery acceptance** and **Diagnostics**. Failed non-test deliveries appear as a critical diagnostic. See [Signal health and performance](/signals/health-and-performance).

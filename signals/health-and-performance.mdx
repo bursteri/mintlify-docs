@@ -1,0 +1,126 @@
+---
+title: "Signal health and performance"
+description: "Interpret the Signals dashboard, measurement states, and stored gateway-versus-Meta comparisons."
+---
+
+The **Signals** dashboard answers two questions: whether your first-party measurement path is working, and whether stored conversion counts align with Meta's reports.
+
+The page refreshes its stored measurements about once per minute. Opening it does not trigger a live Meta Marketing API request.
+
+## Health states
+
+| State | Meaning | What to do |
+| --- | --- | --- |
+| **Setup required** | The Signal or first-party hostname is not fully active. | Finish CNAME and HTTPS validation. |
+| **Awaiting data** | Setup is active, but PlainRouter has not received an event. | Install the pixel and visit the live site. |
+| **Measurement pending** | Events are arriving, but delivery, EMQ, or reconciliation measurements are incomplete. | Allow the first measurement cycles to complete and watch diagnostics. |
+| **Needs attention** | At least one warning or critical diagnostic is active. | Open **Diagnostics** and address each item. |
+| **Healthy** | Event flow exists and all required recent measurement categories are present without warnings. | Continue monitoring. |
+
+<Note>
+  Event activity alone is not enough for **Healthy**. PlainRouter waits for recent delivery outcomes, an EMQ snapshot, and measurable reconciliation history before claiming measured health.
+</Note>
+
+## Summary metrics
+
+### Events received
+
+The large value is the number of events received in the last 24 hours. The supporting value shows the last seven days.
+
+This metric covers collection. It does not mean every event was eligible for or accepted by Meta.
+
+### Match quality
+
+This is the latest stored Meta Event Match Quality score on a 0–10 scale. The trend compares the current snapshot with the prior week when a comparison exists.
+
+The chart appears after at least two stored snapshots.
+
+### Delivery acceptance
+
+This is the percentage of non-test destination deliveries from events received in the last 24 hours that reached an accepted state.
+
+```text
+acceptance rate = accepted deliveries / total non-test deliveries × 100
+```
+
+The detail separates accepted and failed deliveries. Pending deliveries include queued, sent, and retrying states.
+
+### Verified gap
+
+This compares stored daily reconciliation counts:
+
+```text
+observed gap = gateway-verified accepted conversions - Meta-reported conversions
+```
+
+- A positive value means the gateway count is higher.
+- A negative value means the Meta-reported count is higher.
+- Zero means the stored counts match for the selected window.
+
+Alignment uses the larger of the two totals as the denominator. It is unavailable when both totals are zero.
+
+<Warning>
+  Verified gap is an observed account/dataset-level count difference. It is not CPA, attribution lift, incrementality, spend, or target-level performance.
+</Warning>
+
+## Gateway vs Meta chart
+
+Each row shows one stored daily reconciliation report:
+
+- **Gateway** is the number of gateway-verified accepted conversions.
+- **Meta** is the number reported by Meta in the stored reconciliation run.
+- The signed number is that day's observed gap.
+- An amber gap indicates the day exceeded the configured residual threshold.
+
+If no rows appear, PlainRouter has not stored a daily reconciliation report for the window.
+
+## Diagnostics
+
+Diagnostics explain the state behind the summary. Common messages include:
+
+| Diagnostic | Meaning |
+| --- | --- |
+| **Collection setup is incomplete** | The Signal or collection certificate is not active. |
+| **Waiting for the first event** | The pixel has not produced an event yet. |
+| **No events received in 24 hours** | Historical events exist, but recent collection stopped. |
+| **Meta comparison is not active** | No active Meta destination is connected. |
+| **Delivery measurement pending** | Events exist, but no recent delivery outcome exists. |
+| **Meta deliveries are failing** | One or more non-test deliveries failed in the last 24 hours. |
+| **Match quality measurement pending** | No stored EMQ snapshot exists yet. |
+| **Match quality dropped** | The latest EMQ snapshot crossed the configured week-over-week alert threshold. |
+| **Reconciliation measurement pending** | No measurable report history exists yet. |
+| **Reconciliation measurements are stale** | The latest report is more than 48 hours old. |
+| **A reconciliation gap needs review** | At least one day exceeded the configured residual threshold. |
+
+## Measurement freshness
+
+Reconciliation normally runs daily. PlainRouter marks history stale after 48 hours. Until a recent report exists, the read is `not_measurable` and its quantitative values cannot be cited as evidence for an Actions proposal.
+
+The **Measurement state** panel shows the connected domain, dataset ID, last event, and the time the health response was generated.
+
+## Troubleshoot by symptom
+
+<AccordionGroup>
+  <Accordion title="No events received in 24 hours">
+    Confirm the snippet still loads from the collection domain. Check `/v1/events` in the browser network panel, recent deployment changes, your content security policy, and the tracker's allowed website domain.
+  </Accordion>
+  <Accordion title="Meta deliveries are failing">
+    Reconnect Meta if access changed or expired. Confirm the intended dataset is still available, then review whether failures continue on new events.
+  </Accordion>
+  <Accordion title="Measurement remains pending">
+    Confirm events are arriving and Meta is connected. Delivery outcomes need eligible consented events. EMQ and reconciliation also require their scheduled measurement jobs to create stored snapshots and reports.
+  </Accordion>
+  <Accordion title="Gateway and Meta differ">
+    Review the affected dates and event types. Check consent-skipped events, pending or failed deliveries, late reporting, deduplication, and any duplicate integration that still sends to the same dataset.
+  </Accordion>
+</AccordionGroup>
+
+## Delete a Signal
+
+Workspace owners can delete a Signal from the delete control in the Signal health header.
+
+Deletion first deactivates collection and removes the hostname from PlainRouter's edge mapping. It then deletes the Signal and its related events and destination configuration. You can create a new Signal afterward, but the deleted Signal cannot be restored from the dashboard.
+
+<Warning>
+  Deleting a Signal is permanent. It does not retract events that a destination already accepted. Use the destination's own privacy controls or support process for data already held there.
+</Warning>

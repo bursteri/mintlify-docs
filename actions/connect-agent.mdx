@@ -1,0 +1,98 @@
+---
+title: "Connect an AI agent"
+description: "Authorize an MCP-compatible client to read one ad account and propose governed actions."
+---
+
+PlainRouter exposes a remote Model Context Protocol server at:
+
+```text
+https://plainrouter.com/mcp
+```
+
+Use this endpoint in an MCP client that supports remote HTTP servers and OAuth. PlainRouter publishes OAuth discovery metadata, so compatible clients can start authorization automatically.
+
+## Before you begin
+
+You need:
+
+- A PlainRouter account with access to the intended workspace.
+- A connected advertising account.
+- An MCP-compatible client with remote HTTP and OAuth support.
+- A clear choice of the one advertising account the client should use.
+
+For evidence-backed proposals, also configure an active Signal and Meta destination. Without those resources, the read tools return explicit setup or availability states.
+
+## Authorize the connection
+
+<Steps>
+  <Step title="Add the PlainRouter MCP server">
+    In your MCP client, add a remote server using `https://plainrouter.com/mcp`.
+  </Step>
+  <Step title="Start OAuth authorization">
+    Follow the sign-in or authorization prompt opened by the client. Sign in to PlainRouter if needed.
+  </Step>
+  <Step title="Review permissions">
+    PlainRouter requests permission to read the approved ad account and its PlainRouter context, and to submit policy-gated action proposals.
+  </Step>
+  <Step title="Choose the advertising account">
+    Select the exact account for this connection. The resulting agent principal is bound to that account.
+  </Step>
+  <Step title="Return to your client">
+    Finish the redirect or device authorization flow. The client can now initialize the PlainRouter MCP server.
+  </Step>
+</Steps>
+
+## What the connection can access
+
+Every connection is principal-scoped:
+
+- `ad-account.read` permits the three account and Signals read tools.
+- `actions.propose` permits submission to the governed proposal pipeline.
+- The agent cannot supply another account ID to widen access.
+- Read responses repeat the workspace, account, destination, and dataset scope where applicable.
+- The current account-state response reports `marketing_api_reads: false` and `writes: false`.
+
+<Warning>
+  Connecting an agent does not grant direct ad-platform mutation. The current Actions release records suggest-only recommendations and human decisions without execution.
+</Warning>
+
+## Recommended first conversation
+
+Ask the agent to establish scope before analyzing or proposing anything:
+
+```text
+Use PlainRouter to confirm the authorized account, check Signal health,
+and summarize the last seven days of stored reconciliation. Do not propose
+an action if performance is not measurable. Cite the fields you use.
+```
+
+The intended tool order is:
+
+1. `get_account_state`
+2. `get_signal_health`
+3. `get_performance` when a stored comparison is relevant
+4. `propose-actions` only after the evidence and human-supplied target are clear
+
+## Authorization lifetime and revocation
+
+PlainRouter issues short-lived access tokens and refreshable authorization. The person who created an agent connection can revoke it in PlainRouter. Revocation disables the principal and its OAuth tokens.
+
+Reconnect if the selected account changes. One OAuth client can create separate, isolated connections for different users or accounts.
+
+## Troubleshoot
+
+### The client receives `401 Unauthorized`
+
+Confirm the client followed the OAuth metadata advertised by the MCP endpoint. Remove a stale connection and authorize again if its tokens were revoked or expired without a usable refresh token.
+
+### The wrong account appears
+
+Revoke the connection and authorize it again with the correct advertising account. Tool calls do not accept an account override.
+
+### Signals tools show setup required
+
+The account may be authorized correctly while its workspace has no active Signal or destination. Complete [Signals setup](/signals/overview) and call the tools again.
+
+### Proposals are rejected as unauthorized
+
+The connection must include the `actions.propose` permission. Reauthorize the MCP connection and review the permissions shown by PlainRouter.

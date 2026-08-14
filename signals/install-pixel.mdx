@@ -30,10 +30,10 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 
     ```html
     <script>
-      window.signal = window.signal || function () {
-        (window.signal.q = window.signal.q || []).push(arguments);
+      window.signalq = window.signalq || function () {
+        (window.signalq.q = window.signalq.q || []).push(arguments);
       };
-      signal("init", { key: "YOUR_PUBLISHABLE_KEY" });
+      signalq("init", { key: "YOUR_PUBLISHABLE_KEY" });
     </script>
     <script async src="https://YOUR_COLLECTION_DOMAIN/s/v2.js"></script>
     ```
@@ -61,6 +61,26 @@ If setup does not complete, open your browser's developer tools and reload the p
 
 Both requests should return a successful `2xx` response.
 
+## What happens on initialization
+
+`signalq("init", ...)` sends an anonymous, cookieless `PageView`. This verifies installation without waiting for advertising consent.
+
+The event excludes visitor IDs, user data, click IDs, and URL query strings while consent is pending. It is stored for measurement but is not delivered to Meta.
+
+<Note>
+  The generated snippet uses `signalq`. Do not rename it to `signal`; the v2 bundle intentionally exposes only the collision-resistant `signalq` global.
+</Note>
+
+## Content Security Policy
+
+If your website uses a Content Security Policy, allow the collection domain in both places:
+
+- Add `https://YOUR_COLLECTION_DOMAIN` to `script-src`.
+- Add `https://YOUR_COLLECTION_DOMAIN` to `connect-src`.
+- Apply your site's nonce or hash policy to the inline initialization block.
+
+You may need to allow `https://connect.facebook.net` in `script-src` after you [connect Meta](/signals/connect-meta). The Meta library loads only after advertising consent is granted.
+
 ## Troubleshoot
 
 ### The script does not load
@@ -79,3 +99,7 @@ Both requests should return a successful `2xx` response.
 ### Setup still shows as incomplete
 
 Visit a live page where the new snippet is present. Preview environments, cached pages, and pages on a different domain do not verify the production signal tracker.
+
+## Next step
+
+Add your consent state and business events in [Track events and consent](/signals/track-events).

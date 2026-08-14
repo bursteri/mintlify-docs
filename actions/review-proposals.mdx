@@ -1,0 +1,91 @@
+---
+title: "Review action proposals"
+description: "Evaluate evidence, policy checks, and action details in the approval queue."
+---
+
+Open **Approval queue** from the PlainRouter sidebar to review agent recommendations for the current workspace.
+
+## Read the queue summary
+
+The top of the page shows the policy mode and three counts:
+
+| Count | Meaning |
+| --- | --- |
+| **Waiting** | Batches still awaiting a human decision. |
+| **Landed** | Batches that completed real execution in an execution-enabled release. Suggest-only approvals are excluded. |
+| **Blocked** | Batches stopped by policy or execution safety checks. |
+
+Use **Pending** for decisions that need you. Use **History** for approved, rejected, blocked, failed, completed, and rolled-back outcomes.
+
+## Review a proposal card
+
+Read each section before deciding:
+
+### Proposer and account
+
+The header identifies the agent, advertising account, proposal time, and current batch status. Confirm the account is the one you intended to authorize.
+
+### Why now
+
+This is the agent's plain-language rationale for treating the actions as one batch. It should describe the observed condition, the proposed response, and the expected outcome without claiming unavailable target state.
+
+### Evidence provenance
+
+Each cited source shows:
+
+- The source tool.
+- Account or dataset scope.
+- Exact response fields used.
+- When the snapshot was observed.
+- The reporting window, when applicable.
+- Whether stored performance history was measurable.
+
+The target notice reminds you that the target was supplied by a person for selection only. Current target state remains unavailable in this release.
+
+<Warning>
+  Do not approve a rationale that presents aggregate conversion counts as campaign CPA, spend, budget state, learning phase, or target-level performance.
+</Warning>
+
+### Proposed actions
+
+Each item identifies the action type, target type, target ID or name, important parameters, and its rationale. Budget values appear in the connected account's currency.
+
+### Policy results
+
+Static policy failures appear as blocking reasons. Checks that require live account or target state appear as **Dynamic checks unavailable** with the missing field names.
+
+In **Suggest only**, unavailable dynamic checks require human review and never authorize execution.
+
+## Approve a recommendation
+
+<Steps>
+  <Step title="Confirm scope and evidence">
+    Verify the advertising account, dataset scope, observation times, and cited fields.
+  </Step>
+  <Step title="Confirm the action details">
+    Review every target and parameter in the batch. Treat the proposal as one decision.
+  </Step>
+  <Step title="Approve">
+    On desktop, click **Approve**. On mobile, use the approval control shown on the card.
+  </Step>
+  <Step title="Confirm the terminal status">
+    In the current release, the batch moves to **Approved without execution**. No Meta change occurs.
+  </Step>
+</Steps>
+
+## Reject a recommendation
+
+Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason can help future agent reasoning and is stored with the audit event.
+
+Approval and rejection are idempotent terminal decisions. A second decision does not reopen or execute the batch.
+
+## Review checklist
+
+- Is this the correct advertising account?
+- Is every target the target a person intended?
+- Are the evidence fields actually present in the named read tool?
+- Is reconciliation recent and marked measurable before quantitative claims are used?
+- Does the rationale avoid target-level claims that Signals cannot support?
+- Are any dynamic checks unavailable?
+- Does a static policy reason block the batch?
+- Do you understand that current approval records agreement but does not execute?

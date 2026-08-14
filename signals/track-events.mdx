@@ -1,0 +1,146 @@
+---
+title: "Track events and consent"
+description: "Use the Signals v2 browser API to manage consent, identify visitors, and record conversion events."
+---
+
+The Signals v2 API is available as `window.signalq` after you install the generated pixel. Calls made before the asynchronous script loads remain in the queue.
+
+## Set consent
+
+Connect `signalq` to your consent-management platform. Send the current advertising consent state after initialization and whenever the visitor changes it.
+
+```js
+await signalq("consent", "granted");
+
+// If the visitor later withdraws consent:
+await signalq("consent", "denied");
+```
+
+Supported values are `pending`, `granted`, and `denied`.
+
+<Warning>
+  Do not infer consent. Keep the state `pending` until your consent-management platform has an explicit choice.
+</Warning>
+
+While consent is pending or denied, PlainRouter records anonymous events without visitor IDs, user data, click IDs, or URL query strings. Those events are not sent to connected advertising destinations.
+
+Granting consent creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denying consent removes PlainRouter's visitor and click identifiers from cookies and local storage.
+
+## Track an event
+
+Call `track` with an event name and an optional payload:
+
+```js
+const eventId = await signalq("track", "purchase", {
+  value: "49.00",
+  currency: "EUR",
+  order_id: "ORDER-1042",
+  num_items: 2
+});
+```
+
+The promise resolves to the collector-accepted event ID. It resolves to `null` if collection fails after one retry.
+
+<Note>
+  Send monetary `value` as a decimal string, such as `"49.00"`. This avoids floating-point ambiguity.
+</Note>
+
+### Standard event names
+
+Common names are normalized to Meta's standard spelling. For example, `page_view` becomes `PageView` and `initiate_checkout` becomes `InitiateCheckout`.
+
+Frequently used standard events include:
+
+- `PageView`
+- `ViewContent`
+- `Search`
+- `AddToCart`
+- `AddToWishlist`
+- `InitiateCheckout`
+- `AddPaymentInfo`
+- `Purchase`
+- `Lead`
+- `CompleteRegistration`
+- `Contact`
+- `Schedule`
+- `Subscribe`
+
+Custom event names are trimmed and otherwise preserved.
+
+### Payload fields
+
+These convenience fields move into the event's value data automatically:
+
+| Field | Purpose | Example |
+| --- | --- | --- |
+| `value` | Monetary value as a decimal string. | `"49.00"` |
+| `currency` | ISO 4217 currency code. | `"EUR"` |
+| `order_id` | Your unique order or transaction reference. | `"ORDER-1042"` |
+| `contents` | Products or items associated with the event. | `[{ id: "SKU-1", quantity: 2 }]` |
+| `num_items` | Total item count. | `2` |
+
+You can also provide a `value_data` object directly. Other custom fields remain on the event and are available to supported destinations.
+
+## Identify a consenting visitor
+
+Call `identify` only after your consent policy permits advertising identity use:
+
+```js
+const identified = await signalq("identify", {
+  email: " Buyer@Example.com ",
+  phone: "+358 (40) 123-4567"
+});
+```
+
+The browser normalizes and SHA-256 hashes the values before sending them. PlainRouter never sends the raw email or phone in the identity request.
+
+- Email is trimmed and lowercased.
+- International phone numbers must start with `+` and include 8–15 digits after normalization.
+- Finnish local numbers require `defaultPhoneRegion: "FI"` in the initialization configuration.
+- Identification returns `false` on an insecure page where browser cryptography is unavailable.
+
+```html
+<script>
+  window.signalq = window.signalq || function () {
+    (window.signalq.q = window.signalq.q || []).push(arguments);
+  };
+  signalq("init", {
+    key: "YOUR_PUBLISHABLE_KEY",
+    defaultPhoneRegion: "FI"
+  });
+</script>
+```
+
+## Read the visitor ID
+
+`getVisitorId` returns the current first-party visitor ID after consent is granted. It returns `null` while consent is pending or denied.
+
+```js
+const visitorId = signalq("getVisitorId");
+```
+
+One use is attaching the value to a checkout session so a later server webhook can join the purchase to the browser visit:
+
+```js
+await fetch("/create-checkout-session", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ visitor_id: signalq("getVisitorId") })
+});
+```
+
+Your server must copy the value into the payment or checkout metadata used by its integration.
+
+## Reliability behavior
+
+- Event requests use browser `keepalive` where available.
+- A granted event still in flight during `pagehide` is also sent as a text beacon.
+- Network failures and `503` responses receive one retry.
+- The snippet captures supported landing click IDs in memory and persists them only after consent is granted.
+- First-party browser identifiers can still have shorter lifetimes when a browser applies its own storage restrictions.
+
+## Avoid duplicate Meta events
+
+After you [connect Meta](/signals/connect-meta), continue to track through `signalq`. The managed browser Pixel and PlainRouter server delivery share one event ID.
+
+Remove other Pixel or CAPI integrations that send the same event to the same dataset after you confirm the managed flow is working.

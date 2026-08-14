@@ -1,0 +1,88 @@
+---
+title: "Action policy and safety"
+description: "Configure workspace safeguards and understand which checks are enforceable in the current suggest-only release."
+---
+
+Open **Settings** → **Action policy** to review the workspace's non-negotiable boundaries. Agents can supply reasoning and proposals, but they cannot edit or bypass this policy.
+
+Only the workspace owner can save policy changes. Other workspace members can review the current settings.
+
+<Warning>
+  Keep **Suggest only** selected for the current release. Real provider execution, verification, outcome reads, and rollback are disabled. **Auto within limits** and **Full auto** are not part of the current supported operating path.
+</Warning>
+
+## Execution mode
+
+| Mode | Intended behavior | Current availability |
+| --- | --- | --- |
+| **Suggest only** | Every passing proposal waits for a person. Approval records the recommendation without execution. | Supported. |
+| **Auto within limits** | Policy-compliant proposals would execute automatically while hard stops remain active. | Not supported for production execution in this release. |
+| **Full auto** | Continuous operation behind caps, protected entities, verification, and rollback. | Not supported for production execution in this release. |
+
+The selected mode is copied into each proposal as a snapshot. Changing policy later cannot promote an existing suggest-only recommendation into executable work.
+
+## Spend boundaries
+
+### Maximum budget change
+
+The maximum percentage change allowed per budget action, measured from the target's current daily budget.
+
+### Hard account daily cap
+
+The maximum projected combined daily budget for the account. Leave it blank for no configured cap.
+
+Both checks require current account or target budget state. That state is not available from the current Signals read model. The queue therefore labels these dynamic checks unavailable instead of claiming they passed.
+
+## Protected delivery
+
+### Protected entities
+
+Add one platform-native entity reference per line:
+
+```text
+campaign:120012345
+ad_set:120067890
+ad:120098765
+```
+
+Supported prefixes are `campaign`, `ad_set`, and `ad`. A proposal targeting an exact protected entity is blocked in every mode.
+
+### Protect learning phase
+
+This setting is designed to block budget and delivery changes while the target is learning. It requires a current target learning-phase read. That read is unavailable in the current release and appears as an unavailable dynamic check.
+
+## Timing and rollback
+
+### Quiet hours
+
+Set both a start and end time. PlainRouter evaluates the window in the advertising account's timezone, falling back to the application timezone if the account has none.
+
+Quiet hours can cross midnight. For example, `22:00` to `06:00` blocks proposals during the overnight window.
+
+### Outcome check after
+
+This is the intended delay before evaluating an executed change. The accepted range is 1–168 hours.
+
+### CPA anomaly threshold
+
+This is the intended percentage threshold for an outcome anomaly and automatic rollback.
+
+<Note>
+  Outcome checks and rollback require a real provider executor and a compatible outcome reader. Both are disabled in the current suggest-only release, and aggregate Signals reconciliation is never substituted for target-level CPA.
+</Note>
+
+## What policy can enforce now
+
+| Check | Current result |
+| --- | --- |
+| Suggest-only human approval | Enforced. |
+| Protected entity | Enforced from the supplied target ID. |
+| Quiet hours | Enforced from policy and account timezone. |
+| Current budget and spend | Reported unavailable. |
+| Maximum budget delta | Reported unavailable because current target budget is unavailable. |
+| Hard account cap | Reported unavailable because current account budget is unavailable. |
+| Learning phase | Reported unavailable. |
+| Target status and target performance | Reported unavailable. |
+| Real execution, verification, outcome check, rollback | Disabled. |
+
+This fail-closed behavior prevents simulated or aggregate data from being presented as real ad-platform state.
