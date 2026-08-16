@@ -1,91 +1,98 @@
 ---
 title: "Review action proposals"
-description: "Evaluate evidence, policy checks, and action details in the approval queue."
+description: "Evaluate evidence, policy checks, execution consequences, and verification state."
 ---
 
-Open **Approval queue** from the PlainRouter sidebar to review agent recommendations for the current workspace.
+Open **Approval queue** from the PlainRouter sidebar to review agent proposals for the current workspace.
 
 ## Read the queue summary
 
-The top of the page shows the policy mode and three counts:
+The page shows the current policy mode and four counts:
 
 | Count | Meaning |
 | --- | --- |
-| **Waiting** | Batches still awaiting a human decision. |
-| **Landed** | Batches that completed real execution in an execution-enabled release. Suggest-only approvals are excluded. |
-| **Blocked** | Batches stopped by policy or execution safety checks. |
+| **Waiting** | Batches awaiting a human decision. |
+| **Awaiting verification** | Provider writes that are still **Not Landed** while durable receipt-addressed verification continues. |
+| **Landed** | Batches whose executed actions all have verified provider receipts. Suggest-only approvals and measurement-only runs are excluded. |
+| **Blocked** | Batches stopped by proposal-time or execution-time policy. |
 
-Use **Pending** for decisions that need you. Use **History** for approved, rejected, blocked, failed, completed, and rolled-back outcomes.
+Use **Pending** for decisions that need you. Use **History** for approved, rejected, blocked, executing, awaiting-verification, failed, completed, and rolled-back outcomes.
 
 ## Review a proposal card
 
-Read each section before deciding:
-
 ### Proposer and account
 
-The header identifies the agent, advertising account, proposal time, and current batch status. Confirm the account is the one you intended to authorize.
+The header identifies the agent, Meta ad account, proposal time, and current batch status. The card and approval control reflect the frozen execution-mode snapshot. Confirm the account is the one you intended to authorize.
 
 ### Why now
 
-This is the agent's plain-language rationale for treating the actions as one batch. It should describe the observed condition, the proposed response, and the expected outcome without claiming unavailable target state.
+The rationale should describe the evidence, proposed response, and expected outcome. It must not present a human-supplied target or aggregate Signals data as current provider state.
 
 ### Evidence provenance
 
-Each cited source shows:
+Each cited source shows its scope, exact fields, observation time, and measurement window where applicable.
 
-- The source tool.
-- Account or dataset scope.
-- Exact response fields used.
-- When the snapshot was observed.
-- The reporting window, when applicable.
-- Whether stored performance history was measurable.
+For creative actions:
 
-The target notice reminds you that the target was supplied by a person for selection only. Current target state remains unavailable in this release.
+- `get-creative-library` provenance proves selected-asset identity, approved-account ownership, readiness, and status.
+- `staged-asset-manifest` provenance proves the upload uses frozen bytes with a specific SHA-256 digest and detected content type.
+- Creative performance is excluded from the durable action-bound citation.
 
-<Warning>
-  Do not approve a rationale that presents aggregate conversion counts as campaign CPA, spend, budget state, learning phase, or target-level performance.
-</Warning>
+### Dynamic policy checks
 
-### Proposed actions
+Provider-backed fields may be **Available**, **Partially available**, or **Unavailable**. Each missing field is marked as blocking or disclosed but non-blocking.
 
-Each item identifies the action type, target type, target ID or name, important parameters, and its rationale. Budget values appear in the connected account's currency.
+Executable work fails closed when a provider-required or active-policy-required field is unknown. In **Suggest only**, unavailable state may still be presented for human review because approval cannot execute it.
 
-### Policy results
+### Action and consequence
 
-Static policy failures appear as blocking reasons. Checks that require live account or target state appear as **Dynamic checks unavailable** with the missing field names.
+Confirm every target and parameter. The approval control states the consequence:
 
-In **Suggest only**, unavailable dynamic checks require human review and never authorize execution.
+| Button | Result |
+| --- | --- |
+| **Approve recommendation** | Records **Approved without execution**. No Meta write occurs. |
+| **Approve and execute** | Authorizes the executable snapshot and queues a fresh policy check before provider execution. |
+| **Approve one-run measurement** | Starts a closed diagnostic run. It is explicitly **Not Landed** and requires verified compensation. |
 
-## Approve a recommendation
+On mobile, the swipe control also states whether approval executes.
+
+## Approve executable creative work
 
 <Steps>
-  <Step title="Confirm scope and evidence">
-    Verify the advertising account, dataset scope, observation times, and cited fields.
+  <Step title="Confirm the approved account">
+    Verify the account name and platform-native target IDs.
   </Step>
-  <Step title="Confirm the action details">
-    Review every target and parameter in the batch. Treat the proposal as one decision.
+  <Step title="Confirm evidence and policy">
+    Read each citation, any unavailable fields, protected-entity checks, and the proposal-time mode snapshot.
+  </Step>
+  <Step title="Confirm permanent pause">
+    For an ad copy, verify the proposal uses `status: paused`. This release cannot activate the copy.
   </Step>
   <Step title="Approve">
-    On desktop, click **Approve**. On mobile, use the approval control shown on the card.
+    Click **Approve and execute**, or use the mobile approval control. Approval is authoritative once and does not bypass the execution-time policy check.
   </Step>
-  <Step title="Confirm the terminal status">
-    In the current release, the batch moves to **Approved without execution**. No Meta change occurs.
+  <Step title="Follow verification">
+    Open **History**. A successful immediate verification becomes **Completed** and increases **Landed**. An `IN_PROCESS` copy becomes **Executed pending verification** and shows its receipt, latest state, next scheduled read, cutoff, and safety deadline.
   </Step>
 </Steps>
 
-## Reject a recommendation
+<Warning>
+  Do not interpret **Approved**, **Executing**, or **Executed pending verification** as Landed. Landed requires exact provider verification for every action in the batch.
+</Warning>
 
-Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason can help future agent reasoning and is stored with the audit event.
+## Reject a proposal
 
-Approval and rejection are idempotent terminal decisions. A second decision does not reopen or execute the batch.
+Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason is stored in the audit event.
+
+Approval and rejection are idempotent terminal decisions for a pending batch. A second decision does not reopen it.
 
 ## Review checklist
 
-- Is this the correct advertising account?
-- Is every target the target a person intended?
-- Are the evidence fields actually present in the named read tool?
-- Is reconciliation recent and marked measurable before quantitative claims are used?
-- Does the rationale avoid target-level claims that Signals cannot support?
-- Are any dynamic checks unavailable?
-- Does a static policy reason block the batch?
-- Do you understand that current approval records agreement but does not execute?
+- Is this the correct Meta ad account?
+- Did a person intend each source ad and asset selection?
+- Are evidence claims limited to the recorded fields and scope?
+- Does the selected mode make this approval non-executing or executable?
+- Is every missing critical field handled as a block?
+- Is a copied ad permanently `paused`?
+- If work is awaiting verification, do you understand it is Not Landed?
+- Does any rollback-incomplete state require operator attention?

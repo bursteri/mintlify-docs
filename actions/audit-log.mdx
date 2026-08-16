@@ -1,9 +1,9 @@
 ---
 title: "Audit log"
-description: "Trace action proposals, policy decisions, and human outcomes in the workspace audit chain."
+description: "Trace proposals, provider execution, verification, and restoration in the versioned audit chain."
 ---
 
-Open **Audit log** from the PlainRouter sidebar to review the chronological history of Actions activity for the current workspace.
+Open **Audit log** from the PlainRouter sidebar to review the chronological Actions history for the current workspace.
 
 ## What an audit event contains
 
@@ -11,56 +11,62 @@ Each event records:
 
 - Event type and plain-language summary.
 - Actor type and actor name.
-- Related proposal batch and action, when applicable.
-- Structured event payload.
-- Creation time.
-- Event hash and the previous event hash.
+- Related batch and action, when applicable.
+- Structured event payload and creation time.
+- Event hash, previous hash, and hash version.
 
-The hash link creates a tamper-evident chain. The first event has no previous hash. Every later event points to the stored hash of the event before it.
+Events are append-only and predecessor-linked within the current database snapshot.
 
-## Current suggest-only events
+## Integrity versions
 
-The most important events in the current workflow are:
+The top of the audit page reports separate integrity segments:
 
-| Event | Meaning |
+| Segment | Meaning |
 | --- | --- |
-| Proposal created | An authorized agent submitted an evidence-backed batch. |
-| Policy evaluated | PlainRouter required approval or blocked one or more actions. |
-| `batch.recommendation_approved` | A person approved a suggest-only recommendation. No execution followed. |
-| `batch.rejected` | A person rejected the recommendation, with an optional reason. |
+| Historical v1 | Preserves predecessor continuity, but the stored hash cannot be recomputed completely from durable row fields. It is labeled `v1_non_recomputable`. |
+| Checkpoint | Bridges the preserved v1 tail into the v2 segment. The page reports whether it is present and valid. |
+| v2 | Uses a durable canonical representation. PlainRouter recomputes every stored v2 row and reports whether the current database snapshot matches. |
 
-<Note>
-  The audit UI can represent execution, verification, outcome, and rollback events for future execution-enabled workflows. Their presence in the interface does not mean those operations are active in the current release.
-</Note>
+<Warning>
+  The hash chain has no external tail anchor. Successful v2 recomputation detects changed stored rows within the current snapshot, but it cannot independently prove that no tail events were deleted outside that snapshot.
+</Warning>
 
-## Use the log during review
+Expand **Integrity details** on an event to see its version, hash, and predecessor hash.
 
-Use the audit log to answer:
+## Events to follow
 
-- Which agent created the proposal?
-- Which account and workspace did it concern?
-- What did policy decide?
-- Which person approved or rejected it?
-- When did each transition happen?
-- Was a suggest-only approval clearly recorded without execution?
-- Does each event link to the previous stored hash?
+| Stage | Representative events | Meaning |
+| --- | --- | --- |
+| Proposal | `batch.proposed`, `batch.blocked` | An agent submitted a batch and policy accepted it for review or blocked it. |
+| Decision | `batch.recommendation_approved`, `batch.approved`, `batch.rejected` | A person recorded a suggest-only approval, authorized execution, or rejected the proposal. |
+| Execution gate | `execution.started`, `execution.blocked` | The worker began or the fresh execution-time policy check denied the batch. |
+| Provider evidence | `action.provider_read_started`, `action.provider_read_observed`, `action.provider_read_classified` | A receipt-addressed read was authorized, captured, and mechanically classified. |
+| Verification | `action.verified`, `execution.verified` | The exact provider object matched; all actions are Landed only after the batch-level verified event. |
+| Async verification | `action.verification_handed_off`, `action.async_verification_*` | A committed ad copy remains Not Landed while scheduled verification continues. |
+| Outcome | `outcome.checked`, `outcome.anomaly_detected` | A later provider outcome was recorded and classified. |
+| Restoration | `action.rolled_back`, `batch.rolled_back`, `batch.rollback_incomplete` | Compensation restored provider state, or incomplete recovery needs attention. |
 
-## Investigate an unexpected proposal
+Measurement-only events explicitly say **NOT LANDED**. Do not count them as production execution acceptance.
+
+## Investigate unexpected execution
 
 <Steps>
-  <Step title="Confirm the actor">
-    Find the proposal-created event and note the agent name and time.
+  <Step title="Confirm the principal and scope">
+    Find `batch.proposed`. Confirm the agent, account, evidence provenance, target-selection boundary, and execution-mode snapshot.
   </Step>
-  <Step title="Confirm scope">
-    Compare the batch's account and evidence provenance with the account you intended to authorize.
+  <Step title="Trace both policy decisions">
+    Read the proposal-time result and, for executable work, the execution-time result recorded before the provider call.
   </Step>
-  <Step title="Read the policy result">
-    Identify static blocking reasons and unavailable dynamic checks.
+  <Step title="Confirm the human decision">
+    Find the approval or rejection event and confirm the named person and time.
   </Step>
-  <Step title="Trace the decision">
-    Find the approval or rejection event and confirm the named person and terminal status.
+  <Step title="Follow the receipt evidence">
+    Trace execution, raw provider observations, classifications, and terminal verification. An awaiting-verification event is not Landed.
+  </Step>
+  <Step title="Confirm restoration when needed">
+    For failed work, find the compensation and provider-read proof. Escalate any `rollback_incomplete` event.
   </Step>
   <Step title="Revoke access if necessary">
-    If the agent should no longer have access, revoke its PlainRouter connection. Revocation disables its principal and OAuth tokens.
+    Revoke the PlainRouter agent connection. Revocation disables its principal and OAuth tokens.
   </Step>
 </Steps>

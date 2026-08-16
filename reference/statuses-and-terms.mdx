@@ -64,7 +64,7 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
 | --- | --- |
 | `require_approval` | A person must decide in the approval queue. |
 | `block` | At least one safeguard prevents the proposal from proceeding. |
-| `allow` | Policy permits execution in an execution-enabled mode. This is not the current suggest-only path. |
+| `allow` | Policy permits the current phase to proceed. Executable work must receive `allow` again during the execution-time recheck. |
 
 ## Action batch statuses
 
@@ -74,13 +74,33 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
 | `approved_without_execution` | Human-approved suggest-only recommendation. Terminal and not executed. |
 | `rejected` | Human-rejected recommendation. Terminal. |
 | `blocked` | Stopped by policy or a safety condition. Terminal. |
-| `approved` | Approved for an execution-enabled path. Not used by current suggest-only approvals. |
+| `approved` | Human-approved for an execution-enabled path and queued for a fresh policy check. |
 | `auto_approved` | Automatically approved by an execution-enabled policy mode. |
 | `executing` | An execution-enabled batch is in progress. |
-| `completed` | All actions completed and verified. |
+| `executed_pending_verification` | A provider write has a durable receipt, but exact verification is still pending. Not Landed. |
+| `compensating` | PlainRouter is restoring provider state and verifying the restoration. |
+| `measuring` | A closed provider-measurement run is active. Explicitly Not Landed. |
+| `completed` | All actions have exact verified provider receipts. Counted as Landed unless marked measurement-only. |
 | `failed` | Execution failed. |
 | `rolled_back` | Prior state was restored after failure or anomaly. |
 | `rollback_incomplete` | At least one attempted restoration failed and needs attention. |
+
+## Action statuses
+
+| Value | Meaning |
+| --- | --- |
+| `pending` | The action belongs to a batch awaiting a decision. |
+| `approved_without_execution` | Suggest-only approval. Terminal and not executed. |
+| `rejected` | A person rejected the action. Terminal. |
+| `executing` | Provider execution is in progress. |
+| `executed_pending_verification` | The action has a committed receipt but is not yet exactly verified. |
+| `verified` | The receipt-addressed provider state matches the approved action. |
+| `compensating` | Verified restoration is in progress. |
+| `measuring` | The action belongs to a closed provider-measurement run and is Not Landed. |
+| `execution_uncertain` | Provider commit state could not be resolved safely. |
+| `failed` | Execution or verification failed. |
+| `rolled_back` | The provider change was restored and the restoration was verified. |
+| `blocked` | Policy or an execution boundary stopped the action before execution. |
 
 ## Core terms
 
@@ -101,6 +121,21 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
     A platform entity selected by a person. It establishes selection only and does not prove current target state.
   </Accordion>
   <Accordion title="Suggest only">
-    The supported Actions mode in which every proposal requires human review and approval terminates without execution.
+    The default Actions mode in which every passing proposal requires human review and approval terminates without execution.
+  </Accordion>
+  <Accordion title="Landed">
+    A production action batch in which every action has a durable provider receipt and an exact matching verification read. Approval or a provider write alone is not Landed.
+  </Accordion>
+  <Accordion title="Executed pending verification">
+    A committed provider action that has not yet reached exact verification. PlainRouter may continue scheduled receipt-addressed reads, but the action remains Not Landed.
+  </Accordion>
+  <Accordion title="Compensation">
+    A safety restoration against the exact receipt target. PlainRouter considers it successful only after a provider read verifies deletion, archive, or the required restored state.
+  </Accordion>
+  <Accordion title="v1 non-recomputable">
+    A historical audit segment whose predecessor links are preserved but whose hashes cannot be fully recomputed from durable row fields.
+  </Accordion>
+  <Accordion title="v2 recomputable">
+    The durable canonical audit segment whose stored rows can be cryptographically recomputed within the current database snapshot.
   </Accordion>
 </AccordionGroup>

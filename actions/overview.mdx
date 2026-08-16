@@ -1,73 +1,78 @@
 ---
 title: "Actions overview"
-description: "Understand how agents turn Signals evidence into governed, human-reviewed recommendations."
+description: "Understand how agents propose, execute, verify, and audit governed changes."
 ---
 
-Actions is PlainRouter's governed recommendation workflow. An authorized AI agent can read the approved account's Signals context, explain a proposed change, and place it in your approval queue.
+Actions is PlainRouter's governed workflow for AI-proposed advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy.
 
-<Warning>
-  The current release is strictly **Suggest only**. Approving a recommendation records approval as `approved_without_execution`. PlainRouter does not write the change to Meta.
-</Warning>
+<Info>
+  New workspaces start in **Suggest only**. Executable modes can run supported creative actions, but only after policy allows them. New ad copies are always created and verified as `PAUSED`; PlainRouter exposes no activation action in this release.
+</Info>
 
-## The review loop
+## The governed loop
 
 <Steps>
   <Step title="A person authorizes one account">
-    During MCP authorization, you choose the exact advertising account the agent may access. PlainRouter binds the connection to that account rather than accepting an account ID from the agent.
+    During MCP authorization, you choose the exact Meta ad account and permissions the agent may use. The agent cannot replace that account ID in a tool call.
   </Step>
-  <Step title="The agent reads Signals context">
-    The agent starts with account state, then reads Signal health and stored performance when relevant. All three reads carry the same workspace, account, destination, and dataset scope.
+  <Step title="The agent reads evidence">
+    The agent can read Signals context and the approved account's creative library. Creative proposals cite an account-bound asset record or frozen staged-asset manifest.
   </Step>
-  <Step title="The agent proposes a batch">
-    Each batch includes one or more typed actions, a plain-language rationale, exact evidence fields, a stable idempotency key, and a human-supplied target.
+  <Step title="The agent submits a proposal">
+    Each batch includes typed actions, a plain-language rationale, exact evidence fields, a stable idempotency key, and a human-supplied target.
   </Step>
   <Step title="PlainRouter applies policy">
-    Static safeguards can block the proposal. Checks that require unavailable live account or target state are labeled unavailable rather than guessed.
+    Policy evaluates the proposal against protected entities, quiet hours, provider state, and the selected execution mode. Unknown execution-critical state blocks execution.
   </Step>
-  <Step title="A person decides">
-    A pending proposal appears in **Approval queue**. You can approve it or reject it with an optional reason.
+  <Step title="A person or policy approves">
+    Creative proposals require a person at proposal time. In **Suggest only**, approval records agreement without execution. Executable modes queue the approved batch for a fresh policy check.
   </Step>
-  <Step title="The decision becomes audit history">
-    PlainRouter records the proposal, policy result, evidence provenance, and human decision in a tamper-evident audit chain.
+  <Step title="PlainRouter executes and verifies">
+    The execution worker rechecks current policy before any provider write. It records a durable receipt, reads the exact provider object back, and marks the action verified only when the receipt-addressed state matches.
+  </Step>
+  <Step title="The result becomes audit history">
+    Proposals, policy decisions, approvals, provider reads, verification, compensation, outcome checks, and rollback events enter the workspace's versioned audit chain.
   </Step>
 </Steps>
 
-## Supported proposal types
+## Supported action types
 
-| Action | Target | Required parameters |
+| Action | Proposal support | Execution support |
 | --- | --- | --- |
-| Adjust budget | Ad account, campaign, ad set, or ad | New daily budget in the account currency's minor unit. |
-| Set status | Ad account, campaign, ad set, or ad | `active` or `paused`. |
-| Duplicate ad with creative | Ad | Creative-library asset reference and required initial `paused` status. |
-| Upload asset | Ad account, campaign, ad set, or ad | Durable staged asset reference, image or video type, filename, and SHA-256 digest. |
+| Upload asset | Image or video staged-asset shape. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
+| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified permanently `PAUSED`. |
+| Adjust budget | Typed recommendation with a new daily budget. | Disabled in this release. |
+| Set status | Typed recommendation with `active` or `paused`. | Disabled in this release. No activation path is exposed. |
 
-These are proposal shapes. Their presence in a recommendation does not mean PlainRouter executed the action.
+Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/actions/creative-workflow) for the supported creative workflow. The convenience tools create proposals; they do not perform a Meta write inside the MCP request.
+
+## Execution modes
+
+| Mode | Passing proposal |
+| --- | --- |
+| **Suggest only** | Waits for a person. Approval ends as **Approved without execution**. |
+| **Auto within limits** | Supported creative proposals still require a person. Approval queues governed execution. |
+| **Full auto** | Uses the same hard safeguards. Supported creative proposals still require a person in this release. |
+
+The mode is frozen into each proposal. Before execution, PlainRouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
+
+## Verification and Landed
+
+**Landed** means every action in the batch has an exact, durable provider receipt and a matching verification read. A provider write alone is not Landed.
+
+Most verification settles in the immediate bounded read window. A paused Meta ad that remains `IN_PROCESS` can move to **Executed pending verification**. PlainRouter then performs scheduled receipt-addressed reads for up to 48 hours. It remains **Not Landed** during that period.
+
+If verification finds contradictory state or cannot complete inside the safety window, PlainRouter fails closed and attempts verified compensation. A failed or incomplete restoration is surfaced as **Rollback incomplete** for operator attention.
 
 ## Evidence boundaries
 
-The current Signals reads provide aggregate account and dataset evidence:
+Signals reads provide aggregate account and dataset evidence. They do not prove campaign CPA, spend, budget, learning phase, or target-level performance.
 
-- Authorized account, workspace, connection, Signal, and destination identity.
-- First-party event activity and diagnostics.
-- Meta delivery outcomes.
-- Stored Event Match Quality snapshots.
-- Stored gateway-versus-Meta conversion reconciliation.
-
-They do not provide live Marketing API state for budget, spend, campaign status, learning phase, or target-level performance.
+Creative-library evidence proves the selected asset's identity, approved-account ownership, readiness, and status. Although the library response includes last-30-day performance, that performance is excluded from the durable proposal citation and cannot be used as a winning-creative claim.
 
 <Note>
-  A human-supplied campaign, ad set, or ad ID establishes only which target the recommendation refers to. It does not prove that target's current state.
+  A human-supplied campaign, ad set, ad, or asset establishes selection only. PlainRouter re-reads execution-critical provider state instead of treating the supplied ID as current state.
 </Note>
-
-## Suggest-only decisions
-
-| Decision | Result |
-| --- | --- |
-| Approve | The batch and its actions become **Approved without execution**. No execution job is dispatched. |
-| Reject | The batch and its actions become **Rejected**. The optional reason is recorded. |
-| Policy block | The batch becomes **Blocked** and does not enter the pending review flow. |
-
-Approved-without-execution recommendations do not increase the **Landed** count.
 
 ## Next steps
 
@@ -75,13 +80,13 @@ Approved-without-execution recommendations do not increase the **Landed** count.
   <Card title="Connect an agent" icon="bot" href="/actions/connect-agent">
     Authorize an MCP client for one advertising account.
   </Card>
+  <Card title="Use creative actions" icon="images" href="/actions/creative-workflow">
+    Read assets, stage an image, and propose a paused ad copy.
+  </Card>
   <Card title="Review proposals" icon="inbox" href="/actions/review-proposals">
-    Read evidence, policy results, and action details before deciding.
+    Read evidence, policy results, and execution state before deciding.
   </Card>
   <Card title="Configure policy" icon="shield-check" href="/actions/policies-and-safety">
-    Set hard workspace boundaries and understand current availability.
-  </Card>
-  <Card title="Read the audit log" icon="history" href="/actions/audit-log">
-    Trace each proposal and decision to its actor.
+    Set hard workspace boundaries for proposals and execution.
   </Card>
 </CardGroup>

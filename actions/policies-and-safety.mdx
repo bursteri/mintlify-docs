@@ -1,25 +1,34 @@
 ---
 title: "Action policy and safety"
-description: "Configure workspace safeguards and understand which checks are enforceable in the current suggest-only release."
+description: "Configure workspace safeguards for proposals, creative execution, verification, and rollback."
 ---
 
-Open **Settings** → **Action policy** to review the workspace's non-negotiable boundaries. Agents can supply reasoning and proposals, but they cannot edit or bypass this policy.
+Open **Settings** → **Action policy** to review the workspace's non-negotiable boundaries. Agents can supply reasoning and proposals, but they cannot edit or bypass policy.
 
 Only the workspace owner can save policy changes. Other workspace members can review the current settings.
 
-<Warning>
-  Keep **Suggest only** selected for the current release. Real provider execution, verification, outcome reads, and rollback are disabled. **Auto within limits** and **Full auto** are not part of the current supported operating path.
-</Warning>
-
 ## Execution mode
 
-| Mode | Intended behavior | Current availability |
-| --- | --- | --- |
-| **Suggest only** | Every passing proposal waits for a person. Approval records the recommendation without execution. | Supported. |
-| **Auto within limits** | Policy-compliant proposals would execute automatically while hard stops remain active. | Not supported for production execution in this release. |
-| **Full auto** | Continuous operation behind caps, protected entities, verification, and rollback. | Not supported for production execution in this release. |
+| Mode | Behavior in this release |
+| --- | --- |
+| **Suggest only** | Every passing proposal waits for a person. Approval records the recommendation without execution. |
+| **Auto within limits** | Supported creative proposals require human approval, then queue execution under all hard stops. |
+| **Full auto** | Uses the same hard safeguards. Supported creative proposals still require human approval at proposal time. |
 
-The selected mode is copied into each proposal as a snapshot. Changing policy later cannot promote an existing suggest-only recommendation into executable work.
+New workspaces default to **Suggest only**. The selected mode is copied into each proposal as an immutable snapshot.
+
+<Warning>
+  Executable modes currently support only JPEG/PNG image upload and `duplicate_ad_with_creative`. Budget changes, delivery-status changes, video upload execution, and ad activation remain disabled.
+</Warning>
+
+## Two policy gates
+
+Executable creative work passes policy twice:
+
+1. Proposal-time policy decides whether to block or request human approval.
+2. After approval, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
+
+Changing policy does not promote or rewrite an existing proposal. A newly protected target, quiet-hours window, missing driver, unavailable critical field, or other non-`allow` result blocks the queued batch before provider execution.
 
 ## Spend boundaries
 
@@ -31,7 +40,7 @@ The maximum percentage change allowed per budget action, measured from the targe
 
 The maximum projected combined daily budget for the account. Leave it blank for no configured cap.
 
-Both checks require current account or target budget state. That state is not available from the current Signals read model. The queue therefore labels these dynamic checks unavailable instead of claiming they passed.
+Budget actions remain non-executable in this release. Their current account and target state is reported honestly as unavailable rather than inferred from aggregate Signals data.
 
 ## Protected delivery
 
@@ -45,44 +54,56 @@ ad_set:120067890
 ad:120098765
 ```
 
-Supported prefixes are `campaign`, `ad_set`, and `ad`. A proposal targeting an exact protected entity is blocked in every mode.
+Supported prefixes are `campaign`, `ad_set`, and `ad`. An exact match blocks the proposal. The execution-time recheck also stops an approved batch if its source ad becomes protected before the worker runs.
 
 ### Protect learning phase
 
-This setting is designed to block budget and delivery changes while the target is learning. It requires a current target learning-phase read. That read is unavailable in the current release and appears as an unavailable dynamic check.
+When enabled, PlainRouter blocks applicable delivery changes while the target is learning. Creative duplication re-reads the source ad and nested ad-set learning state from Meta. If the required learning state is unknown, execution is blocked.
 
-## Timing and rollback
+Image upload does not require target learning-phase state.
+
+## Timing and outcome safety
 
 ### Quiet hours
 
 Set both a start and end time. PlainRouter evaluates the window in the advertising account's timezone, falling back to the application timezone if the account has none.
 
-Quiet hours can cross midnight. For example, `22:00` to `06:00` blocks proposals during the overnight window.
+Quiet hours can cross midnight. For example, `22:00` to `06:00` blocks proposals and execution during the overnight window.
 
 ### Outcome check after
 
-This is the intended delay before evaluating an executed change. The accepted range is 1–168 hours.
+Sets the delay before checking a verified creative action's provider outcome. The accepted range is 1–168 hours.
 
 ### CPA anomaly threshold
 
-This is the intended percentage threshold for an outcome anomaly and automatic rollback.
+Sets the percentage threshold that classifies a provider outcome as anomalous. A verified anomaly can trigger automatic compensation.
 
-<Note>
-  Outcome checks and rollback require a real provider executor and a compatible outcome reader. Both are disabled in the current suggest-only release, and aggregate Signals reconciliation is never substituted for target-level CPA.
-</Note>
+Aggregate Signals reconciliation is never substituted for target-level provider outcome data.
 
-## What policy can enforce now
+## Verification and compensation
 
-| Check | Current result |
+PlainRouter does not treat a successful provider response as proof that an action Landed. It persists an execution receipt and re-reads the exact object.
+
+- Image upload verification matches the receipt asset, frozen content hash, and provider readiness.
+- Ad-copy verification matches the receipt ad, approved account, selected creative, and permanent `PAUSED` state.
+- An `IN_PROCESS` copy can enter durable asynchronous verification for up to 48 hours.
+- Hard mismatches, provider rejection, verification expiry, or later anomaly trigger compensation.
+- Compensation is itself verified: an uploaded image must be absent after deletion, and a copied ad must be `ARCHIVED` after rollback.
+
+If commit state is unknown, PlainRouter reconciles before retrying. It does not issue unsafe compensation without a trustworthy receipt target.
+
+## Current enforcement boundary
+
+| Check or action | Current result |
 | --- | --- |
-| Suggest-only human approval | Enforced. |
-| Protected entity | Enforced from the supplied target ID. |
-| Quiet hours | Enforced from policy and account timezone. |
-| Current budget and spend | Reported unavailable. |
-| Maximum budget delta | Reported unavailable because current target budget is unavailable. |
-| Hard account cap | Reported unavailable because current account budget is unavailable. |
-| Learning phase | Reported unavailable. |
-| Target status and target performance | Reported unavailable. |
-| Real execution, verification, outcome check, rollback | Disabled. |
+| Human approval for executable creative proposals | Enforced. |
+| Proposal-time and execution-time policy | Enforced. |
+| Protected entity and quiet hours | Enforced. |
+| Provider account, source, asset readiness, and applicable learning state | Re-read and fail-closed. |
+| Image upload and paused ad duplication | Executable with receipts, verification, outcome reads, and compensation. |
+| Duplicate-ad activation | Not exposed. |
+| Budget and status execution | Disabled. |
+| Video upload execution | Disabled. |
+| Unknown provider commit | Reconciled before any retry or compensation. |
 
-This fail-closed behavior prevents simulated or aggregate data from being presented as real ad-platform state.
+This boundary preserves suggest-only recommendations while allowing a narrow, receipt-addressed creative execution path.

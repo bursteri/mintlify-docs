@@ -1,0 +1,65 @@
+---
+title: "Create governed Meta creatives"
+description: "Use the creative library, stage an image, and create a verified paused ad copy."
+---
+
+PlainRouter's creative tools let an authorized agent inspect account-owned assets and submit governed Meta changes. Every proposal stays bound to the account selected during OAuth.
+
+## Creative tool flow
+
+<Steps>
+  <Step title="Read the creative library">
+    Call `get-creative-library` to list images or videos from the approved account. Select an `asset_id` such as `image:<hash>` or `video:<id>`.
+  </Step>
+  <Step title="Stage an image when needed">
+    Call `upload-asset` with a JPEG or PNG filename, raw base64 content, a rationale, and an idempotency key. PlainRouter validates the bytes, freezes a private staged copy, and creates an `upload_asset` proposal.
+  </Step>
+  <Step title="Review or approve the upload">
+    In **Suggest only**, approval records the recommendation without uploading to Meta. In an executable mode, approval queues the provider upload after a fresh policy check. After the upload is verified, call `get-creative-library` again to obtain its `image:<hash>` asset ID.
+  </Step>
+  <Step title="Propose a paused ad copy">
+    Call `duplicate-ad-with-creative` with the human-selected source ad ID and an asset ID returned by PlainRouter. The proposal is hard-coded to `paused`.
+  </Step>
+  <Step title="Review the proposal">
+    Confirm the source ad, selected asset, rationale, evidence provenance, policy snapshot, and the **Approve and execute** consequence.
+  </Step>
+  <Step title="Wait for exact verification">
+    PlainRouter creates the copy as `PAUSED`, records its provider ID in a durable receipt, and re-reads that exact ad. Only an exact account, creative, `status=PAUSED`, and `effective_status=PAUSED` match becomes Landed.
+  </Step>
+</Steps>
+
+## Creative library output
+
+`get-creative-library` returns account-owned images and videos, asset metadata, pagination, associated ads, and aggregated last-30-day impressions, clicks, spend, and conversions.
+
+<Warning>
+  Do not treat creative-library history as causal performance or proof that an asset is a winner. Durable proposal provenance records only identity, account ownership, readiness, and status.
+</Warning>
+
+When requesting `asset_type: "all"`, pagination is returned separately for images and videos. To continue from a cursor, request either `image` or `video`.
+
+## Image upload rules
+
+The `upload-asset` convenience tool accepts:
+
+- `asset_type: "image"`
+- A `.jpg`, `.jpeg`, or `.png` filename that matches the detected content type
+- Raw base64 bytes without a data URI prefix
+- A rationale of up to 1,000 characters
+- A stable idempotency key of up to 64 characters
+
+The configured upload limit is 5 MiB unless the deployment overrides it. Reusing the same idempotency key with different bytes is rejected.
+
+Video assets can be read from the Meta creative library and used for ad duplication. New video upload execution is not supported in this release.
+
+## Paused-copy invariant
+
+PlainRouter exposes no action that activates a copied ad. A duplicate must be created and verified with both configured and effective status equal to `PAUSED`.
+
+If Meta reports `IN_PROCESS`, the batch moves to **Executed pending verification** and remains **Not Landed**. PlainRouter performs scheduled reads for up to 48 hours. Contradictory state, rejection, or expiry triggers verified compensation, which archives the receipt-addressed copy.
+
+## Safe retries
+
+Both proposal-producing creative tools are idempotent. Reuse the same idempotency key when retrying the same intent. Do not generate a new key merely because an MCP request timed out.
+
+After a timeout, check the returned or existing proposal in **Approval queue** before attempting another action. Provider reconciliation uses the durable execution key and receipt to avoid silently creating duplicate objects.

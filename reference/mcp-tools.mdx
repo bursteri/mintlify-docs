@@ -1,9 +1,9 @@
 ---
 title: "MCP tools"
-description: "Reference for the four account-scoped tools exposed by the PlainRouter MCP server."
+description: "Reference for the seven account-scoped tools exposed by the PlainRouter MCP server."
 ---
 
-PlainRouter MCP server version `0.2.0` exposes exactly four tools. All use the advertising account selected by the person during OAuth authorization.
+PlainRouter MCP server version `0.3.0` exposes exactly seven tools. All use the advertising account selected by the person during OAuth authorization.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -11,14 +11,17 @@ PlainRouter MCP server version `0.2.0` exposes exactly four tools. All use the a
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation from stored measurements. |
 | `get_performance` | Read-only, idempotent | Read a 1–90 day stored gateway-versus-Meta comparison. |
 | `propose-actions` | Idempotent write to PlainRouter | Submit an evidence-backed recommendation to policy and approval. |
+| `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
+| `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
+| `duplicate-ad-with-creative` | Idempotent proposal write | Propose a permanently paused copy of a source Meta ad with a selected asset. |
 
 <Warning>
-  `propose-actions` creates a PlainRouter recommendation. In the current **Suggest only** release, approving it does not execute an ad-platform change.
+  Proposal-producing tools do not write to Meta during the MCP request. In **Suggest only**, approval ends without execution. In an executable mode, supported creative work can run only after the policy and approval pipeline authorizes it.
 </Warning>
 
 ## Shared authorization and scope
 
-The read tools require an active principal with `ad-account.read`. `propose-actions` also requires `actions.propose`.
+Signals read tools require an active principal with `ad-account.read`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
 
 Scoped responses identify:
 
@@ -57,7 +60,7 @@ Current capability flags are intentionally explicit:
 }
 ```
 
-`verified_performance` becomes true only when the matching destination is active. It describes stored reconciliation availability, not live target performance.
+`verified_performance` becomes true only when the matching destination is active. It describes stored reconciliation availability, not live target performance. The `marketing_api_reads` and `writes` flags describe this Signals-oriented account-state call; use the separately permissioned creative tools for live creative-library reads and governed creative proposals.
 
 ## `get_signal_health`
 
@@ -154,7 +157,9 @@ Each evidence declaration contains:
 }
 ```
 
-`source_tool` must be `get_account_state`, `get_signal_health`, or `get_performance`. Every field path must exist in a freshly captured response.
+Aggregate `source_tool` values are `get_account_state`, `get_signal_health`, and `get_performance`. Creative actions can also use the action-bound sources `get-creative-library` and `staged-asset-manifest`.
+
+Every field path must exist in a fresh server-side capture. Aggregate sources cannot include `action_index`. An action-bound source requires `action_index` and can cite only its matching creative action.
 
 ### Action object
 
@@ -211,3 +216,64 @@ It also rejects:
 The response includes the batch ID, scope, evidence provenance, status, policy decision and reasons, approval requirement, queue URL, proposer, rationale, and normalized action records.
 
 Evidence provenance records the source service, scope level, exact fields, observation time, reporting window, measurability, and the target-selection boundary.
+
+## `get-creative-library`
+
+This tool makes live Meta Marketing API reads for the approved account. It requires `creative.read` and an active Meta connection with `ads_read` or `ads_management`.
+
+### Input
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `asset_type` | No | `all`, `image`, or `video`. Default is `all`. |
+| `limit` | No | Integer from 1 to 100 per requested asset type. Default is 25. |
+| `cursor` | No | Opaque Meta cursor from a previous call. Choose `image` or `video` when using it. |
+
+### Output
+
+The response includes:
+
+- Images as `image:<hash>` and videos as `video:<id>`.
+- Names, status, dimensions or duration, previews, and creation time when available.
+- Ads historically associated with each asset.
+- Aggregated last-30-day impressions, clicks, spend, and conversions.
+- Separate image and video pagination cursors.
+- `performance_window: "last_30d"`.
+
+<Warning>
+  The performance block is descriptive account history, not causal lift. When this tool supplies proposal provenance, PlainRouter persists only the selected asset's identity, account ownership, readiness, and status.
+</Warning>
+
+## `upload-asset`
+
+This tool validates and privately stages an image, then creates one canonical `upload_asset` proposal. It requires `creative.write` and `actions.propose`.
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `asset_type` | Yes | Must be `image`. |
+| `filename` | Yes | Up to 100 characters with `.jpg`, `.jpeg`, or `.png` matching the detected MIME type. |
+| `content_base64` | Yes in practice | Raw base64 image bytes without a data URI prefix. |
+| `rationale` | Yes | 1–1,000 characters. |
+| `idempotency_key` | Yes | Stable retry key up to 64 characters. |
+
+The response wraps the canonical proposal with its ID, scope, evidence provenance, immutable execution-mode snapshot, status, policy result, approval requirement, approval-queue URL, and action record.
+
+PlainRouter freezes the staged bytes and records only the approved manifest fields: staged ID, SHA-256 digest, detected MIME type, byte size, account binding, and frozen/immutable state. Raw bytes do not enter the action or audit record.
+
+Only JPEG and PNG upload execution is supported. Video upload execution remains blocked.
+
+## `duplicate-ad-with-creative`
+
+This tool creates one canonical `duplicate_ad_with_creative` proposal. It requires `creative.write` and `actions.propose`.
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `source_ad` | Yes | Numeric Meta ID of the human-selected ad to copy. |
+| `asset_id` | Yes | `image:<hash>` or `video:<id>` returned by PlainRouter. |
+| `rationale` | Yes | 1–1,000 characters. |
+| `name_suffix` | No | Optional copied-ad name suffix up to 100 characters. |
+| `idempotency_key` | Yes | Stable retry key up to 64 characters. |
+
+PlainRouter re-reads the source ad and selected asset under the approved account before creating the proposal. The normalized action always contains `status: "paused"`.
+
+If approved in an executable mode, the worker rechecks policy, creates the copy as `PAUSED`, persists the provider ad ID in a durable receipt, and verifies the exact receipt-addressed object. `IN_PROCESS` can enter scheduled verification for up to 48 hours. The batch is not Landed until every receipt is exactly verified.
