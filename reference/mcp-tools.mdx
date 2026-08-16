@@ -3,7 +3,7 @@ title: "MCP tools"
 description: "Reference for the seven account-scoped tools exposed by the PlainRouter MCP server."
 ---
 
-PlainRouter MCP server version `0.3.0` exposes exactly seven tools. All use the advertising account selected by the person during OAuth authorization.
+PlainRouter MCP server version `0.3.0` exposes exactly seven tools. All use the advertising account selected by the person during OAuth authorization or workspace-token issuance.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -22,6 +22,8 @@ PlainRouter MCP server version `0.3.0` exposes exactly seven tools. All use the 
 ## Shared authorization and scope
 
 Signals read tools require an active principal with `ad-account.read`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
+
+Clients can authenticate through OAuth or with an owner-issued [workspace token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. Authentication does not change any MCP tool input or output.
 
 Scoped responses identify:
 

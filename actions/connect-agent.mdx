@@ -1,6 +1,6 @@
 ---
 title: "Connect an AI agent"
-description: "Authorize an MCP-compatible client for one Meta ad account and governed Actions tools."
+description: "Connect an MCP-compatible client to one Meta ad account with OAuth or a workspace token."
 ---
 
 PlainRouter exposes a remote Model Context Protocol server at:
@@ -9,7 +9,9 @@ PlainRouter exposes a remote Model Context Protocol server at:
 https://plainrouter.com/mcp
 ```
 
-Use this endpoint in an MCP client that supports remote HTTP servers and OAuth. PlainRouter publishes OAuth discovery metadata, so compatible clients can start authorization automatically.
+PlainRouter supports interactive OAuth and owner-issued workspace tokens. Both methods bind the client to one workspace, one Meta ad account, and an explicit permission set.
+
+This page covers OAuth. PlainRouter publishes OAuth discovery metadata, so compatible clients can start authorization automatically. If your client uses a fixed bearer credential instead, [issue a workspace token](/actions/workspace-tokens).
 
 ## Before you begin
 
@@ -17,12 +19,12 @@ You need:
 
 - A PlainRouter account with access to the intended workspace.
 - An active Meta ad account connection.
-- An MCP-compatible client with remote HTTP and OAuth support.
+- An MCP-compatible client with remote HTTP and OAuth support. For a client without OAuth support, use a [workspace token](/actions/workspace-tokens).
 - A clear choice of the one advertising account the client should use.
 
 For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
 
-## Authorize the connection
+## Authorize with OAuth
 
 <Steps>
   <Step title="Add the PlainRouter MCP server">
@@ -82,11 +84,15 @@ PlainRouter issues short-lived access tokens and refreshable authorization. The 
 
 Reconnect if the selected account changes or the underlying Meta permissions change. One OAuth client can create separate, isolated connections for different users or accounts.
 
+Workspace tokens use an explicit expiry and owner-managed rotation instead. See [Workspace tokens](/actions/workspace-tokens) for their lifecycle.
+
 ## Troubleshoot
 
 ### The client receives `401 Unauthorized`
 
 Confirm the client followed the OAuth metadata advertised by the MCP endpoint. Remove a stale connection and authorize again if its tokens were revoked or expired without a usable refresh token.
+
+For a workspace token, confirm that the client sends the complete token as a bearer credential and that the token has not expired or been revoked.
 
 ### A creative tool reports a missing permission
 

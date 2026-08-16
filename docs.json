@@ -42,6 +42,7 @@
         "pages": [
           "actions/overview",
           "actions/connect-agent",
+          "actions/workspace-tokens",
           "actions/creative-workflow",
           "actions/review-proposals",
           "actions/policies-and-safety",

@@ -1,0 +1,86 @@
+---
+title: "Workspace tokens"
+description: "Issue, use, rotate, and revoke owner-managed bearer tokens for one workspace and Meta ad account."
+---
+
+Workspace tokens let an MCP client or automation authenticate without an interactive OAuth flow. Each token is bound to exactly one workspace and one active Meta ad account in that workspace.
+
+Only the workspace owner can issue, rotate, or revoke workspace tokens. A client cannot use the token to select another workspace or advertising account.
+
+## Choose OAuth or a workspace token
+
+| Method | Use it when | Lifecycle |
+| --- | --- | --- |
+| OAuth | Your MCP client supports remote HTTP servers and OAuth discovery. | PlainRouter issues short-lived access tokens with refreshable authorization. |
+| Workspace token | Your client or automation can send a fixed bearer token. | You choose a 30, 90, or 365 day expiry and rotate the credential explicitly. |
+
+Both methods create an account-bound agent principal and use the same MCP tools, policy checks, approval flow, receipts, verification, and audit chain.
+
+## Issue a token
+
+<Steps>
+  <Step title="Select the workspace">
+    Switch to the workspace that owns the Meta ad account you want the client to use.
+  </Step>
+  <Step title="Open the token page">
+    In the PlainRouter sidebar, open **Account** → **API**.
+  </Step>
+  <Step title="Choose the scope">
+    Enter a descriptive name. Select one active advertising account, an access tier, and a 30, 90, or 365 day expiry.
+  </Step>
+  <Step title="Issue and copy the token">
+    Click **Issue token** and copy the full token immediately. PlainRouter shows it only once and cannot recover it later.
+  </Step>
+  <Step title="Configure the MCP client">
+    Add `https://plainrouter.com/mcp` as a remote HTTP MCP server. Configure the client to send the full token as its bearer credential.
+  </Step>
+</Steps>
+
+The resulting request uses the standard header:
+
+```http
+Authorization: Bearer <workspace-token>
+```
+
+<Warning>
+  Treat the token like a password. Do not put it in source control, logs, URLs, screenshots, or agent prompts.
+</Warning>
+
+## Access tiers
+
+| Tier | Workspace abilities | MCP access |
+| --- | --- | --- |
+| **Read** | `workspace:read` | Read account and Signals context, plus the approved account's creative library. |
+| **Write** | `workspace:read`, `workspace:write` | Includes read access and can submit governed action and creative proposals. |
+| **Admin** | `workspace:read`, `workspace:write`, `workspace:admin` | Uses the same MCP tools as **Write** and can manage token lifecycle and workspace provisioning through authorized APIs. |
+
+No tier grants wildcard access. **Write** and **Admin** do not bypass action policy, human approval, provider verification, or account restrictions. Proposal-producing MCP tools still create governed proposals rather than direct Meta writes.
+
+To change a token's account or tier, issue a new token and revoke the old one. PlainRouter does not elevate an existing token in place.
+
+## Rotate or revoke a token
+
+Open **Account** → **API** to review active and revoked tokens.
+
+- Click **Rotate** to issue a replacement with the same workspace, account, and tier. Choose a new expiry and copy the replacement immediately. The previous token stops authenticating as soon as rotation succeeds.
+- Click **Revoke** to stop a token immediately. PlainRouter retains the revoked record as durable security history.
+
+Issuance and rotation add `token.issued` to the workspace's v2 audit chain. Rotation and revocation add `token.revoked`. Audit events contain token metadata and scope, never the plaintext credential.
+
+## Troubleshoot
+
+### The client receives `401 Unauthorized`
+
+Confirm that the client sends the complete token as a bearer credential. Expired or revoked tokens are rejected. A token also stops authenticating if its bound account, Meta connection, or agent principal is no longer active.
+
+### A tool reports insufficient permission
+
+Use **Read** for account, Signals, and creative-library reads. Use **Write** or **Admin** for tools that submit action or creative proposals. Issue a new token when you need a different tier.
+
+### The wrong account appears
+
+Revoke the token and issue another one for the correct advertising account. MCP tool calls cannot override the account stored with the token.
+
+### You cannot open the token page
+
+Only the workspace owner can manage tokens. Confirm that you selected the intended workspace and that its Meta account connection is active.

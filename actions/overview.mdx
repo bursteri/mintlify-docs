@@ -13,7 +13,7 @@ Actions is PlainRouter's governed workflow for AI-proposed advertising changes. 
 
 <Steps>
   <Step title="A person authorizes one account">
-    During MCP authorization, you choose the exact Meta ad account and permissions the agent may use. The agent cannot replace that account ID in a tool call.
+    During MCP authorization, you choose the exact Meta ad account and permissions the agent may use. You can authorize with OAuth or an owner-issued workspace token. The agent cannot replace that account ID in a tool call.
   </Step>
   <Step title="The agent reads evidence">
     The agent can read Signals context and the approved account's creative library. Creative proposals cite an account-bound asset record or frozen staged-asset manifest.
@@ -78,7 +78,7 @@ Creative-library evidence proves the selected asset's identity, approved-account
 
 <CardGroup cols={2}>
   <Card title="Connect an agent" icon="bot" href="/actions/connect-agent">
-    Authorize an MCP client for one advertising account.
+    Authorize an MCP client with OAuth or a workspace token for one advertising account.
   </Card>
   <Card title="Use creative actions" icon="images" href="/actions/creative-workflow">
     Read assets, stage an image, and propose a paused ad copy.
