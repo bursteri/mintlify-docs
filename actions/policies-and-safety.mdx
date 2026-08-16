@@ -7,6 +7,10 @@ Open **Settings** → **Action policy** to review the workspace's non-negotiable
 
 Only the workspace owner can save policy changes. Other workspace members can review the current settings.
 
+When the owner changes a policy setting, PlainRouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the owner and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
+
+Policy changes that allow execution are saved atomically with their audit event. If audit-ledger integrity prevents the event from being appended, PlainRouter does not save the executable change. You can still switch to **Suggest only** as a safe fallback, but PlainRouter warns that the audit ledger requires repair if it cannot record that change.
+
 ## Execution mode
 
 | Mode | Behavior in this release |

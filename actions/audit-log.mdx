@@ -37,6 +37,7 @@ Expand **Integrity details** on an event to see its version, hash, and predecess
 
 | Stage | Representative events | Meaning |
 | --- | --- | --- |
+| Policy | `policy.updated` | A workspace owner changed action-policy settings. The event records the complete before-and-after policy and is not tied to a batch or action. |
 | Proposal | `batch.proposed`, `batch.blocked` | An agent submitted a batch and policy accepted it for review or blocked it. |
 | Decision | `batch.recommendation_approved`, `batch.approved`, `batch.rejected` | A person recorded a suggest-only approval, authorized execution, or rejected the proposal. |
 | Execution gate | `execution.started`, `execution.blocked` | The worker began or the fresh execution-time policy check denied the batch. |
