@@ -56,6 +56,10 @@ Authorization: Bearer <workspace-token>
 
 No tier grants wildcard access. **Write** and **Admin** do not bypass action policy, human approval, provider verification, or account restrictions. Proposal-producing MCP tools still create governed proposals rather than direct Meta writes.
 
+<Note>
+  Workspace tokens authenticate MCP and workspace-scoped API routes. They cannot act as an interactive browser session or approve, revoke, or otherwise manage OAuth connections. Sign in to PlainRouter to manage OAuth access.
+</Note>
+
 To change a token's account or tier, issue a new token and revoke the old one. PlainRouter does not elevate an existing token in place.
 
 ## Rotate or revoke a token
