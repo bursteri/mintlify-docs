@@ -38,6 +38,12 @@
         ]
       },
       {
+        "group": "Launcher",
+        "pages": [
+          "launcher/connect-drive"
+        ]
+      },
+      {
         "group": "Actions",
         "pages": [
           "actions/overview",
