@@ -131,6 +131,32 @@ await fetch("/create-checkout-session", {
 
 Your server must copy the value into the payment or checkout metadata used by its integration.
 
+## Verify Stripe Checkout settlement
+
+If PlainRouter is configured to receive Stripe webhooks for your Signal, copy the browser visitor ID into the Checkout Session's `metadata.visitor_id`. This lets the settled server-side purchase join the consenting browser visit.
+
+Configure the Stripe webhook endpoint to receive:
+
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `checkout.session.async_payment_failed`
+- `refund.created` and `charge.refunded` when you track refunds
+
+PlainRouter creates Stripe Checkout revenue only after Stripe confirms an exact `payment_status` of `paid`:
+
+| Stripe state | Signals result |
+| --- | --- |
+| `checkout.session.completed` with `payment_status=paid` | Creates one canonical `Purchase`. |
+| `checkout.session.completed` with `payment_status=unpaid` | Records no `Purchase` and waits for asynchronous success. |
+| `checkout.session.async_payment_succeeded` with `payment_status=paid` | Creates the canonical `Purchase` at the asynchronous settlement time. |
+| `checkout.session.async_payment_failed` | Creates no `Purchase` or `Refund`. |
+| `payment_status=no_payment_required` | Creates no revenue event. |
+| Missing, unknown, or malformed payment status | Fails closed and creates no `Purchase`. |
+
+Duplicate or out-of-order paid webhooks for the same Checkout Session converge on one `Purchase`. PlainRouter uses the settlement-confirming webhook time as the event time. Until settlement is confirmed, the Checkout Session does not enter Signals rollups or Meta delivery.
+
+Stripe refund webhooks create idempotent custom `Refund` events with a negative refunded value. PlainRouter links the refund to its known purchase when the order lineage is available.
+
 ## Reliability behavior
 
 - Event requests use browser `keepalive` where available.
