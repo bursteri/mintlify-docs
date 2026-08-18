@@ -1,0 +1,48 @@
+---
+title: "August 2026"
+description: "PlainRouter product updates shipped in August 2026."
+---
+
+PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
+
+## August 18
+
+### Launcher draft batches arrive in MCP
+
+**New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured PlainRouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/reference/mcp-tools).
+
+### Consent-first Signals and simpler activation
+
+**New** · Signal activation now uses an identity-free server verification event through REST or MCP, making the browser pixel optional for setup. Event ingestion now requires an explicit consent basis and fails closed before ineligible Meta delivery. [See what changed in API 0.3.1](/reference/conversion-api).
+
+### Stripe revenue waits for settlement
+
+**Improved** · Stripe Checkout creates a purchase only after an exact `payment_status` of `paid`. Failed, unpaid, free, missing, and malformed states stay out of the ledger, rollups, and Meta delivery. [Review Stripe event behavior](/signals/track-events#verify-stripe-checkout-settlement).
+
+### Creative media execution is more durable
+
+**Improved** · Launcher now validates staged media before provider upload, records durable lifecycle state, and defers safely when the shared Meta request budget is exhausted. Policy, approval, receipt, and provider-verification gates remain in place.
+
+## August 17
+
+### Drive ownership is verified before sync
+
+**New** · Launcher verifies a connected Drive folder by workspace-domain ownership or a generated challenge file before inventory sync can run. Public folders always require the challenge path. [Connect a Drive folder](/launcher/connect-drive).
+
+### The redesigned Signals ledger reached production
+
+**Improved** · PlainRouter shipped partitioned event storage, exact rollup coverage, bounded retention paths, replay protection, and privacy erasure that preserves the accounting spine while removing subject data.
+
+### Drive sync gained durable operation receipts
+
+**Improved** · Drive dispatch, retries, reconciliation, and final outcomes now share a durable receipt model, making sync work replay-safe and auditable without ambiguous legacy fallback behavior.
+
+## August 16
+
+### Workspace-scoped MCP tokens
+
+**New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. PlainRouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/actions/workspace-tokens).
+
+### Policy changes joined the audit chain
+
+**Improved** · Workspace action-policy changes are now recorded atomically in the recomputable audit chain alongside proposals, approvals, executions, and token lifecycle events. [Learn about the audit log](/actions/audit-log).
