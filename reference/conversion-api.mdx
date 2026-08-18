@@ -1,0 +1,106 @@
+---
+title: "Conversion API and client tooling"
+description: "Use the REST API, signed OpenAPI contract, generated SDKs, and command-line clients for Signals operations."
+---
+
+PlainRouter exposes a server-side Signals Conversion API at `https://plainrouter.com/api/v1`. The signed OpenAPI contract describes the same operations used by generated SDKs and command-line clients.
+
+## Choose an interface
+
+| Interface | Use it when |
+| --- | --- |
+| REST API | You want direct control over HTTP requests and responses. |
+| SDK | You want generated types and methods in application code. |
+| CLI | You want to test an operation or run an operational script from a terminal. |
+| OpenAPI contract | You want to inspect the complete schema or generate another compatible client. |
+
+SDK and CLI distributions can use platform-specific package names and flags. Confirm that your client targets PlainRouter API contract `0.2.0`, then use its built-in help for installation-specific syntax.
+
+## Authenticate
+
+Every request needs the per-Signal tracker secret issued during tracker provisioning:
+
+```http
+Authorization: Bearer YOUR_SIGNAL_TRACKER_SECRET
+Accept: application/json
+Content-Type: application/json
+```
+
+Keep this secret on your server or in your CLI's secure credential store. Never put it in browser code, source control, prompts, or logs.
+
+The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Those credentials authorize agent tools, not a Signal tracker.
+
+## Submit an event
+
+Send a stable `event_id` so retries are idempotent. Money values use decimal strings to preserve their exact representation.
+
+```bash
+curl https://plainrouter.com/api/v1/events \
+  --request POST \
+  --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "event_id": "order-123",
+    "event_name": "Purchase",
+    "event_time": 1786272000,
+    "event_source": "https://shop.example/thank-you",
+    "action_source": "website",
+    "value_data": {
+      "value": "49.90",
+      "currency": "EUR",
+      "order_id": "order-123"
+    }
+  }'
+```
+
+A new event returns HTTP `202`. A retry with the same event ID returns HTTP `200` with `duplicate: true`.
+
+```json
+{
+  "event_id": "order-123",
+  "duplicate": false
+}
+```
+
+For browser consent and visitor joins, see [Track events and consent](/signals/track-events).
+
+## Available operations
+
+SDKs and CLI clients derive their method and command names from these semantic operation IDs:
+
+| Operation ID | Method and path | Purpose |
+| --- | --- | --- |
+| `createEvent` | `POST /events` | Submit an idempotent conversion event. |
+| `getEvent` | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
+| `listEvents` | `GET /dashboard/events` | List recent events and delivery metrics. |
+| `setDestinationTestMode` | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |
+| `sendTestPurchase` | `POST /destinations/{destination}/test-purchase` | Send a controlled test purchase. |
+| `replayDeliveries` | `POST /deliveries/replay` | Replay eligible recent deliveries. |
+| `getReconciliationReport` | `GET /reports/reconciliation` | Retrieve reconciliation results for a date. |
+| `getEmqReport` | `GET /reports/emq` | Retrieve recent Event Match Quality snapshots. |
+| `deleteUserData` | `DELETE /user-data` | Delete data matching a hashed user identifier. |
+
+Resource IDs remain scoped to the authenticated Signal tracker. A client cannot use its secret to read another tracker's events or destinations.
+
+## Use the signed OpenAPI contract
+
+Download or import the canonical contract from:
+
+```text
+https://plainrouter.com/openapi.json
+```
+
+The document uses OpenAPI `3.1.0`, publishes API version `0.2.0`, and includes `x-signed: true`. PlainRouter serves the reviewed bytes with an ETag so automated tooling can detect a new contract without downloading an unchanged document.
+
+Generate clients only from a signed document. Pin the generated SDK or CLI version in production and review contract changes before updating it.
+
+## Handle errors
+
+| Status | Meaning |
+| --- | --- |
+| `401` | The tracker secret is missing or invalid. |
+| `404` | The requested event or destination does not belong to this tracker. |
+| `422` | Request validation failed. |
+| `502` | Meta did not accept a controlled test purchase. |
+
+Validation responses include a message and field-level errors. Treat `401` as a stopped credential and avoid retrying it indefinitely.
