@@ -12,8 +12,8 @@ Signals is PlainRouter's first-party conversion measurement layer. It receives w
 ## How data moves
 
 <Steps>
-  <Step title="The browser records an event">
-    The Signals pixel sends an automatic `PageView`. Your site can also call `signalq("track", ...)` for purchases, leads, checkouts, and custom events.
+  <Step title="Your server or browser records an event">
+    Your server can use the Conversion API. The optional Signals pixel can send browser events such as purchases, leads, checkouts, and custom events.
   </Step>
   <Step title="Your collection domain receives it">
     Requests go to a first-party hostname such as `collect.example.com`. PlainRouter validates the publishable key and website origin before accepting the event.
@@ -45,15 +45,17 @@ Signals is PlainRouter's first-party conversion measurement layer. It receives w
 
 ## Consent behavior
 
-Signals separates anonymous measurement from advertising delivery:
+Signals applies consent before browser measurement or advertising delivery:
 
 | Consent | Collection behavior | Identifier behavior | Destination delivery |
 | --- | --- | --- | --- |
-| `pending` | Records anonymous events. | Does not write or send visitor, user, or click identifiers. | Skipped. |
+| `pending` | Does not accept browser measurement events. | Does not write or send visitor, user, or click identifiers. | Skipped. |
 | `granted` | Records events. | Creates first-party identifiers and includes permitted hashed identity and click data. | Eligible for connected destinations. |
-| `denied` | Records anonymous events. | Clears PlainRouter identifiers and excludes identity data. | Skipped. |
+| `denied` | Does not accept browser measurement events. | Clears PlainRouter identifiers and excludes identity data. | Skipped. |
 
 Connect your consent-management platform by calling `signalq("consent", state)` whenever the visitor's choice changes. See [Track events and consent](/signals/track-events) for examples.
+
+Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. PlainRouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
 
 ## Browser and server deduplication
 
@@ -68,7 +70,10 @@ Do not keep a separate Pixel or CAPI integration sending the same events to the 
     Connect a first-party collection hostname.
   </Card>
   <Card title="Install the pixel" icon="code" href="/signals/install-pixel">
-    Add the generated v2 snippet to every page.
+    Add optional, consent-aware browser measurement.
+  </Card>
+  <Card title="Verify ingestion" icon="badge-check" href="/signals/verify-ingestion">
+    Complete activation through the API or MCP.
   </Card>
   <Card title="Track events" icon="mouse-pointer-click" href="/signals/track-events">
     Add consent, identity, and conversion events.

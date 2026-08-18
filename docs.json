@@ -34,6 +34,7 @@
             "pages": [
               "signals/overview",
               "signals/configure-dns",
+              "signals/verify-ingestion",
               "signals/install-pixel",
               "signals/track-events",
               "signals/connect-meta",
@@ -106,6 +107,7 @@
         "pages": [
           "reference/conversion-api",
           "POST /events",
+          "POST /verification-events",
           "GET /events/{event}",
           "GET /dashboard/events",
           "PATCH /destinations/{destination}/test-mode",

@@ -1,9 +1,13 @@
 ---
 title: "Install the Signals pixel"
-description: "Add the PlainRouter Signals pixel to your website and verify the installation."
+description: "Add optional, consent-aware browser measurement to your website."
 ---
 
 The Signals pixel collects first-party browser events through your collection domain. PlainRouter gives each signal tracker a unique snippet with its publishable key and collection URL.
+
+<Info>
+  The pixel is not required to activate a Signal. Complete [server-side ingestion verification](/signals/verify-ingestion) first, then install the pixel only where your consent policy permits it.
+</Info>
 
 ## Before you begin
 
@@ -19,7 +23,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 
 <Steps>
   <Step title="Copy your snippet">
-    Open **Signals**, continue setup, and find **Set up Signals pixel**.
+    Open **Signals**, continue setup, and find **Optional browser confirmation**.
 
     Click **Copy code**. Use the complete snippet exactly as PlainRouter provides it. Its key and script URL are unique to your signal tracker.
   </Step>
@@ -43,7 +47,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   <Step title="Deploy and visit your site">
     Publish the change, then open any page on the connected website.
 
-    The pixel sends an anonymous, cookieless `PageView` when it loads. PlainRouter detects this event and completes setup automatically.
+    After your consent integration supplies `granted`, track a test event and use the network checks below to confirm the pixel loads and sends it.
   </Step>
 </Steps>
 
@@ -53,19 +57,19 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 
 ## Verify the installation
 
-If setup does not complete, open your browser's developer tools and reload the page:
+To test browser collection, open your browser's developer tools and reload the page:
 
 1. Select the **Network** tab.
 2. Search for `v2.js` and confirm it loads from your collection domain.
-3. Search for `events` and confirm the browser sends a request to `/v1/events` on the same domain.
+3. Grant consent through your integration, track a test event, then search for `events` and confirm the browser sends a request to `/v1/events` on the same domain.
 
 Both requests should return a successful `2xx` response.
 
 ## What happens on initialization
 
-`signalq("init", ...)` sends an anonymous, cookieless `PageView`. This verifies installation without waiting for advertising consent.
+`signalq("init", ...)` initializes browser collection. Browser events require `consent_basis: consent` and granted terminal-storage, advertising-user-data, and advertising-personalization state. While consent is pending or denied, browser measurement events are not accepted.
 
-The event excludes visitor IDs, user data, click IDs, and URL query strings while consent is pending. It is stored for measurement but is not delivered to Meta.
+The browser flow is not the authoritative activation check. Use the identity-free server verification event for setup.
 
 <Note>
   The generated snippet uses `signalq`. Do not rename it to `signal`; the v2 bundle intentionally exposes only the collision-resistant `signalq` global.
@@ -96,9 +100,9 @@ You may need to allow `https://connect.facebook.net` in `script-src` after you [
 - Confirm you installed the snippet on a domain allowed by the signal tracker.
 - Confirm the publishable key and script URL came from the same PlainRouter snippet.
 
-### Setup still shows as incomplete
+### Signal setup still shows as incomplete
 
-Visit a live page where the new snippet is present. Preview environments, cached pages, and pages on a different domain do not verify the production signal tracker.
+The browser pixel does not complete activation. Send the server verification event described in [Verify Signal ingestion](/signals/verify-ingestion), and confirm the collection hostname is active.
 
 ## Next step
 

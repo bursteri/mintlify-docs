@@ -1,15 +1,16 @@
 ---
 title: "MCP tools"
-description: "Reference for the seven account-scoped tools exposed by the PlainRouter MCP server."
+description: "Reference for the eight account-scoped tools exposed by the PlainRouter MCP server."
 ---
 
-PlainRouter MCP server version `0.3.0` exposes exactly seven tools. All use the advertising account selected by the person during OAuth authorization or workspace-token issuance.
+PlainRouter MCP server version `0.3.0` exposes exactly eight tools. All use the advertising account selected by the person during OAuth authorization or workspace-token issuance.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation from stored measurements. |
 | `get_performance` | Read-only, idempotent | Read a 1–90 day stored gateway-versus-Meta comparison. |
+| `verify_signal_ingestion` | Idempotent verification write | Write one identity-free verification event and confirm ledger receipt. |
 | `propose-actions` | Idempotent write to PlainRouter | Submit an evidence-backed recommendation to policy and approval. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
@@ -21,7 +22,7 @@ PlainRouter MCP server version `0.3.0` exposes exactly seven tools. All use the 
 
 ## Shared authorization and scope
 
-Signals read tools require an active principal with `ad-account.read`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
+Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
 
 Clients can authenticate through OAuth or with an owner-issued [workspace token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. Authentication does not change any MCP tool input or output.
 
@@ -131,6 +132,23 @@ The response includes:
 ```
 
 Possible non-measurable reasons are `no_history` and `stale_history`. When `quantitative_citations_allowed` is false, an agent must not cite count, gap, alignment, alert-day, daily, or by-event values as proposal evidence.
+
+## `verify_signal_ingestion`
+
+Use this tool when an active Signal is waiting for its authoritative server-side onboarding check. It accepts no input and resolves the Signal from the authorized workspace.
+
+The tool writes one idempotent `signal_verification` event and returns:
+
+```json
+{
+  "event_id": "signal_verification",
+  "duplicate": false
+}
+```
+
+The event is identity-free, modeled, excluded from enforcement, and never dispatched to Meta. A repeated call returns the same event with `duplicate: true`. The tool has no spend capability.
+
+The call fails if the connection lacks `signals.verify` or the authorized workspace has no active Signal.
 
 ## `propose-actions`
 

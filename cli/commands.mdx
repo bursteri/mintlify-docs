@@ -3,7 +3,7 @@ title: "CLI command reference"
 description: "Reference for PlainRouter CLI authentication, event, destination, delivery, report, and deletion commands."
 ---
 
-The `plainrouter` command wraps all nine operations in the signed Conversion API contract.
+PlainRouter CLI `0.2.0` wraps the nine operations from API contract `0.2.0`. The current signed REST contract is `0.3.1` and also includes ingestion verification, which is not yet a CLI command.
 
 ## Global options
 
@@ -33,7 +33,7 @@ The CLI resolves configuration in this order:
 ## Events
 
 ```bash
-plainrouter events create --data '{"event_name":"Purchase","event_id":"order-123"}'
+plainrouter events create --data '{"event_name":"Purchase","event_id":"order-123","consent_basis":"consent","consent":{"ad_storage":"granted","ad_user_data":"granted","ad_personalization":"granted"}}'
 plainrouter events get order-123
 plainrouter events list --per-page 25
 ```

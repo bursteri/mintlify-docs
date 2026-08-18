@@ -1,0 +1,83 @@
+---
+title: "Verify Signal ingestion"
+description: "Complete Signal activation with the identity-free server verification event."
+---
+
+After your collection hostname becomes active, PlainRouter requires one server-side verification event to confirm that Signal ingestion works end to end. Browser pixel traffic does not complete this activation check.
+
+<Card title="What the verification does" icon="badge-check">
+  It writes one idempotent, identity-free `signal_verification` event to the authorized Signal ledger. It does not contact Meta, enter attribution or enforcement, or create spend.
+</Card>
+
+## Before you begin
+
+You need:
+
+- An active collection hostname.
+- Either the Signal tracker secret for REST authentication or an MCP connection with `signals.verify`.
+
+## Verify with the REST API
+
+Send an authenticated request with no body:
+
+```bash
+curl https://plainrouter.com/api/v1/verification-events \
+  --request POST \
+  --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
+  --header "Accept: application/json"
+```
+
+A new verification returns HTTP `202`:
+
+```json
+{
+  "event_id": "signal_verification",
+  "duplicate": false
+}
+```
+
+Repeating the request is safe. It returns HTTP `200` with `duplicate: true` and does not create another ledger event.
+
+<Warning>
+  Keep the tracker secret on your server. Never put it in browser code, a URL, source control, a prompt, or a log.
+</Warning>
+
+## Verify with MCP
+
+If you already have an authorized PlainRouter MCP connection, ask the client to call:
+
+```text
+verify_signal_ingestion
+```
+
+The tool accepts no input. It uses the Signal in the authorized workspace and returns the same `event_id` and `duplicate` fields as the REST endpoint.
+
+The connection needs the `signals.verify` permission. Read-tier workspace tokens include this permission. See [Connect an AI agent](/actions/connect-agent) or [Workspace tokens](/actions/workspace-tokens).
+
+## Confirm activation
+
+PlainRouter polls setup progress automatically. Once the verification event is present and the collection hostname remains active, the setup screen completes.
+
+You can then:
+
+- [Install the optional Signals pixel](/signals/install-pixel) for consent-aware browser measurement.
+- [Submit server conversion events](/reference/conversion-api).
+- [Connect Meta](/signals/connect-meta) for eligible destination delivery.
+
+## Troubleshoot
+
+### The API returns `401`
+
+The Signal tracker secret is missing, invalid, or belongs to another environment. Confirm the bearer header and replace a stopped credential.
+
+### MCP reports insufficient permission
+
+Reconnect with `signals.verify`, or issue a new workspace token with the Read tier or higher.
+
+### MCP cannot find an active Signal
+
+Confirm that the authorized workspace is the workspace containing the Signal and that its collection hostname has completed validation.
+
+### Setup still does not complete
+
+Confirm the collection hostname is still **Active**, then repeat the idempotent verification request. Installing or visiting the browser pixel does not replace this server-side check.

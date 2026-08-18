@@ -22,9 +22,9 @@ Supported values are `pending`, `granted`, and `denied`.
   Do not infer consent. Keep the state `pending` until your consent-management platform has an explicit choice.
 </Warning>
 
-While consent is pending or denied, PlainRouter records anonymous events. They exclude visitor IDs, user data, click IDs, and URL query strings. At the collection edge, PlainRouter also removes the client IP and user agent before it queues the event. It can retain coarse country and collection-hostname context for measurement. PlainRouter does not send these events to connected advertising destinations.
+While consent is pending or denied, PlainRouter does not accept browser measurement events. It does not write or send visitor, user, click, IP, or user-agent identifiers from those events.
 
-Granting consent creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denying consent removes PlainRouter's visitor and click identifiers from cookies and local storage.
+Granting consent creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denying consent removes PlainRouter's visitor and click identifiers from cookies and local storage. Send the latest state whenever the visitor's choice changes.
 
 ## Track an event
 

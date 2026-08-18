@@ -12,7 +12,7 @@ The page refreshes its stored measurements about once per minute. Opening it doe
 | State | Meaning | What to do |
 | --- | --- | --- |
 | **Setup required** | The Signal or first-party hostname is not fully active. | Finish CNAME and HTTPS validation. |
-| **Awaiting data** | Setup is active, but PlainRouter has not received an event. | Install the pixel and visit the live site. |
+| **Awaiting data** | Setup is active, but PlainRouter has not received a measurement event. | Send a server event or install the optional pixel and visit the live site. |
 | **Measurement pending** | Events are arriving, but delivery, EMQ, or reconciliation measurements are incomplete. | Allow the first measurement cycles to complete and watch diagnostics. |
 | **Needs attention** | At least one warning or critical diagnostic is active. | Open **Diagnostics** and address each item. |
 | **Healthy** | Event flow exists and all required recent measurement categories are present without warnings. | Continue monitoring. |
@@ -81,7 +81,7 @@ Diagnostics explain the state behind the summary. Common messages include:
 | Diagnostic | Meaning |
 | --- | --- |
 | **Collection setup is incomplete** | The Signal or collection certificate is not active. |
-| **Waiting for the first event** | The pixel has not produced an event yet. |
+| **Waiting for the first event** | No server or browser measurement event has arrived yet. |
 | **No events received in 24 hours** | Historical events exist, but recent collection stopped. |
 | **Meta comparison is not active** | No active Meta destination is connected. |
 | **Delivery measurement pending** | Events exist, but no recent delivery outcome exists. |

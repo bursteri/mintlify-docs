@@ -7,6 +7,10 @@ The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` comm
 
 The current npm release is `0.2.0`. Review release notes before upgrading while the CLI remains in the `0.x` series.
 
+<Warning>
+  CLI `0.2.0` targets API contract `0.2.0`. Its raw `events create --data` input can send the now-required consent fields, but it does not include the new Signal verification command. Use `POST /verification-events` or MCP for activation.
+</Warning>
+
 ## Requirements
 
 - Node.js `22.22.2` or later in the Node 22 release line.

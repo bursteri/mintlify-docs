@@ -49,6 +49,7 @@ For creative-library reads, the Meta connection needs `ads_read` or `ads_managem
 | Permission | Allows |
 | --- | --- |
 | `ad-account.read` | Read the approved account and its PlainRouter Signals context. |
+| `signals.verify` | Write the identity-free, consent-safe Signal verification event used for onboarding. |
 | `actions.propose` | Submit actions through workspace policy and the approval pipeline. |
 | `creative.read` | Read the approved Meta account's creative library. |
 | `creative.write` | Stage creative assets and propose creative changes. It does not bypass `actions.propose`. |
@@ -64,9 +65,10 @@ The agent cannot supply another account ID to widen access. Creative tools reche
 For Signals analysis:
 
 1. `get_account_state`
-2. `get_signal_health`
-3. `get_performance` when stored reconciliation is relevant
-4. `propose-actions` only after the evidence and human-supplied target are clear
+2. `verify_signal_ingestion` if Signal activation is still waiting for its server-side check
+3. `get_signal_health`
+4. `get_performance` when stored reconciliation is relevant
+5. `propose-actions` only after the evidence and human-supplied target are clear
 
 For a creative variant:
 
