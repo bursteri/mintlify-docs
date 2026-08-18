@@ -1,0 +1,90 @@
+---
+title: "CLI quickstart"
+description: "Install the PlainRouter CLI, store a Signal tracker token, and run your first command."
+---
+
+The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` command. Every API command delegates to the matching operation in `@plainrouter/sdk`.
+
+<Warning>
+  The CLI is a `0.x` preview and is not yet published to npm. Prepare your workflow now, but run the install command only after PlainRouter announces the first package release.
+</Warning>
+
+## Requirements
+
+- Node.js `22.22.2` or later in the Node 22 release line.
+- A per-Signal tracker secret.
+
+## Install
+
+After the first npm release:
+
+```bash
+npm install --global @plainrouter/cli
+```
+
+Confirm the command is available:
+
+```bash
+plainrouter --version
+plainrouter --help
+```
+
+## Sign in with a tracker token
+
+Run the interactive login command:
+
+```bash
+plainrouter auth login
+```
+
+Paste the tracker token at the hidden prompt. The CLI stores it in `$XDG_CONFIG_HOME/plainrouter/config.json`. When `XDG_CONFIG_HOME` is unset, it uses `~/.config/plainrouter/config.json`.
+
+The CLI creates the directory with mode `0700` and the configuration file with mode `0600`.
+
+Check the active credential without printing it:
+
+```bash
+plainrouter auth status
+```
+
+The status output shows only the token's final four characters and its source.
+
+## Run your first command
+
+List recent events and delivery metrics:
+
+```bash
+plainrouter events list
+```
+
+Request machine-readable output for scripts:
+
+```bash
+plainrouter events list --per-page 25 --json
+```
+
+Without `--json`, the CLI prints a human-readable summary or table.
+
+## Use an environment variable
+
+For CI or an ephemeral shell, inject the token through your secret manager:
+
+```bash
+export PLAINROUTER_TOKEN="YOUR_SIGNAL_TRACKER_SECRET"
+plainrouter reports emq --json
+unset PLAINROUTER_TOKEN
+```
+
+`PLAINROUTER_TOKEN` takes precedence over a stored token. The CLI intentionally has no `--token` option, which helps keep credentials out of shell history and process listings.
+
+## Sign out
+
+Remove the stored configuration:
+
+```bash
+plainrouter auth logout
+```
+
+This command does not revoke or rotate the Signal tracker secret. It only removes the local file.
+
+See the [CLI command reference](/cli/commands) for every supported operation.

@@ -1,0 +1,88 @@
+---
+title: "TypeScript SDK"
+description: "Use the generated @plainrouter/sdk client and Zod schemas with the Signals Conversion API."
+---
+
+`@plainrouter/sdk` is the generated TypeScript client for the signed PlainRouter OpenAPI contract. It exposes typed request and response models, API methods, and Zod schemas for all nine Conversion API operations.
+
+<Warning>
+  The SDK is a `0.x` preview and is not yet published to npm. Prepare your integration now, but run the install command only after PlainRouter announces the first package release.
+</Warning>
+
+## Requirements
+
+- Node.js `22.22.2` or later in the Node 22 release line.
+- A per-Signal tracker secret.
+- Server-side code. Do not use the tracker secret in a browser bundle.
+
+## Install
+
+After the first npm release:
+
+```bash
+npm install @plainrouter/sdk
+```
+
+## Configure the client
+
+Configure the shared client once when your server starts:
+
+```ts
+import {
+  configurePlainrouter,
+  listEvents,
+} from "@plainrouter/sdk";
+
+configurePlainrouter({
+  signalTrackerSecret: process.env.PLAINROUTER_TOKEN!,
+});
+
+const result = await listEvents({
+  query: { per_page: 25 },
+});
+
+if (result.error) {
+  console.error(result.error);
+} else {
+  console.log(result.data);
+}
+```
+
+The client sends the tracker secret as a bearer token. It does not read credentials from the environment automatically.
+
+## Configure another API origin
+
+The default API base URL is `https://plainrouter.com/api/v1`. Override it only for a PlainRouter-provided region or a controlled test environment:
+
+```ts
+configurePlainrouter({
+  baseUrl: "https://example.test/api/v1",
+  signalTrackerSecret: process.env.PLAINROUTER_TOKEN!,
+});
+```
+
+You can also inject a compatible `fetch` implementation through the same configuration object.
+
+## Available methods
+
+| Method | Purpose |
+| --- | --- |
+| `createEvent` | Submit an idempotent conversion event. |
+| `getEvent` | Retrieve an event, lineage, and delivery state. |
+| `listEvents` | List recent events and delivery metrics. |
+| `setDestinationTestMode` | Enable or disable destination test mode. |
+| `sendTestPurchase` | Send a controlled test purchase. |
+| `replayDeliveries` | Replay eligible recent deliveries. |
+| `getReconciliationReport` | Retrieve reconciliation results for a date. |
+| `getEmqReport` | Retrieve recent Event Match Quality snapshots. |
+| `deleteUserData` | Delete data matching a hashed identifier. |
+
+The package also exports the generated TypeScript models and Zod schemas. Use the schemas when you need runtime validation at an application boundary.
+
+## Handle credentials safely
+
+The SDK accepts only a Signal tracker secret for Conversion API calls. It does not accept an MCP OAuth token or workspace token.
+
+Keep the secret in a server-side secret manager. Never include it in client-side JavaScript, prompts, URLs, logs, or source control.
+
+For request and response fields, use the [API reference](/reference/conversion-api).

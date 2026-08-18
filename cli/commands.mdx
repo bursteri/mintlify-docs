@@ -1,0 +1,104 @@
+---
+title: "CLI command reference"
+description: "Reference for PlainRouter CLI authentication, event, destination, delivery, report, and deletion commands."
+---
+
+The `plainrouter` command wraps all nine operations in the signed Conversion API contract.
+
+## Global options
+
+| Option | Purpose |
+| --- | --- |
+| `--json` | Print the API response as formatted JSON. |
+| `--help` | Show help for the current command. |
+| `--version` | Print the CLI version. |
+
+You can place `--json` on any API command. Authentication commands also support it.
+
+## Authentication
+
+| Command | Purpose |
+| --- | --- |
+| `plainrouter auth login` | Prompt for and store a Signal tracker token. |
+| `plainrouter auth status` | Show the masked credential source and API base URL. |
+| `plainrouter auth logout` | Remove the stored local configuration. |
+
+The CLI resolves configuration in this order:
+
+1. `PLAINROUTER_TOKEN` for authentication.
+2. `PLAINROUTER_BASE_URL` for the API origin.
+3. The token and `baseUrl` in the local configuration file.
+4. The production base URL, `https://plainrouter.com/api/v1`.
+
+## Events
+
+```bash
+plainrouter events create --data '{"event_name":"Purchase","event_id":"order-123"}'
+plainrouter events get order-123
+plainrouter events list --per-page 25
+```
+
+| Command | Options |
+| --- | --- |
+| `events create` | Required `--data <json>` request object. |
+| `events get <id>` | Event ID as the positional argument. |
+| `events list` | Optional `--per-page <count>`. |
+
+Use a stable event ID when creating an event so retries remain idempotent.
+
+## Destination test operations
+
+```bash
+plainrouter destinations test-mode DESTINATION_ID --on --test-event-code TEST42
+plainrouter destinations test-mode DESTINATION_ID --off
+plainrouter destinations test-purchase DESTINATION_ID --value 25.00 --currency USD --order-id order-123
+```
+
+`destinations test-mode` requires exactly one of `--on` or `--off`. The test purchase accepts optional `--value`, `--currency`, and `--order-id` values.
+
+## Replay deliveries
+
+```bash
+plainrouter deliveries replay \
+  --delivery-id 7 \
+  --delivery-id 9 \
+  --event-name Purchase \
+  --limit 50
+```
+
+Repeat `--delivery-id` to select multiple deliveries. You can also filter by event name and cap the number of deliveries evaluated.
+
+## Reports
+
+```bash
+plainrouter reports reconciliation --date 2026-08-18
+plainrouter reports emq
+```
+
+The reconciliation date must use `YYYY-MM-DD` format.
+
+## Delete user data
+
+```bash
+plainrouter user-data delete \
+  --type email \
+  --hash HASHED_IDENTIFIER
+```
+
+The identifier type is `email`, `phone`, or `external_id`. The command asks for confirmation before sending the deletion request.
+
+Use `--yes` only in an automation that has already applied an equivalent confirmation gate:
+
+```bash
+plainrouter user-data delete \
+  --type email \
+  --hash HASHED_IDENTIFIER \
+  --yes \
+  --json
+```
+
+## Handle errors
+
+The CLI writes errors to standard error and exits with status `1`. Validation errors include field-level details when the API returns them.
+
+A `401` response means the tracker token is missing, invalid, or no longer active. Stop retrying and replace the credential.

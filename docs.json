@@ -18,49 +18,102 @@
     "library": "lucide"
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Get started",
-        "pages": [
-          "index",
-          "quickstart"
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "index",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Signals",
+            "pages": [
+              "signals/overview",
+              "signals/configure-dns",
+              "signals/install-pixel",
+              "signals/track-events",
+              "signals/connect-meta",
+              "signals/health-and-performance"
+            ]
+          },
+          {
+            "group": "Launcher",
+            "pages": [
+              "launcher/connect-drive"
+            ]
+          },
+          {
+            "group": "Actions",
+            "pages": [
+              "actions/overview",
+              "actions/creative-workflow",
+              "actions/review-proposals",
+              "actions/policies-and-safety",
+              "actions/audit-log"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/statuses-and-terms"
+            ]
+          }
         ]
       },
       {
-        "group": "Signals",
-        "pages": [
-          "signals/overview",
-          "signals/configure-dns",
-          "signals/install-pixel",
-          "signals/track-events",
-          "signals/connect-meta",
-          "signals/health-and-performance"
+        "tab": "MCP",
+        "groups": [
+          {
+            "group": "Connect",
+            "pages": [
+              "actions/connect-agent",
+              "actions/workspace-tokens"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/mcp-tools"
+            ]
+          }
         ]
       },
       {
-        "group": "Launcher",
-        "pages": [
-          "launcher/connect-drive"
+        "tab": "SDK & CLI",
+        "groups": [
+          {
+            "group": "TypeScript SDK",
+            "pages": [
+              "sdk/typescript"
+            ]
+          },
+          {
+            "group": "CLI",
+            "pages": [
+              "cli/quickstart",
+              "cli/commands"
+            ]
+          }
         ]
       },
       {
-        "group": "Actions",
-        "pages": [
-          "actions/overview",
-          "actions/connect-agent",
-          "actions/workspace-tokens",
-          "actions/creative-workflow",
-          "actions/review-proposals",
-          "actions/policies-and-safety",
-          "actions/audit-log"
-        ]
-      },
-      {
-        "group": "Developer reference",
+        "tab": "API reference",
+        "openapi": "https://plainrouter.com/openapi.json",
         "pages": [
           "reference/conversion-api",
-          "reference/mcp-tools",
-          "reference/statuses-and-terms"
+          "POST /events",
+          "GET /events/{event}",
+          "GET /dashboard/events",
+          "PATCH /destinations/{destination}/test-mode",
+          "POST /destinations/{destination}/test-purchase",
+          "POST /deliveries/replay",
+          "GET /reports/reconciliation",
+          "GET /reports/emq",
+          "DELETE /user-data"
         ]
       }
     ],
