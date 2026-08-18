@@ -26,7 +26,8 @@
             "group": "Get started",
             "pages": [
               "index",
-              "quickstart"
+              "quickstart",
+              "changelog"
             ]
           },
           {
