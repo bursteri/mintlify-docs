@@ -1,9 +1,9 @@
 ---
 title: "MCP tools"
-description: "Reference for the eight account-scoped tools exposed by the PlainRouter MCP server."
+description: "Reference for the nine account-scoped tools exposed by the PlainRouter MCP server."
 ---
 
-PlainRouter MCP server version `0.3.0` exposes exactly eight tools. All use the advertising account selected by the person during OAuth authorization or workspace-token issuance.
+PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the advertising account selected by the person during authorization or workspace-token issuance.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -15,6 +15,7 @@ PlainRouter MCP server version `0.3.0` exposes exactly eight tools. All use the 
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a permanently paused copy of a source Meta ad with a selected asset. |
+| `launcher.draft_batch` | Non-destructive PlainRouter write | Create a Launcher draft batch from already-synced Drive assets. |
 
 <Warning>
   Proposal-producing tools do not write to Meta during the MCP request. In **Suggest only**, approval ends without execution. In an executable mode, supported creative work can run only after the policy and approval pipeline authorizes it.
@@ -25,6 +26,8 @@ PlainRouter MCP server version `0.3.0` exposes exactly eight tools. All use the 
 Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
 
 Clients can authenticate through OAuth or with an owner-issued [workspace token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. Authentication does not change any MCP tool input or output.
+
+`launcher.draft_batch` is the exception to the shared authentication surface. It requires an owner-issued workspace execution token with the Write or Admin tier and does not accept an OAuth principal.
 
 Scoped responses identify:
 
@@ -149,6 +152,41 @@ The tool writes one idempotent `signal_verification` event and returns:
 The event is identity-free, modeled, excluded from enforcement, and never dispatched to Meta. A repeated call returns the same event with `duplicate: true`. The tool has no spend capability.
 
 The call fails if the connection lacks `signals.verify` or the authorized workspace has no active Signal.
+
+## `launcher.draft_batch`
+
+This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the PlainRouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
+
+It requires an owner-issued [workspace token](/actions/workspace-tokens) with the **Write** or **Admin** tier.
+
+### Input
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `source_adset_id` | Yes | Numeric Meta ad set ID used as the duplication or destination template. |
+| `source_ad_id` | Yes | Numeric Meta ad ID used as the creative template. |
+| `mode` | Yes | `duplicate_adset`, `duplicate_adset_per_media`, or `add_to_adset`. |
+| `folder_to_adset` | No | Map each source folder to its own ad set. Defaults to `false`. |
+| `grouping_enabled` | No | Select current placement groups together. Defaults to `true`. |
+| `items` | Yes | One or more ordered items containing an already-synced `drive_link` and optional copy or link overrides. |
+
+Overrides use contract version `v: 1` and can contain up to five `primary_texts`, `headlines`, and `descriptions`, plus `website_url` and `display_link`.
+
+Workspace and account IDs are never accepted as input. PlainRouter derives them from the execution token. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
+
+### Output
+
+The response includes the draft batch ID and status, frozen tier and capacity limits, item and media counts, accepted items, bounded rejected-item reason codes, import provenance when present, and an advisory gate result.
+
+Possible rejection codes are:
+
+- `drive_asset_unresolved`
+- `overrides_invalid`
+- `overrides_limit_exceeded`
+- `batch_limit_exceeded`
+- `media_limit_exceeded`
+
+The current MCP entry point returns an advisory gate with `not_evaluated`. Treat the result as a draft, not authorization to execute.
 
 ## `propose-actions`
 

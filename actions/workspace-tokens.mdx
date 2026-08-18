@@ -14,7 +14,7 @@ Only the workspace owner can issue, rotate, or revoke workspace tokens. A client
 | OAuth | Your MCP client supports remote HTTP servers and OAuth discovery. | PlainRouter issues short-lived access tokens with refreshable authorization. |
 | Workspace token | Your client or automation can send a fixed bearer token. | You choose a 30, 90, or 365 day expiry and rotate the credential explicitly. |
 
-Both methods create an account-bound agent principal and use the same MCP tools, policy checks, approval flow, receipts, verification, and audit chain.
+Both methods create an account-bound agent principal and share the Signals, creative, and proposal tools. `launcher.draft_batch` is intentionally workspace-token only and requires the Write or Admin execution tier.
 
 ## Issue a token
 
@@ -51,7 +51,7 @@ Authorization: Bearer <workspace-token>
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
 | **Read** | `workspace:read` | Read account, Signals, and creative context, and submit the consent-safe Signal verification event. |
-| **Write** | `workspace:read`, `workspace:write` | Includes read access and can submit governed action and creative proposals. |
+| **Write** | `workspace:read`, `workspace:write` | Includes read access, can submit governed action and creative proposals, and can create Launcher draft batches. |
 | **Admin** | `workspace:read`, `workspace:write`, `workspace:admin` | Uses the same MCP tools as **Write** and can manage token lifecycle and workspace provisioning through authorized APIs. |
 
 No tier grants wildcard access. **Write** and **Admin** do not bypass action policy, human approval, provider verification, or account restrictions. Proposal-producing MCP tools still create governed proposals rather than direct Meta writes.

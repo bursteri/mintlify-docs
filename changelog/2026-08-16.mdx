@@ -1,0 +1,35 @@
+---
+title: "Workspace tokens and complete policy audit"
+description: "Owner-managed MCP credentials and durable audit evidence for policy changes."
+---
+
+August 16, 2026
+
+We shipped owner-managed workspace tokens for MCP clients and closed the audit gap around workspace policy changes.
+
+## MCP clients can use workspace-scoped tokens
+
+Workspace owners can issue a fixed bearer credential when an MCP client or automation cannot complete interactive OAuth.
+
+Every token is bound to one workspace and one active Meta ad account. Owners choose a Read, Write, or Admin tier and a 30, 90, or 365 day expiry. Tokens can be rotated or revoked without widening their original account scope.
+
+PlainRouter shows the plaintext token only once. Lifecycle actions are recorded in the durable audit chain without storing the credential itself.
+
+<Card title="Workspace tokens" icon="key-round" href="/actions/workspace-tokens">
+  Issue, configure, rotate, and revoke account-bound MCP credentials.
+</Card>
+
+## Policy changes now enter the audit chain
+
+Changes to workspace action policy are now recorded atomically with the policy update. The audit record uses the same recomputable v2 chain as proposals, approvals, executions, and token lifecycle events.
+
+This closes a visibility gap: an operator can now trace both the action decision and the policy posture that governed it without relying on a mutable application log.
+
+<CardGroup cols={2}>
+  <Card title="Audit log" icon="scroll-text" href="/actions/audit-log">
+    See what PlainRouter records and how integrity is verified.
+  </Card>
+  <Card title="Policies and safety" icon="shield" href="/actions/policies-and-safety">
+    Understand the controls applied before governed execution.
+  </Card>
+</CardGroup>

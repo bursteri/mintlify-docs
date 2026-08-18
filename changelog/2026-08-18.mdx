@@ -1,0 +1,74 @@
+---
+title: "Consent-first Signals"
+description: "Server verification, explicit consent enforcement, safer revenue events, and durable creative media execution."
+---
+
+August 18, 2026
+
+We shipped a consent-first Signals contract, a simpler activation check, safer Stripe revenue handling, and agent-created Launcher draft batches backed by a more durable media pipeline.
+
+## Signal activation no longer depends on a pixel
+
+Signal setup now completes through one authoritative server-side verification event. Use `POST /api/v1/verification-events` with a tracker secret or call the MCP tool `verify_signal_ingestion`.
+
+The check is identity-free and idempotent. It confirms ledger ingestion without contacting Meta, entering attribution or enforcement, or creating spend. The browser pixel remains available for consent-aware browser measurement, but it is optional for activation.
+
+<Card title="Verify Signal ingestion" icon="badge-check" href="/signals/verify-ingestion">
+  Activate a Signal through REST or MCP.
+</Card>
+
+## Consent is enforced before storage and delivery
+
+Every `POST /events` request must now declare `consent_basis` as `consent` or `legitimate_interest`.
+
+- Consented events require granted downstream advertising state.
+- Browser measurement requires granted consent.
+- Legitimate-interest events are limited to approved lifecycle cases and remain severed from advertising attribution.
+- Meta delivery fails closed unless the stored event is consented, observed, joined, and attributed.
+
+<Warning>
+  This is a breaking API change. Server integrations must include the required consent fields when creating events.
+</Warning>
+
+The signed OpenAPI contract is now `0.3.1` and contains ten operations. The published TypeScript SDK and CLI remain at `0.2.0`, so direct REST is currently required for ingestion verification and typed event creation.
+
+<Card title="Review API 0.3.1" icon="braces" href="/reference/conversion-api">
+  See the current consent fields, operations, and client compatibility guidance.
+</Card>
+
+## Stripe purchases now wait for settlement
+
+Stripe Checkout creates a Signals purchase only after Stripe reports an exact `payment_status` of `paid`.
+
+Synchronous payments and asynchronous success are supported. Unpaid, failed, free, missing, unknown, and malformed states do not enter the event ledger, rollups, Meta delivery, or future CPA inputs. Duplicate and out-of-order webhooks converge on one purchase using the Checkout Session ID.
+
+<Card title="Track Stripe settlement" icon="credit-card" href="/signals/track-events">
+  Review the supported settlement and refund behavior.
+</Card>
+
+## Launcher media execution is more durable
+
+Approved creative work now resolves source content, validates media before upload, records append-only provider lifecycle state, and shares a Meta request budget across workers.
+
+Failed validation cannot start a provider upload. Temporary processing states can be polled safely, and exhausted request budgets defer work without starting a Meta request. Existing policy, approval, receipt, and provider-verification gates remain in place.
+
+<Card title="Governed creative workflow" icon="images" href="/actions/creative-workflow">
+  See the currently supported creative path and its safety boundaries.
+</Card>
+
+## Agents can create Launcher draft batches
+
+The PlainRouter MCP server now exposes `launcher.draft_batch`. An agent can turn already-synced Drive assets into a structured Launcher draft for the workspace and ad account bound to its token.
+
+The tool accepts source ad set and ad IDs, a duplication mode, grouping options, and ordered Drive items. It returns the draft batch plus accepted and rejected items, so one invalid asset does not hide the valid work.
+
+This tool requires an owner-issued Write or Admin workspace token. It creates a PlainRouter draft only: it does not write to Meta, evaluate the final execution gate, or activate spend.
+
+<CardGroup cols={2}>
+  <Card title="MCP tool reference" icon="bot" href="/reference/mcp-tools">
+    Review the draft-batch input, output, and token boundary.
+  </Card>
+  <Card title="Workspace tokens" icon="key-round" href="/actions/workspace-tokens">
+    Issue a Write or Admin execution token.
+  </Card>
+</CardGroup>
