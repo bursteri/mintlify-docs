@@ -68,6 +68,10 @@ If verification finds contradictory state or cannot complete inside the safety w
 
 Signals reads provide aggregate account and dataset evidence. They do not prove campaign CPA, spend, budget, learning phase, or target-level performance.
 
+`get_signal_health` is diagnostic and cannot support a proposal containing a budget, status, or creative-spend action. Use `get_performance` for admissible stored reconciliation evidence. A batch is treated as spend-affecting when any action in it can affect spend or delivery; only an upload-only asset proposal may retain signal-health context.
+
+Modeled and portfolio-only events are excluded from reconciliation-derived proposal evidence. PlainRouter does not blend them into observed performance used by governed actions.
+
 Creative-library evidence proves the selected asset's identity, approved-account ownership, readiness, and status. Although the library response includes last-30-day performance, that performance is excluded from the durable proposal citation and cannot be used as a winning-creative claim.
 
 <Note>

@@ -7,6 +7,10 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
 ## August 19
 
+### Spend proposals now require performance evidence
+
+**Improved** · Signal health remains available for diagnostics, but it can no longer support budget, status, creative-spend, or mixed proposals. Agents must use eligible observed reconciliation data from `get_performance`; modeled and portfolio-only events remain outside that evidence path. Upload-only asset proposals keep the narrow non-spend exception. [Review the MCP evidence rules](/reference/mcp-tools#evidence-restrictions).
+
 ### Import Launcher drafts from CSV or XLSX
 
 **New** · Write and Admin workspace tokens can create Launcher drafts through `POST /mcp/launcher/import`. The adapter accepts bounded CSV/XLSX files, reports invalid rows without hiding valid work, resolves only already-synced Drive assets in the token workspace, and deletes staged uploads after parsing. [Read the import guide](/launcher/import-draft-batch).

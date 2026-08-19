@@ -8,8 +8,8 @@ PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the a
 | Tool | Type | Purpose |
 | --- | --- | --- |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
-| `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation from stored measurements. |
-| `get_performance` | Read-only, idempotent | Read a 1–90 day stored gateway-versus-Meta comparison. |
+| `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
+| `get_performance` | Read-only, idempotent | Read the admissible 1–90 day stored gateway-versus-Meta comparison for proposal evidence. |
 | `verify_signal_ingestion` | Idempotent verification write | Write one identity-free verification event and confirm ledger receipt. |
 | `propose-actions` | Idempotent write to PlainRouter | Submit an evidence-backed recommendation to policy and approval. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
@@ -85,9 +85,15 @@ This tool accepts no input. It returns the shared scope plus:
 
 The tool reads `event_ledger`, `delivery_ledger`, `emq_snapshots`, and `reconciliation_reports`. It reports `marketing_api_called: false`.
 
+<Warning>
+  Treat this tool as diagnostic. PlainRouter rejects it as evidence for any proposal that can affect spend or delivery, including a mixed batch containing one such action. Use `get_performance` for stored reconciliation-derived performance evidence.
+</Warning>
+
 ## `get_performance`
 
 Use this tool for a stored reconciliation window.
+
+PlainRouter excludes modeled and portfolio-only events from this proposal-evidence path. Only eligible observed reconciliation data contributes to its performance fields.
 
 ### Input
 
@@ -206,11 +212,10 @@ Each evidence declaration contains:
 
 ```json
 {
-  "source_tool": "get_signal_health",
+  "source_tool": "get_performance",
   "fields_used": [
-    "status",
-    "delivery.acceptance_rate",
-    "diagnostics"
+    "gateway_verified",
+    "alignment_percent"
   ]
 }
 ```
@@ -260,6 +265,10 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 ### Evidence restrictions
 
 PlainRouter rejects evidence paths that claim campaign, ad set, ad, target, CPA, spend, budget, or learning-phase state from aggregate Signals reads.
+
+`get_signal_health` is diagnostic and cannot support a batch containing `adjust_budget`, `set_status`, or `duplicate_ad_with_creative`. This rule applies to the entire batch: adding an `upload_asset` action does not make a mixed spend-affecting proposal eligible. An upload-only `upload_asset` batch is the current non-spend exception and may retain signal-health context.
+
+Use `get_performance` when a spend-affecting proposal needs stored reconciliation-derived performance evidence.
 
 It also rejects:
 
