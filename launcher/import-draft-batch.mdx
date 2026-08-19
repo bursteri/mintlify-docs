@@ -1,0 +1,99 @@
+---
+title: "Import a Launcher draft batch"
+description: "Create a Launcher draft from a CSV or XLSX file of already-synced Drive assets."
+---
+
+Use the file-import adapter when a Launcher draft is easier to prepare in a spreadsheet than as MCP tool arguments. It accepts CSV and XLSX files and creates the same account-bound draft model as `launcher.draft_batch`.
+
+<Warning>
+  Import creates a PlainRouter draft only. It does not write to Meta, evaluate the final execution gate, or activate spend.
+</Warning>
+
+## Before you begin
+
+You need:
+
+- A verified Launcher Drive connection whose inventory has already synced.
+- A Write or Admin [workspace execution token](/actions/workspace-tokens).
+- Numeric source Meta ad set and ad IDs from the account bound to that token.
+
+OAuth management credentials and Read-tier workspace tokens cannot import files.
+
+## Prepare the file
+
+The first row must contain unique supported headers. `drive_link` is required.
+
+| Header | Purpose |
+| --- | --- |
+| `drive_link` | Google Drive link for an already-synced asset. Required on every usable row. |
+| `primary_text` through `primary_text_5` | Up to five primary-text variants. |
+| `headline` through `headline_5` | Up to five headline variants. |
+| `description` through `description_5` | Up to five description variants. |
+| `website_url` | Destination URL override. |
+| `display_link` | Display-link override. |
+
+Example CSV:
+
+```csv
+drive_link,primary_text,headline,website_url
+https://drive.google.com/file/d/FILE_ID/view,Meet the new collection,Shop now,https://example.com/new
+```
+
+For XLSX, PlainRouter reads the first visible worksheet.
+
+## Limits
+
+| Limit | Maximum |
+| --- | --- |
+| File size | 5 MiB |
+| Data rows | 1,000 |
+| Cell size | 2,000 bytes |
+| Projected columns | 19 supported headers |
+
+Duplicate or unknown headers reject the file. Rows with an empty Drive link, an invalid shape, or an oversized cell are reported as syntactic failures. Valid rows can still create a partial draft.
+
+## Send the import
+
+Submit a multipart request to:
+
+```text
+POST https://plainrouter.com/mcp/launcher/import
+```
+
+```bash
+curl https://plainrouter.com/mcp/launcher/import \
+  --request POST \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_TOKEN" \
+  --form "file=@launcher.csv" \
+  --form "source_adset_id=123456789" \
+  --form "source_ad_id=987654321" \
+  --form "mode=duplicate_adset" \
+  --form "folder_to_adset=false" \
+  --form "grouping_enabled=true"
+```
+
+Supported modes are:
+
+- `duplicate_adset`
+- `duplicate_adset_per_media`
+- `add_to_adset`
+
+`folder_to_adset` defaults to `false`; `grouping_enabled` defaults to `true`.
+
+## Read the result
+
+The response contains the draft batch, accepted and rejected items, frozen tier and capacity limits, import provenance, and `syntactic_row_failures`.
+
+PlainRouter resolves every Drive link against already-synced inventory in the token workspace. Unknown, stale, failed, removed, or cross-workspace assets appear in `rejected_items` as `drive_asset_unresolved`.
+
+The import provenance stores the file's SHA-256 identity, format, row count, and import time. The privately staged upload is deleted after parsing, including when the import fails.
+
+## Errors
+
+| Status | Meaning |
+| --- | --- |
+| `401` | The token is invalid, expired, revoked, role-capped, or is an OAuth management credential. |
+| `403` | The workspace token does not have Write or Admin authority. |
+| `422` | Request validation, file format, header, size, row, cell, or zero-valid-row checks failed. |
+
+For direct structured input instead of a file, use [`launcher.draft_batch`](/reference/mcp-tools).

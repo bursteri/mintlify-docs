@@ -5,6 +5,20 @@ description: "PlainRouter product updates shipped in August 2026."
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+## August 19
+
+### Import Launcher drafts from CSV or XLSX
+
+**New** · Write and Admin workspace tokens can create Launcher drafts through `POST /mcp/launcher/import`. The adapter accepts bounded CSV/XLSX files, reports invalid rows without hiding valid work, resolves only already-synced Drive assets in the token workspace, and deletes staged uploads after parsing. [Read the import guide](/launcher/import-draft-batch).
+
+### MCP execution credentials fail closed
+
+**Security** · OAuth management credentials are now rejected by default on MCP and agent-authenticated routes. The read-only agent-context route is the sole discovery exception; MCP tools require an account-bound workspace execution token whose tier is capped by the issuer's current workspace role. [Connect an agent](/actions/connect-agent).
+
+### Actions and operational monitoring are more deterministic
+
+**Improved** · PlainRouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
+
 ## August 18
 
 ### Launcher draft batches arrive in MCP
@@ -14,6 +28,10 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 ### Consent-first Signals and simpler activation
 
 **New** · Signal activation now uses an identity-free server verification event through REST or MCP, making the browser pixel optional for setup. Event ingestion now requires an explicit consent basis and fails closed before ineligible Meta delivery. [See what changed in API 0.3.1](/reference/conversion-api).
+
+### SDKs and CLI ship API 0.3.1
+
+**New** · TypeScript SDK `0.3.1`, Python SDK `0.3.1`, and CLI `0.3.1` are now published. Both SDKs expose all ten signed API operations, including ingestion verification and the consent-aware event contract. [Choose a client](/reference/conversion-api#client-releases).
 
 ### Stripe revenue waits for settlement
 

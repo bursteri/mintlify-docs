@@ -78,7 +78,8 @@
           {
             "group": "Reference",
             "pages": [
-              "reference/mcp-tools"
+              "reference/mcp-tools",
+              "launcher/import-draft-batch"
             ]
           }
         ]
@@ -90,6 +91,12 @@
             "group": "TypeScript SDK",
             "pages": [
               "sdk/typescript"
+            ]
+          },
+          {
+            "group": "Python SDK",
+            "pages": [
+              "sdk/python"
             ]
           },
           {

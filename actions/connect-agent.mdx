@@ -1,6 +1,6 @@
 ---
 title: "Connect an AI agent"
-description: "Connect an MCP-compatible client to one Meta ad account with OAuth or a workspace token."
+description: "Connect an MCP-compatible client with an account-bound workspace execution token."
 ---
 
 PlainRouter exposes a remote Model Context Protocol server at:
@@ -9,9 +9,11 @@ PlainRouter exposes a remote Model Context Protocol server at:
 https://plainrouter.com/mcp
 ```
 
-PlainRouter supports interactive OAuth and owner-issued workspace tokens. Both methods bind the client to one workspace, one Meta ad account, and an explicit permission set. The Launcher draft-batch tool is available only through an owner-issued Write or Admin workspace token.
+PlainRouter MCP uses owner-issued workspace execution tokens. Each token binds the client to one workspace, one Meta ad account, and an explicit access tier.
 
-This page covers OAuth. PlainRouter publishes OAuth discovery metadata, so compatible clients can start authorization automatically. If your client uses a fixed bearer credential instead, [issue a workspace token](/actions/workspace-tokens).
+<Warning>
+  OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Use a workspace token for every MCP tool call.
+</Warning>
 
 ## Before you begin
 
@@ -19,30 +21,30 @@ You need:
 
 - A PlainRouter account with access to the intended workspace.
 - An active Meta ad account connection.
-- An MCP-compatible client with remote HTTP and OAuth support. For a client without OAuth support, use a [workspace token](/actions/workspace-tokens).
+- An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
+- A workspace owner who can issue the token.
 - A clear choice of the one advertising account the client should use.
 
 For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
 
-## Authorize with OAuth
+## Connect with a workspace token
 
 <Steps>
+  <Step title="Issue the token">
+    In PlainRouter, switch to the intended workspace and open **Account** → **API**. Choose the exact ad account, a Read, Write, or Admin tier, and an expiry.
+  </Step>
+  <Step title="Copy it once">
+    Copy the complete token immediately after issuance. PlainRouter cannot display it again.
+  </Step>
   <Step title="Add the PlainRouter MCP server">
-    In your MCP client, add a remote server using `https://plainrouter.com/mcp`.
+    In your MCP client, add `https://plainrouter.com/mcp` as a remote HTTP server and configure the token as its bearer credential.
   </Step>
-  <Step title="Start OAuth authorization">
-    Follow the sign-in or authorization prompt opened by the client. Sign in to PlainRouter if needed.
-  </Step>
-  <Step title="Review permissions">
-    Choose the read, proposal, and creative permissions the client needs. Avoid granting creative write access to a client that only analyzes Signals.
-  </Step>
-  <Step title="Choose the advertising account">
-    Select the exact account for this connection. The resulting agent principal is bound to that account.
-  </Step>
-  <Step title="Return to your client">
-    Finish the redirect or device authorization flow. The client can now initialize the PlainRouter MCP server.
+  <Step title="Confirm the bound account">
+    Call `get_account_state` first. Confirm the returned workspace and account before continuing.
   </Step>
 </Steps>
+
+See [Workspace tokens](/actions/workspace-tokens) for tier selection, rotation, and revocation.
 
 ## Permissions
 
@@ -82,23 +84,21 @@ Ask the agent to state clearly whether a proposal is suggest-only, pending appro
 
 ## Authorization lifetime and revocation
 
-PlainRouter issues short-lived access tokens and refreshable authorization. The person who created an agent connection can revoke it in PlainRouter. Revocation disables the principal and its OAuth tokens.
+Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revoke them immediately from **Account** → **API**.
 
-Reconnect if the selected account changes or the underlying Meta permissions change. One OAuth client can create separate, isolated connections for different users or accounts.
-
-Workspace tokens use an explicit expiry and owner-managed rotation instead. See [Workspace tokens](/actions/workspace-tokens) for their lifecycle.
+PlainRouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 
 ## Troubleshoot
 
 ### The client receives `401 Unauthorized`
 
-Confirm the client followed the OAuth metadata advertised by the MCP endpoint. Remove a stale connection and authorize again if its tokens were revoked or expired without a usable refresh token.
+Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. Also confirm its issuing person still holds a workspace role that covers the token tier.
 
-For a workspace token, confirm that the client sends the complete token as a bearer credential and that the token has not expired or been revoked.
+If the client is sending an OAuth access token, the rejection is expected. Replace it with a workspace execution token.
 
 ### A creative tool reports a missing permission
 
-Reauthorize the PlainRouter connection with `creative.read` for library access or both `creative.write` and `actions.propose` for proposal-producing creative tools.
+Issue a token with the required tier. Use Read for library access and Write or Admin for proposal-producing creative tools and Launcher draft batches.
 
 ### PlainRouter asks you to reconnect Meta
 
@@ -106,7 +106,7 @@ The selected account may lack an active Meta connection or the required `ads_rea
 
 ### The wrong account appears
 
-Revoke the connection and authorize it again with the correct advertising account. Tool calls do not accept an account override.
+Revoke the token and issue another one for the correct advertising account. Tool calls do not accept an account override.
 
 ### Signals tools show setup required
 

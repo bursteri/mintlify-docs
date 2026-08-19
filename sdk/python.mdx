@@ -1,0 +1,96 @@
+---
+title: "Python SDK"
+description: "Use the generated plainrouter Python client with the Signals Conversion API."
+---
+
+`plainrouter` is the generated Python SDK for PlainRouter's signed OpenAPI contract. It exposes synchronous and asynchronous clients for all ten Conversion API operations.
+
+The current PyPI release is `0.3.1` and targets signed API contract `0.3.1`.
+
+## Requirements
+
+- Python 3.11 or newer.
+- A per-Signal tracker secret.
+- Server-side code. Do not put the tracker secret in browser or distributed client code.
+
+## Install
+
+```bash
+python -m pip install plainrouter
+```
+
+## Create a client
+
+```python
+from plainrouter import create_client, list_events
+
+client = create_client("YOUR_SIGNAL_TRACKER_SECRET")
+response = list_events.sync(client=client)
+```
+
+The default API base is `https://plainrouter.com/api/v1` and the default request timeout is 30 seconds.
+
+## Use async operations
+
+Each operation module also provides an asynchronous method:
+
+```python
+from plainrouter import create_client, get_event
+
+client = create_client("YOUR_SIGNAL_TRACKER_SECRET")
+response = await get_event.asyncio(
+    event="event-id",
+    client=client,
+)
+```
+
+## Verify Signal ingestion
+
+```python
+from plainrouter import create_client, verify_signal_ingestion
+
+client = create_client("YOUR_SIGNAL_TRACKER_SECRET")
+response = verify_signal_ingestion.sync(client=client)
+```
+
+The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`.
+
+## Available operation modules
+
+| Module | Purpose |
+| --- | --- |
+| `create_event` | Submit an idempotent conversion event. |
+| `verify_signal_ingestion` | Write the identity-free onboarding verification event. |
+| `get_event` | Retrieve an event, lineage, and delivery state. |
+| `list_events` | List recent events and delivery metrics. |
+| `set_destination_test_mode` | Enable or disable destination test mode. |
+| `send_test_purchase` | Send a controlled test purchase. |
+| `replay_deliveries` | Replay eligible recent deliveries. |
+| `get_reconciliation_report` | Retrieve reconciliation results for a date. |
+| `get_emq_report` | Retrieve recent Event Match Quality snapshots. |
+| `delete_user_data` | Delete data matching a hashed identifier. |
+
+## Configure another API origin or timeout
+
+Pass `base_url` or an `httpx.Timeout` when creating the client:
+
+```python
+import httpx
+from plainrouter import create_client
+
+client = create_client(
+    "YOUR_SIGNAL_TRACKER_SECRET",
+    base_url="https://example.test/api/v1",
+    timeout=httpx.Timeout(20.0),
+)
+```
+
+Override the production origin only for a PlainRouter-provided region or a controlled test environment.
+
+## Handle credentials safely
+
+The Python SDK accepts a Signal tracker secret. It does not accept an MCP workspace token or OAuth management credential.
+
+Keep the secret in a server-side secret manager. Never include it in prompts, URLs, logs, source control, or client-side code.
+
+For request and response fields, use the [API reference](/reference/conversion-api).

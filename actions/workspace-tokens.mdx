@@ -3,18 +3,18 @@ title: "Workspace tokens"
 description: "Issue, use, rotate, and revoke owner-managed bearer tokens for one workspace and Meta ad account."
 ---
 
-Workspace tokens let an MCP client or automation authenticate without an interactive OAuth flow. Each token is bound to exactly one workspace and one active Meta ad account in that workspace.
+Workspace tokens are the execution credentials for PlainRouter MCP clients and automations. Each token is bound to exactly one workspace and one active Meta ad account in that workspace.
 
 Only the workspace owner can issue, rotate, or revoke workspace tokens. A client cannot use the token to select another workspace or advertising account.
 
-## Choose OAuth or a workspace token
+## Management and execution credentials
 
-| Method | Use it when | Lifecycle |
+| Credential | What it can do | Lifecycle |
 | --- | --- | --- |
-| OAuth | Your MCP client supports remote HTTP servers and OAuth discovery. | PlainRouter issues short-lived access tokens with refreshable authorization. |
-| Workspace token | Your client or automation can send a fixed bearer token. | You choose a 30, 90, or 365 day expiry and rotate the credential explicitly. |
+| OAuth management credential | Read the approved `GET /api/v1/agent/context` discovery route. It cannot call MCP tools. | Short-lived access with refreshable authorization. |
+| Workspace execution token | Authenticate to MCP and authorized workspace routes for one bound account. | You choose a 30, 90, or 365 day expiry and rotate it explicitly. |
 
-Both methods create an account-bound agent principal and share the Signals, creative, and proposal tools. `launcher.draft_batch` is intentionally workspace-token only and requires the Write or Admin execution tier.
+Management credentials are rejected by default on agent-authenticated routes. The context route is the only read-only exception. Every MCP tool and Launcher file import requires a workspace execution token.
 
 ## Issue a token
 
@@ -56,8 +56,10 @@ Authorization: Bearer <workspace-token>
 
 No tier grants wildcard access. **Write** and **Admin** do not bypass action policy, human approval, provider verification, or account restrictions. Proposal-producing MCP tools still create governed proposals rather than direct Meta writes.
 
+PlainRouter rechecks the issuing person's live workspace role on every authenticated request. Read requires current read access, Write requires update access, and Admin requires the owner-level permission used for workspace deletion. A role downgrade immediately caps the token even if its stored expiry has not passed.
+
 <Note>
-  Workspace tokens authenticate MCP and workspace-scoped API routes. They cannot act as an interactive browser session or approve, revoke, or otherwise manage OAuth connections. Sign in to PlainRouter to manage OAuth access.
+  Workspace tokens authenticate MCP and authorized workspace routes. They cannot act as an interactive browser session. Sign in to PlainRouter to manage tokens and approvals.
 </Note>
 
 To change a token's account or tier, issue a new token and revoke the old one. PlainRouter does not elevate an existing token in place.
@@ -75,7 +77,7 @@ Issuance and rotation add `token.issued` to the workspace's v2 audit chain. Rota
 
 ### The client receives `401 Unauthorized`
 
-Confirm that the client sends the complete token as a bearer credential. Expired or revoked tokens are rejected. A token also stops authenticating if its bound account, Meta connection, or agent principal is no longer active.
+Confirm that the client sends the complete token as a bearer credential. Expired or revoked tokens are rejected. A token also stops authenticating if its bound account, Meta connection, or agent principal is no longer active, or if the issuer's current workspace role no longer covers its tier.
 
 ### A tool reports insufficient permission
 

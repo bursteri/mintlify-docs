@@ -3,7 +3,7 @@ title: "MCP tools"
 description: "Reference for the nine account-scoped tools exposed by the PlainRouter MCP server."
 ---
 
-PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the advertising account selected by the person during authorization or workspace-token issuance.
+PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the advertising account selected during workspace-token issuance.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -25,9 +25,9 @@ PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the a
 
 Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
 
-Clients can authenticate through OAuth or with an owner-issued [workspace token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. Authentication does not change any MCP tool input or output.
+Clients authenticate with an owner-issued [workspace execution token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. OAuth management credentials cannot authenticate to the MCP server.
 
-`launcher.draft_batch` is the exception to the shared authentication surface. It requires an owner-issued workspace execution token with the Write or Admin tier and does not accept an OAuth principal.
+`launcher.draft_batch` and the file-import adapter require the Write or Admin tier. The other tools use their derived scopes as listed above.
 
 Scoped responses identify:
 

@@ -3,13 +3,13 @@ title: "TypeScript SDK"
 description: "Use the generated @plainrouter/sdk client and Zod schemas with the Signals Conversion API."
 ---
 
-`@plainrouter/sdk` is the generated TypeScript client for the signed PlainRouter OpenAPI contract. It exposes typed request and response models, API methods, and Zod schemas for all nine Conversion API operations.
+`@plainrouter/sdk` is the generated TypeScript client for the signed PlainRouter OpenAPI contract. It exposes typed request and response models, API methods, and Zod schemas for all ten Conversion API operations.
 
-The current npm release is `0.2.0`. Review release notes before upgrading while the SDK remains in the `0.x` series.
+The current npm release is `0.3.1` and targets signed API contract `0.3.1`. Review release notes before upgrading while the SDK remains in the `0.x` series.
 
-<Warning>
-  SDK `0.2.0` targets API contract `0.2.0`. The signed REST contract is now `0.3.1`: it requires `consent_basis` for event creation and adds `verifySignalIngestion`. Use direct REST for those operations until an updated SDK is released.
-</Warning>
+<Note>
+  Version `0.3.1` includes the required event consent fields and `verifySignalIngestion`.
+</Note>
 
 ## Requirements
 
@@ -68,6 +68,7 @@ You can also inject a compatible `fetch` implementation through the same configu
 | Method | Purpose |
 | --- | --- |
 | `createEvent` | Submit an idempotent conversion event. |
+| `verifySignalIngestion` | Write the identity-free onboarding verification event. |
 | `getEvent` | Retrieve an event, lineage, and delivery state. |
 | `listEvents` | List recent events and delivery metrics. |
 | `setDestinationTestMode` | Enable or disable destination test mode. |
@@ -78,6 +79,23 @@ You can also inject a compatible `fetch` implementation through the same configu
 | `deleteUserData` | Delete data matching a hashed identifier. |
 
 The package also exports the generated TypeScript models and Zod schemas. Use the schemas when you need runtime validation at an application boundary.
+
+## Verify Signal ingestion
+
+```ts
+import {
+  configurePlainrouter,
+  verifySignalIngestion,
+} from "@plainrouter/sdk";
+
+configurePlainrouter({
+  signalTrackerSecret: process.env.PLAINROUTER_TOKEN!,
+});
+
+const result = await verifySignalIngestion();
+```
+
+The first successful call returns the accepted verification result. Repeating it is safe and returns `duplicate: true`.
 
 ## Handle credentials safely
 
