@@ -39,7 +39,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
       };
       signalq("init", { key: "YOUR_PUBLISHABLE_KEY" });
     </script>
-    <script async src="https://YOUR_COLLECTION_DOMAIN/s/v2.js"></script>
+    <script async src="https://YOUR_COLLECTION_DOMAIN/s/v3.js"></script>
     ```
 
     Keep the initialization block before the asynchronous script. This preserves commands that run while the pixel is loading.
@@ -47,7 +47,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   <Step title="Deploy and visit your site">
     Publish the change, then open any page on the connected website.
 
-    After your consent integration supplies `granted`, track a test event and use the network checks below to confirm the pixel loads and sends it.
+    After your consent integration supplies a complete grant, track a test event and use the network checks below to confirm the pixel loads and sends it.
   </Step>
 </Steps>
 
@@ -60,19 +60,19 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 To test browser collection, open your browser's developer tools and reload the page:
 
 1. Select the **Network** tab.
-2. Search for `v2.js` and confirm it loads from your collection domain.
+2. Search for `v3.js` and confirm it loads from your collection domain.
 3. Grant consent through your integration, track a test event, then search for `events` and confirm the browser sends a request to `/v1/events` on the same domain.
 
 Both requests should return a successful `2xx` response.
 
 ## What happens on initialization
 
-`signalq("init", ...)` initializes browser collection. Browser events require `consent_basis: consent` and granted terminal-storage, advertising-user-data, and advertising-personalization state. While consent is pending or denied, browser measurement events are not accepted.
+`signalq("init", ...)` initializes browser collection without creating visitor state or sending an ordinary event. Browser events require `consent_basis: "consent"` and `granted` values for `ad_storage`, `ad_user_data`, and `ad_personalization`. Missing, unknown, denied, malformed, or withdrawn state does not send an ordinary browser event.
 
 The browser flow is not the authoritative activation check. Use the identity-free server verification event for setup.
 
 <Note>
-  The generated snippet uses `signalq`. Do not rename it to `signal`; the v2 bundle intentionally exposes only the collision-resistant `signalq` global.
+  The generated snippet uses `signalq`. Do not rename it to `signal`; the v3 bundle intentionally exposes only the collision-resistant `signalq` global.
 </Note>
 
 ## Content Security Policy

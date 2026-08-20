@@ -1,30 +1,52 @@
 ---
 title: "Track events and consent"
-description: "Use the Signals v2 browser API to manage consent, identify visitors, and record conversion events."
+description: "Use the Signals browser API to manage consent, identify visitors, and record conversion events."
 ---
 
-The Signals v2 API is available as `window.signalq` after you install the generated pixel. Calls made before the asynchronous script loads remain in the queue.
+The Signals browser API is available as `window.signalq` after you install the generated v3 pixel. Calls made before the asynchronous script loads remain in the queue.
 
 ## Set consent
 
 Connect `signalq` to your consent-management platform. Send the current advertising consent state after initialization and whenever the visitor changes it.
 
 ```js
-await signalq("consent", "granted");
+await signalq("consent", {
+  consent_basis: "consent",
+  consent: {
+    ad_storage: "granted",
+    ad_user_data: "granted",
+    ad_personalization: "granted",
+    captured_at: new Date().toISOString(),
+    source: "your_cmp"
+  }
+});
 
 // If the visitor later withdraws consent:
-await signalq("consent", "denied");
+await signalq("consent", {
+  consent_basis: "consent",
+  withdrawn: true
+});
 ```
 
-Supported values are `pending`, `granted`, and `denied`.
+Each permission accepts `granted`, `denied`, or `unknown`. Missing or unrecognized permissions remain `unknown`; PlainRouter never upgrades them to a grant.
+
+You can provide one or more supported consent adapters:
+
+| Input | Use |
+| --- | --- |
+| `consent` | Send PlainRouter's explicit three-permission snapshot. |
+| `consent_mode` | Map Google Consent Mode v2 fields. |
+| `tcf` | Map a TCF v2 string and optional capture time. |
+
+When you provide more than one adapter, their derived permission states must agree.
 
 <Warning>
-  Do not infer consent. Keep the state `pending` until your consent-management platform has an explicit choice.
+  Do not infer consent. Leave each permission `unknown` until your consent-management platform has an explicit choice.
 </Warning>
 
-While consent is pending or denied, PlainRouter does not accept browser measurement events. It does not write or send visitor, user, click, IP, or user-agent identifiers from those events.
+PlainRouter sends browser events only when all three permissions are `granted`. Granting `ad_storage` alone can permit local visitor state, but no event is transmitted while either downstream advertising permission is denied or unknown.
 
-Granting consent creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denying consent removes PlainRouter's visitor and click identifiers from cookies and local storage. Send the latest state whenever the visitor's choice changes.
+A complete grant creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denied storage, malformed input, or explicit withdrawal clears PlainRouter's visitor and click identifiers. Send the latest structured state whenever the visitor's choice changes.
 
 ## Track an event
 

@@ -64,6 +64,8 @@ Most verification settles in the immediate bounded read window. A paused Meta ad
 
 If verification finds contradictory state or cannot complete inside the safety window, PlainRouter fails closed and attempts verified compensation. A failed or incomplete restoration is surfaced as **Rollback incomplete** for operator attention.
 
+For synchronous verification, the receipt state, verification summary, terminal action state, and audit events commit atomically. If local terminal persistence fails, PlainRouter can replay its durable classified evidence without another provider mutation or provider read. If retry exhaustion occurs after durable verified-creation evidence exists, PlainRouter suppresses destructive compensation and records the case for manual remediation.
+
 ## Evidence boundaries
 
 Signals reads provide aggregate account and dataset evidence. They do not prove campaign CPA, spend, budget, learning phase, or target-level performance.

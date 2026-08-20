@@ -5,6 +5,16 @@ description: "PlainRouter product updates shipped in August 2026."
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+## August 20
+
+### New Signal installs use the v3 browser contract
+
+**Fixed** · PlainRouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. [Install the current pixel](/signals/install-pixel).
+
+### Action verification commits atomically
+
+**Improved** · Receipt state, verification results, terminal action state, and audit events now settle in one transaction. Persistence retries reuse durable classified evidence without repeating provider writes or reads, while verified creation evidence suppresses unsafe exhaustion compensation. [Review verification and Landed](/actions/overview#verification-and-landed).
+
 ## August 19
 
 ### Spend proposals now require performance evidence

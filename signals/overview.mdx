@@ -47,13 +47,14 @@ Signals is PlainRouter's first-party conversion measurement layer. It receives w
 
 Signals applies consent before browser measurement or advertising delivery:
 
-| Consent | Collection behavior | Identifier behavior | Destination delivery |
+| Consent state | Collection behavior | Identifier behavior | Destination delivery |
 | --- | --- | --- | --- |
-| `pending` | Does not accept browser measurement events. | Does not write or send visitor, user, or click identifiers. | Skipped. |
-| `granted` | Records events. | Creates first-party identifiers and includes permitted hashed identity and click data. | Eligible for connected destinations. |
-| `denied` | Does not accept browser measurement events. | Clears PlainRouter identifiers and excludes identity data. | Skipped. |
+| Missing, unknown, or malformed | Sends no ordinary browser event. | Creates no visitor state. | Skipped. |
+| Storage denied or withdrawn | Sends no ordinary browser event. | Clears PlainRouter visitor and click identifiers. | Skipped. |
+| Storage granted; a downstream advertising permission denied or unknown | Sends no ordinary browser event. | May retain local visitor state, but sends no identity or event. | Skipped. |
+| All three permissions granted | Records events. | Creates first-party identifiers and includes permitted hashed identity and click data. | Eligible for connected destinations. |
 
-Connect your consent-management platform by calling `signalq("consent", state)` whenever the visitor's choice changes. See [Track events and consent](/signals/track-events) for examples.
+Connect your consent-management platform by calling `signalq("consent", input)` with the structured permission state whenever the visitor's choice changes. See [Track events and consent](/signals/track-events) for examples.
 
 Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. PlainRouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
 
