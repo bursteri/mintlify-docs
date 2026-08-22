@@ -29,6 +29,8 @@ The large value is the number of events received in the last 24 hours. The suppo
 
 This metric covers collection. It does not mean every event was eligible for or accepted by Meta.
 
+The totals include valid passive arrivals, even when a privacy-bounded strict-EU breakdown cell remains hidden below five arrivals. Passive arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Invalid traffic is excluded.
+
 ### Match quality
 
 This is the latest stored Meta Event Match Quality score on a 0–10 scale. The trend compares the current snapshot with the prior week when a comparison exists.

@@ -5,6 +5,16 @@ description: "PlainRouter product updates shipped in August 2026."
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+## August 21
+
+### Signal serving setup now adapts to your hosting stack
+
+**New** · The Signals dashboard detects your hosting stack in the background and produces one copy-ready setup: a managed-hostname CNAME for platform-constrained sites or same-origin forwarding for Vercel, Netlify, Next.js, Cloudflare, Nginx, and Caddy. Same-origin installs include secret rotation and turn green only after a side-effect-free forwarding probe and the first authenticated arrival. [Configure Signal serving](/signals/configure-serving).
+
+### Signal activity includes privacy-bounded passive arrivals
+
+**Improved** · Activity totals now include valid passive arrivals without exposing them in event-level lists or detail APIs. Invalid traffic stays out of the totals, and strict-EU aggregate cells remain hidden until they contain at least five arrivals. [Interpret Signal activity](/signals/health-and-performance#events-received).
+
 ## August 20
 
 ### New Signal installs use the v3 browser contract

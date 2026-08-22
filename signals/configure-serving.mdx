@@ -1,0 +1,99 @@
+---
+title: "Configure Signal serving"
+description: "Use PlainRouter's generated managed-hostname or same-origin forwarding setup for your hosting stack."
+---
+
+After Signal activation, the **One-screen serving setup** checks your hosting stack and produces one copy-ready configuration. You do not need to compare installation methods yourself.
+
+PlainRouter uses the same managed collector, consent rules, and event contract for both serving paths. Only the route from your website to the collector changes.
+
+## How PlainRouter selects a path
+
+| Hosting stack | Generated setup | Serving path |
+| --- | --- | --- |
+| Vercel, Netlify, Next.js, Cloudflare, Nginx, or Caddy | A rewrite, origin rule, or reverse-proxy block | **Path B — same-origin proxy** |
+| Webflow, Squarespace, Wix, Shopify, or managed WordPress | The validated CNAME record | **Path A — managed hostname** |
+
+Path A sends collection traffic through your PlainRouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run PlainRouter code in your hosting account and does not change which visitors are eligible for measurement.
+
+<Note>
+  Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for consented, server-issued browser identifiers. Both paths apply the same consent gate.
+</Note>
+
+## Generate your setup
+
+<Steps>
+  <Step title="Open the serving setup">
+    Complete [DNS validation](/signals/configure-dns) and [Signal ingestion verification](/signals/verify-ingestion), then open **Signals**.
+  </Step>
+  <Step title="Let PlainRouter check your hosting stack">
+    PlainRouter checks bounded DNS and response-header evidence in the background. While the check is running, the page shows **Pending** and refreshes the stored result automatically.
+
+    If the stack cannot be determined, answer **Where is your website hosted?** with the exact provider or server, then click **Detect hosting**.
+  </Step>
+  <Step title="Copy the generated block">
+    PlainRouter shows one block for the detected stack. For Path B, click **Activate Path B** first, then **Copy code** and add the complete block to your hosting configuration. Do not edit its generated prefix, destination, or secret.
+
+    For Path A, keep the displayed CNAME in place. PlainRouter manages the collector and HTTPS certificate behind it.
+  </Step>
+  <Step title="Verify the live path">
+    Deploy the hosting change and load your live website. The **First arrival check** turns green after PlainRouter stores the first valid arrival.
+
+    For Path B, also click **Run verification**. The side-effect-free forwarding probe checks the deployed route without creating an event or arrival. Path B turns green only after both the probe passes and an authenticated arrival is observed.
+  </Step>
+</Steps>
+
+## Path B forwarding requirements
+
+Install the entire generated block. Transparent forwarding must preserve:
+
+- The original host and visitor path.
+- `Cookie` and `Set-Cookie` in both directions.
+- `Sec-Fetch-*` and `Accept` request headers.
+
+If your platform strips the fetch metadata, PlainRouter cannot classify the document request. It writes no arrival for that request and increments only the aggregate undetermined counter.
+
+<Warning>
+  Path B's generated destination contains a low-privilege forwarding secret. Only members with workspace management permission can view or copy it. Do not publish it in documentation, logs, or a public repository.
+</Warning>
+
+## Exact site domains
+
+Credentialed browser collection requires at least one exact HTTPS site domain in your Signal configuration. Wildcards remain available for their existing matching behavior, but they do not grant credentialed CORS coverage. Add the apex domain explicitly when you need apex coverage.
+
+## Rotate a Path B secret
+
+Click **Rotate forwarding secret**, copy the newly generated block, and deploy it. PlainRouter accepts both the old and new secret during the transition.
+
+The overlap ends when PlainRouter observes the first authenticated arrival using the new secret or when you click **Confirm new secret installed**. Keep the old deployment available until one of those conditions is met.
+
+## Understand detection and verification states
+
+| State | Meaning | What to do |
+| --- | --- | --- |
+| **Pending** | A background check is queued or running. | Wait for the page to refresh the stored result. |
+| **Verified** | The check completed with a definite result. | Continue with the generated setup or confirmed forwarding path. |
+| **Failed** | The site was reachable, but the expected hosting or forwarding result was not present. | Correct the configuration, then retry. |
+| **Unverifiable** | The check timed out or could not reach a definite conclusion. | Confirm the site is publicly reachable, then retry. Do not treat this state as a definite configuration failure. |
+
+<Tip>
+  **Retry detection** and **Retry verification** start fresh background checks. DNS and forwarding probes never run inside the page request.
+</Tip>
+
+## Troubleshoot
+
+<AccordionGroup>
+  <Accordion title="Hosting detection cannot identify my stack">
+    Enter the exact hosting provider or server name. PlainRouter uses that declaration when DNS and response headers are unavailable. If the answer is not recognized, confirm the public site domain and retry when the site is reachable.
+  </Accordion>
+  <Accordion title="Path B verification failed">
+    The probe reached your site but did not observe the expected forwarding response. Reinstall the complete generated block and confirm that no proxy, middleware, or transform removes the original path, cookies, `Sec-Fetch-*`, or `Accept` headers.
+  </Accordion>
+  <Accordion title="Path B is waiting for its first arrival">
+    Open the live website through the exact configured domain. Invalid or unauthenticated traffic does not complete the arrival check.
+  </Accordion>
+  <Accordion title="I need to return to the managed hostname">
+    A member with workspace management permission can click **Revert to Path A**. Keep the validated CNAME in place before reverting.
+  </Accordion>
+</AccordionGroup>
+

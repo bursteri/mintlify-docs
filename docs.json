@@ -35,6 +35,7 @@
               "signals/overview",
               "signals/configure-dns",
               "signals/verify-ingestion",
+              "signals/configure-serving",
               "signals/install-pixel",
               "signals/track-events",
               "signals/connect-meta",

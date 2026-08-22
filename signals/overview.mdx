@@ -3,7 +3,7 @@ title: "Signals overview"
 description: "Understand how PlainRouter collects, delivers, and measures first-party conversion signals."
 ---
 
-Signals is PlainRouter's first-party conversion measurement layer. It receives website events through a collection subdomain you control, records what happened, and can deliver consented events to a connected Meta dataset.
+Signals is PlainRouter's first-party conversion measurement layer. It receives website events through a managed collection subdomain or a same-origin forwarding route, records what happened, and can deliver consented events to a connected Meta dataset.
 
 <Card title="The short version" icon="route">
   Your website sends one event to PlainRouter. PlainRouter records it, adds trusted request context at the edge, and routes eligible events to the destinations you connect.
@@ -15,8 +15,8 @@ Signals is PlainRouter's first-party conversion measurement layer. It receives w
   <Step title="Your server or browser records an event">
     Your server can use the Conversion API. The optional Signals pixel can send browser events such as purchases, leads, checkouts, and custom events.
   </Step>
-  <Step title="Your collection domain receives it">
-    Requests go to a first-party hostname such as `collect.example.com`. PlainRouter validates the publishable key and website origin before accepting the event.
+  <Step title="Your serving path receives it">
+    Requests use a managed hostname such as `collect.example.com` or a generated same-origin forwarding route. PlainRouter validates the authorized Signal and website origin before accepting the event.
   </Step>
   <Step title="PlainRouter stores the event">
     PlainRouter records the canonical event, consent state, delivery state, and the trusted network context added by the collection edge.
@@ -75,6 +75,9 @@ Do not keep a separate Pixel or CAPI integration sending the same events to the 
   </Card>
   <Card title="Verify ingestion" icon="badge-check" href="/signals/verify-ingestion">
     Complete activation through the API or MCP.
+  </Card>
+  <Card title="Configure serving" icon="route" href="/signals/configure-serving">
+    Install the generated block for your hosting stack.
   </Card>
   <Card title="Track events" icon="mouse-pointer-click" href="/signals/track-events">
     Add consent, identity, and conversion events.
