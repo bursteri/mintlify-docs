@@ -29,7 +29,7 @@ The large value is the number of events received in the last 24 hours. The suppo
 
 This metric covers collection. It does not mean every event was eligible for or accepted by Meta.
 
-The totals include valid passive arrivals, even when a privacy-bounded strict-EU breakdown cell remains hidden below five arrivals. Passive arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their stored rows contain no page URL, platform or channel source, visitor identity, IP address, or user agent. They never create destination deliveries. Invalid traffic is excluded.
+The totals include customer-visible passive arrivals. A privacy-bounded strict-EU passive cell contributes zero until it reaches five arrivals; at that point its aggregate count can contribute to the displayed totals. Passive arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their stored rows contain no page URL, platform or channel source, visitor identity, IP address, or user agent. They never create destination deliveries. Invalid traffic is excluded.
 
 ### Match quality
 

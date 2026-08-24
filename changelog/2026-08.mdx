@@ -5,6 +5,22 @@ description: "PlainRouter product updates shipped in August 2026."
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+## August 24
+
+### Launcher batches gain MCP status and preflight preview
+
+**New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/reference/mcp-tools#launcher-batch-status-and-preview).
+
+## August 23
+
+### Signal arrival verification is more durable
+
+**Improved** · A verified managed-hostname arrival stays latched after recent activity ages out. During same-origin secret rotation, PlainRouter now acknowledges the new forwarding secret only after a successfully ingested authenticated arrival, so malformed or failed requests cannot end the overlap. [Review serving verification](/signals/configure-serving#generate-your-setup).
+
+### Strict-EU passive totals honor small-cell privacy
+
+**Privacy** · Strict-EU passive activity contributes zero to displayed Signal totals until its aggregate cell reaches five arrivals. Passive rows remain identity-free, aggregate-only, absent from event-level APIs, and ineligible for Meta delivery. [Interpret Signal activity](/signals/health-and-performance#events-received).
+
 ## August 22
 
 ### Passive Signal rows omit URLs and sources
@@ -19,7 +35,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
 ### Signal activity includes privacy-bounded passive arrivals
 
-**Improved** · Activity totals now include valid passive arrivals without exposing them in event-level lists or detail APIs. Invalid traffic stays out of the totals, and strict-EU aggregate cells remain hidden until they contain at least five arrivals. [Interpret Signal activity](/signals/health-and-performance#events-received).
+**Improved** · Activity totals now include customer-visible passive arrivals without exposing them in event-level lists or detail APIs. Invalid traffic stays out of the totals, and strict-EU passive cells contribute only after their aggregate reaches five arrivals. [Interpret Signal activity](/signals/health-and-performance#events-received).
 
 ## August 20
 

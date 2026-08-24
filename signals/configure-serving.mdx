@@ -43,6 +43,8 @@ Path A sends collection traffic through your PlainRouter-managed subdomain. Path
   </Step>
 </Steps>
 
+Path A's first successful arrival verification remains latched after recent activity ages out. It does not return to an unverified setup state merely because no new arrival appears in the recent window.
+
 ## Path B forwarding requirements
 
 Install the entire generated block. Transparent forwarding must preserve:
@@ -65,7 +67,7 @@ Credentialed browser collection requires at least one exact HTTPS site domain in
 
 Click **Rotate forwarding secret**, copy the newly generated block, and deploy it. PlainRouter accepts both the old and new secret during the transition.
 
-The overlap ends when PlainRouter observes the first authenticated arrival using the new secret or when you click **Confirm new secret installed**. Keep the old deployment available until one of those conditions is met.
+The overlap ends when PlainRouter successfully ingests the first authenticated arrival using the new secret or when you click **Confirm new secret installed**. A malformed or failed request does not acknowledge the new secret or end the overlap. Keep the old deployment available until one of those conditions is met.
 
 ## Understand detection and verification states
 
@@ -96,4 +98,3 @@ The overlap ends when PlainRouter observes the first authenticated arrival using
     A member with workspace management permission can click **Revert to Path A**. Keep the validated CNAME in place before reverting.
   </Accordion>
 </AccordionGroup>
-

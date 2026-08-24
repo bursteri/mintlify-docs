@@ -50,8 +50,8 @@ Authorization: Bearer <workspace-token>
 
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
-| **Read** | `workspace:read` | Read account, Signals, and creative context, and submit the consent-safe Signal verification event. |
-| **Write** | `workspace:read`, `workspace:write` | Includes read access, can submit governed action and creative proposals, and can create Launcher draft batches. |
+| **Read** | `workspace:read` | Read account, Signals, creative context, and Launcher batch status, and submit the consent-safe Signal verification event. |
+| **Write** | `workspace:read`, `workspace:write` | Includes read access, can submit governed action and creative proposals, and can create or preview Launcher draft batches. |
 | **Admin** | `workspace:read`, `workspace:write`, `workspace:admin` | Uses the same MCP tools as **Write** and can manage token lifecycle and workspace provisioning through authorized APIs. |
 
 No tier grants wildcard access. **Write** and **Admin** do not bypass action policy, human approval, provider verification, or account restrictions. Proposal-producing MCP tools still create governed proposals rather than direct Meta writes.
@@ -81,7 +81,7 @@ Confirm that the client sends the complete token as a bearer credential. Expired
 
 ### A tool reports insufficient permission
 
-Use **Read** for account, Signals, and creative-library reads. Use **Write** or **Admin** for tools that submit action or creative proposals. Issue a new token when you need a different tier.
+Use **Read** for account, Signals, creative-library, and Launcher batch-status reads. Use **Write** or **Admin** for tools that submit action or creative proposals or create and preview Launcher batches. Issue a new token when you need a different tier.
 
 ### The wrong account appears
 

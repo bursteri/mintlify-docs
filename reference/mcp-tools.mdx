@@ -1,9 +1,9 @@
 ---
 title: "MCP tools"
-description: "Reference for the nine account-scoped tools exposed by the PlainRouter MCP server."
+description: "Reference for the 12 account-scoped tools exposed by the PlainRouter MCP server."
 ---
 
-PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the advertising account selected during workspace-token issuance.
+PlainRouter MCP server version `0.3.0` exposes exactly 12 tools. All use the advertising account selected during workspace-token issuance.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -16,6 +16,9 @@ PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the a
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a permanently paused copy of a source Meta ad with a selected asset. |
 | `launcher.draft_batch` | Non-destructive PlainRouter write | Create a Launcher draft batch from already-synced Drive assets. |
+| `launcher.batch_status` | Read-only, idempotent | Read the bounded status of one Launcher batch. |
+| `launcher.preview_batch` | Non-destructive PlainRouter write | Evaluate the authoritative preflight gate without provider work. |
+| `launcher.execute_batch` | Closed execution entry | Returns a bounded refusal during Launcher Phase B-1 and performs no mutation. |
 
 <Warning>
   Proposal-producing tools do not write to Meta during the MCP request. In **Suggest only**, approval ends without execution. In an executable mode, supported creative work can run only after the policy and approval pipeline authorizes it.
@@ -23,11 +26,11 @@ PlainRouter MCP server version `0.3.0` exposes exactly nine tools. All use the a
 
 ## Shared authorization and scope
 
-Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`.
+Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`. Every Launcher tool requires the `ad-account.read` baseline.
 
 Clients authenticate with an owner-issued [workspace execution token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. OAuth management credentials cannot authenticate to the MCP server.
 
-`launcher.draft_batch` and the file-import adapter require the Write or Admin tier. The other tools use their derived scopes as listed above.
+`launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, `launcher.execute_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview and the closed execution entry require `actions.propose`.
 
 Scoped responses identify:
 
@@ -193,6 +196,40 @@ Possible rejection codes are:
 - `media_limit_exceeded`
 
 The current MCP entry point returns an advisory gate with `not_evaluated`. Treat the result as a draft, not authorization to execute.
+
+## Launcher batch status and preview
+
+These tools accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. PlainRouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
+
+### `launcher.batch_status`
+
+Use this read-only tool to inspect a batch without evaluating its gate or contacting a provider. It returns:
+
+- Batch status, mode, and item counts.
+- Sub-batch status.
+- The latest stored gate result.
+- Ordered item status, bounded failure stage and code, and linked Actions proposal IDs.
+- Partition status and latest proposal attempts for duplicate-ad-set modes.
+
+The tool requires only a Read-tier token and the shared `ad-account.read` scope.
+
+### `launcher.preview_batch`
+
+Use this non-destructive checkpoint before presenting a batch as ready. PlainRouter re-evaluates the authoritative gate and returns `status: "previewed"` or `status: "gated"`, the resulting batch status, and checks for source relationships, tracking verification, tracked-domain coverage, ledger health, and Actions readiness.
+
+The `previews` array is intentionally empty in this release. No provider preview, Meta write, Actions proposal, or spend activation happens during the call. A successful preview is not execution authorization; any future execution path must evaluate the gate again.
+
+This tool requires a Write or Admin token with `actions.propose`.
+
+### `launcher.execute_batch`
+
+The execution entry is registered so clients can discover the complete Phase B-1 contract, but it is deliberately closed. After validating the token and token-bound batch, every call returns `not_executable_in_phase_b1`.
+
+It does not evaluate the gate, advance the batch, create an Actions proposal or receipt, contact Meta, or mutate provider state.
+
+### Refusals
+
+All three tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `batch_not_found`, or `internal_error`. Preview can also return `batch_not_operable` or `gate_receipt_raced`. Execute returns `not_executable_in_phase_b1` after successful authorization and batch resolution.
 
 ## `propose-actions`
 
