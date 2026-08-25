@@ -2,11 +2,12 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "PlainRouter",
+  "description": "Configure privacy-safe first-party Signals, connect account-bound AI agents, and govern Meta advertising changes with explicit policy, approval, and verification.",
   "rounded": "sharp",
   "colors": {
-    "primary": "#FF5722",
+    "primary": "#A52D00",
     "light": "#FF8A65",
-    "dark": "#000000"
+    "dark": "#D33A08"
   },
   "favicon": "/favicon.svg",
   "appearance": {
@@ -169,7 +170,11 @@
   "contextual": {
     "options": [
       "copy",
-      "view"
+      "view",
+      "assistant",
+      "chatgpt",
+      "claude",
+      "perplexity"
     ]
   }
 }

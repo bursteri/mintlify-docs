@@ -1,0 +1,16 @@
+{
+  "name": "plainrouter-mintlify-docs",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "docs:dev": "npx --yes mint@4.2.824 dev",
+    "docs:structure": "node scripts/check-docs.mjs",
+    "docs:validate": "npx --yes mint@4.2.824 validate",
+    "docs:links": "npx --yes mint@4.2.824 broken-links --check-redirects --check-snippets",
+    "docs:a11y": "npx --yes mint@4.2.824 a11y",
+    "docs:check": "npm run docs:structure && npm run docs:validate && npm run docs:links && npm run docs:a11y",
+    "docs:score": "npx --yes mint@4.2.824 score"
+  }
+}
