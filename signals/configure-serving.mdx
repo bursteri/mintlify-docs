@@ -69,6 +69,8 @@ Click **Rotate forwarding secret**, copy the newly generated block, and deploy i
 
 The overlap ends when PlainRouter successfully ingests the first authenticated arrival using the new secret or when you click **Confirm new secret installed**. A malformed or failed request does not acknowledge the new secret or end the overlap. Keep the old deployment available until one of those conditions is met.
 
+The side-effect-free forwarding probe attests only the currently active secret. A probe signed with the pending overlap secret cannot mark the path verified or complete rotation. If tracker key storage is temporarily unavailable, the probe fails closed with a retryable response instead of recording a pass.
+
 ## Understand detection and verification states
 
 | State | Meaning | What to do |

@@ -48,6 +48,8 @@ PlainRouter sends browser events only when all three permissions are `granted`. 
 
 A complete grant creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denied storage, malformed input, or explicit withdrawal clears PlainRouter's visitor and click identifiers. Send the latest structured state whenever the visitor's choice changes.
 
+On a returning page, initialization stays fail-closed while your consent platform restores its decision: PlainRouter neither reads identifiers nor sends measurement during that undecided period. It also does not erase identifiers left by the visitor's previous grant merely because the consent platform has not answered yet. An explicit denial, malformed consent update, or withdrawal still clears them.
+
 ## Track an event
 
 Call `track` with an event name and an optional payload:

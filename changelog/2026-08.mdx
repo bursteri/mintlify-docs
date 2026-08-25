@@ -6,6 +6,13 @@ rss: true
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+<Update label="August 25, 2026">
+
+  ## Signal collection gets a fail-closed edge release
+
+  **Security** · The `v4.1.4` edge release accepts browser identity only after all three advertising permissions are granted under basis `consent`, rejects alternative caller-supplied identity bases, and keeps severed collection disabled when its private gate is missing or malformed. Same-origin forwarding probes now attest only the active secret and return a retryable error when tracker key storage is unavailable. [Review Signals consent behavior](/signals/track-events#set-consent).
+</Update>
+
 <Update label="August 24, 2026">
 
   ## Compare Signal arrivals with platform-claimed clicks
@@ -50,7 +57,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## New Signal installs use the v3 browser contract
 
-  **Fixed** · PlainRouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. [Install the current pixel](/signals/install-pixel).
+  **Fixed** · PlainRouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. Its `v3.0.1` patch also preserves previously consented visitor state while a returning page waits for the consent platform to restore its decision; no measurement resumes before that decision arrives. [Install the current pixel](/signals/install-pixel).
 
   ## Action verification commits atomically
 
