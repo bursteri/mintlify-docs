@@ -76,6 +76,21 @@ Each row shows one stored daily reconciliation report:
 
 If no rows appear, PlainRouter has not stored a daily reconciliation report for the window.
 
+## Arrivals vs platform-claimed clicks
+
+The **Arrivals vs platform-claimed clicks** panel compares customer-visible observed arrivals with account-level clicks reported by the connected platform. It uses the last seven complete days, shortened when the Signal's retention window does not contain the full period.
+
+| Metric | Meaning |
+| --- | --- |
+| **Total arrivals** | Valid observed arrival cells that pass the customer-visible privacy boundary. Modeled rows and suppressed strict-EU passive cells are excluded. |
+| **Platform-claimed clicks** | Clicks stored by PlainRouter during scheduled reconciliation for the same account and daily period. |
+| **Difference** | Total arrivals minus platform-claimed clicks. |
+| **Difference vs claimed** | The difference as a percentage of platform-claimed clicks. It is unavailable when the claimed-click total is zero. |
+
+The channel table is intentionally a subset, not an allocation of total arrivals. It includes global rows and full-consent strict-EU rows; strict-EU passive rows never appear in the channel view.
+
+Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. PlainRouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
+
 ## Diagnostics
 
 Diagnostics explain the state behind the summary. Common messages include:

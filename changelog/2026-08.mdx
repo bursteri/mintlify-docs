@@ -7,6 +7,10 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
 ## August 24
 
+### Compare Signal arrivals with platform-claimed clicks
+
+**New** · The Signals dashboard now compares privacy-bounded observed arrivals with stored account-level platform clicks over the same fully retained daily period. It shows the difference and claimed-click proportion, includes a CSV export, and never makes a live Marketing API request while rendering or exporting. [Interpret the comparison](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+
 ### Launcher batches gain MCP status and preflight preview
 
 **New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/reference/mcp-tools#launcher-batch-status-and-preview).
