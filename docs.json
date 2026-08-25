@@ -5,9 +5,9 @@
   "description": "Configure privacy-safe first-party Signals, connect account-bound AI agents, and govern Meta advertising changes with explicit policy, approval, and verification.",
   "rounded": "sharp",
   "colors": {
-    "primary": "#A52D00",
+    "primary": "#FF5722",
     "light": "#FF8A65",
-    "dark": "#D33A08"
+    "dark": "#000000"
   },
   "favicon": "/favicon.svg",
   "appearance": {

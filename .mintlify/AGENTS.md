@@ -72,6 +72,9 @@ after the customer-visible implementation is merged and shipped.
 - Label every fenced code block with its language or `text`.
 - Give every image or diagram descriptive alt text. Include a prose explanation
   when the visual carries essential meaning.
+- Treat the configured brand palette as an intentional design decision. Report
+  contrast concerns separately; do not change brand colors without explicit
+  authorization.
 - Bold UI labels, for example **Account**. Format file names, commands, paths,
   API fields, statuses, and code references as code when they are not UI text.
 - Avoid vague marketing claims. Prefer concrete behavior, constraints, inputs,
@@ -117,7 +120,9 @@ git diff --check
 ```
 
 The documentation check must pass the repository structure checks, `mint
-validate`, `mint broken-links`, and `mint a11y`. Also confirm:
+validate`, `mint broken-links`, and the media checks from `mint a11y`. Color
+contrast is reviewed separately because the configured palette is intentional.
+Also confirm:
 
 - Every navigation page exists and every public MDX page is represented.
 - Frontmatter titles and descriptions are present.
