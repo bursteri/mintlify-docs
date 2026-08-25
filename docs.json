@@ -2,10 +2,11 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "PlainRouter",
+  "rounded": "sharp",
   "colors": {
     "primary": "#FF5722",
     "light": "#FF8A65",
-    "dark": "#E64A19"
+    "dark": "#000000"
   },
   "favicon": "/favicon.svg",
   "appearance": {
