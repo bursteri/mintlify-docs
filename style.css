@@ -1,0 +1,11 @@
+#topbar-cta-button {
+  border-color: #000000 !important;
+  border-radius: 6px !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+#topbar-cta-button:hover {
+  border-color: #1a1a1a !important;
+  background-color: #1a1a1a !important;
+}

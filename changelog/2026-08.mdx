@@ -6,7 +6,7 @@ rss: true
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
-<Update label="August 24, 2026" description="Signals comparison and Launcher MCP">
+<Update label="August 24, 2026">
 
   ## Compare Signal arrivals with platform-claimed clicks
 
@@ -17,7 +17,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/reference/mcp-tools#launcher-batch-status-and-preview).
 </Update>
 
-<Update label="August 23, 2026" description="Serving verification and privacy">
+<Update label="August 23, 2026">
 
   ## Signal arrival verification is more durable
 
@@ -28,14 +28,14 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **Privacy** · Strict-EU passive activity contributes zero to displayed Signal totals until its aggregate cell reaches five arrivals. Passive rows remain identity-free, aggregate-only, absent from event-level APIs, and ineligible for Meta delivery. [Interpret Signal activity](/signals/health-and-performance#events-received).
 </Update>
 
-<Update label="August 22, 2026" description="Passive Signal privacy">
+<Update label="August 22, 2026">
 
   ## Passive Signal rows omit URLs and sources
 
   **Privacy** · Passive severed rows now store neither a page URL nor a platform or channel source, and their rollups keep the source dimension empty. These arrivals remain identity-free, aggregate-only, and ineligible for Meta delivery. [Review passive activity handling](/signals/health-and-performance#events-received).
 </Update>
 
-<Update label="August 21, 2026" description="Adaptive serving and passive activity">
+<Update label="August 21, 2026">
 
   ## Signal serving setup now adapts to your hosting stack
 
@@ -46,7 +46,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **Improved** · Activity totals now include customer-visible passive arrivals without exposing them in event-level lists or detail APIs. Invalid traffic stays out of the totals, and strict-EU passive cells contribute only after their aggregate reaches five arrivals. [Interpret Signal activity](/signals/health-and-performance#events-received).
 </Update>
 
-<Update label="August 20, 2026" description="Browser contract and Actions durability">
+<Update label="August 20, 2026">
 
   ## New Signal installs use the v3 browser contract
 
@@ -57,7 +57,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **Improved** · Receipt state, verification results, terminal action state, and audit events now settle in one transaction. Persistence retries reuse durable classified evidence without repeating provider writes or reads, while verified creation evidence suppresses unsafe exhaustion compensation. [Review verification and Landed](/actions/overview#verification-and-landed).
 </Update>
 
-<Update label="August 19, 2026" description="Evidence, Launcher imports, and MCP security">
+<Update label="August 19, 2026">
 
   ## Spend proposals now require performance evidence
 
@@ -76,7 +76,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **Improved** · PlainRouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
 </Update>
 
-<Update label="August 18, 2026" description="Launcher, API 0.3.1, and client releases">
+<Update label="August 18, 2026">
 
   ## Launcher draft batches arrive in MCP
 
@@ -99,7 +99,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **Improved** · Launcher now validates staged media before provider upload, records durable lifecycle state, and defers safely when the shared Meta request budget is exhausted. Policy, approval, receipt, and provider-verification gates remain in place.
 </Update>
 
-<Update label="August 17, 2026" description="Drive verification and the Signals ledger">
+<Update label="August 17, 2026">
 
   ## Drive ownership is verified before sync
 
@@ -114,7 +114,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **Improved** · Drive dispatch, retries, reconciliation, and final outcomes now share a durable receipt model, making sync work replay-safe and auditable without ambiguous legacy fallback behavior.
 </Update>
 
-<Update label="August 16, 2026" description="Workspace tokens and policy audit">
+<Update label="August 16, 2026">
 
   ## Workspace-scoped MCP tokens
 
