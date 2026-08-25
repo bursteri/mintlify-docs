@@ -1,116 +1,126 @@
 ---
 title: "August 2026"
 description: "PlainRouter product updates shipped in August 2026."
+rss: true
 ---
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
-## August 24
+<Update label="August 24, 2026" description="Signals comparison and Launcher MCP">
 
-### Compare Signal arrivals with platform-claimed clicks
+  ## Compare Signal arrivals with platform-claimed clicks
 
-**New** · The Signals dashboard now compares privacy-bounded observed arrivals with stored account-level platform clicks over the same fully retained daily period. It shows the difference and claimed-click proportion, includes a CSV export, and never makes a live Marketing API request while rendering or exporting. [Interpret the comparison](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+  **New** · The Signals dashboard now compares privacy-bounded observed arrivals with stored account-level platform clicks over the same fully retained daily period. It shows the difference and claimed-click proportion, includes a CSV export, and never makes a live Marketing API request while rendering or exporting. [Interpret the comparison](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
 
-### Launcher batches gain MCP status and preflight preview
+  ## Launcher batches gain MCP status and preflight preview
 
-**New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/reference/mcp-tools#launcher-batch-status-and-preview).
+  **New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/reference/mcp-tools#launcher-batch-status-and-preview).
+</Update>
 
-## August 23
+<Update label="August 23, 2026" description="Serving verification and privacy">
 
-### Signal arrival verification is more durable
+  ## Signal arrival verification is more durable
 
-**Improved** · A verified managed-hostname arrival stays latched after recent activity ages out. During same-origin secret rotation, PlainRouter now acknowledges the new forwarding secret only after a successfully ingested authenticated arrival, so malformed or failed requests cannot end the overlap. [Review serving verification](/signals/configure-serving#generate-your-setup).
+  **Improved** · A verified managed-hostname arrival stays latched after recent activity ages out. During same-origin secret rotation, PlainRouter now acknowledges the new forwarding secret only after a successfully ingested authenticated arrival, so malformed or failed requests cannot end the overlap. [Review serving verification](/signals/configure-serving#generate-your-setup).
 
-### Strict-EU passive totals honor small-cell privacy
+  ## Strict-EU passive totals honor small-cell privacy
 
-**Privacy** · Strict-EU passive activity contributes zero to displayed Signal totals until its aggregate cell reaches five arrivals. Passive rows remain identity-free, aggregate-only, absent from event-level APIs, and ineligible for Meta delivery. [Interpret Signal activity](/signals/health-and-performance#events-received).
+  **Privacy** · Strict-EU passive activity contributes zero to displayed Signal totals until its aggregate cell reaches five arrivals. Passive rows remain identity-free, aggregate-only, absent from event-level APIs, and ineligible for Meta delivery. [Interpret Signal activity](/signals/health-and-performance#events-received).
+</Update>
 
-## August 22
+<Update label="August 22, 2026" description="Passive Signal privacy">
 
-### Passive Signal rows omit URLs and sources
+  ## Passive Signal rows omit URLs and sources
 
-**Privacy** · Passive severed rows now store neither a page URL nor a platform or channel source, and their rollups keep the source dimension empty. These arrivals remain identity-free, aggregate-only, and ineligible for Meta delivery. [Review passive activity handling](/signals/health-and-performance#events-received).
+  **Privacy** · Passive severed rows now store neither a page URL nor a platform or channel source, and their rollups keep the source dimension empty. These arrivals remain identity-free, aggregate-only, and ineligible for Meta delivery. [Review passive activity handling](/signals/health-and-performance#events-received).
+</Update>
 
-## August 21
+<Update label="August 21, 2026" description="Adaptive serving and passive activity">
 
-### Signal serving setup now adapts to your hosting stack
+  ## Signal serving setup now adapts to your hosting stack
 
-**New** · The Signals dashboard detects your hosting stack in the background and produces one copy-ready setup: a managed-hostname CNAME for platform-constrained sites or same-origin forwarding for Vercel, Netlify, Next.js, Cloudflare, Nginx, and Caddy. Same-origin installs include secret rotation and turn green only after a side-effect-free forwarding probe and the first authenticated arrival. [Configure Signal serving](/signals/configure-serving).
+  **New** · The Signals dashboard detects your hosting stack in the background and produces one copy-ready setup: a managed-hostname CNAME for platform-constrained sites or same-origin forwarding for Vercel, Netlify, Next.js, Cloudflare, Nginx, and Caddy. Same-origin installs include secret rotation and turn green only after a side-effect-free forwarding probe and the first authenticated arrival. [Configure Signal serving](/signals/configure-serving).
 
-### Signal activity includes privacy-bounded passive arrivals
+  ## Signal activity includes privacy-bounded passive arrivals
 
-**Improved** · Activity totals now include customer-visible passive arrivals without exposing them in event-level lists or detail APIs. Invalid traffic stays out of the totals, and strict-EU passive cells contribute only after their aggregate reaches five arrivals. [Interpret Signal activity](/signals/health-and-performance#events-received).
+  **Improved** · Activity totals now include customer-visible passive arrivals without exposing them in event-level lists or detail APIs. Invalid traffic stays out of the totals, and strict-EU passive cells contribute only after their aggregate reaches five arrivals. [Interpret Signal activity](/signals/health-and-performance#events-received).
+</Update>
 
-## August 20
+<Update label="August 20, 2026" description="Browser contract and Actions durability">
 
-### New Signal installs use the v3 browser contract
+  ## New Signal installs use the v3 browser contract
 
-**Fixed** · PlainRouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. [Install the current pixel](/signals/install-pixel).
+  **Fixed** · PlainRouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. [Install the current pixel](/signals/install-pixel).
 
-### Action verification commits atomically
+  ## Action verification commits atomically
 
-**Improved** · Receipt state, verification results, terminal action state, and audit events now settle in one transaction. Persistence retries reuse durable classified evidence without repeating provider writes or reads, while verified creation evidence suppresses unsafe exhaustion compensation. [Review verification and Landed](/actions/overview#verification-and-landed).
+  **Improved** · Receipt state, verification results, terminal action state, and audit events now settle in one transaction. Persistence retries reuse durable classified evidence without repeating provider writes or reads, while verified creation evidence suppresses unsafe exhaustion compensation. [Review verification and Landed](/actions/overview#verification-and-landed).
+</Update>
 
-## August 19
+<Update label="August 19, 2026" description="Evidence, Launcher imports, and MCP security">
 
-### Spend proposals now require performance evidence
+  ## Spend proposals now require performance evidence
 
-**Improved** · Signal health remains available for diagnostics, but it can no longer support budget, status, creative-spend, or mixed proposals. Agents must use eligible observed reconciliation data from `get_performance`; modeled and portfolio-only events remain outside that evidence path. Upload-only asset proposals keep the narrow non-spend exception. [Review the MCP evidence rules](/reference/mcp-tools#evidence-restrictions).
+  **Improved** · Signal health remains available for diagnostics, but it can no longer support budget, status, creative-spend, or mixed proposals. Agents must use eligible observed reconciliation data from `get_performance`; modeled and portfolio-only events remain outside that evidence path. Upload-only asset proposals keep the narrow non-spend exception. [Review the MCP evidence rules](/reference/mcp-tools#evidence-restrictions).
 
-### Import Launcher drafts from CSV or XLSX
+  ## Import Launcher drafts from CSV or XLSX
 
-**New** · Write and Admin workspace tokens can create Launcher drafts through `POST /mcp/launcher/import`. The adapter accepts bounded CSV/XLSX files, reports invalid rows without hiding valid work, resolves only already-synced Drive assets in the token workspace, and deletes staged uploads after parsing. [Read the import guide](/launcher/import-draft-batch).
+  **New** · Write and Admin workspace tokens can create Launcher drafts through `POST /mcp/launcher/import`. The adapter accepts bounded CSV/XLSX files, reports invalid rows without hiding valid work, resolves only already-synced Drive assets in the token workspace, and deletes staged uploads after parsing. [Read the import guide](/launcher/import-draft-batch).
 
-### MCP execution credentials fail closed
+  ## MCP execution credentials fail closed
 
-**Security** · OAuth management credentials are now rejected by default on MCP and agent-authenticated routes. The read-only agent-context route is the sole discovery exception; MCP tools require an account-bound workspace execution token whose tier is capped by the issuer's current workspace role. [Connect an agent](/actions/connect-agent).
+  **Security** · OAuth management credentials are now rejected by default on MCP and agent-authenticated routes. The read-only agent-context route is the sole discovery exception; MCP tools require an account-bound workspace execution token whose tier is capped by the issuer's current workspace role. [Connect an agent](/actions/connect-agent).
 
-### Actions and operational monitoring are more deterministic
+  ## Actions and operational monitoring are more deterministic
 
-**Improved** · PlainRouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
+  **Improved** · PlainRouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
+</Update>
 
-## August 18
+<Update label="August 18, 2026" description="Launcher, API 0.3.1, and client releases">
 
-### Launcher draft batches arrive in MCP
+  ## Launcher draft batches arrive in MCP
 
-**New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured PlainRouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/reference/mcp-tools).
+  **New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured PlainRouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/reference/mcp-tools).
 
-### Consent-first Signals and simpler activation
+  ## Consent-first Signals and simpler activation
 
-**New** · Signal activation now uses an identity-free server verification event through REST or MCP, making the browser pixel optional for setup. Event ingestion now requires an explicit consent basis and fails closed before ineligible Meta delivery. [See what changed in API 0.3.1](/reference/conversion-api).
+  **New** · Signal activation now uses an identity-free server verification event through REST or MCP, making the browser pixel optional for setup. Event ingestion now requires an explicit consent basis and fails closed before ineligible Meta delivery. [See what changed in API 0.3.1](/reference/conversion-api).
 
-### SDKs and CLI ship API 0.3.1
+  ## SDKs and CLI ship API 0.3.1
 
-**New** · TypeScript SDK `0.3.1`, Python SDK `0.3.1`, and CLI `0.3.1` are now published. Both SDKs expose all ten signed API operations, including ingestion verification and the consent-aware event contract. [Choose a client](/reference/conversion-api#client-releases).
+  **New** · TypeScript SDK `0.3.1`, Python SDK `0.3.1`, and CLI `0.3.1` are now published. Both SDKs expose all ten signed API operations, including ingestion verification and the consent-aware event contract. [Choose a client](/reference/conversion-api#client-releases).
 
-### Stripe revenue waits for settlement
+  ## Stripe revenue waits for settlement
 
-**Improved** · Stripe Checkout creates a purchase only after an exact `payment_status` of `paid`. Failed, unpaid, free, missing, and malformed states stay out of the ledger, rollups, and Meta delivery. [Review Stripe event behavior](/signals/track-events#verify-stripe-checkout-settlement).
+  **Improved** · Stripe Checkout creates a purchase only after an exact `payment_status` of `paid`. Failed, unpaid, free, missing, and malformed states stay out of the ledger, rollups, and Meta delivery. [Review Stripe event behavior](/signals/track-events#verify-stripe-checkout-settlement).
 
-### Creative media execution is more durable
+  ## Creative media execution is more durable
 
-**Improved** · Launcher now validates staged media before provider upload, records durable lifecycle state, and defers safely when the shared Meta request budget is exhausted. Policy, approval, receipt, and provider-verification gates remain in place.
+  **Improved** · Launcher now validates staged media before provider upload, records durable lifecycle state, and defers safely when the shared Meta request budget is exhausted. Policy, approval, receipt, and provider-verification gates remain in place.
+</Update>
 
-## August 17
+<Update label="August 17, 2026" description="Drive verification and the Signals ledger">
 
-### Drive ownership is verified before sync
+  ## Drive ownership is verified before sync
 
-**New** · Launcher verifies a connected Drive folder by workspace-domain ownership or a generated challenge file before inventory sync can run. Public folders always require the challenge path. [Connect a Drive folder](/launcher/connect-drive).
+  **New** · Launcher verifies a connected Drive folder by workspace-domain ownership or a generated challenge file before inventory sync can run. Public folders always require the challenge path. [Connect a Drive folder](/launcher/connect-drive).
 
-### The redesigned Signals ledger reached production
+  ## The redesigned Signals ledger reached production
 
-**Improved** · PlainRouter shipped partitioned event storage, exact rollup coverage, bounded retention paths, replay protection, and privacy erasure that preserves the accounting spine while removing subject data.
+  **Improved** · PlainRouter shipped partitioned event storage, exact rollup coverage, bounded retention paths, replay protection, and privacy erasure that preserves the accounting spine while removing subject data.
 
-### Drive sync gained durable operation receipts
+  ## Drive sync gained durable operation receipts
 
-**Improved** · Drive dispatch, retries, reconciliation, and final outcomes now share a durable receipt model, making sync work replay-safe and auditable without ambiguous legacy fallback behavior.
+  **Improved** · Drive dispatch, retries, reconciliation, and final outcomes now share a durable receipt model, making sync work replay-safe and auditable without ambiguous legacy fallback behavior.
+</Update>
 
-## August 16
+<Update label="August 16, 2026" description="Workspace tokens and policy audit">
 
-### Workspace-scoped MCP tokens
+  ## Workspace-scoped MCP tokens
 
-**New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. PlainRouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/actions/workspace-tokens).
+  **New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. PlainRouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/actions/workspace-tokens).
 
-### Policy changes joined the audit chain
+  ## Policy changes joined the audit chain
 
-**Improved** · Workspace action-policy changes are now recorded atomically in the recomputable audit chain alongside proposals, approvals, executions, and token lifecycle events. [Learn about the audit log](/actions/audit-log).
+  **Improved** · Workspace action-policy changes are now recorded atomically in the recomputable audit chain alongside proposals, approvals, executions, and token lifecycle events. [Learn about the audit log](/actions/audit-log).
+</Update>
