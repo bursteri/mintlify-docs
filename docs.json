@@ -28,7 +28,8 @@
             "group": "Get started",
             "pages": [
               "index",
-              "quickstart"
+              "quickstart",
+              "sandbox"
             ]
           },
           {
@@ -119,6 +120,11 @@
         "openapi": "https://plainrouter.com/openapi.json",
         "pages": [
           "reference/conversion-api",
+          "GET /sandbox",
+          "GET /sandbox/keys",
+          "POST /sandbox/keys",
+          "POST /sandbox/events",
+          "POST /sandbox/keyed-events",
           "POST /events",
           "POST /verification-events",
           "GET /events/{event}",

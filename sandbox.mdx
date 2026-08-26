@@ -1,0 +1,145 @@
+---
+title: "Try the API without an account"
+description: "Make a successful synthetic event request, then test bearer authentication with a short-lived sandbox key."
+---
+
+## Make your first request
+
+Call the sandbox discovery endpoint. You do not need an account or a credential.
+
+```bash
+curl --request GET \
+  --url https://plainrouter.com/api/v1/sandbox \
+  --header "Accept: application/json"
+```
+
+An HTTP `200` response confirms that the sandbox is ready. The response includes:
+
+- A ready-to-run synthetic event request under `try`.
+- A live sandbox key under `self_serve_key.issued_key`.
+
+One read-only request therefore gives you both a successful API response and working sandbox credentials.
+
+## Test an authenticated client
+
+Read the key from `self_serve_key.issued_key.api_key`, store it in a protected local environment variable, and send it as a bearer token:
+
+```bash
+curl --request POST \
+  --url https://plainrouter.com/api/v1/sandbox/keyed-events \
+  --header "Accept: application/json" \
+  --header "Authorization: Bearer ${PLAINROUTER_SANDBOX_KEY}" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "event_id": "sandbox-order-123",
+    "event_name": "Purchase",
+    "action_source": "website",
+    "value_data": {
+      "value": "49.90",
+      "currency": "EUR",
+      "order_id": "sandbox-order-123"
+    }
+  }'
+```
+
+You can also issue a sandbox key directly. `GET /api/v1/sandbox/keys` returns HTTP `200`, while `POST /api/v1/sandbox/keys` returns HTTP `201`. Issuance writes nothing, so both operations are safe to repeat.
+
+Every issued key has this shape:
+
+| Field | Value |
+| --- | --- |
+| `api_key` | Starts with `pr_sandbox_` |
+| `token_type` | `Bearer` |
+| `expires_in` | `900` seconds (15 minutes) |
+| `scope` | `sandbox:event.validate` |
+| `production_access` | `false` |
+
+PlainRouter never persists a sandbox key.
+
+<Warning>
+  A sandbox key is not a Signal tracker secret or a workspace execution token. It authenticates only the synthetic sandbox, has no workspace or Meta ad-account binding, and grants no production access.
+</Warning>
+
+## Validate without a credential
+
+Use `POST /api/v1/sandbox/events` when you want to validate a synthetic event without testing bearer authentication:
+
+```bash
+curl --request POST \
+  --url https://plainrouter.com/api/v1/sandbox/events \
+  --header "Accept: application/json" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "event_name": "Purchase",
+    "action_source": "website",
+    "value_data": {
+      "value": "49.90",
+      "currency": "EUR"
+    }
+  }'
+```
+
+An HTTP `200` response has `accepted: true`, `status: "simulated"`, `persisted: false`, and `provider_delivery: false`.
+
+## Use identity-free synthetic fields
+
+The public sandbox accepts these documented fields:
+
+| Field | Requirement |
+| --- | --- |
+| `event_name` | Required string, maximum 100 characters |
+| `event_id` | Optional string, maximum 128 characters |
+| `action_source` | Optional; `website`, `app`, or `other` |
+| `value_data.value` | Optional non-negative decimal string with up to two decimal places |
+| `value_data.currency` | Optional string of exactly three uppercase letters |
+| `value_data.order_id` | Optional string, maximum 128 characters |
+
+The sandbox rejects `user_data`, `visitor_id`, `click_ids`, `event_source`, `consent`, `consent_mode`, and `tcf`. A request containing one of these fields returns HTTP `422` with this validation message:
+
+```text
+The public sandbox accepts synthetic, identity-free fields only.
+```
+
+Do not send personal data, customer identifiers, click identifiers, or production event payloads to the sandbox.
+
+## Understand what the sandbox does
+
+The sandbox validates each request in memory and immediately discards it. A sandbox request:
+
+- Does not write to the Signal ledger or any other database table.
+- Does not enqueue work.
+- Does not contact Meta or another provider.
+- Does not read production data.
+
+The keyed and keyless validation endpoints apply the same synthetic-event rules.
+
+## Handle sandbox key errors
+
+The keyed endpoint returns HTTP `401` when its bearer credential is missing, invalid, or expired.
+
+| `error.code` | Meaning |
+| --- | --- |
+| `missing_sandbox_key` | The request has no bearer key. |
+| `invalid_sandbox_key` | The value is not a valid sandbox key or does not carry the sandbox validation scope. |
+| `expired_sandbox_key` | The 15-minute key lifetime has ended. |
+
+Each error includes an `error.resolution` field that tells you to supply or issue a replacement sandbox key. The response also includes `WWW-Authenticate: Bearer`.
+
+## Stay within the rate limits
+
+Sandbox limits are per client IP address:
+
+| Operation | Limit |
+| --- | --- |
+| `GET` or `POST /api/v1/sandbox/keys` | 10 key issuances per minute |
+| `POST /api/v1/sandbox/keyed-events` | 60 validations per minute |
+
+Key issuance and keyed validation use independent budgets. Validation traffic cannot exhaust the issuance budget.
+
+## Move to production
+
+PlainRouter is free while monthly managed ad spend is under $300. Registration is self-serve, and a workspace admin can issue scoped workspace execution tokens from the dashboard without a contact-sales step.
+
+Keep the production credential types separate. A Signal tracker secret authenticates the Signals Conversion API. A workspace execution token authenticates MCP and authorized workspace routes for one workspace and one Meta ad account. Neither credential is a sandbox key.
+
+[Follow the Quickstart](/quickstart) to create a workspace, configure a Signal, and verify the production ingestion path.
