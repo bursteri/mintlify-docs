@@ -63,7 +63,7 @@
           {
             "group": "Reference",
             "pages": [
-              "reference/authentication",
+              "auth",
               "reference/api-resource-index",
               "reference/api-catalog",
               "reference/statuses-and-terms"
@@ -167,6 +167,7 @@
   },
   "footer": {
     "socials": {
+      "github": "https://github.com/wudaku",
       "linkedin": "https://www.linkedin.com/company/ivyandion"
     }
   },
@@ -178,5 +179,11 @@
       "claude",
       "perplexity"
     ]
-  }
+  },
+  "redirects": [
+    {
+      "source": "/reference/authentication",
+      "destination": "/auth"
+    }
+  ]
 }

@@ -104,7 +104,8 @@ for (const page of mdxPages) {
   }
 }
 
-const requiredDiscoveryPages = new Map([
+const requiredAgentPages = new Map([
+  ["auth", "title: \"Authentication and clients\""],
   [
     "reference/api-resource-index",
     "https://plainrouter.com/api/llms.txt",
@@ -115,15 +116,15 @@ const requiredDiscoveryPages = new Map([
   ],
 ]);
 
-for (const [page, canonicalResource] of requiredDiscoveryPages) {
+for (const [page, requiredMarker] of requiredAgentPages) {
   if (!configuredPages.has(page)) {
-    fail(`Agent discovery page is missing from navigation: ${page}.mdx`);
+    fail(`Required agent page is missing from navigation: ${page}.mdx`);
     continue;
   }
 
   const source = readFileSync(join(root, `${page}.mdx`), "utf8");
-  if (!source.includes(canonicalResource)) {
-    fail(`${page}.mdx must identify its canonical machine resource`);
+  if (!source.includes(requiredMarker)) {
+    fail(`${page}.mdx is missing its required agent-facing marker`);
   }
 }
 
