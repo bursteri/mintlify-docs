@@ -155,6 +155,11 @@
           "anchor": "Homepage",
           "href": "https://plainrouter.com",
           "icon": "house"
+        },
+        {
+          "anchor": "Agent repository",
+          "href": "https://github.com/wudaku/plainrouter-sdk",
+          "icon": "github"
         }
       ]
     }
