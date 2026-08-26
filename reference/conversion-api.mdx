@@ -124,9 +124,9 @@ Generate clients only from a signed document. Pin the generated SDK or CLI versi
 
 ## Client releases
 
-The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.0`](https://pypi.org/project/plainrouter/), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://github.com/plainrouter/sdk-go) are generated from the signed ten-operation contract. All three expose ingestion verification and the required event consent fields.
+The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.0`](https://pypi.org/project/plainrouter/), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) are generated from the signed ten-operation contract. All three expose ingestion verification and the required event consent fields.
 
-The CLI [`@plainrouter/cli@0.5.0`](https://www.npmjs.com/package/@plainrouter/cli) uses the current TypeScript SDK and can send the consent-aware event shape. Install it with `npm install --global @plainrouter/cli@0.5.0` or `brew install plainrouter/tap/plainrouter`. It exposes nine terminal commands but does not add a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
+The CLI [`@plainrouter/cli@0.5.0`](https://www.npmjs.com/package/@plainrouter/cli) uses the current TypeScript SDK and can send the consent-aware event shape. Install it from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.0` or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. It exposes nine terminal commands but does not add a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
 
 ## Handle errors
 

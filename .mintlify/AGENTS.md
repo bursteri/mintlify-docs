@@ -77,6 +77,11 @@ after the customer-visible implementation is merged and shipped.
   authorization.
 - Bold UI labels, for example **Account**. Format file names, commands, paths,
   API fields, statuses, and code references as code when they are not UI text.
+- Link published package and package-manager mentions to the canonical package
+  page whenever the format supports links: npmjs.com for npm packages, PyPI for
+  Python packages, pkg.go.dev for Go modules, and the official tap for Homebrew.
+  Keep install commands literal and place the package link immediately before
+  or after each command block.
 - Avoid vague marketing claims. Prefer concrete behavior, constraints, inputs,
   outputs, and failure modes.
 
