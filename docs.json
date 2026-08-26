@@ -63,6 +63,7 @@
           {
             "group": "Reference",
             "pages": [
+              "reference/authentication",
               "reference/statuses-and-terms"
             ]
           }
@@ -171,7 +172,6 @@
     "options": [
       "copy",
       "view",
-      "assistant",
       "chatgpt",
       "claude",
       "perplexity"

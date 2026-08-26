@@ -11,6 +11,10 @@ https://plainrouter.com/mcp
 
 PlainRouter MCP uses owner-issued workspace execution tokens. Each token binds the client to one workspace, one Meta ad account, and an explicit access tier.
 
+If you are choosing between a Signal tracker secret, workspace execution token,
+or OAuth management credential, see [Authentication and
+clients](/reference/authentication).
+
 <Warning>
   OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Use a workspace token for every MCP tool call.
 </Warning>

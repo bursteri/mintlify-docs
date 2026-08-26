@@ -1,0 +1,165 @@
+---
+title: "Authentication and clients"
+description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, CLI, MCP, or management-discovery requests."
+---
+
+PlainRouter uses one credential for the Signals Conversion API, one credential
+for MCP execution, and one narrowly scoped credential for management discovery.
+REST, TypeScript, Python, and the CLI are four interfaces to the same Conversion
+API and all use the same per-Signal tracker secret.
+
+## Which credential should I use?
+
+| Goal | Interface | Credential | Scope |
+| --- | --- | --- | --- |
+| Send or read Signal data | REST, TypeScript SDK, Python SDK, or CLI | Signal tracker secret | One Signal tracker and its resources |
+| Call PlainRouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
+| Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
+| Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
+
+These credentials are not interchangeable. The Conversion API rejects workspace
+execution tokens and OAuth management credentials. MCP rejects Signal tracker
+secrets and OAuth management credentials.
+
+<Warning>
+  Never paste any PlainRouter credential into an agent prompt. Inject credentials
+  through your server-side secret manager or the client's protected credential
+  configuration.
+</Warning>
+
+## How do I authenticate the REST API?
+
+Send the Signal tracker secret as a bearer token to the server-side Conversion
+API at `https://plainrouter.com/api/v1`:
+
+```bash
+curl "https://plainrouter.com/api/v1/dashboard/events" \
+  --header "Authorization: Bearer $PLAINROUTER_TOKEN" \
+  --header "Accept: application/json"
+```
+
+`PLAINROUTER_TOKEN` must contain the per-Signal tracker secret. A missing or
+invalid secret returns HTTP `401`.
+
+## How do I authenticate the TypeScript SDK?
+
+Install `@plainrouter/sdk@0.3.1`, then configure the generated client explicitly:
+
+```ts
+import {
+  configurePlainrouter,
+  listEvents,
+} from "@plainrouter/sdk";
+
+configurePlainrouter({
+  signalTrackerSecret: process.env.PLAINROUTER_TOKEN!,
+});
+
+const result = await listEvents({
+  query: { per_page: 25 },
+});
+```
+
+The TypeScript SDK does not read environment variables automatically. Your
+server must pass the Signal tracker secret through `signalTrackerSecret`.
+
+## How do I authenticate the Python SDK?
+
+Install `plainrouter==0.3.1`, then create a client with the Signal tracker secret:
+
+```python
+import os
+
+from plainrouter import create_client, list_events
+
+client = create_client(os.environ["PLAINROUTER_TOKEN"])
+response = list_events.sync(client=client)
+```
+
+The Python SDK requires Python 3.11 or newer. Each operation module also exposes
+an asynchronous `asyncio` method.
+
+## How do I authenticate the CLI?
+
+The CLI uses the same Signal tracker secret. Store it through the hidden login
+prompt for an interactive workstation:
+
+```bash
+plainrouter auth login
+plainrouter auth status
+plainrouter events list --json
+```
+
+For CI or an ephemeral shell, inject `PLAINROUTER_TOKEN` through the job's secret
+manager before running the command. The CLI does not expose a `--token` option.
+An environment token takes precedence over the locally stored token.
+
+## How do I authenticate PlainRouter MCP?
+
+Configure an MCP-compatible client with these exact connection values:
+
+| Setting | Value |
+| --- | --- |
+| Transport | Remote HTTP |
+| Server URL | `https://plainrouter.com/mcp` |
+| Authorization | `Bearer <workspace-execution-token>` |
+
+A workspace owner issues the token from **Account** → **API** for one workspace,
+one active Meta ad account, one Read, Write, or Admin tier, and a 30, 90, or 365
+day expiry.
+
+Call `get_account_state` first. Confirm the returned workspace and Meta ad
+account before calling another tool. Tool arguments cannot override the account
+stored with the token.
+
+<Warning>
+  A Write or Admin token can submit governed proposals, but it does not bypass
+  policy, human approval, provider verification, or account restrictions. A
+  proposal-producing MCP request is not a direct Meta write.
+</Warning>
+
+## How do I use an OAuth management credential?
+
+An OAuth management credential has one documented agent-facing use:
+
+```http
+GET /api/v1/agent/context HTTP/1.1
+Host: plainrouter.com
+Authorization: Bearer <oauth-management-credential>
+Accept: application/json
+```
+
+The route returns the approved read-only account-discovery context. The same
+credential cannot call MCP tools, Launcher imports, or other agent-authenticated
+routes. Use a separately issued workspace execution token for MCP after
+discovery.
+
+## Which clients are available?
+
+| Client | Package or endpoint | Current version | Authentication |
+| --- | --- | --- | --- |
+| REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.3.1` | Signal tracker secret |
+| TypeScript | `@plainrouter/sdk` | `0.3.1` | Signal tracker secret passed to `configurePlainrouter` |
+| Python | `plainrouter` | `0.3.1` | Signal tracker secret passed to `create_client` |
+| CLI | `@plainrouter/cli` | `0.3.1` | Stored tracker token or `PLAINROUTER_TOKEN` |
+| MCP | `https://plainrouter.com/mcp` | Server `0.3.0` | Workspace execution token |
+
+The REST contract and both SDKs expose ten Conversion API operations. CLI
+`0.3.1` exposes nine commands and does not include an ingestion-verification
+command. Use REST, either SDK, or MCP for ingestion verification.
+
+## Which credentials must not be confused?
+
+- A Signal tracker secret cannot authenticate MCP.
+- A workspace execution token cannot authenticate the Conversion API.
+- An OAuth management credential cannot authenticate MCP.
+- A browser session cannot replace an API or MCP bearer credential.
+- A same-origin Path B forwarding secret authenticates generated forwarding
+  infrastructure only. It is not an API, SDK, CLI, or MCP credential.
+- Meta access tokens remain on the PlainRouter server. Do not place a Meta token
+  in a PlainRouter client configuration.
+
+For complete request and response fields, use the [Conversion API
+reference](/reference/conversion-api). For token tiers and lifecycle, use
+[Workspace tokens](/actions/workspace-tokens). For available agent tools, use
+the [MCP tool reference](/reference/mcp-tools).

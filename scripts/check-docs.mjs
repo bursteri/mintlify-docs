@@ -197,7 +197,6 @@ for (const file of mdxFiles) {
 
 for (const required of [
   ".mintlify/AGENTS.md",
-  ".mintlify/Assistant.md",
   ".mintlify/skills/plainrouter/SKILL.md",
 ]) {
   if (!existsSync(join(root, required))) {

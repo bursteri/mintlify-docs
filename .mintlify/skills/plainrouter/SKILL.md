@@ -20,6 +20,9 @@ the token-bound workspace and Meta ad account.
 
 ## Select the correct credential
 
+Use [Authentication and clients](/reference/authentication) as the canonical
+decision guide and copy-ready client reference.
+
 | Credential | Use it for | Do not use it for |
 | --- | --- | --- |
 | Signal tracker secret | Signals Conversion API calls | MCP or interactive workspace management |
