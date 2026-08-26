@@ -64,6 +64,8 @@
             "group": "Reference",
             "pages": [
               "reference/authentication",
+              "reference/api-resource-index",
+              "reference/api-catalog",
               "reference/statuses-and-terms"
             ]
           }

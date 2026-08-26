@@ -1,0 +1,51 @@
+---
+title: "API resource index"
+description: "Give an agent one compact, public index of PlainRouter's Conversion API, authentication, OpenAPI, MCP, and discovery resources."
+---
+
+Use the API resource index when an agent needs a short, heading-led map of
+PlainRouter's developer surfaces before choosing an interface or credential.
+The index is public, requires no authentication, and does not perform any
+product action.
+
+Fetch the canonical resource from:
+
+```text
+https://plainrouter.com/api/llms.txt
+```
+
+This Mintlify explanation is also available as a Markdown page at
+`/reference/api-resource-index.md`.
+
+## What does the index contain?
+
+The index identifies these current entry points:
+
+| Resource | Use it for |
+| --- | --- |
+| Conversion API base URL | Send authenticated Signals requests. |
+| API documentation | Read the server-side request, authentication, and retry contract. |
+| Versioning policy | Check compatibility, deprecation, and sunset behavior. |
+| Signed OpenAPI specification | Inspect schemas or generate a compatible client. |
+| Authentication guide | Select the correct credential for REST, SDK, CLI, MCP, or management discovery. |
+| Webhook guide | Verify supported webhook requests before accepting them. |
+| RFC 9727 API catalog | Follow typed relations to API, MCP, documentation, specification, and status resources. |
+| OAuth metadata and MCP manifests | Discover the protected resource and connect an approved agent client. |
+
+The response uses `text/plain; charset=UTF-8`. Its Markdown-compatible headings
+and links allow an agent to parse the index without rendering HTML.
+
+## Which discovery resource should I use?
+
+- Start with this index when you need a readable inventory.
+- Use the [RFC 9727 API catalog](/reference/api-catalog) when software needs
+  typed link relations.
+- Use the [signed OpenAPI specification](/reference/conversion-api#use-the-signed-openapi-contract)
+  when software needs operation and schema details.
+- Use [Authentication and clients](/reference/authentication) before sending a
+  credential.
+
+<Warning>
+  Discovery does not grant access. Never infer a credential, workspace, Meta ad
+  account, permission, or approval from a public resource.
+</Warning>

@@ -23,6 +23,14 @@ the token-bound workspace and Meta ad account.
 Use [Authentication and clients](/reference/authentication) as the canonical
 decision guide and copy-ready client reference.
 
+For public discovery, use the [API resource
+index](/reference/api-resource-index) as the readable inventory and the [RFC
+9727 API catalog](/reference/api-catalog) for typed relations. Link to these
+Mintlify pages when explaining discovery so agents can fetch their automatic
+`.md` twins. Treat `https://plainrouter.com/api/llms.txt` and
+`https://plainrouter.com/.well-known/api-catalog` as the underlying machine
+resources, not as substitutes for the explanatory documentation pages.
+
 | Credential | Use it for | Do not use it for |
 | --- | --- | --- |
 | Signal tracker secret | Signals Conversion API calls | MCP or interactive workspace management |

@@ -104,6 +104,29 @@ for (const page of mdxPages) {
   }
 }
 
+const requiredDiscoveryPages = new Map([
+  [
+    "reference/api-resource-index",
+    "https://plainrouter.com/api/llms.txt",
+  ],
+  [
+    "reference/api-catalog",
+    "https://plainrouter.com/.well-known/api-catalog",
+  ],
+]);
+
+for (const [page, canonicalResource] of requiredDiscoveryPages) {
+  if (!configuredPages.has(page)) {
+    fail(`Agent discovery page is missing from navigation: ${page}.mdx`);
+    continue;
+  }
+
+  const source = readFileSync(join(root, `${page}.mdx`), "utf8");
+  if (!source.includes(canonicalResource)) {
+    fail(`${page}.mdx must identify its canonical machine resource`);
+  }
+}
+
 const anchorsByPage = new Map();
 
 for (const file of mdxFiles) {

@@ -1,0 +1,55 @@
+---
+title: "RFC 9727 API catalog"
+description: "Discover PlainRouter's API, MCP, OpenAPI, documentation, and status relations through its public RFC 9727 linkset."
+---
+
+Use the API catalog when an agent or integration needs a typed,
+machine-readable map of PlainRouter's public API resources. The catalog is
+public, requires no authentication, and does not perform any product action.
+
+Fetch the canonical RFC 9727 linkset from:
+
+```text
+https://plainrouter.com/.well-known/api-catalog
+```
+
+The response uses `application/linkset+json` with the RFC 9727 profile. This
+Mintlify explanation is also available as a Markdown page at
+`/reference/api-catalog.md`.
+
+## Which relations does the catalog publish?
+
+The catalog anchors its relations at `https://plainrouter.com/api/v1` and
+publishes:
+
+| Relation | Target | Meaning |
+| --- | --- | --- |
+| `item` | `https://plainrouter.com/api/v1` | Conversion API entry point. |
+| `item` | `https://plainrouter.com/mcp` | Streamable HTTP MCP endpoint. |
+| `service-desc` | `https://plainrouter.com/openapi.json` | Signed OpenAPI 3.1 description. |
+| `service-doc` | `https://plainrouter.com/api/docs` | Conversion API documentation in Markdown. |
+| `service-doc` | `https://plainrouter.com/api/versioning` | Versioning and deprecation policy in Markdown. |
+| `status` | `https://plainrouter.com/up` | Public service-status endpoint. |
+
+Treat each relation according to its declared media type. The catalog describes
+where resources are; it does not replace the OpenAPI contract, authentication
+guide, or MCP tool reference.
+
+## How should an agent use the catalog?
+
+1. Fetch the catalog without a credential.
+2. Select a relation based on the task and declared media type.
+3. Read [Authentication and clients](/reference/authentication) before sending
+   any bearer credential.
+4. Confirm the token-bound workspace and Meta ad account before using MCP.
+5. Treat every proposal, approval, provider write, and verification as a
+   separate governed state.
+
+For a compact human- and agent-readable inventory, use the [API resource
+index](/reference/api-resource-index). For request and response schemas, use the
+[Conversion API reference](/reference/conversion-api).
+
+<Warning>
+  A catalog relation is discovery metadata, not authorization. Never send a
+  credential to a URL solely because it appears in a public catalog.
+</Warning>
