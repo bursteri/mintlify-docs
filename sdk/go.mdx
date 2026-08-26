@@ -1,0 +1,64 @@
+---
+title: "Go SDK"
+description: "Install and authenticate the generated PlainRouter Go client for the Signals Conversion API."
+---
+
+`github.com/plainrouter/sdk-go` is the official Go SDK generated from PlainRouter's signed OpenAPI contract. Release `v0.5.0` targets signed API contract `0.5.0`.
+
+## Requirements
+
+- Go 1.23 or newer.
+- A per-Signal tracker secret.
+- Server-side code. Do not put the tracker secret in browser or distributed client code.
+
+## Install
+
+```bash
+go get github.com/plainrouter/sdk-go@v0.5.0
+```
+
+Review the release and generated source in [`plainrouter/sdk-go`](https://github.com/plainrouter/sdk-go).
+
+## Create an authenticated client
+
+Pass the Signal tracker secret through the request context:
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	plainrouter "github.com/plainrouter/sdk-go"
+)
+
+func main() {
+	config := plainrouter.NewConfiguration()
+	client := plainrouter.NewAPIClient(config)
+	ctx := context.WithValue(
+		context.Background(),
+		plainrouter.ContextAccessToken,
+		"YOUR_SIGNAL_TRACKER_SECRET",
+	)
+
+	report, _, err := client.OperationsAPI.GetEmqReport(ctx).Execute()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("%+v", report)
+}
+```
+
+Load the secret from your environment or secret manager rather than writing it in source code. The Go SDK does not accept an MCP workspace token or OAuth management credential.
+
+## Configure another API origin
+
+The generated configuration defaults to the PlainRouter Conversion API. Override its server only for a PlainRouter-provided region or a controlled test environment.
+
+## Handle credentials safely
+
+Keep the Signal tracker secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
+
+For operation names and request fields, use the [Conversion API reference](/reference/conversion-api).

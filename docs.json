@@ -107,6 +107,12 @@
             ]
           },
           {
+            "group": "Go SDK",
+            "pages": [
+              "sdk/go"
+            ]
+          },
+          {
             "group": "CLI",
             "pages": [
               "cli/quickstart",
@@ -158,7 +164,7 @@
         },
         {
           "anchor": "Agent repository",
-          "href": "https://github.com/wudaku/plainrouter-sdk",
+          "href": "https://github.com/plainrouter/sdk",
           "icon": "github"
         }
       ]

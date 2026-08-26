@@ -5,10 +5,10 @@ description: "Install the PlainRouter CLI, store a Signal tracker token, and run
 
 The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` command. Every API command delegates to the matching operation in `@plainrouter/sdk`.
 
-The current npm release is `0.3.1` and uses `@plainrouter/sdk` `0.3.1`. Review release notes before upgrading while the CLI remains in the `0.x` series.
+The current [npm release](https://www.npmjs.com/package/@plainrouter/cli) is `0.5.0` and uses `@plainrouter/sdk` `0.5.0`. Review release notes before upgrading while the CLI remains in the `0.x` series.
 
 <Note>
-  CLI `0.3.1` can create events with the current consent contract. It does not expose an ingestion-verification command; use the TypeScript or Python SDK, direct REST, or MCP for that operation.
+  CLI `0.5.0` can create events with the current consent contract. It does not expose an ingestion-verification command; use the TypeScript, Python, or Go SDK, direct REST, or MCP for that operation.
 </Note>
 
 ## Requirements
@@ -16,10 +16,20 @@ The current npm release is `0.3.1` and uses `@plainrouter/sdk` `0.3.1`. Review r
 - Node.js `22.22.2` or later in the Node 22 release line.
 - A per-Signal tracker secret.
 
-## Install
+## Install with Homebrew
+
+Install from the official [`plainrouter/homebrew-tap`](https://github.com/plainrouter/homebrew-tap):
 
 ```bash
-npm install --global @plainrouter/cli
+brew install plainrouter/tap/plainrouter
+```
+
+The formula supports Homebrew on macOS and Linux and installs the required Node.js runtime.
+
+## Install with npm
+
+```bash
+npm install --global @plainrouter/cli@0.5.0
 ```
 
 Confirm the command is available:

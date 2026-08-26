@@ -1,11 +1,11 @@
 ---
 title: "Authentication and clients"
-description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, CLI, MCP, or management-discovery requests."
+description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Go, CLI, MCP, or management-discovery requests."
 ---
 
 PlainRouter uses one credential for the Signals Conversion API, one credential
 for MCP execution, and one narrowly scoped credential for management discovery.
-REST, TypeScript, Python, and the CLI are four interfaces to the same Conversion
+REST, TypeScript, Python, Go, and the CLI are five interfaces to the same Conversion
 API and all use the same per-Signal tracker secret.
 
 ## Which credential should I use?
@@ -43,7 +43,7 @@ invalid secret returns HTTP `401`.
 
 ## How do I authenticate the TypeScript SDK?
 
-Install `@plainrouter/sdk@0.3.1`, then configure the generated client explicitly:
+Install `@plainrouter/sdk@0.5.0`, then configure the generated client explicitly:
 
 ```ts
 import {
@@ -65,7 +65,7 @@ server must pass the Signal tracker secret through `signalTrackerSecret`.
 
 ## How do I authenticate the Python SDK?
 
-Install `plainrouter==0.3.1`, then create a client with the Signal tracker secret:
+Install `plainrouter==0.5.0`, then create a client with the Signal tracker secret:
 
 ```python
 import os
@@ -78,6 +78,24 @@ response = list_events.sync(client=client)
 
 The Python SDK requires Python 3.11 or newer. Each operation module also exposes
 an asynchronous `asyncio` method.
+
+## How do I authenticate the Go SDK?
+
+Install `github.com/plainrouter/sdk-go@v0.5.0`, create the generated client, and attach the Signal tracker secret to the request context:
+
+```go
+config := plainrouter.NewConfiguration()
+client := plainrouter.NewAPIClient(config)
+ctx := context.WithValue(
+	context.Background(),
+	plainrouter.ContextAccessToken,
+	os.Getenv("PLAINROUTER_TOKEN"),
+)
+
+report, _, err := client.OperationsAPI.GetEmqReport(ctx).Execute()
+```
+
+The Go SDK requires Go 1.23 or newer. Keep the tracker secret in server-side credential storage.
 
 ## How do I authenticate the CLI?
 
@@ -138,15 +156,16 @@ discovery.
 
 | Client | Package or endpoint | Current version | Authentication |
 | --- | --- | --- | --- |
-| REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.3.1` | Signal tracker secret |
-| TypeScript | `@plainrouter/sdk` | `0.3.1` | Signal tracker secret passed to `configurePlainrouter` |
-| Python | `plainrouter` | `0.3.1` | Signal tracker secret passed to `create_client` |
-| CLI | `@plainrouter/cli` | `0.3.1` | Stored tracker token or `PLAINROUTER_TOKEN` |
+| REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signal tracker secret |
+| TypeScript | `@plainrouter/sdk` | `0.5.0` | Signal tracker secret passed to `configurePlainrouter` |
+| Python | `plainrouter` | `0.5.0` | Signal tracker secret passed to `create_client` |
+| Go | `github.com/plainrouter/sdk-go` | `v0.5.0` | Signal tracker secret attached to the request context |
+| CLI | `@plainrouter/cli` or `plainrouter/tap/plainrouter` | `0.5.0` | Stored tracker token or `PLAINROUTER_TOKEN` |
 | MCP | `https://plainrouter.com/mcp` | Server `0.3.0` | Workspace execution token |
 
-The REST contract and both SDKs expose ten Conversion API operations. CLI
-`0.3.1` exposes nine commands and does not include an ingestion-verification
-command. Use REST, either SDK, or MCP for ingestion verification.
+The REST contract and all three SDKs expose ten Conversion API operations. CLI
+`0.5.0` exposes nine commands and does not include an ingestion-verification
+command. Use REST, an SDK, or MCP for ingestion verification.
 
 ## Which credentials must not be confused?
 
