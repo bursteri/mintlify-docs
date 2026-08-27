@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Requires a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-08-26"
+  documentation_revision: "2026-08-27"
 ---
 
 # Use PlainRouter safely
@@ -20,14 +20,17 @@ the token-bound workspace and Meta ad account.
 
 ## Select the correct credential
 
-Use [Authentication and clients](/auth) as the canonical
-decision guide and copy-ready client reference.
+Use
+[Authentication and clients](https://plainrouter.com/docs/auth)
+as the canonical decision guide and copy-ready client reference.
 
-For public discovery, use the [API resource
-index](/reference/api-resource-index) as the readable inventory and the [RFC
-9727 API catalog](/reference/api-catalog) for typed relations. Link to these
-Mintlify pages when explaining discovery so agents can fetch their automatic
-`.md` twins. Treat `https://plainrouter.com/api/llms.txt` and
+For public discovery, use the
+[API resource index](https://plainrouter.com/docs/reference/api-resource-index)
+as the readable inventory and the
+[RFC 9727 API catalog](https://plainrouter.com/docs/reference/api-catalog)
+for typed relations. Link to these Mintlify pages when explaining discovery so
+agents can fetch their automatic `.md` twins. Treat
+`https://plainrouter.com/api/llms.txt` and
 `https://plainrouter.com/.well-known/api-catalog` as the underlying machine
 resources, not as substitutes for the explanatory documentation pages.
 
@@ -74,9 +77,12 @@ from **Account** → **API**.
 5. Report whether the history is measurable before quoting any counts, gap, or
    alignment value.
 
-Read the [Signals overview](/signals/overview), [ingestion verification
-guide](/signals/verify-ingestion), and [health and performance
-guide](/signals/health-and-performance) for setup and interpretation.
+Read the
+[Signals overview](https://plainrouter.com/docs/signals/overview),
+[ingestion verification guide](https://plainrouter.com/docs/signals/verify-ingestion),
+and
+[health and performance guide](https://plainrouter.com/docs/signals/health-and-performance)
+for setup and interpretation.
 
 ## Create an evidence-backed action proposal
 
@@ -92,9 +98,10 @@ guide](/signals/health-and-performance) for setup and interpretation.
    approval queue URL. Describe the result as suggest-only, pending approval,
    blocked, awaiting verification, Landed, or Not Landed as applicable.
 
-Read [Actions overview](/actions/overview), [policy and
-safety](/actions/policies-and-safety), and [proposal
-review](/actions/review-proposals) before representing execution consequences.
+Read [Actions overview](https://plainrouter.com/docs/actions/overview),
+[policy and safety](https://plainrouter.com/docs/actions/policies-and-safety),
+and [proposal review](https://plainrouter.com/docs/actions/review-proposals)
+before representing execution consequences.
 
 ## Propose a creative variant
 
@@ -108,8 +115,9 @@ review](/actions/review-proposals) before representing execution consequences.
 5. Send the person to the returned approval queue. Do not claim that the MCP
    request changed Meta.
 
-Read [Create governed Meta creatives](/actions/creative-workflow) for upload,
-verification, retry, and compensation behavior.
+Read
+[Create governed Meta creatives](https://plainrouter.com/docs/actions/creative-workflow)
+for upload, verification, retry, and compensation behavior.
 
 ## Prepare and inspect a Launcher draft
 
@@ -126,6 +134,8 @@ verification, retry, and compensation behavior.
 6. Do not call `launcher.execute_batch` expecting execution during Phase B-1;
    the entry is closed and non-mutating.
 
-Read [Connect Google Drive](/launcher/connect-drive), [Import a Launcher draft
-batch](/launcher/import-draft-batch), and the [MCP tool
-reference](/reference/mcp-tools) for current limits and refusal codes.
+Read
+[Connect Google Drive](https://plainrouter.com/docs/launcher/connect-drive),
+[Import a Launcher draft batch](https://plainrouter.com/docs/launcher/import-draft-batch),
+and the [MCP tool reference](https://plainrouter.com/docs/reference/mcp-tools)
+for current limits and refusal codes.

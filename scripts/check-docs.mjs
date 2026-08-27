@@ -219,12 +219,39 @@ for (const file of mdxFiles) {
   }
 }
 
-for (const required of [
+const agentReadinessFiles = [
   ".mintlify/AGENTS.md",
   ".mintlify/skills/plainrouter/SKILL.md",
-]) {
+];
+
+for (const required of agentReadinessFiles) {
   if (!existsSync(join(root, required))) {
     fail(`Missing agent-readiness file: ${required}`);
+  }
+}
+
+const skillPath = join(root, ".mintlify/skills/plainrouter/SKILL.md");
+if (existsSync(skillPath)) {
+  const skillSource = readFileSync(skillPath, "utf8");
+
+  for (const link of skillSource.matchAll(/\[[^\]]+\]\(([^)\s]+)\)/g)) {
+    const target = link[1];
+
+    if (target.startsWith("/")) {
+      fail(`PlainRouter skill link must be an absolute URL: ${target}`);
+      continue;
+    }
+
+    if (!target.startsWith("https://plainrouter.com/docs")) continue;
+
+    const url = new URL(target);
+    const targetPage = url.pathname === "/docs"
+      ? "index"
+      : url.pathname.slice("/docs/".length).replace(/\.md$/, "");
+
+    if (!mdxPages.has(targetPage)) {
+      fail(`PlainRouter skill links to missing documentation page: ${target}`);
+    }
   }
 }
 
