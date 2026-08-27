@@ -19,7 +19,7 @@ see [Authentication and clients](/auth).
 | [PlainRouter CLI](/cli/quickstart) | You want to test an operation or run an operational script from a terminal. |
 | OpenAPI contract | You want to inspect the complete schema or generate another compatible client. |
 
-The signed REST contract, TypeScript SDK, Python SDK, Go SDK, and CLI are published at version `0.5.0`. See [Client releases](#client-releases) for the CLI's command boundary.
+The signed REST contract, TypeScript SDK, Go SDK, and npm CLI are published at version `0.5.0`. Python package `0.5.1` targets the same signed contract and adds the PyPI CLI distribution. See [Client releases](#client-releases) for the CLI's command boundary.
 
 ## Authenticate
 
@@ -124,9 +124,9 @@ Generate clients only from a signed document. Pin the generated SDK or CLI versi
 
 ## Client releases
 
-The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.0`](https://pypi.org/project/plainrouter/), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) are generated from the signed ten-operation contract. All three expose ingestion verification and the required event consent fields.
+The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) are generated from the signed `0.5.0` ten-operation contract. All three expose ingestion verification and the required event consent fields.
 
-The CLI [`@plainrouter/cli@0.5.0`](https://www.npmjs.com/package/@plainrouter/cli) uses the current TypeScript SDK and can send the consent-aware event shape. Install it from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.0` or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. It exposes nine terminal commands but does not add a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
+Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx install plainrouter==0.5.1`, from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.0`, or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. The PyPI and npm distributions expose the same nine terminal commands and consent-aware event shape. Neither adds a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
 
 ## Handle errors
 

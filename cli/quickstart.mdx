@@ -3,18 +3,28 @@ title: "CLI quickstart"
 description: "Install the PlainRouter CLI, store a Signal tracker token, and run your first command."
 ---
 
-The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` command. Every API command delegates to the matching operation in [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk).
+The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` command. Install the command from [PyPI](https://pypi.org/project/plainrouter/), [npm](https://www.npmjs.com/package/@plainrouter/cli), or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap).
 
-The current [npm release](https://www.npmjs.com/package/@plainrouter/cli) is `0.5.0` and uses `@plainrouter/sdk` `0.5.0`. Review release notes before upgrading while the CLI remains in the `0.x` series.
+The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.1` and includes both the Python SDK and CLI. The current [npm release](https://www.npmjs.com/package/@plainrouter/cli) is `0.5.0` and uses `@plainrouter/sdk` `0.5.0`. Both distributions expose the same command tree and target signed API contract `0.5.0`.
 
 <Note>
-  CLI `0.5.0` can create events with the current consent contract. It does not expose an ingestion-verification command; use the TypeScript, Python, or Go SDK, direct REST, or MCP for that operation.
+  The PyPI and npm CLI distributions can create events with the current consent contract. They do not expose an ingestion-verification command; use the TypeScript, Python, or Go SDK, direct REST, or MCP for that operation.
 </Note>
 
 ## Requirements
 
-- Node.js `22.22.2` or later in the Node 22 release line.
+- Python 3.11 or newer for the PyPI package, or Node.js `22.22.2` or later in the Node 22 release line for npm.
 - A per-Signal tracker secret.
+
+## Install with [PyPI](https://pypi.org/project/plainrouter/)
+
+Use [`pipx`](https://pipx.pypa.io/) to install the CLI in an isolated Python environment:
+
+```bash
+pipx install plainrouter==0.5.1
+```
+
+The same package also exposes the Python SDK. From an active environment, you can run `python -m plainrouter` instead of the console command.
 
 ## Install with [Homebrew](https://brew.sh/)
 
@@ -40,6 +50,8 @@ Confirm the command is available:
 plainrouter --version
 plainrouter --help
 ```
+
+Keep only one global PlainRouter CLI installation on your `PATH`. If you install from more than one package manager, your shell may select a different distribution than the one you intended.
 
 ## Sign in with a tracker token
 
