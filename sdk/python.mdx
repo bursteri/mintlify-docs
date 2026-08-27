@@ -1,11 +1,11 @@
 ---
-title: "Python SDK"
-description: "Use the generated plainrouter Python client with the Signals Conversion API."
+title: "Python SDK and CLI"
+description: "Use the generated plainrouter Python client or install its command-line interface from PyPI."
 ---
 
-[`plainrouter`](https://pypi.org/project/plainrouter/) is the generated Python SDK for PlainRouter's signed OpenAPI contract. It exposes synchronous and asynchronous clients for all ten Conversion API operations.
+[`plainrouter`](https://pypi.org/project/plainrouter/) contains the generated Python SDK and the `plainrouter` command-line interface. The SDK exposes synchronous and asynchronous clients for all ten Conversion API operations. The CLI exposes nine operational commands.
 
-The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.0` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/python).
+The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.1` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/python).
 
 ## Requirements
 
@@ -16,8 +16,17 @@ The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.0` and
 ## Install
 
 ```bash
-python -m pip install plainrouter==0.5.0
+python -m pip install plainrouter==0.5.1
 ```
+
+For command-line use, install the package in an isolated environment with [`pipx`](https://pipx.pypa.io/):
+
+```bash
+pipx install plainrouter==0.5.1
+plainrouter --help
+```
+
+You can also run `python -m plainrouter` from an active environment. See the [CLI quickstart](/cli/quickstart) for authentication, configuration, and command examples.
 
 ## Create a client
 

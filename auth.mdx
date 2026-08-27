@@ -65,7 +65,7 @@ server must pass the Signal tracker secret through `signalTrackerSecret`.
 
 ## How do I authenticate the Python SDK?
 
-Install `plainrouter==0.5.0`, then create a client with the Signal tracker secret:
+Install [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), then create a client with the Signal tracker secret:
 
 ```python
 import os
@@ -158,13 +158,13 @@ discovery.
 | --- | --- | --- | --- |
 | REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signal tracker secret |
 | TypeScript | `@plainrouter/sdk` | `0.5.0` | Signal tracker secret passed to `configurePlainrouter` |
-| Python | `plainrouter` | `0.5.0` | Signal tracker secret passed to `create_client` |
+| Python | `plainrouter` | `0.5.1` | Signal tracker secret passed to `create_client` |
 | Go | `github.com/plainrouter/sdk-go` | `v0.5.0` | Signal tracker secret attached to the request context |
-| CLI | `@plainrouter/cli` or `plainrouter/tap/plainrouter` | `0.5.0` | Stored tracker token or `PLAINROUTER_TOKEN` |
+| CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.1`; npm `0.5.0` | Stored tracker token or `PLAINROUTER_TOKEN` |
 | MCP | `https://plainrouter.com/mcp` | Server `0.3.0` | Workspace execution token |
 
-The REST contract and all three SDKs expose ten Conversion API operations. CLI
-`0.5.0` exposes nine commands and does not include an ingestion-verification
+The REST contract and all three SDKs expose ten Conversion API operations. The
+PyPI and npm CLI distributions expose nine commands and do not include an ingestion-verification
 command. Use REST, an SDK, or MCP for ingestion verification.
 
 ## Which credentials must not be confused?
