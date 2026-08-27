@@ -1,18 +1,18 @@
 ---
 title: "PlainRouter auth docs"
-description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Go, CLI, MCP, or management-discovery requests."
+description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
 ---
 
 PlainRouter uses one credential for the Signals Conversion API, one credential
 for MCP execution, and one narrowly scoped credential for management discovery.
-REST, TypeScript, Python, Go, and the CLI are five interfaces to the same Conversion
+REST, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same Conversion
 API and all use the same per-Signal tracker secret.
 
 ## Which credential should I use?
 
 | Goal | Interface | Credential | Scope |
 | --- | --- | --- | --- |
-| Send or read Signal data | REST, TypeScript SDK, Python SDK, or CLI | Signal tracker secret | One Signal tracker and its resources |
+| Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signal tracker secret | One Signal tracker and its resources |
 | Call PlainRouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
@@ -78,6 +78,22 @@ response = list_events.sync(client=client)
 
 The Python SDK requires Python 3.11 or newer. Each operation module also exposes
 an asynchronous `asyncio` method.
+
+## How do I authenticate the Ruby SDK?
+
+Install [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Signal tracker secret:
+
+```ruby
+require "plainrouter"
+
+client = PlainRouter::Client.new(
+  token: ENV.fetch("PLAINROUTER_TOKEN")
+)
+
+events = client.operations.list_events(per_page: 25)
+```
+
+The Ruby SDK requires Ruby 3.2 or newer. The client sends the supplied tracker secret as a bearer token and does not read environment variables automatically.
 
 ## How do I authenticate the Go SDK?
 
@@ -159,11 +175,12 @@ discovery.
 | REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signal tracker secret |
 | TypeScript | `@plainrouter/sdk` | `0.5.0` | Signal tracker secret passed to `configurePlainrouter` |
 | Python | `plainrouter` | `0.5.0` | Signal tracker secret passed to `create_client` |
+| Ruby | `plainrouter-sdk` | `0.1.0` | Signal tracker secret passed to `PlainRouter::Client.new` |
 | Go | `github.com/plainrouter/sdk-go` | `v0.5.0` | Signal tracker secret attached to the request context |
 | CLI | `@plainrouter/cli` or `plainrouter/tap/plainrouter` | `0.5.0` | Stored tracker token or `PLAINROUTER_TOKEN` |
 | MCP | `https://plainrouter.com/mcp` | Server `0.3.0` | Workspace execution token |
 
-The REST contract and all three SDKs expose ten Conversion API operations. CLI
+The REST contract and all four SDKs expose the signed Conversion API operations. CLI
 `0.5.0` exposes nine commands and does not include an ingestion-verification
 command. Use REST, an SDK, or MCP for ingestion verification.
 
