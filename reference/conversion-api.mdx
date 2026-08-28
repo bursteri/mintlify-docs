@@ -15,11 +15,12 @@ see [Authentication and clients](/auth).
 | REST API | You want direct control over HTTP requests and responses. |
 | [TypeScript SDK](/sdk/typescript) | You want generated types, Zod schemas, and methods in Node.js application code. |
 | [Python SDK](/sdk/python) | You want generated synchronous and asynchronous operations in Python. |
+| [Ruby SDK](/sdk/ruby) | You want a compact Ruby client over the generated API. |
 | [Go SDK](/sdk/go) | You want a generated client for a Go service. |
 | [PlainRouter CLI](/cli/quickstart) | You want to test an operation or run an operational script from a terminal. |
 | OpenAPI contract | You want to inspect the complete schema or generate another compatible client. |
 
-The signed REST contract, TypeScript SDK, Go SDK, and npm CLI are published at version `0.5.0`. Python package `0.5.1` targets the same signed contract and adds the PyPI CLI distribution. See [Client releases](#client-releases) for the CLI's command boundary.
+The signed REST contract, TypeScript SDK, Go SDK, and npm CLI are published at version `0.5.0`. Python package `0.5.1` and Ruby SDK `0.1.0` target the same signed contract. The Python package also adds the PyPI CLI distribution. See [Client releases](#client-releases) for package links and the CLI's command boundary.
 
 ## Authenticate
 
@@ -124,7 +125,7 @@ Generate clients only from a signed document. Pin the generated SDK or CLI versi
 
 ## Client releases
 
-The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) are generated from the signed `0.5.0` ten-operation contract. All three expose ingestion verification and the required event consent fields.
+The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) are generated from the signed Conversion API contract `0.5.0`. All four expose ingestion verification and the required event consent fields.
 
 Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx install plainrouter==0.5.1`, from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.0`, or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. The PyPI and npm distributions expose the same nine terminal commands and consent-aware event shape. Neither adds a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
 

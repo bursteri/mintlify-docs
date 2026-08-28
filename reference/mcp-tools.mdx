@@ -1,9 +1,9 @@
 ---
 title: "PlainRouter MCP server"
-description: "Reference for the 12 account-scoped tools exposed by the PlainRouter MCP server."
+description: "Reference for the 13 production tools and four synthetic test-mode tools exposed by PlainRouter MCP."
 ---
 
-PlainRouter MCP server version `0.3.0` exposes exactly 12 tools. All use the advertising account selected during workspace-token issuance.
+PlainRouter MCP server version `0.3.2` exposes 13 production tools. Account-scoped tools use the advertising account selected during workspace-token issuance.
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -19,10 +19,32 @@ PlainRouter MCP server version `0.3.0` exposes exactly 12 tools. All use the adv
 | `launcher.batch_status` | Read-only, idempotent | Read the bounded status of one Launcher batch. |
 | `launcher.preview_batch` | Non-destructive PlainRouter write | Evaluate the authoritative preflight gate without provider work. |
 | `launcher.execute_batch` | Closed execution entry | Returns a bounded refusal during Launcher Phase B-1 and performs no mutation. |
+| `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
 
 <Warning>
   Proposal-producing tools do not write to Meta during the MCP request. In **Suggest only**, approval ends without execution. In an executable mode, supported creative work can run only after the policy and approval pipeline authorizes it.
 </Warning>
+
+## Test mode and production boundaries
+
+Use `https://plainrouter.com/mcp/sandbox` to prove an integration without an
+account or credential. It exposes four tools:
+
+| Tool | Purpose |
+| --- | --- |
+| `get_account_state` | Return an invented account, workspace, connection, and Signal destination. |
+| `get_signal_health` | Return synthetic event flow, delivery, and match-quality diagnostics. |
+| `get_performance` | Return synthetic reconciliation evidence for a requested 1–90 day window. |
+| `validate_sandbox_event` | Validate an identity-free synthetic conversion event. |
+
+Every result is marked with `"sandbox": true`. The endpoint reads no tenant
+data, writes nothing, and contacts no advertising provider. It does not expose
+production proposal, creative, approval, Launcher, or spend-affecting tools.
+
+The production endpoint is `https://plainrouter.com/mcp`. Its handshake, tool
+and resource catalogs, and static `ui://` MCP App shells are publicly
+discoverable. Every tool call and account-data read requires an account-bound
+workspace execution token.
 
 ## Shared authorization and scope
 
@@ -161,6 +183,18 @@ The tool writes one idempotent `signal_verification` event and returns:
 The event is identity-free, modeled, excluded from enforcement, and never dispatched to Meta. A repeated call returns the same event with `duplicate: true`. The tool has no spend capability.
 
 The call fails if the connection lacks `signals.verify` or the authorized workspace has no active Signal.
+
+## `show_spend_cap_approval`
+
+This read-only, idempotent tool renders the static
+`ui://resources/spend-cap-approval-app` MCP App preview. It accepts no input and
+returns only a confirmation that the preview card loaded.
+
+The card contains fixed demonstration values and is labeled **Preview — not a
+live control**. Its **Approve** and **Reject** buttons are disabled. The tool
+does not read an account, submit an approval, call another tool, persist data,
+contact Meta, or change spend. Use it only to verify that an MCP host can render
+PlainRouter's app presentation.
 
 ## `launcher.draft_batch`
 

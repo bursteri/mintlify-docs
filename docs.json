@@ -107,6 +107,12 @@
             ]
           },
           {
+            "group": "Ruby SDK",
+            "pages": [
+              "sdk/ruby"
+            ]
+          },
+          {
             "group": "Go SDK",
             "pages": [
               "sdk/go"

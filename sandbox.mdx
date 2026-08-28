@@ -20,6 +20,12 @@ An HTTP `200` response confirms that the sandbox is ready. The response includes
 
 One read-only request therefore gives you both a successful API response and working sandbox credentials.
 
+<Note>
+  Building an MCP client instead of a REST client? Connect directly to
+  `https://plainrouter.com/mcp/sandbox`. It needs no account or credential and
+  exposes four synthetic tools. [Start in MCP test mode](/actions/connect-agent#start-in-test-mode).
+</Note>
+
 ## Test an authenticated client
 
 Read the key from `self_serve_key.issued_key.api_key`, store it in a protected local environment variable, and send it as a bearer token:

@@ -6,11 +6,22 @@ rss: true
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+<Update label="August 28, 2026">
+
+  ## Signal channel reporting now follows consent scope
+
+  **Privacy** · The dashboard's channel subset now includes only attributed global arrivals and fully consented strict-EU arrivals. Portfolio, legitimate-interest revenue, and severed-measurement rows stay out of the channel split, while the separate total remains privacy-bounded. When a strict-EU passive total is below five, both the dashboard and CSV show `Suppressed (<5)` instead of the ledger count. [Interpret channels and totals](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+</Update>
+
 <Update label="August 27, 2026">
 
-  ## Install the PlainRouter CLI from PyPI
+  ## Ruby SDK and PyPI CLI expand the official clients
 
-  **New** · Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/) now includes the `plainrouter` command alongside the generated SDK. Install the isolated CLI with `pipx install plainrouter==0.5.1`, or run it as `python -m plainrouter` from an active environment. The PyPI and npm distributions expose the same nine-command interface and target signed API contract `0.5.0`. [Install the CLI](/cli/quickstart).
+  **New** · Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk) brings the signed Conversion API contract to Ruby 3.2 and newer. Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/) now also includes the `plainrouter` command: install it with `pipx install plainrouter==0.5.1` or run `python -m plainrouter` from an active environment. [Install the Ruby SDK](/sdk/ruby) or [choose a CLI distribution](/cli/quickstart).
+
+  ## MCP hosts can render an approval-card preview
+
+  **Preview** · The production MCP catalog now includes `show_spend_cap_approval`, a read-only MCP App presentation with fixed demonstration values and disabled controls. It performs no account read, approval, provider call, or spend change. [Review the preview boundary](/reference/mcp-tools#showspendcapapproval).
 </Update>
 
 <Update label="August 26, 2026">
@@ -22,6 +33,10 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   ## Try the API without an account
 
   **New** · The public sandbox now lets you validate an identity-free synthetic event without an account or credential. One read-only request also returns a short-lived sandbox key for testing bearer-authenticated client setup. Sandbox requests read no production data, persist nothing, and contact no advertising provider. [Try the sandbox](/sandbox).
+
+  ## Test MCP integrations without an account
+
+  **New** · `https://plainrouter.com/mcp/sandbox` exposes synthetic `get_account_state`, `get_signal_health`, `get_performance`, and `validate_sandbox_event` calls without a credential or human step. The endpoint is separate from account-bound production MCP, exposes no proposal or spend tools, stores nothing, and contacts no advertising provider. [Start in MCP test mode](/actions/connect-agent#start-in-test-mode).
 </Update>
 
 <Update label="August 25, 2026">

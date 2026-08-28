@@ -1,11 +1,11 @@
 ---
 name: plainrouter
-description: Configure PlainRouter Signals, connect account-bound MCP clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
+description: Test PlainRouter MCP without credentials, connect account-bound production clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
 license: Proprietary
-compatibility: Requires a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
+compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-08-27"
+  documentation_revision: "2026-08-28"
 ---
 
 # Use PlainRouter safely
@@ -14,9 +14,28 @@ Use this skill when a person wants to configure PlainRouter Signals, connect an
 AI client to PlainRouter MCP, inspect Signal or creative state, create a
 governed advertising proposal, or prepare a Launcher draft.
 
-PlainRouter MCP is available at `https://plainrouter.com/mcp`. Every MCP
-workflow must begin with `get_account_state` so the person and agent can confirm
-the token-bound workspace and Meta ad account.
+PlainRouter MCP test mode is available at
+`https://plainrouter.com/mcp/sandbox`; production is available at
+`https://plainrouter.com/mcp`. Every production workflow must begin with
+`get_account_state` so the person and agent can confirm the token-bound
+workspace and Meta ad account.
+
+## Prove an integration without credentials
+
+Connect to `https://plainrouter.com/mcp/sandbox`. It needs no account,
+credential, or human step and exposes `get_account_state`,
+`get_signal_health`, `get_performance`, and `validate_sandbox_event` with
+synthetic responses marked `"sandbox": true`.
+
+Do not send personal data, customer identifiers, click identifiers, or
+production payloads. Test mode reads no tenant data, persists nothing, contacts
+no advertising provider, and exposes no proposal, write, approval, Launcher,
+or spend-affecting tool. When the client works, move it to the production URL
+and configure an account-bound workspace execution token.
+
+Read [Connect an AI agent](https://plainrouter.com/docs/actions/connect-agent)
+and the [MCP tool reference](https://plainrouter.com/docs/reference/mcp-tools)
+before moving from test mode to production.
 
 ## Select the correct credential
 

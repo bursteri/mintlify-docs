@@ -87,7 +87,7 @@ The **Arrivals vs platform-claimed clicks** panel compares customer-visible obse
 | **Difference** | Total arrivals minus platform-claimed clicks. |
 | **Difference vs claimed** | The difference as a percentage of platform-claimed clicks. It is unavailable when the claimed-click total is zero. |
 
-The channel table is intentionally a subset, not an allocation of total arrivals. It includes global rows and full-consent strict-EU rows; strict-EU passive rows never appear in the channel view.
+The channel table is intentionally a subset, not an allocation of total arrivals. It includes structurally attributed rows with a consent basis of `consent`: global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows never appear in the channel view. Admission follows the stored consent and enforcement scope rather than treating names such as `direct`, `unknown`, or `unattributed` as special cases.
 
 Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. PlainRouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
 

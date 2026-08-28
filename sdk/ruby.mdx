@@ -1,0 +1,94 @@
+---
+title: "Ruby SDK"
+description: "Install and authenticate the plainrouter-sdk gem for the Signals Conversion API and zero-auth sandbox."
+---
+
+[`plainrouter-sdk`](https://rubygems.org/gems/plainrouter-sdk) is the official Ruby SDK for PlainRouter's signed OpenAPI contract. Gem `0.1.0` targets signed API contract `0.5.0` and exposes a compact client over the generated API.
+
+The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/ruby). Review release notes before upgrading while the gem remains in the `0.x` series.
+
+## Requirements
+
+- Ruby 3.2 or newer.
+- A per-Signal tracker secret for production Conversion API operations.
+- Server-side code. Do not put the tracker secret in browser or distributed client code.
+
+## Install
+
+Install [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk):
+
+```bash
+gem install plainrouter-sdk -v 0.1.0
+```
+
+Or add the gem to your `Gemfile`, then run `bundle install`:
+
+```ruby
+gem "plainrouter-sdk", "~> 0.1.0"
+```
+
+## Create an authenticated client
+
+Pass the Signal tracker secret when you create the client:
+
+```ruby
+require "plainrouter"
+
+client = PlainRouter::Client.new(
+  token: ENV.fetch("PLAINROUTER_TOKEN")
+)
+
+events = client.operations.list_events(per_page: 25)
+event = client.events.get_event("event-id")
+```
+
+The client sends the tracker secret as a bearer token. It does not read credentials from the environment automatically.
+
+## Choose an API group
+
+| Group | Use it for |
+| --- | --- |
+| `client.events` | Create or retrieve an event and verify Signal ingestion. |
+| `client.operations` | List events, control destination testing, replay deliveries, read reports, or delete user data. |
+| `client.sandbox` | Discover and validate identity-free synthetic requests without a production credential. |
+
+Generated models, API errors, configuration, response metadata, and every generated operation remain available under `PlainRouter::OpenAPI`.
+
+## Verify Signal ingestion
+
+```ruby
+result = client.events.verify_signal_ingestion
+```
+
+The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`.
+
+## Try the zero-auth sandbox
+
+Create a client without a token for sandbox discovery:
+
+```ruby
+sandbox = PlainRouter::Client.new
+example = sandbox.sandbox.get_sandbox
+```
+
+Sandbox operations accept only identity-free synthetic data. They do not read or write the production Signal ledger and do not contact an advertising provider. Read [Try the API without an account](/sandbox) before submitting a synthetic request.
+
+## Configure another API origin or timeout
+
+The default API base URL is `https://plainrouter.com/api/v1` and the default timeout is 30 seconds. Override either value only for a PlainRouter-provided region or a controlled test environment:
+
+```ruby
+client = PlainRouter::Client.new(
+  token: ENV.fetch("PLAINROUTER_TOKEN"),
+  base_url: "https://example.test/api/v1",
+  timeout: 20
+)
+```
+
+## Handle credentials safely
+
+The Ruby SDK accepts a Signal tracker secret for production Conversion API calls. It does not accept an MCP workspace token or OAuth management credential.
+
+Keep the secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
+
+For request and response fields, use the [Conversion API reference](/reference/conversion-api).

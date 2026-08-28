@@ -1,13 +1,14 @@
 ---
 title: "Connect an AI agent"
-description: "Connect an MCP-compatible client with an account-bound workspace execution token."
+description: "Test PlainRouter MCP without credentials, then connect production with an account-bound workspace execution token."
 ---
 
-PlainRouter exposes a remote Model Context Protocol server at:
+PlainRouter exposes two remote Model Context Protocol endpoints:
 
-```text
-https://plainrouter.com/mcp
-```
+| Endpoint | Use | Credential |
+| --- | --- | --- |
+| `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
+| `https://plainrouter.com/mcp` | Read one approved account and submit governed proposals. | Workspace execution token for tool calls and account data |
 
 PlainRouter MCP uses owner-issued workspace execution tokens. Each token binds the client to one workspace, one Meta ad account, and an explicit access tier.
 
@@ -18,6 +19,33 @@ clients](/auth).
 <Warning>
   OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Use a workspace token for every MCP tool call.
 </Warning>
+
+## Start in test mode
+
+Point the client at `https://plainrouter.com/mcp/sandbox`. No PlainRouter account,
+credential, or human approval is required.
+
+The endpoint exposes:
+
+- `get_account_state`
+- `get_signal_health`
+- `get_performance`
+- `validate_sandbox_event`
+
+Every response is synthetic and carries `"sandbox": true`. Test mode reads no
+tenant data, persists nothing, and contacts no advertising provider. It exposes
+no proposal, write, approval, Launcher, or spend-affecting tool.
+
+When the client can initialize, list tools, and call a sandbox tool, change its
+server URL to `https://plainrouter.com/mcp` and configure a workspace execution
+token. The three read-tool names and their argument shapes match production.
+
+<Note>
+  The production endpoint exposes its protocol handshake, tool and resource
+  catalogs, and static `ui://` app shells without a credential. Tool calls and
+  account-data reads remain account-bound and return HTTP `401` without a valid
+  workspace execution token.
+</Note>
 
 ## Before you begin
 

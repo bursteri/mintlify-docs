@@ -1,18 +1,22 @@
 ---
 title: "PlainRouter auth docs"
-description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Go, CLI, MCP, or management-discovery requests."
+description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
 ---
 
-PlainRouter uses one credential for the Signals Conversion API, one credential
-for MCP execution, and one narrowly scoped credential for management discovery.
-REST, TypeScript, Python, Go, and the CLI are five interfaces to the same Conversion
-API and all use the same per-Signal tracker secret.
+PlainRouter uses a per-Signal tracker secret for the Signals Conversion API, an
+account-bound workspace execution token for production MCP tool calls, and a
+narrowly scoped OAuth management credential for account discovery. Public MCP
+discovery and the synthetic MCP sandbox require no credential.
+
+REST, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same
+Conversion API and all use the same per-Signal tracker secret.
 
 ## Which credential should I use?
 
 | Goal | Interface | Credential | Scope |
 | --- | --- | --- | --- |
-| Send or read Signal data | REST, TypeScript SDK, Python SDK, or CLI | Signal tracker secret | One Signal tracker and its resources |
+| Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signal tracker secret | One Signal tracker and its resources |
+| Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
 | Call PlainRouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
@@ -79,6 +83,23 @@ response = list_events.sync(client=client)
 The Python SDK requires Python 3.11 or newer. Each operation module also exposes
 an asynchronous `asyncio` method.
 
+## How do I authenticate the Ruby SDK?
+
+Install [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Signal tracker secret:
+
+```ruby
+require "plainrouter"
+
+client = PlainRouter::Client.new(
+  token: ENV.fetch("PLAINROUTER_TOKEN")
+)
+
+events = client.operations.list_events(per_page: 25)
+```
+
+The Ruby SDK requires Ruby 3.2 or newer. The client sends the supplied tracker
+secret as a bearer token and does not read environment variables automatically.
+
 ## How do I authenticate the Go SDK?
 
 Install `github.com/plainrouter/sdk-go@v0.5.0`, create the generated client, and attach the Signal tracker secret to the request context:
@@ -111,6 +132,24 @@ plainrouter events list --json
 For CI or an ephemeral shell, inject `PLAINROUTER_TOKEN` through the job's secret
 manager before running the command. The CLI does not expose a `--token` option.
 An environment token takes precedence over the locally stored token.
+
+## How do I try MCP without a credential?
+
+Connect an MCP client to the synthetic test endpoint:
+
+```text
+https://plainrouter.com/mcp/sandbox
+```
+
+It exposes `get_account_state`, `get_signal_health`, `get_performance`, and
+`validate_sandbox_event`. Every response is synthetic and marked with
+`"sandbox": true`. The endpoint reads no tenant data, persists nothing, and
+contacts no advertising provider.
+
+The production endpoint also permits anonymous protocol discovery, tool and
+resource listing, and reads of static `ui://` app shells. Every production tool
+call and every account-data read still requires an account-bound workspace
+execution token.
 
 ## How do I authenticate PlainRouter MCP?
 
@@ -159,11 +198,13 @@ discovery.
 | REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signal tracker secret |
 | TypeScript | `@plainrouter/sdk` | `0.5.0` | Signal tracker secret passed to `configurePlainrouter` |
 | Python | `plainrouter` | `0.5.1` | Signal tracker secret passed to `create_client` |
+| Ruby | `plainrouter-sdk` | `0.1.0` | Signal tracker secret passed to `PlainRouter::Client.new` |
 | Go | `github.com/plainrouter/sdk-go` | `v0.5.0` | Signal tracker secret attached to the request context |
 | CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.1`; npm `0.5.0` | Stored tracker token or `PLAINROUTER_TOKEN` |
-| MCP | `https://plainrouter.com/mcp` | Server `0.3.0` | Workspace execution token |
+| MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.3.2` | None |
+| MCP production | `https://plainrouter.com/mcp` | Server `0.3.2` | Workspace execution token for tool calls and account data |
 
-The REST contract and all three SDKs expose ten Conversion API operations. The
+The REST contract and all four SDKs expose the signed Conversion API operations. The
 PyPI and npm CLI distributions expose nine commands and do not include an ingestion-verification
 command. Use REST, an SDK, or MCP for ingestion verification.
 
