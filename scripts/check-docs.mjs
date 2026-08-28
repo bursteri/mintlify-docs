@@ -81,6 +81,10 @@ if (!config.description?.trim()) {
   fail("docs.json must include a non-empty site description for generated llms.txt metadata");
 }
 
+if (config.navbar?.primary?.href !== "https://plainrouter.com/login") {
+  fail("The primary documentation CTA must link directly to /login without a redirect");
+}
+
 const tabs = config.navigation?.tabs;
 if (!Array.isArray(tabs) || tabs.at(-1)?.tab !== "Changelog") {
   fail("The Changelog tab must be last in docs.json navigation");
@@ -146,8 +150,9 @@ for (const file of mdxFiles) {
     }
   }
 
-  if ((parsed.fields.description?.length ?? 0) > 300) {
-    fail(`${page}.mdx description exceeds Mintlify's 300-character llms.txt limit`);
+  const descriptionLength = parsed.fields.description?.length ?? 0;
+  if (descriptionLength < 100 || descriptionLength > 160) {
+    fail(`${page}.mdx description must be between 100 and 160 characters`);
   }
 
   let previousLevel = 1;

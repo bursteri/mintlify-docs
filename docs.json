@@ -185,7 +185,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://plainrouter.com/dashboard"
+      "href": "https://plainrouter.com/login"
     }
   },
   "footer": {
