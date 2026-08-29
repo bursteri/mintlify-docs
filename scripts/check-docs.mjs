@@ -81,7 +81,7 @@ if (!config.description?.trim()) {
   fail("docs.json must include a non-empty site description for generated llms.txt metadata");
 }
 
-if (config.navbar?.primary?.href !== "https://plainrouter.com/login") {
+if (config.navbar?.primary?.href !== "/login") {
   fail("The primary documentation CTA must link directly to /login without a redirect");
 }
 
