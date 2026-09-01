@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="32" viewBox="0 0 180 32" role="img" aria-labelledby="title description">
   <title id="title">PlainRouter</title>
   <desc id="description">PlainRouter logo.</desc>
-  <g transform="translate(0 4)" fill="none" stroke="#FF5722" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+  <g transform="translate(0 4)" fill="none" stroke="#EA561F" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
     <path transform="translate(1 0)" d="M16 3h3a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-3" />
     <path d="M8 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h3" />
   </g>

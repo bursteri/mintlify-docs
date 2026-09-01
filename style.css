@@ -1,0 +1,11 @@
+html.dark #topbar-cta-button > a > span.absolute {
+  background-color: #fafafa;
+}
+
+html.dark #topbar-cta-button > a:hover > span.absolute {
+  background-color: #e4e4e7;
+}
+
+html.dark #topbar-cta-button > a > div * {
+  color: #171717;
+}
