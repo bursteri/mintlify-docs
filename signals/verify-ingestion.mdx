@@ -1,6 +1,6 @@
 ---
 title: "Verify Signal ingestion"
-description: "Complete Signal activation with an identity-free server verification event and confirm that PlainRouter accepts the tracker-scoped request."
+description: "Complete Signal activation with an identity-free server verification event and confirm that PlainRouter accepts the workspace-scoped request."
 ---
 
 After your collection hostname becomes active, PlainRouter requires one server-side verification event to confirm that Signal ingestion works end to end. Browser pixel traffic does not complete this activation check.
@@ -14,7 +14,7 @@ After your collection hostname becomes active, PlainRouter requires one server-s
 You need:
 
 - An active collection hostname.
-- Either the Signal tracker secret for REST authentication or an MCP connection with `signals.verify`.
+- Either the Signals workspace secret for REST authentication or an MCP connection with `signals.verify`.
 
 ## Verify with the REST API
 
@@ -68,7 +68,7 @@ You can then:
 
 ### The API returns `401`
 
-The Signal tracker secret is missing, invalid, or belongs to another environment. Confirm the bearer header and replace a stopped credential.
+The Signals workspace secret is missing, invalid, or belongs to another environment. Confirm the bearer header and replace a stopped credential.
 
 ### MCP reports insufficient permission
 

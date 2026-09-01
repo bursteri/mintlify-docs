@@ -9,6 +9,8 @@ Signals is PlainRouter's first-party conversion measurement layer. It receives w
   Your website sends one event to PlainRouter. PlainRouter records it, adds trusted request context at the edge, and routes eligible events to the destinations you connect.
 </Card>
 
+One workspace is one Signals tenant. The workspace owns the collection domain, publishable key, Signals API secret, identity retention, destination history, and event ledger.
+
 ## How data moves
 
 <Steps>
@@ -57,6 +59,12 @@ Signals applies consent before browser measurement or advertising delivery:
 Connect your consent-management platform by calling `signalq("consent", input)` with the structured permission state whenever the visitor's choice changes. See [Track events and consent](/signals/track-events) for examples.
 
 Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. PlainRouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
+
+## Identity retention
+
+When you provision Signals, choose 30 or 90 days for visitor identity retention. The default is 90 days. The selection applies to the workspace's retained visitor identity state; it does not widen the fixed retention limits of every ledger table.
+
+PlainRouter records the current retention instruction with its effective time, controller identity, selected value, selecting user, and optional justification and privacy-notice version. A retention change must pass the same server-side policy used by the dashboard and API. MCP does not expose a retention setter.
 
 ## Browser and server deduplication
 

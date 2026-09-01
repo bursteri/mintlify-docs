@@ -3,25 +3,25 @@ title: "Go SDK"
 description: "Install and authenticate the generated PlainRouter Go client, then send typed requests to the Signals Conversion API and zero-auth sandbox."
 ---
 
-[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from PlainRouter's signed OpenAPI contract. Release `v0.5.0` targets signed API contract `0.5.0`.
+[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from PlainRouter's signed OpenAPI contract. Release `v0.5.2` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
 
 ## Requirements
 
 - Go 1.23 or newer.
-- A per-Signal tracker secret.
-- Server-side code. Do not put the tracker secret in browser or distributed client code.
+- A Signals workspace secret.
+- Server-side code. Do not put the secret in browser or distributed client code.
 
 ## Install
 
 ```bash
-go get github.com/plainrouter/sdk-go@v0.5.0
+go get github.com/plainrouter/sdk-go@v0.5.2
 ```
 
 Review the package on [Go Packages](https://pkg.go.dev/github.com/plainrouter/sdk-go) and the generated source in [`plainrouter/sdk-go`](https://github.com/plainrouter/sdk-go).
 
 ## Create an authenticated client
 
-Pass the Signal tracker secret through the request context:
+Pass the Signals workspace secret through the request context:
 
 ```go
 package main
@@ -39,7 +39,7 @@ func main() {
 	ctx := context.WithValue(
 		context.Background(),
 		plainrouter.ContextAccessToken,
-		"YOUR_SIGNAL_TRACKER_SECRET",
+		"YOUR_SIGNALS_WORKSPACE_SECRET",
 	)
 
 	report, _, err := client.OperationsAPI.GetEmqReport(ctx).Execute()
@@ -51,7 +51,7 @@ func main() {
 }
 ```
 
-Load the secret from your environment or secret manager rather than writing it in source code. The Go SDK does not accept an MCP workspace token or OAuth management credential.
+Load the secret from your environment or secret manager rather than writing it in source code. The Go SDK does not accept an MCP workspace execution token or OAuth management credential.
 
 ## Configure another API origin
 
@@ -59,6 +59,6 @@ The generated configuration defaults to the PlainRouter Conversion API. Override
 
 ## Handle credentials safely
 
-Keep the Signal tracker secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
+Keep the Signals workspace secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
 
 For operation names and request fields, use the [Conversion API reference](/reference/conversion-api).

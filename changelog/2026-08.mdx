@@ -6,11 +6,49 @@ rss: true
 
 PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
+<Update label="August 30, 2026">
+
+  ## New accounts start directly in Signals setup
+
+  **Improved** · Email and supported social registrations now create the default workspace and open the canonical Signals setup flow immediately. Empty workspaces, Actions pages, and workspace settings also point to one honest next action instead of presenting dead-end tables. [Follow the self-serve quickstart](/quickstart).
+
+  ## Google Ads connection reaches Workspace Settings
+
+  **New** · When the Google Ads integration is configured, workspace owners can connect, reconnect, or disconnect Google Ads from **Workspace Settings**. PlainRouter stores the encrypted refresh credential and shows the customer IDs the connection can access. This connection does not turn Meta-only Actions into Google Ads execution.
+
+  ## The dashboard shows completed-month workspace usage
+
+  **New** · The workspace dashboard now shows arrivals and locally stored observed platform spend for the previous completed UTC month. Rendering the panel makes no live advertising-provider request, and incomplete spend or currency evidence appears as unavailable instead of an invented total.
+
+  ## Passive measurement stores less commerce detail
+
+  **Privacy** · Passive severed-measurement rows now round event and consent-capture times down to the UTC hour and omit product identifiers, quantities, and item counts. Amount, currency, and a workspace-keyed order reference remain available for aggregate measurement; passive rows still contain no visitor identity, URL, source, IP address, or user agent and never enter destination delivery. [Review passive activity handling](/signals/health-and-performance#events-received).
+</Update>
+
+<Update label="August 29, 2026">
+
+  ## Signals becomes workspace-native
+
+  **Improved** · Signals configuration and tenancy now belong directly to the workspace. Conversion API responses use numeric `workspace_id` as the canonical identifier and retain `signal_tracker_id` as a deprecated decimal-string alias. Published `0.5.x` SDKs can continue reading that compatibility alias until regenerated clients add the canonical field. [Read the identifier transition](/reference/conversion-api#read-workspace-identifiers).
+
+  ## Retention instructions become visible and auditable
+
+  **Privacy** · PlainRouter now records the current visitor-identity retention instruction with its effective time, controller identity, selected duration, selecting user, and supporting context. Existing workspaces without an instruction are reported as deliberately undocumented rather than receiving a fabricated historical record. [Review identity retention](/signals/overview#identity-retention).
+</Update>
+
 <Update label="August 28, 2026">
 
   ## Signal channel reporting now follows consent scope
 
   **Privacy** · The dashboard's channel subset now includes only attributed global arrivals and fully consented strict-EU arrivals. Portfolio, legitimate-interest revenue, and severed-measurement rows stay out of the channel split, while the separate total remains privacy-bounded. When a strict-EU passive total is below five, both the dashboard and CSV show `Suppressed (<5)` instead of the ledger count. [Interpret channels and totals](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+
+  ## Signals identity lookup becomes workspace-keyed
+
+  **Security** · PlainRouter now separates its private per-workspace identity lookup from the platform-format digests returned by `user_data_hashed`. User-data deletion accepts a verified raw identifier or legacy SHA-256 digest only in the JSON body and rejects identifiers placed in a URL query string. [Review deletion and identity fields](/reference/conversion-api#delete-retained-user-data).
+
+  ## Visitor identity retention is bounded to 30 or 90 days
+
+  **Privacy** · New and updated Signals configurations now use one fail-closed retention policy across the dashboard and API. The published choices are 30 and 90 days, with 90 days as the default; MCP exposes no retention setter. [Review identity retention](/signals/overview#identity-retention).
 </Update>
 
 <Update label="August 27, 2026">
@@ -29,6 +67,10 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   ## Official clients publish API 0.5.0
 
   **New** · TypeScript SDK [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python SDK [`plainrouter==0.5.0`](https://pypi.org/project/plainrouter/), Go SDK [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go), and CLI [`@plainrouter/cli@0.5.0`](https://www.npmjs.com/package/@plainrouter/cli) are published from the signed API contract. Install the CLI from [npm](https://www.npmjs.com/package/@plainrouter/cli) or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. [Choose an official client](/reference/conversion-api#client-releases).
+
+  ## Go SDK package documentation improves
+
+  **Improved** · [`github.com/plainrouter/sdk-go@v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go) adds canonical package documentation and runnable examples for pkg.go.dev while continuing to target signed API contract `0.5.0`. [Install the Go SDK](/sdk/go).
 
   ## Try the API without an account
 

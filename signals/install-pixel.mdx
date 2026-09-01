@@ -3,7 +3,7 @@ title: "Install the Signals pixel"
 description: "Add optional, consent-aware browser measurement to your website and verify that PlainRouter receives the expected first-party Signal traffic."
 ---
 
-The Signals pixel collects first-party browser events through your collection domain. PlainRouter gives each signal tracker a unique snippet with its publishable key and collection URL.
+The Signals pixel collects first-party browser events through your collection domain. PlainRouter gives each workspace a unique Signals snippet with its publishable key and collection URL.
 
 <Info>
   The pixel is not required to activate a Signal. Complete [server-side ingestion verification](/signals/verify-ingestion) first, then install the pixel only where your consent policy permits it.
@@ -15,7 +15,7 @@ You need:
 
 - A collection domain that shows as active in PlainRouter.
 - Access to the shared `<head>` template or site-wide code injection setting for your website.
-- Permission to deploy changes to the domain connected to your signal tracker.
+- Permission to deploy changes to the domain connected to the workspace's Signals setup.
 
 If your collection domain is still pending, complete [Configure DNS and CNAME](/signals/configure-dns) first.
 
@@ -25,7 +25,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   <Step title="Copy your snippet">
     Open **Signals**, continue setup, and find **Optional browser confirmation**.
 
-    Click **Copy code**. Use the complete snippet exactly as PlainRouter provides it. Its key and script URL are unique to your signal tracker.
+    Click **Copy code**. Use the complete snippet exactly as PlainRouter provides it. Its key and script URL are unique to your workspace.
   </Step>
   <Step title="Add it to every page">
     Paste the snippet immediately before the closing `</head>` tag in your site-wide layout.
@@ -52,7 +52,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 </Steps>
 
 <Note>
-  You can close the setup screen after deployment. Reopen **Signals** later to check the signal tracker status.
+  You can close the setup screen after deployment. Reopen **Signals** later to check the workspace's Signals status.
 </Note>
 
 ## Verify the installation
@@ -97,7 +97,7 @@ You may need to allow `https://connect.facebook.net` in `script-src` after you [
 ### The event request is blocked
 
 - Allow your collection domain in the `connect-src` directive of your Content Security Policy.
-- Confirm you installed the snippet on a domain allowed by the signal tracker.
+- Confirm you installed the snippet on a domain allowed by the workspace's Signals setup.
 - Confirm the publishable key and script URL came from the same PlainRouter snippet.
 
 ### Signal setup still shows as incomplete

@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-08-28"
+  documentation_revision: "2026-09-01"
 ---
 
 # Use PlainRouter safely
@@ -55,7 +55,7 @@ resources, not as substitutes for the explanatory documentation pages.
 
 | Credential | Use it for | Do not use it for |
 | --- | --- | --- |
-| Signal tracker secret | Signals Conversion API calls | MCP or interactive workspace management |
+| Signals workspace secret | Signals Conversion API calls for one workspace | MCP or interactive workspace management |
 | Workspace execution token | MCP and authorized workspace routes for one bound workspace and Meta ad account | Signals Conversion API or interactive browser sessions |
 | OAuth management credential | Read-only account discovery through `GET /api/v1/agent/context` | MCP tool calls |
 

@@ -35,7 +35,9 @@ after the customer-visible implementation is merged and shipped.
   project, organization, or account.
 - Use **Meta ad account** for the advertising account bound to a workspace
   execution token. Do not shorten it to workspace account.
-- A **Signal tracker secret** authenticates the Signals Conversion API.
+- A **Signals workspace secret** authenticates the Signals Conversion API for
+  one workspace. Published `0.5.x` clients retain names such as
+  `signalTrackerSecret` and "tracker token" as compatibility labels.
 - A **workspace execution token** authenticates PlainRouter MCP and authorized
   workspace routes for one workspace and one Meta ad account.
 - An **OAuth management credential** may read the account-discovery context

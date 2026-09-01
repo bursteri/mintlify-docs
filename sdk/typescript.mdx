@@ -14,8 +14,8 @@ The current [npm release](https://www.npmjs.com/package/@plainrouter/sdk) is `0.
 ## Requirements
 
 - Node.js `22.22.2` or later in the Node 22 release line.
-- A per-Signal tracker secret.
-- Server-side code. Do not use the tracker secret in a browser bundle.
+- A Signals workspace secret.
+- Server-side code. Do not use the secret in a browser bundle.
 
 ## Install
 
@@ -48,7 +48,7 @@ if (result.error) {
 }
 ```
 
-The client sends the tracker secret as a bearer token. It does not read credentials from the environment automatically.
+The client sends the Signals workspace secret as a bearer token. The `signalTrackerSecret` property keeps its compatibility name in `0.5.0`. The client does not read credentials from the environment automatically.
 
 ## Configure another API origin
 
@@ -99,7 +99,7 @@ The first successful call returns the accepted verification result. Repeating it
 
 ## Handle credentials safely
 
-The SDK accepts only a Signal tracker secret for Conversion API calls. It does not accept an MCP OAuth token or workspace token.
+The SDK accepts only a Signals workspace secret for Conversion API calls. It does not accept an MCP OAuth token or workspace execution token.
 
 Keep the secret in a server-side secret manager. Never include it in client-side JavaScript, prompts, URLs, logs, or source control.
 

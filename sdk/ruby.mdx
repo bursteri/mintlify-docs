@@ -10,8 +10,8 @@ The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/mai
 ## Requirements
 
 - Ruby 3.2 or newer.
-- A per-Signal tracker secret for production Conversion API operations.
-- Server-side code. Do not put the tracker secret in browser or distributed client code.
+- A Signals workspace secret for production Conversion API operations.
+- Server-side code. Do not put the secret in browser or distributed client code.
 
 ## Install
 
@@ -29,7 +29,7 @@ gem "plainrouter-sdk", "~> 0.1.0"
 
 ## Create an authenticated client
 
-Pass the Signal tracker secret when you create the client:
+Pass the Signals workspace secret when you create the client:
 
 ```ruby
 require "plainrouter"
@@ -42,7 +42,7 @@ events = client.operations.list_events(per_page: 25)
 event = client.events.get_event("event-id")
 ```
 
-The client sends the tracker secret as a bearer token. It does not read credentials from the environment automatically.
+The client sends the Signals workspace secret as a bearer token. It does not read credentials from the environment automatically.
 
 ## Choose an API group
 
@@ -87,7 +87,7 @@ client = PlainRouter::Client.new(
 
 ## Handle credentials safely
 
-The Ruby SDK accepts a Signal tracker secret for production Conversion API calls. It does not accept an MCP workspace token or OAuth management credential.
+The Ruby SDK accepts a Signals workspace secret for production Conversion API calls. It does not accept an MCP workspace execution token or OAuth management credential.
 
 Keep the secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
 

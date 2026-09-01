@@ -1,6 +1,6 @@
 ---
 title: "CLI quickstart"
-description: "Install the PlainRouter CLI, store a Signal tracker token securely, and run your first authenticated event or diagnostics command."
+description: "Install the PlainRouter CLI, store a Signals workspace secret securely, and run your first authenticated event or diagnostics command."
 ---
 
 The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` command. Install the command from [PyPI](https://pypi.org/project/plainrouter/), [npm](https://www.npmjs.com/package/@plainrouter/cli), or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap).
@@ -14,7 +14,7 @@ The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.1` and
 ## Requirements
 
 - Python 3.11 or newer for the PyPI package, or Node.js `22.22.2` or later in the Node 22 release line for npm.
-- A per-Signal tracker secret.
+- A Signals workspace secret.
 
 ## Install with [PyPI](https://pypi.org/project/plainrouter/)
 
@@ -53,7 +53,7 @@ plainrouter --help
 
 Keep only one global PlainRouter CLI installation on your `PATH`. If you install from more than one package manager, your shell may select a different distribution than the one you intended.
 
-## Sign in with a tracker token
+## Sign in with a Signals workspace secret
 
 Run the interactive login command:
 
@@ -61,7 +61,7 @@ Run the interactive login command:
 plainrouter auth login
 ```
 
-Paste the tracker token at the hidden prompt. The CLI stores it in `$XDG_CONFIG_HOME/plainrouter/config.json`. When `XDG_CONFIG_HOME` is unset, it uses `~/.config/plainrouter/config.json`.
+Paste the Signals workspace secret at the hidden prompt. Current `0.5.x` builds label this credential a tracker token for compatibility. The CLI stores it in `$XDG_CONFIG_HOME/plainrouter/config.json`. When `XDG_CONFIG_HOME` is unset, it uses `~/.config/plainrouter/config.json`.
 
 The CLI creates the directory with mode `0700` and the configuration file with mode `0600`.
 
@@ -94,7 +94,7 @@ Without `--json`, the CLI prints a human-readable summary or table.
 For CI or an ephemeral shell, inject the token through your secret manager:
 
 ```bash
-export PLAINROUTER_TOKEN="YOUR_SIGNAL_TRACKER_SECRET"
+export PLAINROUTER_TOKEN="YOUR_SIGNALS_WORKSPACE_SECRET"
 plainrouter reports emq --json
 unset PLAINROUTER_TOKEN
 ```
@@ -109,6 +109,6 @@ Remove the stored configuration:
 plainrouter auth logout
 ```
 
-This command does not revoke or rotate the Signal tracker secret. It only removes the local file.
+This command does not revoke or rotate the Signals workspace secret. It only removes the local file.
 
 See the [CLI command reference](/cli/commands) for every supported operation.

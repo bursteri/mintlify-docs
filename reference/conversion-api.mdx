@@ -20,21 +20,21 @@ see [Authentication and clients](/auth).
 | [PlainRouter CLI](/cli/quickstart) | You want to test an operation or run an operational script from a terminal. |
 | OpenAPI contract | You want to inspect the complete schema or generate another compatible client. |
 
-The signed REST contract, TypeScript SDK, Go SDK, and npm CLI are published at version `0.5.0`. Python package `0.5.1` and Ruby SDK `0.1.0` target the same signed contract. The Python package also adds the PyPI CLI distribution. See [Client releases](#client-releases) for package links and the CLI's command boundary.
+The signed REST contract, TypeScript SDK, and npm CLI are published at version `0.5.0`. Go SDK `v0.5.2`, Python package `0.5.1`, and Ruby SDK `0.1.0` target the same signed contract. The Python package also adds the PyPI CLI distribution. See [Client releases](#client-releases) for package links and the CLI's command boundary.
 
 ## Authenticate
 
-Every request needs the per-Signal tracker secret issued during tracker provisioning:
+Every request needs the Signals workspace secret issued during Signals provisioning:
 
 ```http
-Authorization: Bearer YOUR_SIGNAL_TRACKER_SECRET
+Authorization: Bearer YOUR_SIGNALS_WORKSPACE_SECRET
 Accept: application/json
 Content-Type: application/json
 ```
 
 Keep this secret on your server or in your CLI's secure credential store. Never put it in browser code, source control, prompts, or logs.
 
-The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Those credentials authorize agent tools, not a Signal tracker.
+The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Those credentials authorize agent tools, not the workspace's Signals API.
 
 ## Submit an event
 
@@ -109,7 +109,21 @@ SDKs and CLI clients derive their method and command names from these semantic o
 | `getEmqReport` | `GET /reports/emq` | Retrieve recent Event Match Quality snapshots. |
 | `deleteUserData` | `DELETE /user-data` | Delete data matching a hashed user identifier. |
 
-Resource IDs remain scoped to the authenticated Signal tracker. A client cannot use its secret to read another tracker's events or destinations.
+Resource IDs remain scoped to the authenticated workspace. A client cannot use its Signals secret to read another workspace's events or destinations.
+
+## Read workspace identifiers
+
+Signals configuration now belongs directly to the workspace. API responses use the numeric `workspace_id` as the canonical tenant identifier. Existing response shapes also include `signal_tracker_id` as a deprecated decimal-string alias of the same workspace ID.
+
+The currently published `0.5.x` SDKs were generated before `workspace_id` became canonical, so their models may expose only `signal_tracker_id`. You can continue reading that compatibility field until a regenerated client release adds `workspace_id`. Do not treat the two fields as different tenants.
+
+The `user_data_hashed` response field contains the identity representation sent to the advertising platform: normalized Meta-format SHA-256 digests plus the network fields Meta requires verbatim. It never contains PlainRouter's internal per-workspace keyed lookup values.
+
+## Delete retained user data
+
+`DELETE /user-data` accepts either a verified raw `identifier` or a legacy SHA-256 `identifier_hash`, together with `identifier_type`. Send the identifier only in the JSON request body. PlainRouter rejects identifiers in the query string so they do not enter URLs, access logs, browser history, caches, or referrer data.
+
+Deletion is idempotent and scoped to the authenticated workspace. The response reports whether the request was a duplicate and how many retained event and session records were updated.
 
 ## Use the signed OpenAPI contract
 
@@ -125,7 +139,7 @@ Generate clients only from a signed document. Pin the generated SDK or CLI versi
 
 ## Client releases
 
-The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), and Go module [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) are generated from the signed Conversion API contract `0.5.0`. All four expose ingestion verification and the required event consent fields.
+The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), and Go module [`github.com/plainrouter/sdk-go@v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go) target the signed Conversion API contract `0.5.0`. All four expose ingestion verification and the required event consent fields. Go `v0.5.2` improves canonical documentation and package examples without changing the API contract.
 
 Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx install plainrouter==0.5.1`, from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.0`, or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. The PyPI and npm distributions expose the same nine terminal commands and consent-aware event shape. Neither adds a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
 
@@ -133,8 +147,8 @@ Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx in
 
 | Status | Meaning |
 | --- | --- |
-| `401` | The tracker secret is missing or invalid. |
-| `404` | The requested event or destination does not belong to this tracker. |
+| `401` | The Signals workspace secret is missing or invalid. |
+| `404` | The requested event or destination does not belong to this workspace. |
 | `422` | Request validation failed. |
 | `502` | Meta did not accept a controlled test purchase. |
 

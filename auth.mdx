@@ -3,26 +3,26 @@ title: "PlainRouter auth docs"
 description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
 ---
 
-PlainRouter uses a per-Signal tracker secret for the Signals Conversion API, an
+PlainRouter uses a per-workspace Signals secret for the Signals Conversion API, an
 account-bound workspace execution token for production MCP tool calls, and a
 narrowly scoped OAuth management credential for account discovery. Public MCP
 discovery and the synthetic MCP sandbox require no credential.
 
 REST, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same
-Conversion API and all use the same per-Signal tracker secret.
+Conversion API and all use the same Signals workspace secret.
 
 ## Which credential should I use?
 
 | Goal | Interface | Credential | Scope |
 | --- | --- | --- | --- |
-| Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signal tracker secret | One Signal tracker and its resources |
+| Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signals workspace secret | One workspace and its Signals resources |
 | Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
 | Call PlainRouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
 
 These credentials are not interchangeable. The Conversion API rejects workspace
-execution tokens and OAuth management credentials. MCP rejects Signal tracker
+execution tokens and OAuth management credentials. MCP rejects Signals workspace
 secrets and OAuth management credentials.
 
 <Warning>
@@ -33,7 +33,7 @@ secrets and OAuth management credentials.
 
 ## How do I authenticate the REST API?
 
-Send the Signal tracker secret as a bearer token to the server-side Conversion
+Send the Signals workspace secret as a bearer token to the server-side Conversion
 API at `https://plainrouter.com/api/v1`:
 
 ```bash
@@ -42,7 +42,7 @@ curl "https://plainrouter.com/api/v1/dashboard/events" \
   --header "Accept: application/json"
 ```
 
-`PLAINROUTER_TOKEN` must contain the per-Signal tracker secret. A missing or
+`PLAINROUTER_TOKEN` must contain the Signals workspace secret. A missing or
 invalid secret returns HTTP `401`.
 
 ## How do I authenticate the TypeScript SDK?
@@ -65,11 +65,12 @@ const result = await listEvents({
 ```
 
 The TypeScript SDK does not read environment variables automatically. Your
-server must pass the Signal tracker secret through `signalTrackerSecret`.
+server must pass the Signals workspace secret through `signalTrackerSecret`.
+The property keeps its pre-collapse name for compatibility.
 
 ## How do I authenticate the Python SDK?
 
-Install [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), then create a client with the Signal tracker secret:
+Install [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), then create a client with the Signals workspace secret:
 
 ```python
 import os
@@ -85,7 +86,7 @@ an asynchronous `asyncio` method.
 
 ## How do I authenticate the Ruby SDK?
 
-Install [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Signal tracker secret:
+Install [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Signals workspace secret:
 
 ```ruby
 require "plainrouter"
@@ -102,7 +103,7 @@ secret as a bearer token and does not read environment variables automatically.
 
 ## How do I authenticate the Go SDK?
 
-Install `github.com/plainrouter/sdk-go@v0.5.0`, create the generated client, and attach the Signal tracker secret to the request context:
+Install `github.com/plainrouter/sdk-go@v0.5.2`, create the generated client, and attach the Signals workspace secret to the request context:
 
 ```go
 config := plainrouter.NewConfiguration()
@@ -116,11 +117,12 @@ ctx := context.WithValue(
 report, _, err := client.OperationsAPI.GetEmqReport(ctx).Execute()
 ```
 
-The Go SDK requires Go 1.23 or newer. Keep the tracker secret in server-side credential storage.
+The Go SDK requires Go 1.23 or newer. Keep the Signals workspace secret in server-side credential storage.
 
 ## How do I authenticate the CLI?
 
-The CLI uses the same Signal tracker secret. Store it through the hidden login
+The CLI uses the same Signals workspace secret. Current `0.5.x` builds call it a
+tracker token in prompts for compatibility. Store it through the hidden login
 prompt for an interactive workstation:
 
 ```bash
@@ -195,12 +197,12 @@ discovery.
 
 | Client | Package or endpoint | Current version | Authentication |
 | --- | --- | --- | --- |
-| REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signal tracker secret |
-| TypeScript | `@plainrouter/sdk` | `0.5.0` | Signal tracker secret passed to `configurePlainrouter` |
-| Python | `plainrouter` | `0.5.1` | Signal tracker secret passed to `create_client` |
-| Ruby | `plainrouter-sdk` | `0.1.0` | Signal tracker secret passed to `PlainRouter::Client.new` |
-| Go | `github.com/plainrouter/sdk-go` | `v0.5.0` | Signal tracker secret attached to the request context |
-| CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.1`; npm `0.5.0` | Stored tracker token or `PLAINROUTER_TOKEN` |
+| REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signals workspace secret |
+| TypeScript | `@plainrouter/sdk` | `0.5.0` | Signals workspace secret passed through `signalTrackerSecret` |
+| Python | `plainrouter` | `0.5.1` | Signals workspace secret passed to `create_client` |
+| Ruby | `plainrouter-sdk` | `0.1.0` | Signals workspace secret passed to `PlainRouter::Client.new` |
+| Go | `github.com/plainrouter/sdk-go` | `v0.5.2` | Signals workspace secret attached to the request context |
+| CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.1`; npm `0.5.0` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
 | MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.3.2` | None |
 | MCP production | `https://plainrouter.com/mcp` | Server `0.3.2` | Workspace execution token for tool calls and account data |
 
@@ -210,7 +212,7 @@ command. Use REST, an SDK, or MCP for ingestion verification.
 
 ## Which credentials must not be confused?
 
-- A Signal tracker secret cannot authenticate MCP.
+- A Signals workspace secret cannot authenticate MCP.
 - A workspace execution token cannot authenticate the Conversion API.
 - An OAuth management credential cannot authenticate MCP.
 - A browser session cannot replace an API or MCP bearer credential.
