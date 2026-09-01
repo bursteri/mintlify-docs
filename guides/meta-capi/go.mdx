@@ -1,0 +1,126 @@
+---
+title: "Meta CAPI with Go"
+description: "Send consented, retry-safe Meta Conversions API purchases from Go with PlainRouter's generated client and published wire models."
+---
+
+Use [`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) to call the PlainRouter Signals Conversion API from a Go service. Release `v0.5.2` is generated from the signed `0.5.0` contract.
+
+## Before you begin
+
+You need Go 1.23 or newer, a Signals workspace secret in server-side credential storage, and an active [Meta destination](/signals/connect-meta).
+
+Install the published module:
+
+```bash
+go get github.com/plainrouter/sdk-go@v0.5.2
+```
+
+## Create and send a purchase
+
+The generated `v0.5.2` request uses an `anyOf` wrapper. Construct the consented branch, then place it in `CreateEventRequest`:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	plainrouter "github.com/plainrouter/sdk-go"
+)
+
+func field(value any) *interface{} {
+	boxed := interface{}(value)
+	return &boxed
+}
+
+func main() {
+	secret := os.Getenv("PLAINROUTER_SIGNAL_SECRET")
+	if secret == "" {
+		log.Fatal("PLAINROUTER_SIGNAL_SECRET is required")
+	}
+
+	config := plainrouter.NewConfiguration()
+	client := plainrouter.NewAPIClient(config)
+	ctx := context.WithValue(
+		context.Background(),
+		plainrouter.ContextAccessToken,
+		secret,
+	)
+
+	orderID := "ORDER-1042"
+	consented := plainrouter.NewCreateEventRequestAnyOf("Purchase", "consent")
+	consented.SetEventId("purchase:" + orderID)
+	consented.SetEventSource("https://shop.example/checkout/success")
+	consented.SetActionSource("website")
+	consented.SetConsent(map[string]*interface{}{
+		"ad_storage":        field("granted"),
+		"ad_user_data":      field("granted"),
+		"ad_personalization": field("granted"),
+		"captured_at":       field("2026-08-09T12:00:00Z"),
+		"source":            field("checkout_cmp"),
+	})
+	consented.SetUserData(map[string]*interface{}{
+		"email": field("buyer@example.com"),
+		"phone": field("+358401234567"),
+	})
+	consented.SetClickIds(map[string]*interface{}{
+		"fbp": field("fb.1.1786271000000.1234567890"),
+		"fbc": field("fb.1.1786271000000.EXAMPLE_FBCLID"),
+	})
+
+	value := plainrouter.NewCreateEventRequestAnyOfValueData()
+	value.SetValue("49.90")
+	value.SetCurrency("EUR")
+	value.SetOrderId(orderID)
+	value.SetContents([]interface{}{
+		map[string]interface{}{"id": "SKU-1", "quantity": 2},
+	})
+	value.SetNumItems(2)
+	consented.SetValueData(*value)
+
+	request := plainrouter.CreateEventRequest{
+		CreateEventRequestAnyOf: consented,
+	}
+
+	result, response, err := client.EventAPI.
+		CreateEvent(ctx).
+		CreateEventRequest(request).
+		Execute()
+	if response != nil {
+		defer response.Body.Close()
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("event_id=%s duplicate=%t\n", result.GetEventId(), result.GetDuplicate())
+}
+```
+
+Replace the example browser identifiers with real values from a consenting browser, or omit `SetClickIds` when none are available. PlainRouter accepts raw supported identity fields and performs Meta-compatible normalization and SHA-256 hashing before delivery.
+
+## Reuse the client and context safely
+
+Create one `APIClient` per configuration and reuse it. Derive request contexts with timeouts or cancellation from your job or HTTP request context. The bearer token lives in the context in `v0.5.2`; never log the context or token.
+
+Use one stable event ID for each logical conversion. Retrying `purchase:ORDER-1042` returns the existing event with `duplicate: true`. A new ID represents a new conversion.
+
+<Note>
+  The Go repository's `main` branch contains post-`v0.5.2` migration helpers. This guide uses the API that is actually published in `v0.5.2`.
+</Note>
+
+## Confirm destination delivery
+
+The create response confirms ingestion only. Use `client.EventAPI.GetEvent(ctx, result.GetEventId()).Execute()` to retrieve the event and delivery trace, or review [Signal health and performance](/signals/health-and-performance).
+
+## Implementation references
+
+- [`EventAPI.CreateEvent` at Go `v0.5.2`](https://github.com/plainrouter/sdk-go/blob/v0.5.2/api_event.go)
+- [`CreateEventRequestAnyOf` at Go `v0.5.2`](https://github.com/plainrouter/sdk-go/blob/v0.5.2/model_create_event_request_any_of.go)
+- [`CreateEventRequestAnyOfValueData` at Go `v0.5.2`](https://github.com/plainrouter/sdk-go/blob/v0.5.2/model_create_event_request_any_of_value_data.go)
+- [Go SDK reference](/sdk/go)
+- [PlainRouter Conversion API reference](/reference/conversion-api)
+

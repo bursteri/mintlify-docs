@@ -1,0 +1,136 @@
+---
+title: "Meta CAPI with TypeScript"
+description: "Build a typed, consent-aware Meta Conversions API purchase flow with PlainRouter's generated TypeScript client and request models."
+---
+
+The [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) package exposes generated TypeScript request types, response types, Zod schemas, and methods for the PlainRouter Signals Conversion API.
+
+## Before you begin
+
+You need Node.js `22.22.2` or later, TypeScript, a server-side Signals workspace secret, and an active [Meta destination](/signals/connect-meta). Do not import a server-configured SDK client into a browser bundle.
+
+Install the published client:
+
+```bash
+npm install @plainrouter/sdk@0.5.0
+```
+
+## Define the purchase boundary
+
+Keep order values and consent evidence explicit at the point where application data becomes a Conversion API event:
+
+```ts
+export type PurchaseInput = {
+  orderId: string;
+  paidAt: Date;
+  total: string;
+  currency: string;
+  email: string;
+  phone?: string;
+  fbp?: string;
+  fbc?: string;
+  consentCapturedAt: Date;
+};
+```
+
+`total` is a string because the API preserves decimal money exactly. `fbp` and `fbc` are optional because not every purchase has a browser identifier or a Meta ad-click identifier.
+
+## Create a typed event
+
+Use the generated `CreateEventData` type rather than maintaining a parallel payload interface:
+
+```ts
+import {
+  configurePlainrouter,
+  createEvent,
+  type CreateEventData,
+  type CreateEventResponse,
+} from "@plainrouter/sdk";
+
+import type { PurchaseInput } from "./purchase-input.js";
+
+type ConsentedEventBody = Extract<
+  CreateEventData["body"],
+  { consent_basis: "consent" }
+>;
+
+const signalSecret = process.env.PLAINROUTER_SIGNAL_SECRET;
+if (!signalSecret) throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
+
+configurePlainrouter({ signalTrackerSecret: signalSecret });
+
+function purchaseBody(purchase: PurchaseInput): ConsentedEventBody {
+  return {
+    event_id: `purchase:${purchase.orderId}`,
+    event_name: "Purchase",
+    event_time: Math.floor(purchase.paidAt.getTime() / 1000),
+    event_source: "https://shop.example/checkout/success",
+    action_source: "website",
+    consent_basis: "consent",
+    consent: {
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+      captured_at: purchase.consentCapturedAt.toISOString(),
+      source: "checkout_cmp",
+    },
+    user_data: {
+      email: purchase.email,
+      ...(purchase.phone ? { phone: purchase.phone } : {}),
+    },
+    click_ids: {
+      ...(purchase.fbp ? { fbp: purchase.fbp } : {}),
+      ...(purchase.fbc ? { fbc: purchase.fbc } : {}),
+    },
+    value_data: {
+      value: purchase.total,
+      currency: purchase.currency,
+      order_id: purchase.orderId,
+    },
+  };
+}
+
+export async function sendPurchase(
+  purchase: PurchaseInput,
+): Promise<CreateEventResponse> {
+  const result = await createEvent({ body: purchaseBody(purchase) });
+
+  if (result.error) {
+    throw new Error(`PlainRouter rejected the event: ${JSON.stringify(result.error)}`);
+  }
+
+  return result.data;
+}
+```
+
+The request type enforces `consent_basis` and the documented commerce fields. The generated OpenAPI shape intentionally leaves consent adapters, identity fields, and click IDs as extensible records; PlainRouter performs the authoritative runtime validation.
+
+## Validate an untrusted boundary
+
+The package exports `zCreateEventBody` when you need runtime validation before calling your domain function:
+
+```ts
+import { zCreateEventBody } from "@plainrouter/sdk";
+
+const parsed = zCreateEventBody.safeParse(untrustedPayload);
+
+if (!parsed.success) {
+  throw new Error(parsed.error.message);
+}
+```
+
+Schema validation proves that the payload matches the published client contract. PlainRouter still applies consent, identity normalization, URL, value, size, and workspace checks on ingestion.
+
+## Handle idempotency and destination state
+
+Use one stable `event_id` for one logical conversion. Reuse the ID for queue retries and timeouts. A response with `duplicate: true` is a successful idempotent replay, not an error.
+
+The create response reports ingestion, not final Meta acceptance. Call `getEvent` for the delivery trace or use [Signal health and performance](/signals/health-and-performance). For the browser/server pairing rules, see [Meta `event_id` deduplication](/guides/meta-capi/event-id-deduplication).
+
+## Implementation references
+
+- [`@plainrouter/sdk` package entry point](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/index.ts)
+- [`CreateEventData` and `CreateEventResponse` source](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/types.gen.ts)
+- [`zCreateEventBody` generated schema](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/zod.gen.ts)
+- [TypeScript SDK reference](/sdk/typescript)
+- [PlainRouter Conversion API reference](/reference/conversion-api)

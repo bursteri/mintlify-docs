@@ -1,0 +1,122 @@
+---
+title: "Meta CAPI without GTM"
+description: "Install PlainRouter directly in your site, connect consent, and send deduplicated browser and Meta CAPI events without Google Tag Manager."
+---
+
+Google Tag Manager is not required. Install the generated PlainRouter Signals snippet in your site-wide `<head>`, pass consent from your consent-management platform, and call `signalq` for business events.
+
+PlainRouter can then send one consented event through the managed Meta Pixel and Meta Conversions API with a shared event ID.
+
+## Before you begin
+
+You need:
+
+- An active first-party collection domain.
+- The generated snippet from your workspace's **Signals** setup.
+- A [connected Meta dataset](/signals/connect-meta).
+- A consent-management platform or another explicit source of the visitor's current choice.
+
+The browser snippet uses a publishable key. Your Signals workspace secret remains on the server and must never appear in this HTML.
+
+## Install the generated snippet directly
+
+Place the exact snippet shown in **Signals** immediately before `</head>` in your shared site layout:
+
+```html
+<script>
+  window.signalq = window.signalq || function () {
+    (window.signalq.q = window.signalq.q || []).push(arguments);
+  };
+  signalq("init", { key: "YOUR_PUBLISHABLE_KEY" });
+</script>
+<script async src="https://YOUR_COLLECTION_DOMAIN/s/v3.js"></script>
+```
+
+Keep the initialization block before the asynchronous script. Calls made before `v3.js` finishes loading remain queued in order.
+
+Do not substitute the Conversion API bearer secret for the publishable key. Copy both the key and script origin from the same workspace-generated snippet.
+
+## Connect your consent choice
+
+Call `consent` when your consent platform resolves the current advertising state and whenever the visitor changes it:
+
+```html
+<script>
+  function updatePlainRouterConsent(choice) {
+    signalq("consent", {
+      consent_basis: "consent",
+      consent: {
+        ad_storage: choice.adStorage ? "granted" : "denied",
+        ad_user_data: choice.adUserData ? "granted" : "denied",
+        ad_personalization: choice.adPersonalization ? "granted" : "denied",
+        captured_at: new Date().toISOString(),
+        source: "example_cmp"
+      }
+    });
+  }
+
+  function withdrawPlainRouterConsent() {
+    signalq("consent", {
+      consent_basis: "consent",
+      withdrawn: true
+    });
+  }
+</script>
+```
+
+PlainRouter does not infer missing grants. Ordinary browser transmission requires all three permissions to be `granted`. A denial, malformed update, or withdrawal stops consent-dependent transmission and clears PlainRouter's browser identifiers.
+
+## Identify and track after consent
+
+After a full grant, identify the visitor and send the business event from your application code:
+
+```js
+await signalq("identify", {
+  email: "buyer@example.com",
+  phone: "+358401234567"
+});
+
+const eventId = await signalq("track", "Purchase", {
+  value: "49.90",
+  currency: "EUR",
+  order_id: "ORDER-1042",
+  contents: [{ id: "SKU-1", quantity: 2 }],
+  num_items: 2
+});
+
+console.log("PlainRouter event", eventId);
+```
+
+The browser hashes normalized email and phone values before the identity request. The managed browser Pixel and PlainRouter's server delivery use the same event ID, so Meta can deduplicate the pair.
+
+Use a decimal string for `value`. Do not send the same purchase through another Pixel or CAPI integration after you confirm the managed flow, because independent integrations may use different IDs.
+
+## Configure Content Security Policy
+
+Allow the following origins where your policy applies:
+
+```text
+script-src https://YOUR_COLLECTION_DOMAIN https://connect.facebook.net
+connect-src https://YOUR_COLLECTION_DOMAIN
+```
+
+Apply your existing nonce or hash policy to the inline blocks. The Meta library loads only after full advertising consent and only when the connected destination supplies a dataset ID.
+
+## Verify the direct installation
+
+In browser developer tools:
+
+1. Confirm `/s/v3.js` loads from your collection domain.
+2. Confirm initialization alone does not send an ordinary event before consent resolves.
+3. Grant consent and confirm `/v1/events` receives `PageView` and your test event.
+4. Confirm the Meta Pixel call and PlainRouter event use the same event ID.
+5. Open **Signals** and inspect the destination delivery state.
+
+The browser event response proves collector acceptance, not final Meta acceptance. Use [Signal health and performance](/signals/health-and-performance) for the stored delivery outcome.
+
+## Implementation references
+
+- [Install the Signals pixel](/signals/install-pixel)
+- [Track events and consent](/signals/track-events)
+- [Connect Meta](/signals/connect-meta)
+- [PlainRouter Conversion API reference](/reference/conversion-api)

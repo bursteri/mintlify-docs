@@ -1,0 +1,136 @@
+---
+title: "Meta CAPI with Node.js"
+description: "Send consented Meta Conversions API purchases from Node.js through PlainRouter with stable IDs, match data, and retry-safe handling."
+---
+
+Use the [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) package from server-side Node.js code. PlainRouter validates the event, normalizes and hashes supported identity fields, and sends eligible events to the Meta dataset connected to your workspace.
+
+## Before you begin
+
+You need:
+
+- Node.js `22.22.2` or later in the Node 22 release line.
+- A [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) stored only on your server.
+- An active [Meta destination](/signals/connect-meta).
+- A consent decision that permits downstream advertising use. See [Server-side tracking consent](/guides/meta-capi/server-side-consent).
+
+## Install the Node.js SDK
+
+Install the currently published package:
+
+```bash
+npm install @plainrouter/sdk@0.5.0
+```
+
+The package is an ES module. Use `import` from a `.mjs` file or from a project whose `package.json` contains `"type": "module"`.
+
+## Configure one server-side client
+
+Set the secret in your deployment environment:
+
+```bash
+export PLAINROUTER_SIGNAL_SECRET="YOUR_SIGNALS_WORKSPACE_SECRET"
+```
+
+Configure the shared SDK client once when the process starts:
+
+```js
+import { configurePlainrouter } from "@plainrouter/sdk";
+
+const signalSecret = process.env.PLAINROUTER_SIGNAL_SECRET;
+
+if (!signalSecret) {
+  throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
+}
+
+configurePlainrouter({ signalTrackerSecret: signalSecret });
+```
+
+`signalTrackerSecret` is the compatibility name used by SDK `0.5.0`. Supply a Signals workspace secret, not an MCP token or workspace execution token.
+
+## Send a purchase
+
+Use a stable, non-personal identifier for each logical conversion. A database order ID is a good source when it does not contain customer data.
+
+```js
+import {
+  configurePlainrouter,
+  createEvent,
+} from "@plainrouter/sdk";
+
+const signalSecret = process.env.PLAINROUTER_SIGNAL_SECRET;
+if (!signalSecret) throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
+
+configurePlainrouter({ signalTrackerSecret: signalSecret });
+
+export async function sendPurchase(order) {
+  const eventId = `purchase:${order.id}`;
+
+  const { data, response } = await createEvent({
+    body: {
+      event_id: eventId,
+      event_name: "Purchase",
+      event_time: Math.floor(order.paidAt.getTime() / 1000),
+      event_source: "https://shop.example/checkout/success",
+      action_source: "website",
+      consent_basis: "consent",
+      consent: {
+        ad_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+        captured_at: order.consentCapturedAt.toISOString(),
+        source: "checkout_cmp",
+      },
+      user_data: {
+        email: order.email,
+        phone: order.phone,
+        client_ip_address: order.ipAddress,
+        client_user_agent: order.userAgent,
+      },
+      click_ids: {
+        ...(order.fbp ? { fbp: order.fbp } : {}),
+        ...(order.fbc ? { fbc: order.fbc } : {}),
+      },
+      value_data: {
+        value: order.total,
+        currency: order.currency,
+        order_id: order.id,
+        contents: order.items.map((item) => ({
+          id: item.sku,
+          quantity: item.quantity,
+        })),
+        num_items: order.items.reduce((total, item) => total + item.quantity, 0),
+      },
+    },
+    throwOnError: true,
+  });
+
+  console.log({ status: response.status, ...data });
+  return data;
+}
+```
+
+Send monetary `value` as a decimal string such as `"49.90"`. PlainRouter accepts raw or already SHA-256-hashed supported identity values. Raw values are normalized and hashed before Meta delivery; `fbp` and `fbc` are sent in their valid Meta browser-ID format without hashing.
+
+## Retry without creating another event
+
+Keep the same `event_id` when a timeout or queue retry repeats the same logical purchase:
+
+- A new event returns HTTP `202` with `duplicate: false`.
+- A previously accepted `event_id` returns HTTP `200` with `duplicate: true`.
+- Changing the ID on each retry defeats idempotency and can create duplicate conversions.
+
+PlainRouter also passes the event ID to Meta. When you use the managed browser Pixel for the same event, PlainRouter uses one ID for the Pixel `eventID` and the server `event_id`. See [Meta `event_id` deduplication](/guides/meta-capi/event-id-deduplication).
+
+## Confirm delivery
+
+The `202` response means PlainRouter accepted the event for processing. It does not mean Meta has accepted the destination delivery yet.
+
+Use [Signal health and performance](/signals/health-and-performance) or retrieve the event with `getEvent` to inspect its delivery state. During setup, you can also use Meta Test Events mode through the destination operations in the [Conversion API reference](/reference/conversion-api).
+
+## Implementation references
+
+- [`configurePlainrouter` source at SDK `0.5.0`](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/config.ts)
+- [`createEvent` generated operation at SDK `0.5.0`](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/sdk.gen.ts)
+- [`CreateEventData` request type at SDK `0.5.0`](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/types.gen.ts)
+- [PlainRouter Conversion API reference](/reference/conversion-api)

@@ -1,0 +1,127 @@
+---
+title: "Meta CAPI with Python"
+description: "Send a consented Meta Conversions API purchase with PlainRouter's generated Python client, typed models, and idempotent retries."
+---
+
+Use the [`plainrouter`](https://pypi.org/project/plainrouter/) package to send server-side events to the PlainRouter Signals Conversion API. The package contains generated synchronous and asynchronous operations for the signed `0.5.0` API contract.
+
+## Before you begin
+
+You need Python 3.11 or newer, a server-side Signals workspace secret, and an active [Meta destination](/signals/connect-meta). Confirm that your consent policy permits the identity and click data in the request.
+
+Install the current PyPI release:
+
+```bash
+python -m pip install plainrouter==0.5.1
+```
+
+Store the secret outside source control:
+
+```bash
+export PLAINROUTER_SIGNAL_SECRET="YOUR_SIGNALS_WORKSPACE_SECRET"
+```
+
+## Send a purchase synchronously
+
+The generated nested consent, identity, and click-ID models accept dictionaries through `from_dict`. This keeps the request readable while preserving the generated top-level event type.
+
+```python
+from http import HTTPStatus
+import os
+
+from plainrouter import create_client, create_event
+from plainrouter.generated.models import CreateEventBodyType0
+
+
+signal_secret = os.environ["PLAINROUTER_SIGNAL_SECRET"]
+client = create_client(signal_secret)
+
+order_id = "ORDER-1042"
+event = CreateEventBodyType0.from_dict(
+    {
+        "event_id": f"purchase:{order_id}",
+        "event_name": "Purchase",
+        "event_time": 1786272000,
+        "event_source": "https://shop.example/checkout/success",
+        "action_source": "website",
+        "consent_basis": "consent",
+        "consent": {
+            "ad_storage": "granted",
+            "ad_user_data": "granted",
+            "ad_personalization": "granted",
+            "captured_at": "2026-08-09T12:00:00Z",
+            "source": "checkout_cmp",
+        },
+        "user_data": {
+            "email": "buyer@example.com",
+            "phone": "+358401234567",
+            "client_ip_address": "203.0.113.10",
+            "client_user_agent": "ExampleCheckout/1.0",
+        },
+        "click_ids": {
+            "fbp": "fb.1.1786271000000.1234567890",
+            "fbc": "fb.1.1786271000000.EXAMPLE_FBCLID",
+        },
+        "value_data": {
+            "value": "49.90",
+            "currency": "EUR",
+            "order_id": order_id,
+            "contents": [{"id": "SKU-1", "quantity": 2}],
+            "num_items": 2,
+        },
+    }
+)
+
+response = create_event.sync_detailed(client=client, body=event)
+
+if response.status_code not in {HTTPStatus.OK, HTTPStatus.ACCEPTED}:
+    raise RuntimeError(response.content.decode("utf-8"))
+
+if response.parsed is None:
+    raise RuntimeError("PlainRouter returned an empty response")
+
+print(
+    {
+        "event_id": response.parsed.event_id,
+        "duplicate": response.parsed.duplicate,
+    }
+)
+```
+
+Replace the example `fbp` and `fbc` values with values captured from the consenting browser. Omit a field when you do not have a valid value; do not send placeholders in production.
+
+PlainRouter normalizes and hashes raw supported identity values before Meta delivery. A 64-character SHA-256 value is accepted as already hashed. Browser identifiers such as `fbp` and `fbc` remain unhashed.
+
+## Send the same model asynchronously
+
+Reuse the event model with the generated async operation:
+
+```python
+response = await create_event.asyncio_detailed(client=client, body=event)
+
+if response.status_code not in {HTTPStatus.OK, HTTPStatus.ACCEPTED}:
+    raise RuntimeError(response.content.decode("utf-8"))
+```
+
+The client reuses an `httpx` session. Create one client per service configuration rather than constructing a new client for every event.
+
+## Retry safely
+
+Use the same `event_id` for every retry of the same purchase. PlainRouter returns:
+
+- HTTP `202` and `duplicate: false` for a new accepted event.
+- HTTP `200` and `duplicate: true` for an already accepted event ID.
+
+You can use the generated `idempotency_key` argument instead of a body `event_id`. When both are present, they must match. See [Meta `event_id` deduplication](/guides/meta-capi/event-id-deduplication) before pairing this event with a browser Pixel event.
+
+## Confirm Meta delivery
+
+An accepted ingestion response is not a final Meta delivery receipt. Use `get_event.sync` with the returned event ID or read [Signal health and performance](/signals/health-and-performance) to inspect queued, accepted, skipped, and failed delivery states.
+
+## Implementation references
+
+- [`create_event` operation in Python `0.5.1`](https://github.com/plainrouter/sdk/blob/python-v0.5.1/packages/python/src/plainrouter/generated/api/event/create_event.py)
+- [`CreateEventBodyType0` model in Python `0.5.1`](https://github.com/plainrouter/sdk/blob/python-v0.5.1/packages/python/src/plainrouter/generated/models/create_event_body_type_0.py)
+- [`create_client` source in Python `0.5.1`](https://github.com/plainrouter/sdk/blob/python-v0.5.1/packages/python/src/plainrouter/client.py)
+- [Python SDK reference](/sdk/python)
+- [PlainRouter Conversion API reference](/reference/conversion-api)

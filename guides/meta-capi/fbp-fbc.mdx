@@ -1,0 +1,137 @@
+---
+title: "fbp and fbc explained"
+description: "Understand Meta fbp and fbc identifiers, capture them after consent, and pass valid browser context through PlainRouter to Meta CAPI."
+---
+
+`fbp` and `fbc` are Meta browser identifiers that help match a server event to browser and ad-click context. They are different values and neither should be hashed.
+
+| Field | What it represents | When it exists |
+| --- | --- | --- |
+| `fbp` | A Meta browser identifier associated with the first-party `_fbp` cookie. | PlainRouter can create it after browser storage consent. |
+| `fbc` | A Meta click identifier derived from a landing-page `fbclid` and its capture time. | Only when a valid Meta click ID is available. |
+
+PlainRouter sends valid values inside Meta `user_data` during eligible destination delivery. In the PlainRouter event request, put them under `click_ids`, not `user_data`.
+
+## Recognize the formats
+
+PlainRouter's browser library uses these shapes:
+
+```text
+fbp: fb.1.<timestamp-milliseconds>.<random-decimal>
+fbc: fb.1.<timestamp-milliseconds>.<fbclid>
+```
+
+For example:
+
+```text
+fb.1.1786271000000.1234567890
+fb.1.1786271000000.IwAR3ExampleClickIdentifier
+```
+
+Do not create an `fbc` value when the visit has no `fbclid`. An absent click identifier is more accurate than a fabricated one.
+
+## How PlainRouter captures the values
+
+The generated browser snippet:
+
+1. Reads the landing URL and buffers a valid `fbclid` in page memory.
+2. Waits for full advertising consent before creating or persisting `_fbp` or `_fbc`.
+3. Preserves the click-capture timestamp when formatting `fbc`.
+4. Adds the values to consented browser events under `click_ids`.
+5. Clears PlainRouter-owned browser identifiers after explicit denial or withdrawal.
+
+The requested cookie lifetime is 90 days. Browsers can apply shorter storage limits. PlainRouter's server-side visitor click state also uses a 90-day window for `fbp` and `fbc` when a consented visitor join is available.
+
+## Read the cookies in a server handler
+
+If you send a server event yourself, transfer the cookie values from the consenting browser request. This Node.js helper parses the request's `Cookie` header without changing the values:
+
+```js
+function cookies(header = "") {
+  return Object.fromEntries(
+    header
+      .split(";")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .map((part) => {
+        const separator = part.indexOf("=");
+        const name = decodeURIComponent(part.slice(0, separator));
+        const value = decodeURIComponent(part.slice(separator + 1));
+        return [name, value];
+      })
+  );
+}
+
+const browserCookies = cookies(request.headers.cookie);
+const clickIds = {
+  ...(browserCookies._fbp ? { fbp: browserCookies._fbp } : {}),
+  ...(browserCookies._fbc ? { fbc: browserCookies._fbc } : {})
+};
+```
+
+Use this only where your consent policy permits reading and using these cookies. Do not place the values in URLs or logs.
+
+## Send them through the PlainRouter SDK
+
+Pass the unchanged values under `click_ids`:
+
+```ts
+import {
+  configurePlainrouter,
+  createEvent,
+} from "@plainrouter/sdk";
+
+const signalSecret = process.env.PLAINROUTER_SIGNAL_SECRET;
+if (!signalSecret) throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
+
+configurePlainrouter({ signalTrackerSecret: signalSecret });
+
+await createEvent({
+  body: {
+    event_id: "purchase:ORDER-1042",
+    event_name: "Purchase",
+    consent_basis: "consent",
+    consent: {
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+      source: "checkout_cmp",
+    },
+    click_ids: clickIds,
+    value_data: {
+      value: "49.90",
+      currency: "EUR",
+      order_id: "ORDER-1042",
+    },
+  },
+});
+```
+
+PlainRouter accepts `fbc`, `fbp`, `gclid`, `gbraid`, `wbraid`, and `ttclid` in `click_ids`. Meta delivery uses only valid Meta `fbc` and `fbp` values. Invalid Meta browser-ID formats are discarded rather than forwarded.
+
+## Do not confuse click IDs with identity hashes
+
+Supported identity fields such as `email`, `phone`, `first_name`, `last_name`, `city`, `zip`, `country`, and `external_id` belong under `user_data`. PlainRouter normalizes and SHA-256 hashes raw identity values for Meta.
+
+`fbp` and `fbc` are already protocol identifiers. Hashing them destroys their meaning and reduces match context.
+
+## Troubleshoot missing values
+
+### `fbp` is absent
+
+Confirm `ad_storage`, `ad_user_data`, and `ad_personalization` are all granted before the event. Check whether the browser blocked the cookie write or shortened its lifetime.
+
+### `fbc` is absent
+
+Confirm the landing URL contained a non-empty `fbclid`. Direct, organic, and many non-Meta visits should not have `fbc`.
+
+### Values appear in the request but not Meta delivery
+
+Check that each value follows the Meta browser-ID format and that the event is consent-eligible. A stored event can exist without a destination delivery when consent or destination rules prevent forwarding.
+
+## Implementation references
+
+- [Track events and consent](/signals/track-events)
+- [Server-side tracking consent](/guides/meta-capi/server-side-consent)
+- [`click_ids` generated request type](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/types.gen.ts)
+- [PlainRouter Conversion API reference](/reference/conversion-api)
