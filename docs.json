@@ -52,6 +52,20 @@
             ]
           },
           {
+            "group": "Meta Conversions API",
+            "pages": [
+              "guides/meta-capi/nodejs",
+              "guides/meta-capi/typescript",
+              "guides/meta-capi/python",
+              "guides/meta-capi/go",
+              "guides/meta-capi/without-gtm",
+              "guides/meta-capi/event-id-deduplication",
+              "guides/meta-capi/fbp-fbc",
+              "guides/meta-capi/event-match-quality",
+              "guides/meta-capi/server-side-consent"
+            ]
+          },
+          {
             "group": "Launcher",
             "pages": [
               "launcher/connect-drive"
