@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-labelledby="title">
   <title id="title">PlainRouter</title>
-  <g transform="matrix(1.7 0 0 1.55 -4.5 -2.5)" fill="none" stroke="#FF5722" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M16 3h3a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-3" />
-    <path d="M8 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h3" />
-  </g>
+  <rect width="32" height="32" fill="#000000" />
+  <rect x="8" y="8" width="16" height="16" fill="#ffffff" />
 </svg>
