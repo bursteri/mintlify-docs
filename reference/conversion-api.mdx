@@ -20,7 +20,7 @@ see [Authentication and clients](/auth).
 | [PlainRouter CLI](/cli/quickstart) | You want to test an operation or run an operational script from a terminal. |
 | OpenAPI contract | You want to inspect the complete schema or generate another compatible client. |
 
-The signed REST contract, TypeScript SDK, and npm CLI are published at version `0.5.0`. Go SDK `v0.5.2`, Python package `0.5.1`, and Ruby SDK `0.1.0` target the same signed contract. The Python package also adds the PyPI CLI distribution. See [Client releases](#client-releases) for package links and the CLI's command boundary.
+The signed REST contract is published at version `0.5.0`. TypeScript SDK and npm CLI `0.5.1`, Go SDK `v0.5.2`, Python package `0.5.2`, and Ruby SDK `0.1.1` target that signed contract. The Python package also includes the PyPI CLI distribution. See [Client releases](#client-releases) for package links and the CLI's command boundary.
 
 ## Authenticate
 
@@ -139,9 +139,9 @@ Generate clients only from a signed document. Pin the generated SDK or CLI versi
 
 ## Client releases
 
-The TypeScript package [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), and Go module [`github.com/plainrouter/sdk-go@v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go) target the signed Conversion API contract `0.5.0`. All four expose ingestion verification and the required event consent fields. Go `v0.5.2` improves canonical documentation and package examples without changing the API contract.
+The TypeScript package [`@plainrouter/sdk@0.5.1`](https://www.npmjs.com/package/@plainrouter/sdk), Python package [`plainrouter==0.5.2`](https://pypi.org/project/plainrouter/), Ruby gem [`plainrouter-sdk 0.1.1`](https://rubygems.org/gems/plainrouter-sdk), and Go module [`github.com/plainrouter/sdk-go@v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go) target the signed Conversion API contract `0.5.0`. All four expose ingestion verification and the required event consent fields. The TypeScript, Python, and Ruby patch releases publish canonical documentation metadata; Go `v0.5.2` improves canonical documentation and package examples without changing the API contract.
 
-Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx install plainrouter==0.5.1`, from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.0`, or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. The PyPI and npm distributions expose the same nine terminal commands and consent-aware event shape. Neither adds a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
+Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx install plainrouter==0.5.2`, from [npm](https://www.npmjs.com/package/@plainrouter/cli) with `npm install --global @plainrouter/cli@0.5.1`, or from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. The PyPI and npm distributions expose the same nine terminal commands and consent-aware event shape. Neither adds a command for `verifySignalIngestion`; use an SDK, direct REST, or MCP for that operation.
 
 ## Handle errors
 

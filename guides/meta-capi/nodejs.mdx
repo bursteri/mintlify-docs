@@ -19,7 +19,7 @@ You need:
 Install the currently published package:
 
 ```bash
-npm install @plainrouter/sdk@0.5.0
+npm install @plainrouter/sdk@0.5.1
 ```
 
 The package is an ES module. Use `import` from a `.mjs` file or from a project whose `package.json` contains `"type": "module"`.
@@ -46,7 +46,7 @@ if (!signalSecret) {
 configurePlainrouter({ signalTrackerSecret: signalSecret });
 ```
 
-`signalTrackerSecret` is the compatibility name used by SDK `0.5.0`. Supply a Signals workspace secret, not an MCP token or workspace execution token.
+`signalTrackerSecret` is the compatibility name used by SDK `0.5.1`. Supply a Signals workspace secret, not an MCP token or workspace execution token.
 
 ## Send a purchase
 
@@ -130,7 +130,7 @@ Use [Signal health and performance](/signals/health-and-performance) or retrieve
 
 ## Implementation references
 
-- [`configurePlainrouter` source at SDK `0.5.0`](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/config.ts)
-- [`createEvent` generated operation at SDK `0.5.0`](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/sdk.gen.ts)
-- [`CreateEventData` request type at SDK `0.5.0`](https://github.com/plainrouter/sdk/blob/v0.5.0/packages/sdk/src/generated/types.gen.ts)
+- [`configurePlainrouter` source at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/config.ts)
+- [`createEvent` generated operation at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/generated/sdk.gen.ts)
+- [`CreateEventData` request type at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/generated/types.gen.ts)
 - [PlainRouter Conversion API reference](/reference/conversion-api)

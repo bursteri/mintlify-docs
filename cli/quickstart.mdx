@@ -5,7 +5,7 @@ description: "Install the PlainRouter CLI, store a Signals workspace secret secu
 
 The PlainRouter CLI exposes the Signals Conversion API as the `plainrouter` command. Install the command from [PyPI](https://pypi.org/project/plainrouter/), [npm](https://www.npmjs.com/package/@plainrouter/cli), or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap).
 
-The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.1` and includes both the Python SDK and CLI. The current [npm release](https://www.npmjs.com/package/@plainrouter/cli) is `0.5.0` and uses `@plainrouter/sdk` `0.5.0`. Both distributions expose the same command tree and target signed API contract `0.5.0`.
+The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.2` and includes both the Python SDK and CLI. The current [npm release](https://www.npmjs.com/package/@plainrouter/cli) is `0.5.1` and uses `@plainrouter/sdk` `0.5.1`. Both distributions expose the same command tree and target signed API contract `0.5.0`.
 
 <Note>
   The PyPI and npm CLI distributions can create events with the current consent contract. They do not expose an ingestion-verification command; use the TypeScript, Python, Ruby, or Go SDK, direct REST, or MCP for that operation.
@@ -21,7 +21,7 @@ The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.1` and
 Use [`pipx`](https://pipx.pypa.io/) to install the CLI in an isolated Python environment:
 
 ```bash
-pipx install plainrouter==0.5.1
+pipx install plainrouter==0.5.2
 ```
 
 The same package also exposes the Python SDK. From an active environment, you can run `python -m plainrouter` instead of the console command.
@@ -41,7 +41,7 @@ The formula supports [Homebrew](https://brew.sh/) on macOS and Linux and install
 Install the CLI from its [official npm package page](https://www.npmjs.com/package/@plainrouter/cli):
 
 ```bash
-npm install --global @plainrouter/cli@0.5.0
+npm install --global @plainrouter/cli@0.5.1
 ```
 
 Confirm the command is available:

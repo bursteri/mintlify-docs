@@ -47,7 +47,7 @@ invalid secret returns HTTP `401`.
 
 ## How do I authenticate the TypeScript SDK?
 
-Install `@plainrouter/sdk@0.5.0`, then configure the generated client explicitly:
+Install `@plainrouter/sdk@0.5.1`, then configure the generated client explicitly:
 
 ```ts
 import {
@@ -70,7 +70,7 @@ The property keeps its pre-collapse name for compatibility.
 
 ## How do I authenticate the Python SDK?
 
-Install [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/), then create a client with the Signals workspace secret:
+Install [`plainrouter==0.5.2`](https://pypi.org/project/plainrouter/), then create a client with the Signals workspace secret:
 
 ```python
 import os
@@ -86,7 +86,7 @@ an asynchronous `asyncio` method.
 
 ## How do I authenticate the Ruby SDK?
 
-Install [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Signals workspace secret:
+Install [`plainrouter-sdk 0.1.1`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Signals workspace secret:
 
 ```ruby
 require "plainrouter"
@@ -198,11 +198,11 @@ discovery.
 | Client | Package or endpoint | Current version | Authentication |
 | --- | --- | --- | --- |
 | REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signals workspace secret |
-| TypeScript | `@plainrouter/sdk` | `0.5.0` | Signals workspace secret passed through `signalTrackerSecret` |
-| Python | `plainrouter` | `0.5.1` | Signals workspace secret passed to `create_client` |
-| Ruby | `plainrouter-sdk` | `0.1.0` | Signals workspace secret passed to `PlainRouter::Client.new` |
+| TypeScript | `@plainrouter/sdk` | `0.5.1` | Signals workspace secret passed through `signalTrackerSecret` |
+| Python | `plainrouter` | `0.5.2` | Signals workspace secret passed to `create_client` |
+| Ruby | `plainrouter-sdk` | `0.1.1` | Signals workspace secret passed to `PlainRouter::Client.new` |
 | Go | `github.com/plainrouter/sdk-go` | `v0.5.2` | Signals workspace secret attached to the request context |
-| CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.1`; npm `0.5.0` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
+| CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
 | MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.3.2` | None |
 | MCP production | `https://plainrouter.com/mcp` | Server `0.3.2` | Workspace execution token for tool calls and account data |
 
