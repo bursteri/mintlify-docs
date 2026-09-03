@@ -12,7 +12,7 @@ You need:
 - Node.js `22.22.2` or later in the Node 22 release line.
 - A [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) stored only on your server.
 - An active [Meta destination](/signals/connect-meta).
-- A consent decision that permits downstream advertising use. See [Server-side tracking consent](/guides/meta-capi/server-side-consent).
+- A consent decision that permits downstream advertising use. See [Server-side tracking consent](https://plainrouter.com/library/server-side-consent).
 
 ## Install the Node.js SDK
 
@@ -120,7 +120,7 @@ Keep the same `event_id` when a timeout or queue retry repeats the same logical 
 - A previously accepted `event_id` returns HTTP `200` with `duplicate: true`.
 - Changing the ID on each retry defeats idempotency and can create duplicate conversions.
 
-PlainRouter also passes the event ID to Meta. When you use the managed browser Pixel for the same event, PlainRouter uses one ID for the Pixel `eventID` and the server `event_id`. See [Meta `event_id` deduplication](/guides/meta-capi/event-id-deduplication).
+PlainRouter also passes the event ID to Meta. When you use the managed browser Pixel for the same event, PlainRouter uses one ID for the Pixel `eventID` and the server `event_id`. See [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
 
 ## Confirm delivery
 

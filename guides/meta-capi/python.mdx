@@ -112,7 +112,7 @@ Use the same `event_id` for every retry of the same purchase. PlainRouter return
 - HTTP `202` and `duplicate: false` for a new accepted event.
 - HTTP `200` and `duplicate: true` for an already accepted event ID.
 
-You can use the generated `idempotency_key` argument instead of a body `event_id`. When both are present, they must match. See [Meta `event_id` deduplication](/guides/meta-capi/event-id-deduplication) before pairing this event with a browser Pixel event.
+You can use the generated `idempotency_key` argument instead of a body `event_id`. When both are present, they must match. See [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication) before pairing this event with a browser Pixel event.
 
 ## Confirm Meta delivery
 

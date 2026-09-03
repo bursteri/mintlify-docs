@@ -57,12 +57,7 @@
               "guides/meta-capi/nodejs",
               "guides/meta-capi/typescript",
               "guides/meta-capi/python",
-              "guides/meta-capi/go",
-              "guides/meta-capi/without-gtm",
-              "guides/meta-capi/event-id-deduplication",
-              "guides/meta-capi/fbp-fbc",
-              "guides/meta-capi/event-match-quality",
-              "guides/meta-capi/server-side-consent"
+              "guides/meta-capi/go"
             ]
           },
           {
@@ -228,6 +223,26 @@
     {
       "source": "/reference/authentication",
       "destination": "/auth"
+    },
+    {
+      "source": "/guides/meta-capi/without-gtm",
+      "destination": "https://plainrouter.com/library/meta-capi-without-gtm"
+    },
+    {
+      "source": "/guides/meta-capi/event-id-deduplication",
+      "destination": "https://plainrouter.com/library/meta-event-id-deduplication"
+    },
+    {
+      "source": "/guides/meta-capi/fbp-fbc",
+      "destination": "https://plainrouter.com/library/fbp-fbc"
+    },
+    {
+      "source": "/guides/meta-capi/event-match-quality",
+      "destination": "https://plainrouter.com/library/meta-event-match-quality"
+    },
+    {
+      "source": "/guides/meta-capi/server-side-consent",
+      "destination": "https://plainrouter.com/library/server-side-consent"
     }
   ]
 }

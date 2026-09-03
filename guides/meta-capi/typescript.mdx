@@ -125,7 +125,7 @@ Schema validation proves that the payload matches the published client contract.
 
 Use one stable `event_id` for one logical conversion. Reuse the ID for queue retries and timeouts. A response with `duplicate: true` is a successful idempotent replay, not an error.
 
-The create response reports ingestion, not final Meta acceptance. Call `getEvent` for the delivery trace or use [Signal health and performance](/signals/health-and-performance). For the browser/server pairing rules, see [Meta `event_id` deduplication](/guides/meta-capi/event-id-deduplication).
+The create response reports ingestion, not final Meta acceptance. Call `getEvent` for the delivery trace or use [Signal health and performance](/signals/health-and-performance). For the browser/server pairing rules, see [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
 
 ## Implementation references
 
