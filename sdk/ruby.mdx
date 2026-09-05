@@ -60,7 +60,7 @@ Generated models, API errors, configuration, response metadata, and every genera
 result = client.events.verify_signal_ingestion
 ```
 
-The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`.
+The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`. The event confirms ledger receipt but is not real arrival evidence and does not complete onboarding.
 
 ## Try the zero-auth sandbox
 

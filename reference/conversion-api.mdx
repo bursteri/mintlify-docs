@@ -90,7 +90,7 @@ curl https://plainrouter.com/api/v1/verification-events \
   --header "Accept: application/json"
 ```
 
-A new verification returns `202`; a repeat returns `200` with `duplicate: true`. The request has no body. See [Verify Signal ingestion](/signals/verify-ingestion) for the onboarding workflow and MCP alternative.
+A new verification returns `202`; a repeat returns `200` with `duplicate: true`. The request has no body. It confirms ledger receipt but does not count as real arrival evidence or complete onboarding. See [Test Signal ingestion](/signals/verify-ingestion) for the MCP alternative.
 
 ## Available operations
 
@@ -99,7 +99,7 @@ SDKs and CLI clients derive their method and command names from these semantic o
 | Operation ID | Method and path | Purpose |
 | --- | --- | --- |
 | `createEvent` | `POST /events` | Submit an idempotent conversion event. |
-| `verifySignalIngestion` | `POST /verification-events` | Write the identity-free onboarding verification event. |
+| `verifySignalIngestion` | `POST /verification-events` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
 | `getEvent` | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
 | `listEvents` | `GET /dashboard/events` | List recent events and delivery metrics. |
 | `setDestinationTestMode` | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |

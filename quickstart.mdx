@@ -4,13 +4,13 @@ description: "Set up your workspace, collect your first website signal, and choo
 ---
 
 <Info>
-  PlainRouter's complete control plane costs &#36;0 while combined monthly managed ad spend is under &#36;300. Registration requires no contact-sales form. After workspace and Meta ad-account setup, the workspace owner can manage production tokens from **Account** → **API**.
+  PlainRouter's complete control plane costs &#36;0 while combined monthly managed ad spend is under &#36;300. Registration is open and requires no contact-sales form. After workspace and Meta ad-account setup, the workspace owner can manage production tokens from **Account** → **API**.
 </Info>
 
-Welcome to PlainRouter. This guide takes you from a new account to verified first-party Signals ingestion.
+Welcome to PlainRouter. This guide takes you from a new account to the first real arrival through your first-party Signals domain.
 
 <Card title="What you will accomplish" icon="circle-check">
-  Create your account, confirm your workspace, connect a first-party collection domain, and verify the server-side ingestion path.
+  Create your account, connect a first-party collection domain, install the generated browser snippet, and observe the first consented arrival.
 </Card>
 
 ## Before you begin
@@ -19,7 +19,8 @@ Before you begin, you need:
 
 - An email address you can verify.
 - Access to the DNS provider for your website domain.
-- A Signals workspace secret for API verification, or an authorized MCP connection with `signals.verify`.
+- Access to your website's shared `<head>` template or site-wide code injection setting.
+- A consent integration that can provide PlainRouter with the required advertising permissions.
 
 ## Set up your account
 
@@ -46,6 +47,11 @@ Signals collects first-party conversion events from your website through a colle
 
     Enter a collection subdomain that you control, such as `collect.example.com`. Do not include `https://`.
   </Step>
+  <Step title="Copy the workspace API secret">
+    PlainRouter shows the newly issued Signals workspace secret once, directly in the setup screen. Copy it into your server-side secret manager before leaving the page.
+
+    The secret is not stored as plaintext and cannot be shown again. If you miss it, issue a replacement from the same screen.
+  </Step>
   <Step title="Add the CNAME record">
     Copy the CNAME name and target from PlainRouter into your DNS provider. Keep the setup screen open or return to it from **Signals**.
 
@@ -53,16 +59,16 @@ Signals collects first-party conversion events from your website through a colle
 
     See [Configure DNS and CNAME](/signals/configure-dns) for provider field guidance and troubleshooting.
   </Step>
-  <Step title="Verify server-side ingestion">
-    When the collection domain becomes active, send the identity-free verification event through `POST /api/v1/verification-events` or call the MCP tool `verify_signal_ingestion`.
+  <Step title="Install Signals and wait for an arrival">
+    When the collection domain becomes active, copy the generated snippet into the shared `<head>` of your site. Connect it to your consent flow, deploy, and visit a page where all required advertising permissions are granted.
 
-    PlainRouter completes setup after that event reaches the Signal ledger. The operation is idempotent and does not send data to Meta or create spend.
+    PlainRouter completes setup after the first qualifying `PageView` reaches the workspace. The setup screen polls automatically, backs off while it waits, and resumes after you return to the tab.
 
-    See [Verify Signal ingestion](/signals/verify-ingestion) for both methods.
+    See [Install the Signals pixel](/signals/install-pixel) for the snippet and consent requirements.
   </Step>
 </Steps>
 
-The browser pixel is optional for activation. Install it afterward if you want browser events, visitor joins, and managed browser/server deduplication. Only load it where your consent policy permits terminal storage and downstream advertising use.
+The identity-free `POST /api/v1/verification-events` operation remains available as a server-side diagnostic, but it does not count as real arrival evidence and does not complete onboarding. See [Test Signal ingestion](/signals/verify-ingestion).
 
 <Note>
   Signal setup is optional and resumable. Closing the setup screen does not remove your collection domain or log you out.
@@ -72,7 +78,7 @@ The browser pixel is optional for activation. Install it afterward if you want b
 
 Your initial PlainRouter setup is complete when:
 
-- **Signals** shows setup as complete after receiving the server verification event on an active collection domain.
+- **Signals** shows setup as complete after receiving the first qualifying arrival on an active collection domain.
 - Your workspace name clearly identifies the client, brand, or market it contains.
 
 You can now return to the [dashboard](https://plainrouter.com/dashboard) and continue working from the workspace you created.
@@ -85,8 +91,8 @@ Choose the next step that matches your goal:
   <Card title="Track conversion events" icon="mouse-pointer-click" href="/signals/track-events">
     Add purchases, leads, checkouts, and other events to your implementation.
   </Card>
-  <Card title="Install browser measurement" icon="code" href="/signals/install-pixel">
-    Add the optional Signals pixel to collect consent-aware website events.
+  <Card title="Review browser measurement" icon="code" href="/signals/install-pixel">
+    Review the installed Signals pixel and troubleshoot consent-aware website events.
   </Card>
   <Card title="Connect Meta" icon="plug" href="/signals/connect-meta">
     Send paired browser Pixel and server events with automatic deduplication.

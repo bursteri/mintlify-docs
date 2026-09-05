@@ -169,7 +169,7 @@ Possible non-measurable reasons are `no_history` and `stale_history`. When `quan
 
 ## `verify_signal_ingestion`
 
-Use this tool when an active Signal is waiting for its authoritative server-side onboarding check. It accepts no input and resolves the Signal from the authorized workspace.
+Use this tool to run an identity-free write-path diagnostic against an active Signal. It accepts no input and resolves the Signal from the authorized workspace.
 
 The tool writes one idempotent `signal_verification` event and returns:
 
@@ -180,7 +180,7 @@ The tool writes one idempotent `signal_verification` event and returns:
 }
 ```
 
-The event is identity-free, modeled, excluded from enforcement, and never dispatched to Meta. A repeated call returns the same event with `duplicate: true`. The tool has no spend capability.
+The event is identity-free, modeled, excluded from enforcement, and never dispatched to Meta. It does not count as real arrival evidence or complete onboarding. A repeated call returns the same event with `duplicate: true`. The tool has no spend capability.
 
 The call fails if the connection lacks `signals.verify` or the authorized workspace has no active Signal.
 

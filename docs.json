@@ -43,9 +43,9 @@
             "pages": [
               "signals/overview",
               "signals/configure-dns",
-              "signals/verify-ingestion",
-              "signals/configure-serving",
               "signals/install-pixel",
+              "signals/configure-serving",
+              "signals/verify-ingestion",
               "signals/track-events",
               "signals/connect-meta",
               "signals/health-and-performance"

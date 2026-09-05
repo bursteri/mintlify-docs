@@ -62,14 +62,14 @@ client = create_client("YOUR_SIGNALS_WORKSPACE_SECRET")
 response = verify_signal_ingestion.sync(client=client)
 ```
 
-The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`.
+The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`. The event confirms ledger receipt but is not real arrival evidence and does not complete onboarding.
 
 ## Available operation modules
 
 | Module | Purpose |
 | --- | --- |
 | `create_event` | Submit an idempotent conversion event. |
-| `verify_signal_ingestion` | Write the identity-free onboarding verification event. |
+| `verify_signal_ingestion` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
 | `get_event` | Retrieve an event, lineage, and delivery state. |
 | `list_events` | List recent events and delivery metrics. |
 | `set_destination_test_mode` | Enable or disable destination test mode. |

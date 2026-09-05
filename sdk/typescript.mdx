@@ -68,7 +68,7 @@ You can also inject a compatible `fetch` implementation through the same configu
 | Method | Purpose |
 | --- | --- |
 | `createEvent` | Submit an idempotent conversion event. |
-| `verifySignalIngestion` | Write the identity-free onboarding verification event. |
+| `verifySignalIngestion` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
 | `getEvent` | Retrieve an event, lineage, and delivery state. |
 | `listEvents` | List recent events and delivery metrics. |
 | `setDestinationTestMode` | Enable or disable destination test mode. |
@@ -95,7 +95,7 @@ configurePlainrouter({
 const result = await verifySignalIngestion();
 ```
 
-The first successful call returns the accepted verification result. Repeating it is safe and returns `duplicate: true`.
+The first successful call returns the accepted verification result. Repeating it is safe and returns `duplicate: true`. The event confirms ledger receipt but is not real arrival evidence and does not complete onboarding.
 
 ## Handle credentials safely
 

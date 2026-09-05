@@ -3,7 +3,7 @@ title: "Configure Signal serving"
 description: "Use PlainRouter's generated managed-hostname or same-origin forwarding setup for your hosting stack."
 ---
 
-After Signal activation, the **One-screen serving setup** checks your hosting stack and produces one copy-ready configuration. You do not need to compare installation methods yourself.
+After the initial Signal setup completes, the **One-screen serving setup** checks your hosting stack and produces one copy-ready configuration. You do not need to compare installation methods yourself.
 
 PlainRouter uses the same managed collector, consent rules, and event contract for both serving paths. Only the route from your website to the collector changes.
 
@@ -24,7 +24,7 @@ Path A sends collection traffic through your PlainRouter-managed subdomain. Path
 
 <Steps>
   <Step title="Open the serving setup">
-    Complete [DNS validation](/signals/configure-dns) and [Signal ingestion verification](/signals/verify-ingestion), then open **Signals**.
+    Complete [DNS validation](/signals/configure-dns), install the generated snippet, and wait for the first qualifying arrival. Then open **Signals**.
   </Step>
   <Step title="Let PlainRouter check your hosting stack">
     PlainRouter checks bounded DNS and response-header evidence in the background. While the check is running, the page shows **Pending** and refreshes the stored result automatically.

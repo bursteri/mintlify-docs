@@ -1,12 +1,12 @@
 ---
 title: "Install the Signals pixel"
-description: "Add optional, consent-aware browser measurement to your website and verify that PlainRouter receives the expected first-party Signal traffic."
+description: "Add consent-aware browser measurement to your website and complete setup with the first qualifying Signal arrival."
 ---
 
 The Signals pixel collects first-party browser events through your collection domain. PlainRouter gives each workspace a unique Signals snippet with its publishable key and collection URL.
 
 <Info>
-  The pixel is not required to activate a Signal. Complete [server-side ingestion verification](/signals/verify-ingestion) first, then install the pixel only where your consent policy permits it.
+  Setup completes only after PlainRouter receives a real eligible arrival. The identity-free server verification event is a diagnostic and does not complete onboarding.
 </Info>
 
 ## Before you begin
@@ -23,7 +23,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 
 <Steps>
   <Step title="Copy your snippet">
-    Open **Signals**, continue setup, and find **Optional browser confirmation**.
+    Open **Signals**, continue setup, and find **Install Signals and wait for a real arrival**.
 
     Click **Copy code**. Use the complete snippet exactly as PlainRouter provides it. Its key and script URL are unique to your workspace.
   </Step>
@@ -39,7 +39,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
       };
       signalq("init", { key: "YOUR_PUBLISHABLE_KEY" });
     </script>
-    <script async src="https://YOUR_COLLECTION_DOMAIN/s/v3.js"></script>
+    <script async src="https://YOUR_COLLECTION_DOMAIN/s/v4.js"></script>
     ```
 
     Keep the initialization block before the asynchronous script. This preserves commands that run while the pixel is loading.
@@ -47,7 +47,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   <Step title="Deploy and visit your site">
     Publish the change, then open any page on the connected website.
 
-    After your consent integration supplies a complete grant, track a test event and use the network checks below to confirm the pixel loads and sends it.
+    After your consent integration supplies a complete grant, use the network checks below to confirm that the pixel loads and sends its consented `PageView`.
   </Step>
 </Steps>
 
@@ -60,8 +60,8 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 To test browser collection, open your browser's developer tools and reload the page:
 
 1. Select the **Network** tab.
-2. Search for `v3.js` and confirm it loads from your collection domain.
-3. Grant consent through your integration, track a test event, then search for `events` and confirm the browser sends a request to `/v1/events` on the same domain.
+2. Search for `v4.js` and confirm it loads from your collection domain.
+3. Grant consent through your integration, then search for `events` and confirm the browser sends a `PageView` request to `/v1/events` on the same domain.
 
 Both requests should return a successful `2xx` response.
 
@@ -69,10 +69,10 @@ Both requests should return a successful `2xx` response.
 
 `signalq("init", ...)` initializes browser collection without creating visitor state or sending an ordinary event. Browser events require `consent_basis: "consent"` and `granted` values for `ad_storage`, `ad_user_data`, and `ad_personalization`. Missing, unknown, denied, malformed, or withdrawn state does not send an ordinary browser event.
 
-The browser flow is not the authoritative activation check. Use the identity-free server verification event for setup.
+After the first complete grant, the v4 collector sends a consented `PageView`. That real arrival is the authoritative setup check. A queued event from before consent is not sent retroactively.
 
 <Note>
-  The generated snippet uses `signalq`. Do not rename it to `signal`; the v3 bundle intentionally exposes only the collision-resistant `signalq` global.
+  The generated snippet uses `signalq`. Do not rename it to `signal`; the v4 bundle intentionally exposes only the collision-resistant `signalq` global.
 </Note>
 
 ## Content Security Policy
@@ -102,7 +102,7 @@ You may need to allow `https://connect.facebook.net` in `script-src` after you [
 
 ### Signal setup still shows as incomplete
 
-The browser pixel does not complete activation. Send the server verification event described in [Verify Signal ingestion](/signals/verify-ingestion), and confirm the collection hostname is active.
+Confirm the collection hostname is active, the page loaded `v4.js`, and your consent integration supplied granted `ad_storage`, `ad_user_data`, and `ad_personalization`. Setup stays incomplete until a qualifying arrival is stored. The identity-free verification event cannot replace it.
 
 ## Next step
 

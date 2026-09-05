@@ -1,12 +1,12 @@
 ---
-title: "Verify Signal ingestion"
-description: "Complete Signal activation with an identity-free server verification event and confirm that PlainRouter accepts the workspace-scoped request."
+title: "Test Signal ingestion"
+description: "Write an identity-free diagnostic event through REST or MCP to confirm that PlainRouter accepts the workspace-scoped request."
 ---
 
-After your collection hostname becomes active, PlainRouter requires one server-side verification event to confirm that Signal ingestion works end to end. Browser pixel traffic does not complete this activation check.
+Use the server-side verification event when you want to confirm that a Signals workspace secret or MCP connection can write to the authorized Signal ledger without sending customer identity or destination data.
 
 <Card title="What the verification does" icon="badge-check">
-  It writes one idempotent, identity-free `signal_verification` event to the authorized Signal ledger. It does not contact Meta, enter attribution or enforcement, or create spend.
+  It writes one idempotent, identity-free `signal_verification` event to the authorized Signal ledger. It does not count as real arrival evidence, complete onboarding, contact Meta, enter attribution or enforcement, or create spend.
 </Card>
 
 ## Before you begin
@@ -16,7 +16,7 @@ You need:
 - An active collection hostname.
 - Either the Signals workspace secret for REST authentication or an MCP connection with `signals.verify`.
 
-## Verify with the REST API
+## Test with the REST API
 
 Send an authenticated request with no body:
 
@@ -39,10 +39,10 @@ A new verification returns HTTP `202`:
 Repeating the request is safe. It returns HTTP `200` with `duplicate: true` and does not create another ledger event.
 
 <Warning>
-  Keep the tracker secret on your server. Never put it in browser code, a URL, source control, a prompt, or a log.
+  Keep the Signals workspace secret on your server. Never put it in browser code, a URL, source control, a prompt, or a log.
 </Warning>
 
-## Verify with MCP
+## Test with MCP
 
 If you already have an authorized PlainRouter MCP connection, ask the client to call:
 
@@ -54,13 +54,13 @@ The tool accepts no input. It uses the Signal in the authorized workspace and re
 
 The connection needs the `signals.verify` permission. Read-tier workspace tokens include this permission. See [Connect an AI agent](/actions/connect-agent) or [Workspace tokens](/actions/workspace-tokens).
 
-## Confirm activation
+## Interpret the result
 
-PlainRouter polls setup progress automatically. Once the verification event is present and the collection hostname remains active, the setup screen completes.
+The result confirms that the authenticated request reached the workspace's Signal ledger. It does not turn the setup screen green. Onboarding completes only after PlainRouter stores a real eligible arrival, such as the consented `PageView` sent by the installed browser snippet.
 
-You can then:
+You can use the successful diagnostic before or after you:
 
-- [Install the optional Signals pixel](/signals/install-pixel) for consent-aware browser measurement.
+- [Install the Signals pixel](/signals/install-pixel) for consent-aware browser measurement and onboarding evidence.
 - [Submit server conversion events](/reference/conversion-api).
 - [Connect Meta](/signals/connect-meta) for eligible destination delivery.
 
@@ -80,4 +80,4 @@ Confirm that the authorized workspace is the workspace containing the Signal and
 
 ### Setup still does not complete
 
-Confirm the collection hostname is still **Active**, then repeat the idempotent verification request. Installing or visiting the browser pixel does not replace this server-side check.
+Repeating this diagnostic will not complete setup. Confirm the collection hostname is **Active**, install the generated browser snippet, provide a complete consent grant, and wait for the first qualifying arrival. See [Install the Signals pixel](/signals/install-pixel).
