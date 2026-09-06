@@ -1,0 +1,60 @@
+---
+title: "Why numbers differ from GA4"
+description: "Reconcile PlainRouter and GA4 by matching event definitions, consent eligibility, reporting scope, and observed versus modeled data."
+---
+
+PlainRouter arrivals and GA4 sessions measure different things. Even a working installation can produce different totals because the tools count different events, apply different consent rules, and expose different reporting populations.
+
+This guide explains how to compare reports side by side. It does not require a GA4 connection in PlainRouter.
+
+## What does each number mean?
+
+| Number | Definition |
+| --- | --- |
+| PlainRouter **Total arrivals** | Eligible observed event counts summed from workspace aggregates. Not a unique-person or session count, and not restricted to page views. |
+| GA4 sessions | Groups of interactions within a session. Several events can belong to one session. |
+| GA4 users | A user metric whose meaning depends on the selected report and metric, such as active users or total users. |
+| GA4 event count | Occurrences of the selected event. This is a closer starting point for comparing the same instrumented action. |
+
+GA4 sessions normally expire after 30 minutes of inactivity, and the timeout is configurable. See [Google's session definition](https://support.google.com/analytics/answer/9191807).
+
+Do not compare all PlainRouter arrivals with GA4 `page_view` and call the remainder missing page views. First isolate equivalent event names and triggers in the available reports. If the report cannot isolate the same population, record that limitation.
+
+## Which activity is eligible?
+
+PlainRouter's arrival comparison includes valid observed activity allowed by its privacy boundary. Modeled rows, invalid traffic, and suppressed strict-EU passive cells are excluded. Eligible passive aggregates can contribute to totals without appearing in event-level lists or channel breakdowns.
+
+GA4 reports reflect the configured streams, collection triggers, filters, reporting identity, and selected dimensions. An event sent to only one tool cannot appear in both. A server-recorded purchase and a browser thank-you-page event also have different failure modes.
+
+Compare one event definition at a time: a confirmed purchase with a confirmed purchase, rather than a purchase with every thank-you-page load.
+
+## How does consent change the comparison?
+
+| Situation | PlainRouter browser collection | GA4 |
+| --- | --- | --- |
+| Consent is pending or denied | Sends no ordinary browser event without all three advertising permissions granted. | Basic consent mode blocks tags until consent. Advanced consent mode can send cookieless pings while consent is denied. |
+| Analytics is permitted but an advertising permission is denied | Ordinary Signals browser events remain blocked. | Analytics collection depends on its own consent configuration; analytics permission and advertising permission are separate. |
+| A report includes estimates | The arrival comparison excludes modeled rows. | Eligible properties and reports can include behavioral modeling for users who declined analytics storage. |
+
+Google documents [basic and advanced consent mode](https://developers.google.com/tag-platform/security/concepts/consent-mode) and [behavioral modeling eligibility](https://support.google.com/analytics/answer/11161109). Modeling is conditional; do not assume every GA4 report contains it.
+
+PlainRouter's separately collected passive aggregates do not create an individual browsing history or advertising delivery. See [Signals consent behavior](/signals/overview#consent-behavior) and [aggregate visibility](/signals/health-and-performance#events-received).
+
+## What can each side not see?
+
+PlainRouter cannot reconstruct GA4's session boundaries, reporting identity, or modeled users from its arrival totals. It cannot know whether an absent browser event means the visitor left, denied consent, or encountered a collection failure.
+
+GA4 cannot infer PlainRouter's stored consent classification, suppressed cells, or destination delivery acceptance from its own events. A GA4 purchase event does not prove that Meta accepted the corresponding conversion.
+
+For example, one consented visit containing a page view and a purchase can create multiple eligible PlainRouter events within one GA4 session. Different totals can follow directly from correct collection.
+
+## How do I investigate a change?
+
+1. Match the website, date boundaries, timezone, and event trigger. Use complete days and allow report processing to finish.
+2. Record the exact GA4 metric, stream, filters, and reporting identity. Check whether the report includes modeled data.
+3. Test a controlled visit with the relevant consent states. Check whether each collector sends the intended event; do not bypass consent to align totals.
+4. Check script coverage, duplicate triggers, redirects, blockers, and browser versus server event sources. Compare traffic-source labels only after confirming their scopes match.
+
+Success means explaining which events and populations overlap, then investigating any remaining change. Equal totals are not an installation requirement. For a support investigation, include the dates, timezone, metric names, filters, consent setup, and aggregate counts, without visitor identifiers or credentials.
+
+Continue with [Signal health and performance](/signals/health-and-performance), or compare [Meta clicks](/signals/why-numbers-differ-meta) and [Plausible](/signals/why-numbers-differ-plausible).

@@ -1,0 +1,62 @@
+---
+title: "Why numbers differ from Plausible"
+sidebarTitle: "Versus Plausible"
+description: "Explain differences between PlainRouter arrivals and Plausible visitors, visits, and pageviews using measurement units, consent, and privacy boundaries."
+---
+
+Plausible visitors, Plausible pageviews, and PlainRouter arrivals answer different questions. Two privacy-focused measurement systems can disagree because they collect different events and apply different rules to identity and consent.
+
+This guide explains a comparison between your reports. The PlainRouter arrivals panel compares against Meta claimed clicks; it does not show a Plausible reconciliation.
+
+## What does each number mean?
+
+| Metric | What it counts |
+| --- | --- |
+| PlainRouter **Total arrivals** | Valid observed arrivals in customer-visible measurement cells for one workspace and retained period. It is not a deduplicated count of people. |
+| Plausible unique visitors | Visitors distinguished using Plausible's daily identification method. |
+| Plausible visits | Sessions of activity, which can contain several pageviews. |
+| Plausible pageviews | Recorded page views, including repeated views. |
+
+One visitor viewing five pages can produce five Plausible pageviews and one unique visitor. Start with pageviews when investigating arrival collection, while keeping the different event rules explicit. See [Plausible's metric definitions](https://plausible.io/docs/metrics-definitions).
+
+## Which traffic is eligible?
+
+PlainRouter's arrival comparison excludes modeled rows, invalid traffic, and suppressed strict-EU passive cells. Total arrivals and consented channel arrivals cover different populations.
+
+For Plausible, check the selected site, date range, filters, and installed collection path. Browser collection depends on the script running and its request reaching the service. Server-sent events depend on the integration sending the intended events. Plausible supports both pageviews and custom events through its [Events API](https://plausible.io/docs/events-api); do not compare a custom-event goal total with PlainRouter arrivals.
+
+Plausible can automatically record pageviews on single-page application navigation. Confirm which navigations actually produce PlainRouter measurements before expecting parity. See [Plausible's page tracking documentation](https://plausible.io/docs/top-pages).
+
+## How does consent change the comparison?
+
+Plausible describes its standard analytics collection as cookieless. It uses a daily-changing identifier to distinguish visitors without a persistent browser identifier. That method does not establish a stable person across days or devices. See [Plausible's data policy](https://plausible.io/data-policy).
+
+PlainRouter ordinary browser events require a complete grant for `ad_storage`, `ad_user_data`, and `ad_personalization`. A Plausible request can therefore occur while a PlainRouter ordinary event is withheld. If your site also gates Plausible through a consent manager, that configuration changes the comparison again.
+
+Separately, PlainRouter can include eligible passive measurements under its privacy boundary. Strict-EU passive cells below five arrivals are suppressed; visible passive measurements remain aggregate-only and never create destination deliveries. Consent to an ordinary event and eligibility for an aggregate count are different conditions. See [Signals consent behavior](/signals/overview#consent-behavior) and [passive measurement visibility](/signals/health-and-performance#events-received).
+
+Neither product's collection configuration grants permission to send the same data to an advertising destination.
+
+## What can each side not see?
+
+| Side | Blind spot |
+| --- | --- |
+| PlainRouter | Plausible-only pageviews and visitor groupings. Privacy-bounded passive data cannot reveal a person's pages, identity, or acquisition channel. |
+| Plausible | Events sent only to PlainRouter, PlainRouter's suppressed cells, and its Meta delivery outcomes. Its daily visitor method does not supply persistent cross-day identity. |
+| Either report | Requests that never reach its collection path, or proof that the other system missed a person just because its total is lower. |
+
+Source breakdowns also need care. PlainRouter's channel table contains attributed consent rows, not an allocation of every arrival. Do not expect a Plausible source filter and a PlainRouter channel row to cover the same people merely because their labels match.
+
+## How do I investigate a discrepancy?
+
+1. Select the exact Plausible metric. Keep visitors, visits, pageviews, and custom events separate.
+2. Match the website, complete dates, timezone, and filters to the period shown in PlainRouter. Avoid comparing a multi-day visitor total with a sum of daily visitor counts.
+3. Test one page load with the actual consent integration. Record whether each script loads and each request succeeds. Use [PlainRouter's installation checks](/signals/install-pixel#verify-the-installation).
+4. Test single-page navigation separately, and inspect duplicate installations or server integrations that may add events.
+5. Compare total arrivals before comparing source rows. Account for PlainRouter's suppression and consented channel eligibility using [the comparison reference](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+
+Success means you can explain the difference in units, coverage, or eligibility, or reproduce a collection problem worth fixing. Exact equality is not evidence that either system sees every visit.
+
+## Compare another system
+
+Read [versus Meta claimed clicks](/signals/compare-meta-clicks) or [versus GA4](/signals/compare-ga4).

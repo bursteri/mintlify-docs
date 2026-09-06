@@ -1,0 +1,58 @@
+---
+title: "Why numbers differ from Plausible"
+description: "Compare PlainRouter with Plausible by separating arrivals, pageviews, visits, and visitors, then checking consent and visibility limits."
+---
+
+Plausible measures website activity with a cookieless analytics approach. PlainRouter's arrival comparison counts eligible observed events under its own consent and privacy rules. Their totals can differ even when both installations work.
+
+Use this guide for a side-by-side comparison of reports. It does not require a Plausible connection in PlainRouter.
+
+## What does each number mean?
+
+| Number | Definition |
+| --- | --- |
+| PlainRouter **Total arrivals** | Eligible observed event counts in the workspace's aggregates. Not unique visitors or sessions, and not restricted to page views. |
+| Plausible **Total Pageviews** | Recorded page loads, including repeated views. |
+| Plausible **Total Visits** | Sessions of activity; a visit ends after 30 minutes without an action. |
+| Plausible **Unique Visitors** | Visitors counted without persistent identifiers. The same person on different devices or different days can count separately. |
+
+One person loading three pages can therefore produce three Plausible pageviews in one visit. Neither number is automatically equivalent to PlainRouter's arrival total. See [Plausible's metric definitions](https://plausible.io/docs/metrics-definitions).
+
+For a custom action, compare equivalent event totals. Plausible's unique conversions count converting visitors, while total conversions count repeated completions too. Neither should be substituted silently for the other.
+
+## Which activity is eligible?
+
+PlainRouter includes observed arrivals classified as valid and permitted by its customer-visible privacy rules. Modeled activity and invalid traffic are excluded. Strict-EU passive cells remain suppressed until each cell reaches five arrivals; eligible passive totals remain aggregate-only.
+
+Plausible can count only activity its integration receives and accepts. Its script coverage, event configuration, traffic filtering, and report filters can differ from PlainRouter's. A missing script on checkout or a duplicate pageview trigger can change one total without changing the other.
+
+Do not compare a whole-workspace arrival total with a single Plausible page, goal, or traffic-source filter. The PlainRouter channel table is a consented subset, not an allocation of every arrival. See [arrival eligibility](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+
+## How does consent change the comparison?
+
+Plausible states that its standard analytics uses no cookies or persistent identifiers. See [Plausible's data policy](https://plausible.io/data-policy) for its collection approach. Your site's implementation still determines whether a consent manager delays loading its script.
+
+PlainRouter's ordinary browser events require granted `ad_storage`, `ad_user_data`, and `ad_personalization`. If Plausible loads while PlainRouter waits for those permissions, Plausible may record a pageview that the Signals browser collector does not send. That is a population difference to account for, not a reason to weaken the consent gate.
+
+Separately collected passive PlainRouter arrivals may appear in privacy-bounded aggregates. They do not become identifiable visitors, channel-attributed events, or Meta deliveries. See [Track events and consent](/signals/track-events).
+
+## What can each side not see?
+
+| Side | Visibility limit |
+| --- | --- |
+| PlainRouter | Cannot derive Plausible's unique visitors or session boundaries from an event total. Suppressed or aggregate-only arrivals cannot be expanded into individual journeys. |
+| Plausible | Its cookieless visitor metric does not provide a persistent identity across days or devices. Its website counts cannot establish PlainRouter's event eligibility or whether Meta accepted a delivery. |
+| Both | A missing browser event alone cannot identify whether the cause was an early exit, a blocker, missing script coverage, or an intentional collection rule. |
+
+For example, a visitor who loads a page and leaves before granting advertising consent may appear in Plausible while producing no ordinary Signals browser event. This is an illustrative scenario, not an expected percentage difference.
+
+## How do I investigate a change?
+
+1. Match the domain, complete date range, timezone, and filters. Write down whether Plausible shows pageviews, visits, unique visitors, or a goal metric.
+2. Compare the same event trigger where both reports allow it. Separate browser pageviews from server-recorded purchases and passive aggregates.
+3. Check whether your consent manager starts the two scripts at different times. Test the actual granted and denied paths without bypassing consent.
+4. Check missing pages, duplicate triggers, client-side navigation, blockers, and traffic filtering. Use [Signals installation checks](/signals/install-pixel#verify-the-installation) to verify collection.
+
+A successful comparison explains the populations and isolates unexplained changes. There is no universal percentage that makes the installation correct. If you need support, provide the metric names, dates, timezone, filters, consent setup, and aggregate counts without visitor identifiers or credentials.
+
+Continue with [Signal health and performance](/signals/health-and-performance), or compare [Meta clicks](/signals/why-numbers-differ-meta) and [GA4](/signals/why-numbers-differ-ga4).

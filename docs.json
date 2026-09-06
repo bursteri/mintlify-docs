@@ -52,6 +52,22 @@
             ]
           },
           {
+            "group": "Why the numbers differ",
+            "pages": [
+              "signals/why-numbers-differ-meta",
+              "signals/why-numbers-differ-ga4",
+              "signals/why-numbers-differ-plausible"
+            ]
+          },
+          {
+            "group": "Why the numbers differ",
+            "pages": [
+              "signals/compare-meta-clicks",
+              "signals/compare-ga4",
+              "signals/compare-plausible"
+            ]
+          },
+          {
             "group": "Meta Conversions API",
             "pages": [
               "guides/meta-capi/nodejs",

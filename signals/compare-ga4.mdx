@@ -1,0 +1,60 @@
+---
+title: "Why numbers differ from GA4"
+sidebarTitle: "Versus GA4"
+description: "Compare PlainRouter arrivals with GA4 page views, sessions, and users while accounting for consent, modeling, and collection coverage."
+---
+
+PlainRouter arrivals and GA4 users or sessions are different units. Start with the exact GA4 metric, then compare collection coverage and consent. Even GA4 page views need not match PlainRouter arrivals.
+
+This guide explains how to compare reports you have in each product. The PlainRouter arrivals panel compares against Meta claimed clicks; it does not show a GA4 reconciliation.
+
+## What does each number mean?
+
+| Metric | What it counts |
+| --- | --- |
+| PlainRouter **Total arrivals** | Valid observed arrivals in customer-visible measurement cells for one workspace and retained period. It is not a deduplicated count of people. |
+| GA4 `page_view` | Page-view events. Enhanced measurement can send these on page loads and browser-history changes. |
+| GA4 sessions | Groups of interactions during a session. Multiple page views can belong to one session. |
+| GA4 users | Users measured under the selected metric and reporting identity. Record whether you chose active users or total users. |
+
+GA4 can count navigation within a single-page application as additional page views. Do not assume those events have equivalent PlainRouter arrivals. Check [Google's page-view measurement definition](https://support.google.com/analytics/answer/9216061) before comparing the counts.
+
+## Which traffic is eligible?
+
+PlainRouter's arrival comparison excludes modeled rows and invalid traffic, and applies its customer-visible privacy boundary. Its consented channel table covers a narrower population than total arrivals.
+
+On the GA4 side, check the web stream, hostname coverage, event name, report filters, and tag triggers. A property spanning several domains or including app traffic is broader than a single PlainRouter workspace. A missing tag, blocked request, or duplicate page-view setup can also change collection independently on either side.
+
+For an arrival comparison, start with web `page_view` events for the same domain and complete dates. Treat that as a diagnostic comparison, not an expectation of exact equality.
+
+## How does consent change the comparison?
+
+PlainRouter ordinary browser events require granted `ad_storage`, `ad_user_data`, and `ad_personalization`. An analytics-only grant does not satisfy that requirement. Eligible passive measurements remain subject to separate privacy limits: strict-EU cells below five arrivals are suppressed, and passive data does not become an attributed visitor trail or a Meta delivery. See [Signals consent behavior](/signals/overview#consent-behavior).
+
+GA4 behavior depends on its consent implementation. Basic consent mode blocks Google tags until consent is granted. Advanced consent mode can send cookieless pings while consent is denied. An analytics-storage grant and an advertising grant are separate decisions. See [Google's consent mode overview](https://developers.google.com/tag-platform/security/concepts/consent-mode).
+
+Eligible GA4 properties can include behavioral estimates in user and session reporting. Check the reporting identity and data-quality indicator instead of assuming modeling is active. Google distinguishes these estimates from report event counts such as `page_view`, which behavioral modeling does not inflate. Path and funnel explorations have additional modeling differences. See [Google's behavioral modeling reference](https://support.google.com/analytics/answer/11161109).
+
+## What can each side not see?
+
+| Side | Blind spot |
+| --- | --- |
+| PlainRouter | GA4-only events, Google's user/session identity decisions, or a browser interaction that never reaches PlainRouter. Passive measurements cannot supply an individual journey. |
+| GA4 | Events sent only to PlainRouter, PlainRouter's privacy suppression decisions, or its destination-delivery outcomes. Missing persistent identifiers limit directly observed user continuity. |
+| Either report | Every person who intended to visit. An absent measurement cannot establish whether the visitor left, declined consent, or encountered a collection failure. |
+
+For example, one person opening several pages can create several page-view events within one session. Comparing that session to arrival events creates a discrepancy before any measurement failure occurs.
+
+## How do I investigate a discrepancy?
+
+1. Write down the GA4 metric and report. Do not compare users, sessions, all events, and page views interchangeably.
+2. Match the domain, complete dates, timezone, and traffic filters. Use the actual period shown in PlainRouter, which can be shortened by retention.
+3. Record GA4's reporting identity, modeling indicator, and consent-mode implementation. Compare these with the permission states supplied to PlainRouter.
+4. Test a page load and an in-app navigation separately. Check when each tag sends a request and whether duplicate tags send extra events. Follow [PlainRouter's installation checks](/signals/install-pixel#verify-the-installation).
+5. Compare total arrivals separately from consented channels. If only channel counts differ, inspect consent and source availability before concluding that collection failed.
+
+A useful outcome is a documented definition or collection difference you can reproduce. If a gap remains unexplained, retain the report settings, timestamps, consent choices, and request outcomes for investigation.
+
+## Compare another system
+
+Read [versus Meta claimed clicks](/signals/compare-meta-clicks) or [versus Plausible](/signals/compare-plausible).

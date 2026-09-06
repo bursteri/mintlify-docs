@@ -1,0 +1,60 @@
+---
+title: "Why numbers differ from Meta claimed clicks"
+sidebarTitle: "Versus Meta claimed clicks"
+description: "Explain the gap between PlainRouter arrivals and Meta-reported clicks by checking metric definitions, scope, consent, and missing evidence."
+---
+
+Meta counts ad clicks. PlainRouter counts observed arrivals that pass its measurement and privacy rules. A click can happen without a measurable arrival, and an arrival can come from somewhere other than Meta. The difference is useful evidence, but it does not identify a lost visitor by itself.
+
+## What does each number mean?
+
+| Number | Definition | What it does not mean |
+| --- | --- | --- |
+| PlainRouter **Total arrivals** | Valid observed arrivals in customer-visible measurement cells for the workspace and retained period. | Unique people, Meta-only traffic, or accepted conversions. |
+| **Platform-claimed clicks** | The connected Meta ad account's `clicks` field, stored during scheduled reconciliation. | Outbound clicks, unique link clicks, or landing-page views. |
+| **Difference** | Total arrivals minus platform-claimed clicks. | A count of people Meta failed to deliver. |
+| **Difference vs claimed** | Difference divided by platform-claimed clicks, expressed as a percentage. | A conversion rate or attribution accuracy score. It is unavailable when claimed clicks are zero. |
+
+Meta exposes separate click metrics in its [Marketing API examples](https://www.postman.com/meta/facebook-marketing-api/request/u07tack/get-ad-insights-l1). When reproducing PlainRouter's comparison in Ads Manager, keep the exact metric visible in your export.
+
+For example, 800 arrivals and 1,000 claimed clicks produce a difference of −200, or −20%. That arithmetic does **not** establish that 200 people clicked an ad and disappeared: the two totals do not describe a matched group of people.
+
+## Which traffic is eligible?
+
+PlainRouter includes valid, observed arrival cells that pass the customer-visible privacy boundary. It excludes modeled rows, invalid traffic, and suppressed strict-EU passive cells. Total arrivals can include traffic from other sources.
+
+Meta's side covers the connected **Meta ad account**, which may advertise destinations beyond the website measured by this workspace. The panel does not pair individual Meta clicks with individual arrivals or provide an ad-level loss calculation.
+
+The comparison uses the last seven complete days, shortened by the workspace's retention window. It uses the Meta ad account's timezone, with UTC as the fallback when that timezone is unavailable. Match the displayed dates and timezone before comparing exports.
+
+## How does consent change the comparison?
+
+A Meta-reported click does not establish that the visitor granted permission for website measurement or advertising delivery.
+
+PlainRouter's ordinary browser events require a complete grant for `ad_storage`, `ad_user_data`, and `ad_personalization`. Missing or denied permission prevents those events. Separately, eligible passive measurements can contribute only under their privacy rules: strict-EU passive cells remain suppressed below five arrivals, stay aggregate-only, and never create destination deliveries.
+
+The channel table is a narrower consented subset. It includes structurally attributed consent rows from global and full-consent strict-EU populations. Source-less, legitimate-interest, portfolio-scoped, and severed rows do not appear there. Do not distribute the difference between channel rows and total arrivals back to Meta.
+
+See [Signals consent behavior](/signals/overview#consent-behavior) and [arrival comparison eligibility](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+
+## What can each side not see?
+
+| Side | Blind spot |
+| --- | --- |
+| PlainRouter | A click inside Meta that never produces an accepted measurement on your website. It also cannot recover a missing channel from privacy-bounded passive data. |
+| Meta's claimed-click count | Whether PlainRouter received a valid arrival, whether a consent gate prevented collection, or which website arrivals came from unrelated sources. |
+| The comparison | The cause of each missing observation. A count difference alone cannot separate navigation abandonment, blocking, consent, scope, and reporting timing. |
+
+## How do I investigate a discrepancy?
+
+1. Match the Meta ad account, dates, timezone, and `clicks` metric. Check whether the account advertises other domains.
+2. Read **Total arrivals** separately from the consented channel table. Neither is a one-to-one list of Meta clicks.
+3. Check the panel's availability. **Not connected** means there is no active platform connection. **Unavailable** can mean missing or stale stored click history or no complete retained day. Neither means zero clicks.
+4. Test a real landing page with your consent integration. Confirm the script and event request succeed using [installation checks](/signals/install-pixel#verify-the-installation). Inspect redirects and blocked requests if the arrival is missing.
+5. Export the comparison and record the metric, period, timezone, and consent state alongside the counts. Investigate an unexplained change after those conditions match.
+
+Opening the dashboard or exporting CSV reads stored data; it does not fetch fresh Meta clicks. The separate **Verified gap** metric compares conversions, not clicks. See [Signal health and performance](/signals/health-and-performance#verified-gap).
+
+## Compare another system
+
+Read [versus GA4](/signals/compare-ga4) or [versus Plausible](/signals/compare-plausible).
