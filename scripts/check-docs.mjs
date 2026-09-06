@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
+import { runInNewContext } from "node:vm";
 
 const root = resolve(import.meta.dirname, "..");
 const errors = [];
@@ -83,6 +84,94 @@ if (!config.description?.trim()) {
 
 if (config.navbar?.primary?.href !== "https://plainrouter.com/login") {
   fail("The primary documentation CTA must link directly to /login without a redirect");
+}
+
+const linkTargetsPath = join(root, "link-targets.js");
+
+if (!existsSync(linkTargetsPath)) {
+  fail("Missing the documentation link target policy");
+} else {
+  class TestLink {
+    constructor(href, target = null) {
+      this.attributes = new Map([["href", href]]);
+
+      if (target) {
+        this.attributes.set("target", target);
+      }
+    }
+
+    getAttribute(name) {
+      return this.attributes.get(name) ?? null;
+    }
+
+    hasAttribute(name) {
+      return this.attributes.has(name);
+    }
+
+    removeAttribute(name) {
+      this.attributes.delete(name);
+    }
+
+    setAttribute(name, value) {
+      this.attributes.set(name, value);
+    }
+  }
+
+  const links = [
+    new TestLink("https://plainrouter.com/login", "_blank"),
+    new TestLink("https://app.plainrouter.com/workspaces", "_blank"),
+    new TestLink("/quickstart", "_blank"),
+    new TestLink("mailto:hello@plainrouter.com", "_blank"),
+    new TestLink("https://github.com/plainrouter/sdk"),
+  ];
+  let observerCallback;
+  const document = {
+    documentElement: {},
+    querySelectorAll: () => links,
+  };
+
+  class TestMutationObserver {
+    constructor(callback) {
+      observerCallback = callback;
+    }
+
+    observe() {}
+  }
+
+  try {
+    runInNewContext(readFileSync(linkTargetsPath, "utf8"), {
+      document,
+      MutationObserver: TestMutationObserver,
+      Set,
+      URL,
+      window: { location: new URL("https://plainrouter.com/docs/quickstart") },
+    });
+  } catch (error) {
+    fail(`The documentation link target policy failed to run: ${error.message}`);
+  }
+
+  if (links.slice(0, 4).some((link) => link.hasAttribute("target"))) {
+    fail("Only external web links outside PlainRouter may open in a new tab");
+  }
+
+  if (links[4].getAttribute("target") !== "_blank") {
+    fail("External links must open in a new tab");
+  }
+
+  if (!links[4].getAttribute("rel")?.includes("noopener")) {
+    fail("External links that open in a new tab must use noopener");
+  }
+
+  const dynamicExternalLink = new TestLink("https://mintlify.com/docs");
+  dynamicExternalLink.matches = () => true;
+  observerCallback?.([{
+    type: "childList",
+    addedNodes: [dynamicExternalLink],
+  }]);
+
+  if (dynamicExternalLink.getAttribute("target") !== "_blank") {
+    fail("Dynamically rendered external links must open in a new tab");
+  }
 }
 
 const tabs = config.navigation?.tabs;
