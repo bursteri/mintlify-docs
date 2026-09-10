@@ -1,9 +1,10 @@
 ---
-title: "Meta CAPI with Node.js"
-description: "Send consented Meta Conversions API purchases from Node.js through PlainRouter with stable IDs, match data, and retry-safe handling."
+title: "Send Meta conversions with Node.js and TypeScript"
+sidebarTitle: "Send Meta conversions"
+description: "Send Meta conversions through PlainRouter from Node.js or TypeScript, using consented purchase examples, stable event IDs, and delivery checks."
 ---
 
-Use the [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) package from server-side Node.js code. PlainRouter validates the event, normalizes and hashes supported identity fields, and sends eligible events to the Meta dataset connected to your workspace.
+Send a purchase to Meta through PlainRouter using the [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) package from server-side Node.js code. PlainRouter validates the event, normalizes and hashes supported identity fields, and sends eligible events to the Meta dataset connected to your workspace.
 
 ## Before you begin
 
@@ -16,7 +17,7 @@ You need:
 
 ## Install the Node.js SDK
 
-Install the currently published package:
+Install [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk):
 
 ```bash
 npm install @plainrouter/sdk@0.5.1
@@ -24,33 +25,14 @@ npm install @plainrouter/sdk@0.5.1
 
 The package is an ES module. Use `import` from a `.mjs` file or from a project whose `package.json` contains `"type": "module"`.
 
-## Configure one server-side client
-
-Set the secret in your deployment environment:
-
-```bash
-export PLAINROUTER_SIGNAL_SECRET="YOUR_SIGNALS_WORKSPACE_SECRET"
-```
-
-Configure the shared SDK client once when the process starts:
-
-```js
-import { configurePlainrouter } from "@plainrouter/sdk";
-
-const signalSecret = process.env.PLAINROUTER_SIGNAL_SECRET;
-
-if (!signalSecret) {
-  throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
-}
-
-configurePlainrouter({ signalTrackerSecret: signalSecret });
-```
-
-`signalTrackerSecret` is the compatibility name used by SDK `0.5.1`. Supply a Signals workspace secret, not an MCP token or workspace execution token.
-
 ## Send a purchase
 
-Use a stable, non-personal identifier for each logical conversion. A database order ID is a good source when it does not contain customer data.
+Store `PLAINROUTER_SIGNAL_SECRET` in your server environment. The SDK option `signalTrackerSecret` is its compatibility name; it expects a Signals workspace secret. Keep the configured client out of browser bundles.
+
+Call the example only after confirming the recorded consent permits advertising use. Supply the actual purchase time and consent-capture time from your order records. Reuse a stable, non-personal order ID for retries, and send money as a decimal string such as `"49.90"`.
+
+<Tabs>
+  <Tab title="JavaScript">
 
 ```js
 import {
@@ -110,7 +92,105 @@ export async function sendPurchase(order) {
 }
 ```
 
-Send monetary `value` as a decimal string such as `"49.90"`. PlainRouter accepts raw or already SHA-256-hashed supported identity values. Raw values are normalized and hashed before Meta delivery; `fbp` and `fbc` are sent in their valid Meta browser-ID format without hashing.
+  </Tab>
+  <Tab title="TypeScript">
+
+Use the generated `CreateEventData` request type for the consented event branch:
+
+```ts
+import {
+  configurePlainrouter,
+  createEvent,
+  type CreateEventData,
+  type CreateEventResponse,
+} from "@plainrouter/sdk";
+
+export type PurchaseInput = {
+  orderId: string;
+  paidAt: Date;
+  total: string;
+  currency: string;
+  email: string;
+  phone?: string;
+  fbp?: string;
+  fbc?: string;
+  consentCapturedAt: Date;
+};
+
+type ConsentedEventBody = Extract<
+  CreateEventData["body"],
+  { consent_basis: "consent" }
+>;
+
+const signalSecret = process.env.PLAINROUTER_SIGNAL_SECRET;
+if (!signalSecret) throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
+
+configurePlainrouter({ signalTrackerSecret: signalSecret });
+
+function purchaseBody(purchase: PurchaseInput): ConsentedEventBody {
+  return {
+    event_id: `purchase:${purchase.orderId}`,
+    event_name: "Purchase",
+    event_time: Math.floor(purchase.paidAt.getTime() / 1000),
+    event_source: "https://shop.example/checkout/success",
+    action_source: "website",
+    consent_basis: "consent",
+    consent: {
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+      captured_at: purchase.consentCapturedAt.toISOString(),
+      source: "checkout_cmp",
+    },
+    user_data: {
+      email: purchase.email,
+      ...(purchase.phone ? { phone: purchase.phone } : {}),
+    },
+    click_ids: {
+      ...(purchase.fbp ? { fbp: purchase.fbp } : {}),
+      ...(purchase.fbc ? { fbc: purchase.fbc } : {}),
+    },
+    value_data: {
+      value: purchase.total,
+      currency: purchase.currency,
+      order_id: purchase.orderId,
+    },
+  };
+}
+
+export async function sendPurchase(
+  purchase: PurchaseInput,
+): Promise<CreateEventResponse> {
+  const result = await createEvent({ body: purchaseBody(purchase) });
+
+  if (result.error) {
+    throw new Error(`PlainRouter rejected the event (HTTP ${result.response.status})`);
+  }
+
+  return result.data;
+}
+```
+
+  </Tab>
+</Tabs>
+
+Only include identity and browser identifiers you have permission to use. Omit `fbp` or `fbc` when unavailable; see [browser identifier formats](https://plainrouter.com/library/fbp-fbc).
+
+## Validate a TypeScript payload
+
+The SDK exports a runtime schema when data crosses an untrusted boundary:
+
+```ts
+import { zCreateEventBody } from "@plainrouter/sdk";
+
+const parsed = zCreateEventBody.safeParse(untrustedPayload);
+
+if (!parsed.success) {
+  throw new Error(parsed.error.message);
+}
+```
+
+Passing this schema check does not establish consent or final API acceptance. PlainRouter still validates the submitted event.
 
 ## Retry without creating another event
 

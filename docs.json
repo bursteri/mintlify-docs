@@ -53,31 +53,6 @@
             ]
           },
           {
-            "group": "Why the numbers differ",
-            "pages": [
-              "signals/why-numbers-differ-meta",
-              "signals/why-numbers-differ-ga4",
-              "signals/why-numbers-differ-plausible"
-            ]
-          },
-          {
-            "group": "Why the numbers differ",
-            "pages": [
-              "signals/compare-meta-clicks",
-              "signals/compare-ga4",
-              "signals/compare-plausible"
-            ]
-          },
-          {
-            "group": "Meta Conversions API",
-            "pages": [
-              "guides/meta-capi/nodejs",
-              "guides/meta-capi/typescript",
-              "guides/meta-capi/python",
-              "guides/meta-capi/go"
-            ]
-          },
-          {
             "group": "Launcher",
             "pages": [
               "launcher/connect-drive"
@@ -135,7 +110,8 @@
           {
             "group": "TypeScript SDK",
             "pages": [
-              "sdk/typescript"
+              "sdk/typescript",
+              "guides/meta-capi/nodejs"
             ]
           },
           {
@@ -267,6 +243,96 @@
     {
       "source": "/guides/meta-capi/server-side-consent",
       "destination": "https://plainrouter.com/library/server-side-consent"
+    },
+    {
+      "source": "/signals/why-numbers-differ-meta",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance#meta-clicks",
+      "permanent": true
+    },
+    {
+      "source": "/signals/why-numbers-differ-meta.md",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance.md#meta-clicks",
+      "permanent": true
+    },
+    {
+      "source": "/signals/compare-meta-clicks",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance#meta-clicks",
+      "permanent": true
+    },
+    {
+      "source": "/signals/compare-meta-clicks.md",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance.md#meta-clicks",
+      "permanent": true
+    },
+    {
+      "source": "/signals/why-numbers-differ-ga4",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance#ga4",
+      "permanent": true
+    },
+    {
+      "source": "/signals/why-numbers-differ-ga4.md",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance.md#ga4",
+      "permanent": true
+    },
+    {
+      "source": "/signals/compare-ga4",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance#ga4",
+      "permanent": true
+    },
+    {
+      "source": "/signals/compare-ga4.md",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance.md#ga4",
+      "permanent": true
+    },
+    {
+      "source": "/signals/why-numbers-differ-plausible",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance#plausible",
+      "permanent": true
+    },
+    {
+      "source": "/signals/why-numbers-differ-plausible.md",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance.md#plausible",
+      "permanent": true
+    },
+    {
+      "source": "/signals/compare-plausible",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance#plausible",
+      "permanent": true
+    },
+    {
+      "source": "/signals/compare-plausible.md",
+      "destination": "https://plainrouter.com/docs/signals/health-and-performance.md#plausible",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/typescript",
+      "destination": "https://plainrouter.com/docs/guides/meta-capi/nodejs",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/typescript.md",
+      "destination": "https://plainrouter.com/docs/guides/meta-capi/nodejs.md",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/python",
+      "destination": "https://plainrouter.com/docs/sdk/python#send-a-meta-conversion",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/python.md",
+      "destination": "https://plainrouter.com/docs/sdk/python.md#send-a-meta-conversion",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/go",
+      "destination": "https://plainrouter.com/docs/sdk/go#send-a-meta-conversion",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/go.md",
+      "destination": "https://plainrouter.com/docs/sdk/go.md#send-a-meta-conversion",
+      "permanent": true
     }
   ]
 }

@@ -53,6 +53,109 @@ func main() {
 
 Load the secret from your environment or secret manager rather than writing it in source code. The Go SDK does not accept an MCP workspace execution token or OAuth management credential.
 
+## Send a Meta conversion
+
+This recipe sends a purchase through PlainRouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
+
+Replace the sample order, identity, browser identifiers and timestamps with your actual purchase and consent records. Keep the same event ID and purchase time on retries. Omit browser identifiers when unavailable.
+
+### Create and send a purchase
+
+The generated `v0.5.2` request uses an `anyOf` wrapper. Construct the consented branch, then place it in `CreateEventRequest`:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	plainrouter "github.com/plainrouter/sdk-go"
+)
+
+func field(value any) *interface{} {
+	boxed := interface{}(value)
+	return &boxed
+}
+
+func main() {
+	secret := os.Getenv("PLAINROUTER_SIGNAL_SECRET")
+	if secret == "" {
+		log.Fatal("PLAINROUTER_SIGNAL_SECRET is required")
+	}
+
+	config := plainrouter.NewConfiguration()
+	client := plainrouter.NewAPIClient(config)
+	ctx := context.WithValue(
+		context.Background(),
+		plainrouter.ContextAccessToken,
+		secret,
+	)
+
+	orderID := "ORDER-1042"
+	consented := plainrouter.NewCreateEventRequestAnyOf("Purchase", "consent")
+	consented.SetEventId("purchase:" + orderID)
+	consented.SetEventSource("https://shop.example/checkout/success")
+	consented.SetActionSource("website")
+	consented.SetConsent(map[string]*interface{}{
+		"ad_storage":        field("granted"),
+		"ad_user_data":      field("granted"),
+		"ad_personalization": field("granted"),
+		"captured_at":       field("2026-08-09T12:00:00Z"),
+		"source":            field("checkout_cmp"),
+	})
+	consented.SetUserData(map[string]*interface{}{
+		"email": field("buyer@example.com"),
+		"phone": field("+358401234567"),
+	})
+	consented.SetClickIds(map[string]*interface{}{
+		"fbp": field("fb.1.1786271000000.1234567890"),
+		"fbc": field("fb.1.1786271000000.EXAMPLE_FBCLID"),
+	})
+
+	value := plainrouter.NewCreateEventRequestAnyOfValueData()
+	value.SetValue("49.90")
+	value.SetCurrency("EUR")
+	value.SetOrderId(orderID)
+	value.SetContents([]interface{}{
+		map[string]interface{}{"id": "SKU-1", "quantity": 2},
+	})
+	value.SetNumItems(2)
+	consented.SetValueData(*value)
+
+	request := plainrouter.CreateEventRequest{
+		CreateEventRequestAnyOf: consented,
+	}
+
+	result, response, err := client.EventAPI.
+		CreateEvent(ctx).
+		CreateEventRequest(request).
+		Execute()
+	if response != nil {
+		defer response.Body.Close()
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("event_id=%s duplicate=%t\n", result.GetEventId(), result.GetDuplicate())
+}
+```
+
+Replace the example browser identifiers with real values from a consenting browser, or omit `SetClickIds` when none are available. PlainRouter accepts raw supported identity fields and performs Meta-compatible normalization and SHA-256 hashing before delivery.
+
+### Reuse the client and context safely
+
+Create one `APIClient` per configuration and reuse it. Derive request contexts with timeouts or cancellation from your job or HTTP request context. The bearer token lives in the context in `v0.5.2`; never log the context or token.
+
+Use one stable event ID for each logical conversion. Retrying `purchase:ORDER-1042` returns the existing event with `duplicate: true`. A new ID represents a new conversion.
+
+### Confirm destination delivery
+
+The create response confirms ingestion only. Use `client.EventAPI.GetEvent(ctx, result.GetEventId()).Execute()` to retrieve the event and delivery trace, or review [Signal health and performance](/signals/health-and-performance).
+
 ## Configure another API origin
 
 The generated configuration defaults to the PlainRouter Conversion API. Override its server only for a PlainRouter-provided region or a controlled test environment.

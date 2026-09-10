@@ -91,22 +91,32 @@ The channel table is intentionally a subset, not an allocation of total arrivals
 
 Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. PlainRouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
 
-## Why do my numbers differ from another report?
+## Why numbers differ
 
-Start with the system you are comparing. Each guide explains definitions, eligibility, consent, blind spots, and checks you can reproduce:
+PlainRouter arrivals, ad clicks, pageviews, sessions and visitors count different things. A difference between them does not, by itself, measure lost visitors or failed conversion delivery.
 
-- [Versus Meta claimed clicks](/signals/compare-meta-clicks)
-- [Versus GA4](/signals/compare-ga4)
-- [Versus Plausible](/signals/compare-plausible)
+### Meta clicks
 
+Compare against the connected Meta ad account's `clicks` metric, not outbound clicks or landing-page views. PlainRouter arrivals can include traffic from other sources, and the ad account may advertise other websites. The totals do not pair individual clicks with individual arrivals.
 
-## Why do the numbers differ?
+Match the account, complete dates and timezone shown in the comparison. Check the stored data's availability before treating a missing value as zero. Keep this arrival comparison separate from [Verified gap](/signals/health-and-performance#verified-gap), which compares conversion counts.
 
-Start with the tool you are comparing. Each guide explains the counting unit, eligibility, consent treatment, visibility limits, and checks to run:
+### GA4
 
-- [Versus Meta-claimed clicks](/signals/why-numbers-differ-meta)
-- [Versus GA4](/signals/why-numbers-differ-ga4)
-- [Versus Plausible](/signals/why-numbers-differ-plausible)
+Choose one GA4 metric and record the report settings. Users and sessions are not arrival counts. For collection troubleshooting, compare web `page_view` events for the same domain, then check tag triggers, filters and consent settings. GA4 can record pageviews on browser-history changes as well as page loads; test these separately. See [Google's page-view definition](https://support.google.com/analytics/answer/9216061).
+
+### Plausible
+
+Keep unique visitors, visits, pageviews and custom-event goals separate. Start with pageviews when checking collection, with the same website, dates, timezone and filters. Repeated pageviews need not represent different visitors. See [Plausible's metric definitions](https://plausible.io/docs/metrics-definitions).
+
+### Check the collection difference
+
+1. Match the metric, website and reporting period before comparing totals.
+2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by PlainRouter. Compare total arrivals separately from the narrower channel breakdown.
+3. Test one page load and one in-app navigation with your actual consent choices. Confirm which requests reach each collector using the [installation checks](/signals/install-pixel#verify-the-installation).
+4. Inspect duplicate tags, redirects and blocked requests. Record the settings and request outcomes needed to reproduce an unexplained change.
+
+Compare GA4 and Plausible using their own reports alongside PlainRouter. The platform-claimed-clicks panel reads stored Meta data; it does not reconcile those analytics reports.
 
 ## Diagnostics
 
