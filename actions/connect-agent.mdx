@@ -1,9 +1,14 @@
 ---
-title: "Connect an AI agent"
-description: "Test PlainRouter MCP without credentials, then connect production with an account-bound workspace execution token."
+title: "Meta Ads MCP: connect your agent with PlainRouter"
+sidebarTitle: "Connect your agent"
+description: "Connect Claude Code to PlainRouter's Meta Ads MCP server, read signal health, and submit creative proposals for approval in one Meta ad account."
 ---
 
-PlainRouter exposes two remote Model Context Protocol endpoints:
+Connect your AI agent to a Meta ad account through PlainRouter's Model Context Protocol (MCP) server. You can inspect conversion signal health, read the account's creative library, and submit supported creative changes for approval.
+
+This guide sets up the PlainRouter connection for Facebook and Instagram advertising. Start with synthetic data, then connect your own Meta ad account with a workspace execution token.
+
+## Choose your MCP endpoint
 
 | Endpoint | Use | Credential |
 | --- | --- | --- |
@@ -22,8 +27,13 @@ clients](/auth).
 
 ## Start in test mode
 
-Point the client at `https://plainrouter.com/mcp/sandbox`. No PlainRouter account,
-credential, or human approval is required.
+In a terminal with [Claude Code](https://code.claude.com/docs/en/mcp) installed, add the test server:
+
+```bash
+claude mcp add --transport http plainrouter-test https://plainrouter.com/mcp/sandbox
+```
+
+Open Claude Code in the same directory and run `/mcp` to check the connection. No PlainRouter account or credential is required. Other MCP clients can use the same URL with HTTP transport.
 
 The endpoint exposes:
 
@@ -35,6 +45,29 @@ The endpoint exposes:
 Every response is synthetic and carries `"sandbox": true`. Test mode reads no
 tenant data, persists nothing, and contacts no advertising provider. It exposes
 no proposal, write, approval, Launcher, or spend-affecting tool.
+
+Ask the agent:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Summarize the synthetic account and signal health. Do not call other tools.
+```
+
+A successful account response includes the following fields. This is an excerpt from the synthetic response, not a real advertising account:
+
+```json
+{
+  "sandbox": true,
+  "workspace": { "id": 0, "name": "Sandbox Workspace" },
+  "ad_account": {
+    "id": 0,
+    "external_id": "act_SANDBOX",
+    "name": "Sandbox Ad Account"
+  }
+}
+```
+
+Both calls should return without a tool error. This proves the test connection works; it does not verify your production account or event collection.
 
 When the client can initialize, list tools, and call a sandbox tool, change its
 server URL to `https://plainrouter.com/mcp` and configure a workspace execution
@@ -78,6 +111,41 @@ For creative-library reads, the Meta connection needs `ads_read` or `ads_managem
 
 See [Workspace tokens](/actions/workspace-tokens) for tier selection, rotation, and revocation.
 
+### Configure Claude Code for your Meta ad account
+
+Add this server entry to your project's `.mcp.json`, preserving any existing servers. Claude Code [expands environment variables in MCP headers](https://code.claude.com/docs/en/mcp#environment-variable-expansion-in-mcp-json).
+
+```json
+{
+  "mcpServers": {
+    "plainrouter": {
+      "type": "http",
+      "url": "https://plainrouter.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${PLAINROUTER_WORKSPACE_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Supply `PLAINROUTER_WORKSPACE_TOKEN` in the terminal environment through your local secret manager before starting Claude Code. Keep the variable reference in the file; do not replace it with the token or paste the token into an agent prompt. Open `/mcp` and allow the project connection when prompted.
+
+Start with a **Read** token for account and library inspection. Use **Write** or **Admin** only when you need proposal-producing tools.
+
+### Confirm a read-only production connection
+
+Ask the agent:
+
+```text
+Use plainrouter to call get_account_state. Show the workspace name and
+Meta ad account name and external ID, then stop. Do not propose changes.
+```
+
+Check that the returned workspace and Meta ad account match the ones you selected when issuing the token. If they do, ask for `get_signal_health` to inspect conversion delivery and matching diagnostics. Missing Signals setup or measurement history is a separate setup issue; a successful account read does not establish healthy tracking.
+
+For the returned fields and their meaning, see the [MCP tool reference](/reference/mcp-tools).
+
 ## Permissions
 
 | Permission | Allows |
@@ -114,6 +182,19 @@ For a creative variant:
 
 Ask the agent to state clearly whether a proposal is suggest-only, pending approval, blocked, awaiting verification, or Landed.
 
+### Example: request a creative proposal
+
+After you select a source ad and an asset from the approved account's creative library, ask:
+
+```text
+Use the source ad and asset I selected to propose a paused ad copy.
+Summarize the proposed change and show its approval link. Stop for my review.
+```
+
+The creative tool submits a proposal to PlainRouter; it does not change Meta during that MCP call. In **Suggest only**, approval records agreement without execution. In an executable mode, supported creative work still requires policy checks and human approval. A new ad copy remains `PAUSED`.
+
+Follow the [creative workflow](/actions/creative-workflow) and [proposal review guide](/actions/review-proposals) for the next steps. Use the [Actions overview](/actions/overview) to check supported changes before requesting a different operation.
+
 ## Authorization lifetime and revocation
 
 Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revoke them immediately from **Account** → **API**.
@@ -121,6 +202,10 @@ Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revok
 PlainRouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 
 ## Troubleshoot
+
+### Claude Code cannot load the token variable
+
+Confirm `PLAINROUTER_WORKSPACE_TOKEN` is set in the environment that starts Claude Code. Restart the client after supplying it. Keep the variable name consistent with `.mcp.json`; do not print the token to debug the connection.
 
 ### The client receives `401 Unauthorized`
 
