@@ -102,6 +102,7 @@ SDKs and CLI clients derive their method and command names from these semantic o
 | `verifySignalIngestion` | `POST /verification-events` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
 | `getEvent` | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
 | `listEvents` | `GET /dashboard/events` | List recent events and delivery metrics. |
+| `listEventsByCursor` | `GET /dashboard/events/cursor` | Page through retained events with an opaque cursor. |
 | `setDestinationTestMode` | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |
 | `sendTestPurchase` | `POST /destinations/{destination}/test-purchase` | Send a controlled test purchase. |
 | `replayDeliveries` | `POST /deliveries/replay` | Replay eligible recent deliveries. |
@@ -110,6 +111,8 @@ SDKs and CLI clients derive their method and command names from these semantic o
 | `deleteUserData` | `DELETE /user-data` | Delete data matching a hashed user identifier. |
 
 Resource IDs remain scoped to the authenticated workspace. A client cannot use its Signals secret to read another workspace's events or destinations.
+
+Cursor listing accepts `per_page` up to 100. Omit `cursor` on the first request, then pass the returned `next_cursor` unchanged to fetch the next page. TypeScript exposes `listEventsByCursor`; Python exposes it through `plainrouter.generated.api.operations.list_events_by_cursor`. The CLI has no cursor-listing command.
 
 ## Read workspace identifiers
 

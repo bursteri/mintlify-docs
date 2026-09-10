@@ -13,7 +13,7 @@ The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.2` and
 
 ## Requirements
 
-- Python 3.11 or newer for the PyPI package, or Node.js `22.22.2` or later in the Node 22 release line for npm.
+- Python 3.11 or newer for the PyPI package, or Node.js `22.22.2` or newer for npm.
 - A Signals workspace secret.
 
 ## Install with [PyPI](https://pypi.org/project/plainrouter/)
@@ -91,10 +91,11 @@ Without `--json`, the CLI prints a human-readable summary or table.
 
 ## Use an environment variable
 
-For CI or an ephemeral shell, inject the token through your secret manager:
+For CI, inject `PLAINROUTER_TOKEN` through your secret manager. In an interactive Bash shell, read it at a hidden prompt:
 
 ```bash
-export PLAINROUTER_TOKEN="YOUR_SIGNALS_WORKSPACE_SECRET"
+read -r -s -p "Signals workspace secret: " PLAINROUTER_TOKEN
+export PLAINROUTER_TOKEN
 plainrouter reports emq --json
 unset PLAINROUTER_TOKEN
 ```

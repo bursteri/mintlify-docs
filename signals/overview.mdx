@@ -62,9 +62,9 @@ Server-side `POST /events` requests must include a `consent_basis` of `consent` 
 
 ## Identity retention
 
-When you provision Signals, choose 30 or 90 days for visitor identity retention. The default is 90 days. The selection applies to the workspace's retained visitor identity state; it does not widen the fixed retention limits of every ledger table.
+New Signals setup uses 90-day visitor identity retention without a retention questionnaire. The authenticated admin API retains the supported 30- and 90-day settings, subject to server-side policy. Identity retention applies to the workspace's retained visitor identity state; it does not widen the fixed retention limits of every ledger table.
 
-PlainRouter records the current retention instruction with its effective time, controller identity, selected value, selecting user, and optional justification and privacy-notice version. A retention change must pass the same server-side policy used by the dashboard and API. MCP does not expose a retention setter.
+PlainRouter records the current retention instruction with its effective time, controller identity, duration, selecting user, and supporting context. Retention changes must pass the server-side retention policy. MCP does not expose a retention setter.
 
 ## Browser and server deduplication
 

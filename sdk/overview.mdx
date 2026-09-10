@@ -1,0 +1,52 @@
+---
+title: "Choose an SDK or CLI"
+description: "Choose an official PlainRouter client for server-side conversions, terminal diagnostics, or account-bound AI workflows."
+---
+
+Use an SDK to add the Signals Conversion API to your application. Use the CLI to inspect events and reports from a terminal or script. To give an AI agent access to governed advertising workflows, [connect it through MCP](/actions/connect-agent).
+
+## Which client should I use?
+
+| Client | Published version | Best fit | Guide |
+| --- | --- | --- | --- |
+| [TypeScript SDK](https://www.npmjs.com/package/@plainrouter/sdk) | `0.5.1` | Typed server-side requests and Zod validation. | [TypeScript setup](/sdk/typescript) |
+| [Python SDK](https://pypi.org/project/plainrouter/) | `0.5.2` | Synchronous or asynchronous Python applications. | [Python setup](/sdk/python) |
+| [Ruby SDK](https://rubygems.org/gems/plainrouter-sdk) | `0.1.1` | Ruby applications using the curated client facade. | [Ruby setup](/sdk/ruby) |
+| [Go SDK](https://pkg.go.dev/github.com/plainrouter/sdk-go) | `v0.5.2` | Typed Go applications. | [Go setup](/sdk/go) |
+| [npm CLI](https://www.npmjs.com/package/@plainrouter/cli) | `0.5.1` | Terminal commands and JSON output for scripts. | [CLI setup](/cli/quickstart) |
+| [Python CLI](https://pypi.org/project/plainrouter/) | `0.5.2` | The same command tree installed through `pipx`. | [CLI setup](/cli/quickstart) |
+
+The CLI is also available from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap). Choose one global CLI installation so your shell consistently runs the intended `plainrouter` executable.
+
+## What do the clients cover?
+
+All four SDKs target signed API contract `0.5.0` and cover event creation and retrieval, ingestion verification, destination testing, delivery replay, reports, and user-data deletion. The CLI exposes nine API commands. It has no command for ingestion verification or cursor-based event listing; use the relevant SDK operation or direct REST. MCP also provides an ingestion diagnostic.
+
+SDK and CLI package versions are independent of the API contract version. Pin the package you install and review changes before upgrading. For the workspace identifier compatibility boundary in published `0.5.x` clients, see [Read workspace identifiers](/reference/conversion-api#read-workspace-identifiers).
+
+| Task | Use |
+| --- | --- |
+| Send purchases, leads, or other conversions from your server | An SDK and the [event consent contract](/signals/track-events). |
+| Inspect recent events, delivery status, or stored reports | The [CLI command reference](/cli/commands) or an SDK. |
+| Confirm that authenticated ingestion works | An SDK or [REST/MCP ingestion diagnostic](/signals/verify-ingestion). |
+| Install browser measurement | The [Signals browser snippet](/signals/install-pixel). |
+| Read account context or propose governed advertising actions | An [MCP connection](/actions/connect-agent). |
+
+## Which credential do I need?
+
+Production Conversion API calls use a **Signals workspace secret**. Keep it on your server or in the CLI's local credential storage. The published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential.
+
+MCP uses a separate **workspace execution token** bound to one workspace and one Meta ad account. SDK or CLI installation does not grant MCP access or widen permissions. See [Authentication](/auth) before choosing a credential.
+
+## Start with a read-only command
+
+After [installing the CLI](/cli/quickstart), store your Signals workspace secret at the hidden prompt and list recent events:
+
+```bash
+plainrouter auth login
+plainrouter events list --per-page 25 --json
+```
+
+A successful request returns the workspace's event response. An empty event list can still be a successful authenticated request; it does not prove that browser collection is installed. A `401` means the credential needs attention.
+
+For application code, continue with your language's setup guide above. For identity-free synthetic requests before production setup, see [Try the API without an account](/sandbox).

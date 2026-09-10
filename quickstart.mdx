@@ -4,7 +4,7 @@ description: "Set up your workspace, collect your first website signal, and choo
 ---
 
 <Info>
-  PlainRouter's complete control plane costs &#36;0 while combined monthly managed ad spend is under &#36;300. Registration is open and requires no contact-sales form. After workspace and Meta ad-account setup, the workspace owner can manage production tokens from **Account** → **API**.
+  Registration is open and requires no contact-sales form. Review [pricing](https://plainrouter.com/pricing) for the Free band's spend threshold, arrival allowance, and overage rules. After workspace and Meta ad-account setup, the workspace owner can manage production tokens from **Account** → **API**.
 </Info>
 
 Welcome to PlainRouter. This guide takes you from a new account to the first real arrival through your first-party Signals domain.
@@ -17,7 +17,7 @@ Welcome to PlainRouter. This guide takes you from a new account to the first rea
 
 Before you begin, you need:
 
-- An email address you can verify.
+- An email address you can access.
 - Access to the DNS provider for your website domain.
 - Access to your website's shared `<head>` template or site-wide code injection setting.
 - A consent integration that can provide PlainRouter with the required advertising permissions.
@@ -26,9 +26,11 @@ Before you begin, you need:
 
 <Steps>
   <Step title="Create your account">
-    [Create a PlainRouter account](https://plainrouter.com/register), then verify your email address.
+    [Create a PlainRouter account](https://plainrouter.com/register).
 
     PlainRouter creates a personal team and a default workspace, then opens the Signals setup flow. A workspace keeps one client, brand, or market and its connected resources together.
+
+    Connecting an ad account is optional. If you open ad-account onboarding, **Continue** takes you to Signals setup even without a connected account; **Skip** takes you to the dashboard.
   </Step>
   <Step title="Name your workspace">
     Open the [PlainRouter dashboard](https://plainrouter.com/dashboard), then go to **Settings** → **Workspace**.
@@ -42,15 +44,15 @@ Before you begin, you need:
 Signals collects first-party conversion events from your website through a collection subdomain you control.
 
 <Steps>
-  <Step title="Start your first signal">
-    In the dashboard, open **Signals** and click **New signal** or **Set up your first signal**.
+  <Step title="Enter your website address">
+    Open **Signals** and continue setup. In **Website address**, enter the website where you will install Signals, such as `www.example.com`.
 
-    Enter a collection subdomain that you control, such as `collect.example.com`. Do not include `https://`.
+    The form supplies `https://`. Use the exact website host, without a page path, query string, or fragment. The website address identifies the site allowed to send events; it is separate from your collection subdomain, such as `collect.example.com`.
   </Step>
-  <Step title="Copy the workspace API secret">
-    PlainRouter shows the newly issued Signals workspace secret once, directly in the setup screen. Copy it into your server-side secret manager before leaving the page.
+  <Step title="Continue to collection-domain setup">
+    Follow the setup flow to the collection-domain and DNS instructions. Meta connection and dataset selection are separate from installing first-party Signals.
 
-    The secret is not stored as plaintext and cannot be shown again. If you miss it, issue a replacement from the same screen.
+    Use the collection domain displayed by PlainRouter. When entering a collection subdomain, use a hostname such as `collect.example.com`, without `https://` or a path.
   </Step>
   <Step title="Add the CNAME record">
     Copy the CNAME name and target from PlainRouter into your DNS provider. Keep the setup screen open or return to it from **Signals**.
@@ -68,7 +70,9 @@ Signals collects first-party conversion events from your website through a colle
   </Step>
 </Steps>
 
-The identity-free `POST /api/v1/verification-events` operation remains available as a server-side diagnostic, but it does not count as real arrival evidence and does not complete onboarding. See [Test Signal ingestion](/signals/verify-ingestion).
+For server-side API, SDK, or CLI access, use the **Workspace API secret** panel in Signals setup. If you need a new secret, choose **Rotate API secret**, copy the replacement into server-side credential storage, and select **Confirm replacement installed** after updating your integration. The secret is shown once. The browser snippet uses the publishable key and must never contain this secret.
+
+Managed-hostname setup can also recognize qualifying verified server revenue. The identity-free `POST /api/v1/verification-events` operation remains available as a server-side diagnostic, but it does not count as real arrival or revenue evidence and does not complete onboarding. See [Test Signal ingestion](/signals/verify-ingestion).
 
 <Note>
   Signal setup is optional and resumable. Closing the setup screen does not remove your collection domain or log you out.
@@ -83,11 +87,16 @@ Your initial PlainRouter setup is complete when:
 
 You can now return to the [dashboard](https://plainrouter.com/dashboard) and continue working from the workspace you created.
 
+The dashboard's customizable charts are labeled **Dashboard preview · Sample data**. Use **Signals** to confirm actual collection, and [billing setup](/billing/overview) to interpret a checkout notice.
+
 ## Continue from here
 
 Choose the next step that matches your goal:
 
 <CardGroup cols={2}>
+  <Card title="Choose an SDK or CLI" icon="boxes" href="/sdk/overview">
+    Add server-side conversions to your application or inspect events from a terminal.
+  </Card>
   <Card title="Track conversion events" icon="mouse-pointer-click" href="/signals/track-events">
     Add purchases, leads, checkouts, and other events to your implementation.
   </Card>

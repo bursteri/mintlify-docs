@@ -35,6 +35,7 @@
             "pages": [
               "index",
               "quickstart",
+              "billing/overview",
               "sandbox"
             ]
           },
@@ -126,6 +127,12 @@
         "tab": "SDK & CLI",
         "groups": [
           {
+            "group": "Get started",
+            "pages": [
+              "sdk/overview"
+            ]
+          },
+          {
             "group": "TypeScript SDK",
             "pages": [
               "sdk/typescript"
@@ -172,6 +179,7 @@
           "POST /verification-events",
           "GET /events/{event}",
           "GET /dashboard/events",
+          "GET /dashboard/events/cursor",
           "PATCH /destinations/{destination}/test-mode",
           "POST /destinations/{destination}/test-purchase",
           "POST /deliveries/replay",

@@ -6,6 +6,31 @@ rss: true
 
 PlainRouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 10, 2026">
+
+  ## Team names stay aligned with Stripe
+
+  **Fixed** · Renaming a team in settings or during billing checkout now updates its existing Stripe customer after the name is saved. A temporary Stripe failure leaves the saved name intact. [Review billing setup](/billing/overview).
+</Update>
+
+<Update label="September 8, 2026">
+
+  ## Ad-account onboarding is optional
+
+  **Improved** · Continue to Signals setup without connecting an ad account, or skip to the dashboard and return later. Signals setup starts with the website address, keeping it separate from the collection-domain DNS instructions. [Follow the quickstart](/quickstart).
+
+  ## Dashboard charts are clearly marked as a preview
+
+  **Improved** · The dashboard offers customizable charts labeled as sample data. Workspace, team, and profile names save on blur, and appearance settings include System mode. Use Signals for actual website measurements.
+</Update>
+
+<Update label="September 6, 2026">
+
+  ## Billing checkout includes your company or team name
+
+  **Improved** · The dashboard guides eligible paid workspaces into hosted Stripe Checkout and asks for the company or team name used on invoices. Workspaces joining an existing team subscription show a synchronization notice. [Complete billing setup](/billing/overview#how-do-i-complete-checkout).
+</Update>
+
 <Update label="September 5, 2026">
 
   ## Self-serve Signals setup now waits for real traffic
@@ -17,9 +42,31 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
   **New** · Every generated managed-hostname, onboarding, and same-origin installation now loads `/s/v4.js`. The live collector is served from PlainRouter's dedicated `cname.plainrouter.app` origin behind each customer collection domain, while previously published major URLs remain available for existing installations. [Install the current Signals pixel](/signals/install-pixel).
 </Update>
 
+<Update label="September 4, 2026">
+
+  ## Signals setup removes the retention questionnaire
+
+  **Improved** · New Signals setup uses the 90-day identity-retention default without asking you to fill out a legal-profile or retention questionnaire. Server-side retention policy continues to apply. [Review identity retention](/signals/overview#identity-retention).
+
+  ## Pricing is pinned at the first paying invoice
+
+  **Improved** · PlainRouter pins the pricing table when the first paying invoice is reserved, rather than when an account is created. [Understand the pricing basis](/billing/overview).
+</Update>
+
+<Update label="September 3, 2026">
+
+  ## Connect Stripe revenue from workspace settings
+
+  **New** · Workspace settings now provide the callback URL and signing-secret setup for Stripe verified revenue. Paid Checkout Sessions can produce verified purchase events in Signals. [Connect Stripe revenue](/signals/track-events#verify-stripe-checkout-settlement).
+
+  ## EUR pricing includes arrival allowances
+
+  **Improved** · Published monthly pricing bands now explain the observed-spend basis, included arrivals, and overage rate. The Free band has a €0 base price below €300 in observed monthly ad spend and includes 2,000 arrivals. [Review pricing and billing](/billing/overview).
+</Update>
+
 <Update label="September 2, 2026">
 
   ## SDK and CLI packages link to canonical documentation
 
-  **Improved** · TypeScript SDK [`@plainrouter/sdk@0.5.1`](https://www.npmjs.com/package/@plainrouter/sdk), npm CLI [`@plainrouter/cli@0.5.1`](https://www.npmjs.com/package/@plainrouter/cli), Python SDK and CLI [`plainrouter==0.5.2`](https://pypi.org/project/plainrouter/), and Ruby gem [`plainrouter-sdk 0.1.1`](https://rubygems.org/gems/plainrouter-sdk) now publish canonical `plainrouter.com/docs` links in their package metadata or README. The releases continue to target signed API contract `0.5.0`. [Choose an official client](/reference/conversion-api#client-releases).
+  **Improved** · TypeScript SDK [`@plainrouter/sdk@0.5.1`](https://www.npmjs.com/package/@plainrouter/sdk), npm CLI [`@plainrouter/cli@0.5.1`](https://www.npmjs.com/package/@plainrouter/cli), Python SDK and CLI [`plainrouter==0.5.2`](https://pypi.org/project/plainrouter/), and Ruby gem [`plainrouter-sdk 0.1.1`](https://rubygems.org/gems/plainrouter-sdk) now publish canonical `plainrouter.com/docs` links in their package metadata or README. The releases continue to target signed API contract `0.5.0`. [Choose an official client](/sdk/overview).
 </Update>

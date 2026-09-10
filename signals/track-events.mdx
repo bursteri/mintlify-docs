@@ -3,7 +3,7 @@ title: "Track events and consent"
 description: "Use the Signals browser API to manage consent, identify visitors, record conversion events, and preserve browser-server deduplication."
 ---
 
-The Signals browser API is available as `window.signalq` after you install the generated v3 pixel. Calls made before the asynchronous script loads remain in the queue.
+The Signals browser API is available as `window.signalq` after you [install the generated Signals pixel](/signals/install-pixel). Calls made before the asynchronous script loads remain in the queue.
 
 ## Set consent
 
@@ -156,6 +156,15 @@ await fetch("/create-checkout-session", {
 Your server must copy the value into the payment or checkout metadata used by its integration.
 
 ## Verify Stripe Checkout settlement
+
+Connect Stripe from **Workspace Settings** → **Revenue sources** → **Stripe verified revenue**:
+
+1. Copy the workspace's webhook callback URL and add it as an endpoint in Stripe.
+2. Select the event types listed below.
+3. Copy Stripe's endpoint signing secret into **Endpoint signing secret** in PlainRouter, then choose **Save secret**.
+4. Confirm that PlainRouter shows **Webhook configured**. Complete a paid Checkout Session and check Signals for the resulting purchase.
+
+PlainRouter clears the signing-secret field after saving. Use **Rotate secret** when replacing the Stripe endpoint's signing secret. This revenue connection measures your customers' purchases; it is separate from [paying for PlainRouter](/billing/overview).
 
 If PlainRouter is configured to receive Stripe webhooks for your Signal, copy the browser visitor ID into the Checkout Session's `metadata.visitor_id`. This lets the settled server-side purchase join the consenting browser visit.
 

@@ -3,7 +3,7 @@ title: "Python SDK and CLI"
 description: "Install and use the generated plainrouter Python client, or run its CLI from PyPI for authenticated Signals and sandbox workflows."
 ---
 
-[`plainrouter`](https://pypi.org/project/plainrouter/) contains the generated Python SDK and the `plainrouter` command-line interface. The SDK exposes synchronous and asynchronous clients for all ten Conversion API operations. The CLI exposes nine operational commands.
+[`plainrouter`](https://pypi.org/project/plainrouter/) contains the generated Python SDK and the `plainrouter` command-line interface. The SDK exposes synchronous and asynchronous Conversion API operations, with ten convenience imports at the package root. The CLI exposes nine API commands.
 
 The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.2` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/python).
 
@@ -78,6 +78,20 @@ The operation is idempotent. A repeated verification returns the existing event 
 | `get_reconciliation_report` | Retrieve reconciliation results for a date. |
 | `get_emq_report` | Retrieve recent Event Match Quality snapshots. |
 | `delete_user_data` | Delete data matching a hashed identifier. |
+
+## List events by cursor
+
+Cursor-based listing is available through the generated module rather than a package-root convenience import:
+
+```python
+from plainrouter import create_client
+from plainrouter.generated.api.operations import list_events_by_cursor
+
+client = create_client("YOUR_SIGNALS_WORKSPACE_SECRET")
+response = list_events_by_cursor.sync(client=client, per_page=25)
+```
+
+Omit `cursor` on the first request. For the next page, pass the opaque `next_cursor` returned in the response's event pagination data. The CLI does not expose this operation.
 
 ## Configure another API origin or timeout
 

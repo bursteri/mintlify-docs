@@ -1,0 +1,50 @@
+---
+title: "Pricing and billing setup"
+description: "Understand PlainRouter's EUR pricing, arrival allowance, and dashboard checkout flow, then complete billing for your team."
+---
+
+PlainRouter uses flat monthly EUR pricing bands based on the previous calendar month's observed platform ad spend, billed in arrears. Each band includes an arrival allowance. See the [pricing page](https://plainrouter.com/pricing) for the complete table.
+
+## What does the Free band include?
+
+The Free band has a €0 base price for observed monthly ad spend below €300 and includes 2,000 arrivals. The published overage rate is €1 per additional block of 5,000 arrivals, with a partial block counted as a full block. A €0 base price does not mean unlimited arrivals.
+
+Your pricing table is pinned when your first paying invoice is reserved and stays pinned. Creating an account alone does not pin the pricing table.
+
+## What counts toward usage?
+
+Billing counts observed arrivals regardless of consent basis and excludes traffic classified as invalid. Conversion events do not count toward the arrival allowance.
+
+Observed platform ad spend is spend reported by connected ad-platform accounts. Missing spend or currency evidence is unavailable rather than assumed to be zero. One ad account's observed spend is attributed to at most one workspace; connecting it to multiple destinations does not multiply that spend.
+
+## How do I complete checkout?
+
+When the dashboard shows **Billing checkout required**, the workspace has a reserved paid billing band that needs a subscription.
+
+<Steps>
+  <Step title="Open the workspace dashboard">
+    Sign in as the team owner and select the intended workspace. Check the billing month and band shown in the notice.
+  </Step>
+  <Step title="Confirm your company or team name">
+    Enter a non-blank **Company or team name**. PlainRouter saves this name for billing; it appears on invoices.
+  </Step>
+  <Step title="Continue to Stripe Checkout">
+    Select **Continue to checkout** and complete the hosted checkout. PlainRouter returns you to the dashboard afterward.
+  </Step>
+  <Step title="Check the billing state">
+    A workspace covered by an active subscription item no longer shows the checkout notice. If the team already has a subscription but this workspace is awaiting its next synchronization, the dashboard says that the workspace will join the team's plan at the next synchronization.
+  </Step>
+</Steps>
+
+Renaming the team also updates its existing Stripe customer details after the name is saved. If Stripe is temporarily unavailable, the saved team name is preserved.
+
+## Why can't I start checkout?
+
+- If the dashboard asks a team owner to complete checkout, switch to the owner account.
+- A blank company or team name must be corrected before continuing.
+- A workspace with no reserved paid line does not receive this checkout action. Free, Contact, and manually handled billing lines are outside this self-serve paid-band flow.
+- If the team already has an active subscription, wait for the workspace synchronization shown in the dashboard instead of creating another subscription.
+
+The dashboard's charts are labeled **Dashboard preview · Sample data**. Those charts are not billing evidence; use the separate billing notice for checkout status and **Signals** for real website activity.
+
+To measure purchases paid by your own customers, configure [Stripe verified revenue](/signals/track-events#verify-stripe-checkout-settlement) separately.
