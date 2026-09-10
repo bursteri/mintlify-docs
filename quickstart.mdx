@@ -10,7 +10,7 @@ description: "Set up your workspace, collect your first website signal, and choo
 Welcome to PlainRouter. This guide takes you from a new account to the first real arrival through your first-party Signals domain.
 
 <Card title="What you will accomplish" icon="circle-check">
-  Create your account, connect a first-party collection domain, install the generated browser snippet, and observe the first consented arrival.
+  Create your account, connect a first-party collection domain, install the generated browser snippet, and observe the first arrival.
 </Card>
 
 ## Before you begin
@@ -20,7 +20,7 @@ Before you begin, you need:
 - An email address you can access.
 - Access to the DNS provider for your website domain.
 - Access to your website's shared `<head>` template or site-wide code injection setting.
-- A consent integration that can provide PlainRouter with the required advertising permissions.
+- A consent integration for conversion events and advertising delivery. The identity-free arrival check does not wait for a consent grant.
 
 ## Set up your account
 
@@ -62,9 +62,9 @@ Signals collects first-party conversion events from your website through a colle
     See [Configure DNS and CNAME](/signals/configure-dns) for provider field guidance and troubleshooting.
   </Step>
   <Step title="Install Signals and wait for an arrival">
-    When the collection domain becomes active, copy the generated snippet into the shared `<head>` of your site. Connect it to your consent flow, deploy, and visit a page where all required advertising permissions are granted.
+    When the collection domain becomes active, copy the generated snippet into the shared `<head>` of your site, deploy, and visit a page. The snippet sends one identity-free arrival before evaluating consent.
 
-    PlainRouter completes setup after the first qualifying `PageView` reaches the workspace. The setup screen polls automatically, backs off while it waits, and resumes after you return to the tab.
+    PlainRouter completes setup after the first qualifying arrival is stored for the workspace. The setup screen polls automatically, backs off while it waits, and resumes after you return to the tab. Connect your consent flow separately before sending conversion events or advertising identity.
 
     See [Install the Signals pixel](/signals/install-pixel) for the snippet and consent requirements.
   </Step>

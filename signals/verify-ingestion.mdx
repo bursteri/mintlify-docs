@@ -56,7 +56,7 @@ The connection needs the `signals.verify` permission. Read-tier workspace tokens
 
 ## Interpret the result
 
-The result confirms that the authenticated request reached the workspace's Signal ledger. It does not turn the setup screen green. For a managed collection hostname, setup requires a real eligible arrival or qualifying verified server revenue. The browser path uses the consented `PageView` sent by the installed snippet. Same-origin forwarding still requires its own authenticated arrival and forwarding verification.
+The result confirms that the authenticated request reached the workspace's Signal ledger. It does not turn the setup screen green. For a managed collection hostname, setup requires a real eligible arrival or qualifying verified server revenue. The browser path uses the consent-independent `/v1/arrival` request sent once on document initialization. Same-origin forwarding still requires its own authenticated arrival and forwarding verification.
 
 You can use the successful diagnostic before or after you:
 
@@ -80,4 +80,4 @@ Confirm that the authorized workspace is the workspace containing the Signal and
 
 ### Setup still does not complete
 
-Repeating this diagnostic will not complete setup. Confirm the collection hostname is **Active**, install the generated browser snippet, provide a complete consent grant, and wait for the first qualifying arrival. See [Install the Signals pixel](/signals/install-pixel).
+Repeating this diagnostic will not complete setup. Confirm the collection hostname is **Active**, install the generated browser snippet, reload the website, and check that `/v1/arrival` is accepted. This arrival does not require a consent grant. See [Install the Signals pixel](/signals/install-pixel).

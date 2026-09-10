@@ -8,12 +8,20 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="September 10, 2026">
 
+  ## Landing click IDs stay in document memory
+
+  **Privacy** · The v4 snippet keeps landing click IDs in the current document's memory and sends them only with fully consented events. It retires the `pr_click_ids` cookie and drops malformed click-ID entries individually without discarding valid entries. Meta's consent-gated `_fbc` and `_fbp` cookies remain separate. [Review click-ID handling](/signals/track-events#how-landing-click-ids-are-handled).
+
   ## Team names stay aligned with Stripe
 
   **Fixed** · Renaming a team in settings or during billing checkout now updates its existing Stripe customer after the name is saved. A temporary Stripe failure leaves the saved name intact. [Review billing setup](/billing/overview).
 </Update>
 
 <Update label="September 8, 2026">
+
+  ## Arrivals are counted on page load
+
+  **Improved** · The v4 snippet sends one identity-free arrival per document load before consent evaluation, on both managed-hostname and same-origin installations. Consent changes and in-app navigation do not add arrivals. Conversion events, visitor identity, and Meta delivery remain consent-gated. [Verify the arrival request](/signals/install-pixel#verify-the-installation).
 
   ## Ad-account onboarding is optional
 

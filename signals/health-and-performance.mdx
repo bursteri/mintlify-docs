@@ -25,11 +25,13 @@ The page refreshes its stored measurements about once per minute. Opening it doe
 
 ### Events received
 
-The large value is the number of events received in the last 24 hours. The supporting value shows the last seven days.
+Arrival activity counts the dedicated arrival records sent once per document load. A consented `PageView`, purchase, or other conversion does not add another arrival. The completed reporting window and **Today so far** are separate; today's value is an incomplete local-day count.
 
 This metric covers collection. It does not mean every event was eligible for or accepted by Meta.
 
-The totals include customer-visible passive arrivals. A privacy-bounded strict-EU passive cell contributes zero until it reaches five arrivals; at that point its aggregate count can contribute to the displayed totals. Passive arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their stored rows contain no page URL, platform or channel source, visitor identity, IP address, user agent, product identifier, quantity, or item count. Event time and captured consent time are rounded down to the UTC hour. Amount, currency, and a workspace-keyed order reference remain available for aggregate measurement. Passive arrivals never create destination deliveries. Invalid traffic is excluded.
+Arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their records contain no page URL, referrer, platform or channel source, visitor identity, IP address, user agent, or commerce details. Event time is rounded down to the UTC hour. Arrivals never create destination deliveries, and legacy exposure rows do not enter the new arrival totals. Invalid traffic is excluded.
+
+Privacy-limited display is separate from collection. A strict-EU severed subtotal from one to four arrivals is withheld until it reaches five. If no other component can be shown, the display is **Suppressed (&lt;5)**. If other components can be shown, the displayed number is partial and omits the withheld subtotal. Suppressed and partial values do not mean that collection stopped.
 
 ### Match quality
 
@@ -78,16 +80,16 @@ If no rows appear, PlainRouter has not stored a daily reconciliation report for 
 
 ## Arrivals vs platform-claimed clicks
 
-The **Arrivals vs platform-claimed clicks** panel compares customer-visible observed arrivals with account-level clicks reported by the connected platform. It uses the last seven complete days, shortened when the workspace's Signals retention window does not contain the full period.
+The **Arrivals vs platform-claimed clicks** panel compares customer-visible observed arrivals with account-level clicks reported by the connected platform. It uses the selected complete-day window, shortened when the workspace's Signals retention window does not contain the full period. **Today so far** is shown separately.
 
 | Metric | Meaning |
 | --- | --- |
-| **Total arrivals** | Valid observed arrival cells that pass the customer-visible privacy boundary. Modeled rows and suppressed strict-EU passive cells are excluded. |
+| **Total arrivals** | Valid observed arrival records after the customer-visible privacy rules. Conversion events and legacy exposure rows do not contribute; a withheld component can make the result suppressed or partial. |
 | **Platform-claimed clicks** | Clicks stored by PlainRouter during scheduled reconciliation for the same account and daily period. |
 | **Difference** | Total arrivals minus platform-claimed clicks. |
 | **Difference vs claimed** | The difference as a percentage of platform-claimed clicks. It is unavailable when the claimed-click total is zero. |
 
-The channel table is intentionally a subset, not an allocation of total arrivals. It includes structurally attributed rows with a consent basis of `consent`: global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows never appear in the channel view. Admission follows the stored consent and enforcement scope rather than treating names such as `direct`, `unknown`, or `unattributed` as special cases.
+The channel table reads consented, attributed conversion-event data separately from arrival totals. It includes global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows never appear in the channel view. Because arrival records carry no channel identity, the channel rows do not allocate or sum to the total arrival count.
 
 Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. PlainRouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
 
@@ -112,7 +114,7 @@ Keep unique visitors, visits, pageviews and custom-event goals separate. Start w
 ### Check the collection difference
 
 1. Match the metric, website and reporting period before comparing totals.
-2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by PlainRouter. Compare total arrivals separately from the narrower channel breakdown.
+2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by PlainRouter. Arrivals do not wait for consent; conversion events and the channel breakdown do. Keep these counts separate.
 3. Test one page load and one in-app navigation with your actual consent choices. Confirm which requests reach each collector using the [installation checks](/signals/install-pixel#verify-the-installation).
 4. Inspect duplicate tags, redirects and blocked requests. Record the settings and request outcomes needed to reproduce an unexplained change.
 
@@ -146,7 +148,7 @@ The **Measurement state** panel shows the connected domain, dataset ID, last eve
 
 <AccordionGroup>
   <Accordion title="No events received in 24 hours">
-    Confirm the snippet still loads from the collection domain. Check `/v1/events` in the browser network panel, recent deployment changes, your content security policy, and the workspace's allowed website domain.
+    Confirm the snippet still loads from the collection domain. Check `/v1/arrival` for arrival collection and `/v1/events` for consented conversions, then review recent deployment changes, your content security policy, and the workspace's allowed website domain.
   </Accordion>
   <Accordion title="Meta deliveries are failing">
     Reconnect Meta if access changed or expired. Confirm the intended dataset is still available, then review whether failures continue on new events.

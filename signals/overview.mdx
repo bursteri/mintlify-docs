@@ -6,7 +6,7 @@ description: "Understand how PlainRouter collects, delivers, and measures first-
 Signals is PlainRouter's first-party conversion measurement layer. It receives website events through a managed collection subdomain or a same-origin forwarding route, records what happened, and can deliver consented events to a connected Meta dataset.
 
 <Card title="The short version" icon="route">
-  Your website sends one event to PlainRouter. PlainRouter records it, adds trusted request context at the edge, and routes eligible events to the destinations you connect.
+  The snippet records one identity-free arrival per page load. With full consent, your website can also send conversion events for eligible destination delivery.
 </Card>
 
 One workspace is one Signals tenant. The workspace owns the collection domain, publishable key, Signals API secret, identity retention, destination history, and event ledger.
@@ -15,13 +15,13 @@ One workspace is one Signals tenant. The workspace owns the collection domain, p
 
 <Steps>
   <Step title="Your server or browser records an event">
-    Your server can use the Conversion API. The optional Signals pixel can send browser events such as purchases, leads, checkouts, and custom events.
+    The Signals pixel sends an arrival once per document load before consent evaluation. Your server can use the Conversion API, and the pixel can send consented purchases, leads, checkouts, and custom events separately.
   </Step>
   <Step title="Your serving path receives it">
     Requests use a managed hostname such as `collect.example.com` or a generated same-origin forwarding route. PlainRouter validates the authorized Signal and website origin before accepting the event.
   </Step>
   <Step title="PlainRouter stores the event">
-    PlainRouter records the canonical event, consent state, delivery state, and the trusted network context added by the collection edge.
+    Arrival records retain workspace and policy context with time rounded to the UTC hour, without visitor identity, URLs, network identity, or commerce data. Conversion events use their own consent-aware event and delivery records.
   </Step>
   <Step title="Eligible events reach Meta">
     When you connect a Meta dataset and grant advertising consent, PlainRouter sends the server event through Conversions API. The managed browser Pixel sends a paired copy with the same event ID for deduplication.
@@ -47,16 +47,16 @@ One workspace is one Signals tenant. The workspace owns the collection domain, p
 
 ## Consent behavior
 
-Signals applies consent before browser measurement or advertising delivery:
+The identity-free arrival runs once on initialization regardless of consent. Consent controls the separate conversion-event, identifier, and advertising-delivery paths:
 
 | Consent state | Collection behavior | Identifier behavior | Destination delivery |
 | --- | --- | --- | --- |
 | Missing, unknown, or malformed | Sends no ordinary browser event. | Creates no visitor state. | Skipped. |
-| Storage denied or withdrawn | Sends no ordinary browser event. | Clears PlainRouter visitor and click identifiers. | Skipped. |
-| Storage granted; a downstream advertising permission denied or unknown | Sends no ordinary browser event. | May retain local visitor state, but sends no identity or event. | Skipped. |
+| Storage denied or withdrawn | Sends no ordinary browser event. | Discards in-memory landing context; leaving an active grant clears consent-dependent identifiers. | Skipped. |
+| Storage granted; a downstream advertising permission denied or unknown | Sends no ordinary browser event. | No visitor-cookie access or identity transmission. | Skipped. |
 | All three permissions granted | Records events. | Creates first-party identifiers and includes permitted hashed identity and click data. | Eligible for connected destinations. |
 
-Connect your consent-management platform by calling `signalq("consent", input)` with the structured permission state whenever the visitor's choice changes. See [Track events and consent](/signals/track-events) for examples.
+Connect your consent-management platform by calling `signalq("consent", input)` with the structured permission state whenever the visitor's choice changes. A consent update does not send another arrival. See [Track events and consent](/signals/track-events) for examples and click-ID handling.
 
 Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. PlainRouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
 

@@ -17,7 +17,7 @@ PlainRouter uses the same managed collector, consent rules, and event contract f
 Path A sends collection traffic through your PlainRouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run PlainRouter code in your hosting account and does not change which visitors are eligible for measurement.
 
 <Note>
-  Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for consented, server-issued browser identifiers. Both paths apply the same consent gate.
+  Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for consented, server-issued browser identifiers. Both paths send identity-free arrivals independently of consent and require full consent for conversion events and advertising identity.
 </Note>
 
 ## Generate your setup
@@ -51,9 +51,9 @@ Install the entire generated block. Transparent forwarding must preserve:
 
 - The original host and visitor path.
 - `Cookie` and `Set-Cookie` in both directions.
-- `Sec-Fetch-*` and `Accept` request headers.
+- Request methods, bodies, content types, and the headers included in the generated configuration.
 
-If your platform strips the fetch metadata, PlainRouter cannot classify the document request. It writes no arrival for that request and increments only the aggregate undetermined counter.
+Arrival collection uses the snippet's `POST /v1/arrival` through the generated prefix. Loading the website document alone is not the arrival transport. The snippet omits cookies from its arrival request, and the collector does not set visitor cookies in its arrival response. Cookie forwarding remains necessary for the separate consented event and identity routes.
 
 <Warning>
   Path B's generated destination contains a low-privilege forwarding secret. Only members with workspace management permission can view or copy it. Do not publish it in documentation, logs, or a public repository.

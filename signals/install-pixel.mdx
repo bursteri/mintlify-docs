@@ -3,7 +3,7 @@ title: "Install the Signals pixel"
 description: "Add consent-aware browser measurement to your website and complete setup with the first qualifying Signal arrival."
 ---
 
-The Signals pixel collects first-party browser events through your collection domain. PlainRouter gives each workspace a unique Signals snippet with its publishable key and collection URL.
+The Signals pixel sends one identity-free arrival per document load through your collection domain. Conversion events and advertising identity require a complete consent grant. PlainRouter gives each workspace a unique Signals snippet with its publishable key and collection URL.
 
 <Info>
   The browser setup path completes after PlainRouter receives a real eligible arrival. Managed-hostname setup can also recognize qualifying verified server revenue. The identity-free server verification event is a diagnostic and does not complete onboarding.
@@ -47,7 +47,7 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   <Step title="Deploy and visit your site">
     Publish the change, then open any page on the connected website.
 
-    After your consent integration supplies a complete grant, use the network checks below to confirm that the pixel loads and sends its consented `PageView`.
+    Use the network checks below to confirm that the pixel loads and sends an arrival. Then test your consent integration separately for conversion events and Meta delivery.
   </Step>
 </Steps>
 
@@ -61,15 +61,20 @@ To test browser collection, open your browser's developer tools and reload the p
 
 1. Select the **Network** tab.
 2. Search for `v4.js` and confirm it loads from your collection domain.
-3. Grant consent through your integration, then search for `events` and confirm the browser sends a `PageView` request to `/v1/events` on the same domain.
+3. Search for `arrival` and confirm one `POST /v1/arrival` request receives `202`. This request occurs before consent evaluation, including when consent is denied or has not been provided.
+4. Grant all three advertising permissions through your consent integration. Confirm the separate `PageView` request to `/v1/events` succeeds.
 
-Both requests should return a successful `2xx` response.
+On a same-origin installation, these requests use the generated forwarding prefix on your website. An accepted arrival confirms edge receipt; setup completes after the arrival is stored for the workspace.
 
 ## What happens on initialization
 
-`signalq("init", ...)` initializes browser collection without creating visitor state or sending an ordinary event. Browser events require `consent_basis: "consent"` and `granted` values for `ad_storage`, `ad_user_data`, and `ad_personalization`. Missing, unknown, denied, malformed, or withdrawn state does not send an ordinary browser event.
+`signalq("init", ...)` sends one arrival per document and publishable key before checking consent. It does not create or read visitor cookies for that request. Repeating initialization with the same key, changing consent, navigating with the History API, or restoring the page from the back-forward cache does not send another arrival. A full page reload starts a new document and can send a new arrival.
 
-After the first complete grant, the v4 collector sends a consented `PageView`. That real arrival is the authoritative setup check. A queued event from before consent is not sent retroactively.
+The current snippet sends the publishable key in a `text/plain` JSON body with `credentials: "omit"`. It does not put click IDs or customer data in the arrival body. The stored arrival contains workspace and policy context with time rounded down to the UTC hour; it contains no visitor identity, page URL, referrer, IP address, user agent, or commerce details. Arrivals do not trigger Meta delivery.
+
+The separate `/v1/events` path requires `consent_basis: "consent"` and `granted` values for `ad_storage`, `ad_user_data`, and `ad_personalization`. After the first complete grant, the collector sends a consented `PageView`. This event does not add a second arrival to the arrival total. Events requested before consent are not replayed retroactively.
+
+Arrival requests are not retried, queued in the browser, or resent by beacon. A failed request can therefore leave that document load uncounted.
 
 <Note>
   The generated snippet uses `signalq`. Do not rename it to `signal`; the v4 bundle intentionally exposes only the collision-resistant `signalq` global.
@@ -102,7 +107,13 @@ You may need to allow `https://connect.facebook.net` in `script-src` after you [
 
 ### Signal setup still shows as incomplete
 
-Confirm the collection hostname is active, the page loaded `v4.js`, and your consent integration supplied granted `ad_storage`, `ad_user_data`, and `ad_personalization`. Setup stays incomplete until a qualifying arrival is stored. The identity-free verification event cannot replace it.
+Confirm the collection hostname is active, `v4.js` loads, and `/v1/arrival` is accepted. A missing or invalid publishable key or unauthorized website origin is rejected without recording an arrival. A `429` means an arrival rate limit was reached. Fix the cause and reload the page; the snippet does not retry an arrival on its own. The identity-free verification event cannot replace a real arrival.
+
+### An older installation behaves differently
+
+These instructions describe the current v4 channel. Older v1–v3 assets remain frozen compatibility versions and do not acquire v4 changes automatically. Replace an older installation with the complete current snippet generated by PlainRouter.
+
+The v4 script uses a one-hour cache lifetime with up to 24 hours of stale-while-revalidate caching. When testing an update, disable the browser cache and reload before comparing behavior.
 
 ## Next step
 

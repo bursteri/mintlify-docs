@@ -44,11 +44,19 @@ When you provide more than one adapter, their derived permission states must agr
   Do not infer consent. Leave each permission `unknown` until your consent-management platform has an explicit choice.
 </Warning>
 
-PlainRouter sends browser events only when all three permissions are `granted`. Granting `ad_storage` alone can permit local visitor state, but no event is transmitted while either downstream advertising permission is denied or unknown.
+Conversion events, visitor-cookie access, identity transmission, and managed Meta delivery require all three permissions to be `granted`. Granting `ad_storage` alone is insufficient. The identity-free arrival sent once at document initialization is a separate request and does not wait for these permissions. See [What happens on initialization](/signals/install-pixel#what-happens-on-initialization).
 
-A complete grant creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Denied storage, malformed input, or explicit withdrawal clears PlainRouter's visitor and click identifiers. Send the latest structured state whenever the visitor's choice changes.
+A complete grant creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Leaving full consent stops event transmission and clears the current page's consent-dependent identifiers. Explicit storage denial or withdrawal also discards the in-memory landing context. Send the latest structured state whenever the visitor's choice changes.
 
-On a returning page, initialization stays fail-closed while your consent platform restores its decision: PlainRouter neither reads identifiers nor sends measurement during that undecided period. It also does not erase identifiers left by the visitor's previous grant merely because the consent platform has not answered yet. An explicit denial, malformed consent update, or withdrawal still clears them.
+On a returning page, the arrival is sent while your consent platform restores its decision. PlainRouter does not read visitor cookies or send conversion events during that undecided period. Existing cookies are not read or refreshed merely because the snippet initialized.
+
+## How landing click IDs are handled
+
+The snippet captures supported landing query parameters in the current document's memory: `fbclid`, `gclid`, `gbraid`, `wbraid`, `ttclid`, and `msclkid`. Unknown or partial consent keeps this temporary buffer available for a later complete grant. Explicit storage denial or withdrawal discards it.
+
+Click IDs are sent with eligible events only after full consent. They never enter the identity-free arrival payload. The browser no longer reads or writes the legacy `pr_click_ids` value; it expires that cookie when full consent opens and when an active grant is withdrawn. A new document starts with its own landing context.
+
+The Meta `_fbc` and `_fbp` cookies are separate from this retired click-ID map and remain subject to full consent. At event intake, PlainRouter drops invalid or unsupported click-ID entries individually while retaining valid entries. Do not rely on one malformed value to reject an otherwise valid event.
 
 ## Track an event
 
@@ -194,8 +202,8 @@ Stripe refund webhooks create idempotent custom `Refund` events with a negative 
 
 - Event requests use browser `keepalive` where available.
 - A granted event still in flight during `pagehide` is also sent as a text beacon.
-- Network failures and `503` responses receive one retry.
-- The snippet captures supported landing click IDs in memory and persists them only after consent is granted.
+- Conversion-event requests can receive at most one retry after network failures or retryable responses, within the request's retry budget. Arrival requests are never retried.
+- Landing click IDs stay in document memory and are transmitted only with a complete consent grant; the legacy `pr_click_ids` cookie is no longer used for storage.
 - First-party browser identifiers can still have shorter lifetimes when a browser applies its own storage restrictions.
 
 ## Avoid duplicate Meta events
