@@ -28,13 +28,13 @@ await signalq("consent", {
 });
 ```
 
-Each permission accepts `granted`, `denied`, or `unknown`. Missing or unrecognized permissions remain `unknown`; PlainRouter never upgrades them to a grant.
+Each permission accepts `granted`, `denied`, or `unknown`. Missing or unrecognized permissions remain `unknown`; Plainrouter never upgrades them to a grant.
 
 You can provide one or more supported consent adapters:
 
 | Input | Use |
 | --- | --- |
-| `consent` | Send PlainRouter's explicit three-permission snapshot. |
+| `consent` | Send Plainrouter's explicit three-permission snapshot. |
 | `consent_mode` | Map Google Consent Mode v2 fields. |
 | `tcf` | Map a TCF v2 string and optional capture time. |
 
@@ -48,7 +48,7 @@ Conversion events, visitor-cookie access, identity transmission, and managed Met
 
 A complete grant creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Leaving full consent stops event transmission and clears the current page's consent-dependent identifiers. Explicit storage denial or withdrawal also discards the in-memory landing context. Send the latest structured state whenever the visitor's choice changes.
 
-On a returning page, the arrival is sent while your consent platform restores its decision. PlainRouter does not read visitor cookies or send conversion events during that undecided period. Existing cookies are not read or refreshed merely because the snippet initialized.
+On a returning page, the arrival is sent while your consent platform restores its decision. Plainrouter does not read visitor cookies or send conversion events during that undecided period. Existing cookies are not read or refreshed merely because the snippet initialized.
 
 ## How landing click IDs are handled
 
@@ -56,7 +56,7 @@ The snippet captures supported landing query parameters in the current document'
 
 Click IDs are sent with eligible events only after full consent. They never enter the identity-free arrival payload. The browser no longer reads or writes the legacy `pr_click_ids` value; it expires that cookie when full consent opens and when an active grant is withdrawn. A new document starts with its own landing context.
 
-The Meta `_fbc` and `_fbp` cookies are separate from this retired click-ID map and remain subject to full consent. At event intake, PlainRouter drops invalid or unsupported click-ID entries individually while retaining valid entries. Do not rely on one malformed value to reject an otherwise valid event.
+The Meta `_fbc` and `_fbp` cookies are separate from this retired click-ID map and remain subject to full consent. At event intake, Plainrouter drops invalid or unsupported click-ID entries individually while retaining valid entries. Do not rely on one malformed value to reject an otherwise valid event.
 
 ## Track an event
 
@@ -124,7 +124,7 @@ const identified = await signalq("identify", {
 });
 ```
 
-The browser normalizes and SHA-256 hashes the values before sending them. PlainRouter never sends the raw email or phone in the identity request.
+The browser normalizes and SHA-256 hashes the values before sending them. Plainrouter never sends the raw email or phone in the identity request.
 
 - Email is trimmed and lowercased.
 - International phone numbers must start with `+` and include 8–15 digits after normalization.
@@ -169,12 +169,12 @@ Connect Stripe from **Workspace Settings** → **Revenue sources** → **Stripe 
 
 1. Copy the workspace's webhook callback URL and add it as an endpoint in Stripe.
 2. Select the event types listed below.
-3. Copy Stripe's endpoint signing secret into **Endpoint signing secret** in PlainRouter, then choose **Save secret**.
-4. Confirm that PlainRouter shows **Webhook configured**. Complete a paid Checkout Session and check Signals for the resulting purchase.
+3. Copy Stripe's endpoint signing secret into **Endpoint signing secret** in Plainrouter, then choose **Save secret**.
+4. Confirm that Plainrouter shows **Webhook configured**. Complete a paid Checkout Session and check Signals for the resulting purchase.
 
-PlainRouter clears the signing-secret field after saving. Use **Rotate secret** when replacing the Stripe endpoint's signing secret. This revenue connection measures your customers' purchases; it is separate from [paying for PlainRouter](/billing/overview).
+Plainrouter clears the signing-secret field after saving. Use **Rotate secret** when replacing the Stripe endpoint's signing secret. This revenue connection measures your customers' purchases; it is separate from [paying for Plainrouter](/billing/overview).
 
-If PlainRouter is configured to receive Stripe webhooks for your Signal, copy the browser visitor ID into the Checkout Session's `metadata.visitor_id`. This lets the settled server-side purchase join the consenting browser visit.
+If Plainrouter is configured to receive Stripe webhooks for your Signal, copy the browser visitor ID into the Checkout Session's `metadata.visitor_id`. This lets the settled server-side purchase join the consenting browser visit.
 
 Configure the Stripe webhook endpoint to receive:
 
@@ -183,7 +183,7 @@ Configure the Stripe webhook endpoint to receive:
 - `checkout.session.async_payment_failed`
 - `refund.created` and `charge.refunded` when you track refunds
 
-PlainRouter creates Stripe Checkout revenue only after Stripe confirms an exact `payment_status` of `paid`:
+Plainrouter creates Stripe Checkout revenue only after Stripe confirms an exact `payment_status` of `paid`:
 
 | Stripe state | Signals result |
 | --- | --- |
@@ -194,9 +194,9 @@ PlainRouter creates Stripe Checkout revenue only after Stripe confirms an exact 
 | `payment_status=no_payment_required` | Creates no revenue event. |
 | Missing, unknown, or malformed payment status | Fails closed and creates no `Purchase`. |
 
-Duplicate or out-of-order paid webhooks for the same Checkout Session converge on one `Purchase`. PlainRouter uses the settlement-confirming webhook time as the event time. Until settlement is confirmed, the Checkout Session does not enter Signals rollups or Meta delivery.
+Duplicate or out-of-order paid webhooks for the same Checkout Session converge on one `Purchase`. Plainrouter uses the settlement-confirming webhook time as the event time. Until settlement is confirmed, the Checkout Session does not enter Signals rollups or Meta delivery.
 
-Stripe refund webhooks create idempotent custom `Refund` events with a negative refunded value. PlainRouter links the refund to its known purchase when the order lineage is available.
+Stripe refund webhooks create idempotent custom `Refund` events with a negative refunded value. Plainrouter links the refund to its known purchase when the order lineage is available.
 
 ## Reliability behavior
 
@@ -208,6 +208,6 @@ Stripe refund webhooks create idempotent custom `Refund` events with a negative 
 
 ## Avoid duplicate Meta events
 
-After you [connect Meta](/signals/connect-meta), continue to track through `signalq`. The managed browser Pixel and PlainRouter server delivery share one event ID.
+After you [connect Meta](/signals/connect-meta), continue to track through `signalq`. The managed browser Pixel and Plainrouter server delivery share one event ID.
 
 Remove other Pixel or CAPI integrations that send the same event to the same dataset after you confirm the managed flow is working.

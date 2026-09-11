@@ -3,7 +3,7 @@ title: "TypeScript SDK"
 description: "Install and use the generated @plainrouter/sdk client and Zod schemas to send authenticated Signals Conversion API requests safely."
 ---
 
-[`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) is the generated TypeScript client for the signed PlainRouter OpenAPI contract. It exposes typed request and response models, API methods, and Zod schemas for the Conversion API, including cursor-based event listing.
+[`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) is the generated TypeScript client for the signed Plainrouter OpenAPI contract. It exposes typed request and response models, API methods, and Zod schemas for the Conversion API, including cursor-based event listing.
 
 The current [npm release](https://www.npmjs.com/package/@plainrouter/sdk) is `0.5.1` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/sdk). Review release notes before upgrading while the SDK remains in the `0.x` series.
 
@@ -52,7 +52,7 @@ The client sends the Signals workspace secret as a bearer token. The `signalTrac
 
 ## Configure another API origin
 
-The default API base URL is `https://plainrouter.com/api/v1`. Override it only for a PlainRouter-provided region or a controlled test environment:
+The default API base URL is `https://plainrouter.com/api/v1`. Override it only for a Plainrouter-provided region or a controlled test environment:
 
 ```ts
 configurePlainrouter({

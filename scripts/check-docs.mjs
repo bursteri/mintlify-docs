@@ -198,7 +198,7 @@ for (const page of mdxPages) {
 }
 
 const requiredAgentPages = new Map([
-  ["auth", "title: \"PlainRouter auth docs\""],
+  ["auth", "title: \"Plainrouter auth docs\""],
   [
     "reference/api-resource-index",
     "https://plainrouter.com/api/llms.txt",

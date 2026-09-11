@@ -1,20 +1,20 @@
 ---
 title: "Configure Signal serving"
-description: "Use PlainRouter's generated managed-hostname or same-origin forwarding setup for your hosting stack."
+description: "Use Plainrouter's generated managed-hostname or same-origin forwarding setup for your hosting stack."
 ---
 
 After the initial Signal setup completes, the **One-screen serving setup** checks your hosting stack and produces one copy-ready configuration. You do not need to compare installation methods yourself.
 
-PlainRouter uses the same managed collector, consent rules, and event contract for both serving paths. Only the route from your website to the collector changes.
+Plainrouter uses the same managed collector, consent rules, and event contract for both serving paths. Only the route from your website to the collector changes.
 
-## How PlainRouter selects a path
+## How Plainrouter selects a path
 
 | Hosting stack | Generated setup | Serving path |
 | --- | --- | --- |
 | Vercel, Netlify, Next.js, Cloudflare, Nginx, or Caddy | A rewrite, origin rule, or reverse-proxy block | **Path B — same-origin proxy** |
 | Webflow, Squarespace, Wix, Shopify, or managed WordPress | The validated CNAME record | **Path A — managed hostname** |
 
-Path A sends collection traffic through your PlainRouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run PlainRouter code in your hosting account and does not change which visitors are eligible for measurement.
+Path A sends collection traffic through your Plainrouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run Plainrouter code in your hosting account and does not change which visitors are eligible for measurement.
 
 <Note>
   Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for consented, server-issued browser identifiers. Both paths send identity-free arrivals independently of consent and require full consent for conversion events and advertising identity.
@@ -26,18 +26,18 @@ Path A sends collection traffic through your PlainRouter-managed subdomain. Path
   <Step title="Open the serving setup">
     Complete [DNS validation](/signals/configure-dns), install the generated snippet, and wait for the first qualifying arrival. Then open **Signals**.
   </Step>
-  <Step title="Let PlainRouter check your hosting stack">
-    PlainRouter checks bounded DNS and response-header evidence in the background. While the check is running, the page shows **Pending** and refreshes the stored result automatically.
+  <Step title="Let Plainrouter check your hosting stack">
+    Plainrouter checks bounded DNS and response-header evidence in the background. While the check is running, the page shows **Pending** and refreshes the stored result automatically.
 
     If the stack cannot be determined, answer **Where is your website hosted?** with the exact provider or server, then click **Detect hosting**.
   </Step>
   <Step title="Copy the generated block">
-    PlainRouter shows one block for the detected stack. For Path B, click **Activate Path B** first, then **Copy code** and add the complete block to your hosting configuration. Do not edit its generated prefix, destination, or secret.
+    Plainrouter shows one block for the detected stack. For Path B, click **Activate Path B** first, then **Copy code** and add the complete block to your hosting configuration. Do not edit its generated prefix, destination, or secret.
 
-    For Path A, keep the displayed CNAME in place. PlainRouter manages the collector and HTTPS certificate behind it.
+    For Path A, keep the displayed CNAME in place. Plainrouter manages the collector and HTTPS certificate behind it.
   </Step>
   <Step title="Verify the live path">
-    Deploy the hosting change and load your live website. The **First arrival check** turns green after PlainRouter stores the first valid arrival.
+    Deploy the hosting change and load your live website. The **First arrival check** turns green after Plainrouter stores the first valid arrival.
 
     For Path B, also click **Run verification**. The side-effect-free forwarding probe checks the deployed route without creating an event or arrival. Path B turns green only after both the probe passes and an authenticated arrival is observed.
   </Step>
@@ -65,9 +65,9 @@ Credentialed browser collection requires at least one exact HTTPS site domain in
 
 ## Rotate a Path B secret
 
-Click **Rotate forwarding secret**, copy the newly generated block, and deploy it. PlainRouter accepts both the old and new secret during the transition.
+Click **Rotate forwarding secret**, copy the newly generated block, and deploy it. Plainrouter accepts both the old and new secret during the transition.
 
-The overlap ends when PlainRouter successfully ingests the first authenticated arrival using the new secret or when you click **Confirm new secret installed**. A malformed or failed request does not acknowledge the new secret or end the overlap. Keep the old deployment available until one of those conditions is met.
+The overlap ends when Plainrouter successfully ingests the first authenticated arrival using the new secret or when you click **Confirm new secret installed**. A malformed or failed request does not acknowledge the new secret or end the overlap. Keep the old deployment available until one of those conditions is met.
 
 The side-effect-free forwarding probe attests only the currently active secret. A probe signed with the pending overlap secret cannot mark the path verified or complete rotation. If tracker key storage is temporarily unavailable, the probe fails closed with a retryable response instead of recording a pass.
 
@@ -88,7 +88,7 @@ The side-effect-free forwarding probe attests only the currently active secret. 
 
 <AccordionGroup>
   <Accordion title="Hosting detection cannot identify my stack">
-    Enter the exact hosting provider or server name. PlainRouter uses that declaration when DNS and response headers are unavailable. If the answer is not recognized, confirm the public site domain and retry when the site is reachable.
+    Enter the exact hosting provider or server name. Plainrouter uses that declaration when DNS and response headers are unavailable. If the answer is not recognized, confirm the public site domain and retry when the site is reachable.
   </Accordion>
   <Accordion title="Path B verification failed">
     The probe reached your site but did not observe the expected forwarding response. Reinstall the complete generated block and confirm that no proxy, middleware, or transform removes the original path, cookies, `Sec-Fetch-*`, or `Accept` headers.

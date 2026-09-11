@@ -1,9 +1,9 @@
 ---
 title: "Signals overview"
-description: "Understand how PlainRouter collects, delivers, and measures first-party conversion signals while enforcing consent and destination boundaries."
+description: "Understand how Plainrouter collects, delivers, and measures first-party conversion signals while enforcing consent and destination boundaries."
 ---
 
-Signals is PlainRouter's first-party conversion measurement layer. It receives website events through a managed collection subdomain or a same-origin forwarding route, records what happened, and can deliver consented events to a connected Meta dataset.
+Signals is Plainrouter's first-party conversion measurement layer. It receives website events through a managed collection subdomain or a same-origin forwarding route, records what happened, and can deliver consented events to a connected Meta dataset.
 
 <Card title="The short version" icon="route">
   The snippet records one identity-free arrival per page load. With full consent, your website can also send conversion events for eligible destination delivery.
@@ -18,13 +18,13 @@ One workspace is one Signals tenant. The workspace owns the collection domain, p
     The Signals pixel sends an arrival once per document load before consent evaluation. Your server can use the Conversion API, and the pixel can send consented purchases, leads, checkouts, and custom events separately.
   </Step>
   <Step title="Your serving path receives it">
-    Requests use a managed hostname such as `collect.example.com` or a generated same-origin forwarding route. PlainRouter validates the authorized Signal and website origin before accepting the event.
+    Requests use a managed hostname such as `collect.example.com` or a generated same-origin forwarding route. Plainrouter validates the authorized Signal and website origin before accepting the event.
   </Step>
-  <Step title="PlainRouter stores the event">
+  <Step title="Plainrouter stores the event">
     Arrival records retain workspace and policy context with time rounded to the UTC hour, without visitor identity, URLs, network identity, or commerce data. Conversion events use their own consent-aware event and delivery records.
   </Step>
   <Step title="Eligible events reach Meta">
-    When you connect a Meta dataset and grant advertising consent, PlainRouter sends the server event through Conversions API. The managed browser Pixel sends a paired copy with the same event ID for deduplication.
+    When you connect a Meta dataset and grant advertising consent, Plainrouter sends the server event through Conversions API. The managed browser Pixel sends a paired copy with the same event ID for deduplication.
   </Step>
   <Step title="Stored measurements become health evidence">
     The Signals dashboard combines the event ledger, delivery ledger, stored Event Match Quality snapshots, and daily reconciliation reports. It does not make a live Meta Marketing API call when the page loads.
@@ -35,7 +35,7 @@ One workspace is one Signals tenant. The workspace owns the collection domain, p
 
 | Area | What it tells you |
 | --- | --- |
-| Event activity | How many events PlainRouter received and when the last event arrived. |
+| Event activity | How many events Plainrouter received and when the last event arrived. |
 | Delivery acceptance | Whether non-test events were accepted, failed, or remain pending for the connected destination. |
 | Match quality | The latest stored Meta Event Match Quality score and its recent trend. |
 | Reconciliation | The difference between gateway-verified accepted conversions and Meta-reported conversions in stored daily reports. |
@@ -58,17 +58,17 @@ The identity-free arrival runs once on initialization regardless of consent. Con
 
 Connect your consent-management platform by calling `signalq("consent", input)` with the structured permission state whenever the visitor's choice changes. A consent update does not send another arrival. See [Track events and consent](/signals/track-events) for examples and click-ID handling.
 
-Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. PlainRouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
+Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. Plainrouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
 
 ## Identity retention
 
 New Signals setup uses 90-day visitor identity retention without a retention questionnaire. The authenticated admin API retains the supported 30- and 90-day settings, subject to server-side policy. Identity retention applies to the workspace's retained visitor identity state; it does not widen the fixed retention limits of every ledger table.
 
-PlainRouter records the current retention instruction with its effective time, controller identity, duration, selecting user, and supporting context. Retention changes must pass the server-side retention policy. MCP does not expose a retention setter.
+Plainrouter records the current retention instruction with its effective time, controller identity, duration, selecting user, and supporting context. Retention changes must pass the server-side retention policy. MCP does not expose a retention setter.
 
 ## Browser and server deduplication
 
-When Meta is connected, one `signalq("track", ...)` call can produce both a managed browser Pixel event and a server-side Conversions API event. PlainRouter assigns the same UUID to both copies so Meta can deduplicate them.
+When Meta is connected, one `signalq("track", ...)` call can produce both a managed browser Pixel event and a server-side Conversions API event. Plainrouter assigns the same UUID to both copies so Meta can deduplicate them.
 
 Do not keep a separate Pixel or CAPI integration sending the same events to the same dataset after you validate the managed setup. Duplicate integrations can inflate reporting.
 

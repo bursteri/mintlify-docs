@@ -6,7 +6,7 @@ description: "Create a Launcher draft from a CSV or XLSX file of already-synced 
 Use the file-import adapter when a Launcher draft is easier to prepare in a spreadsheet than as MCP tool arguments. It accepts CSV and XLSX files and creates the same account-bound draft model as `launcher.draft_batch`.
 
 <Warning>
-  Import creates a PlainRouter draft only. It does not write to Meta, evaluate the final execution gate, or activate spend.
+  Import creates a Plainrouter draft only. It does not write to Meta, evaluate the final execution gate, or activate spend.
 </Warning>
 
 ## Before you begin
@@ -39,7 +39,7 @@ drive_link,primary_text,headline,website_url
 https://drive.google.com/file/d/FILE_ID/view,Meet the new collection,Shop now,https://example.com/new
 ```
 
-For XLSX, PlainRouter reads the first visible worksheet.
+For XLSX, Plainrouter reads the first visible worksheet.
 
 ## Limits
 
@@ -84,7 +84,7 @@ Supported modes are:
 
 The response contains the draft batch, accepted and rejected items, frozen tier and capacity limits, import provenance, and `syntactic_row_failures`.
 
-PlainRouter resolves every Drive link against already-synced inventory in the token workspace. Unknown, stale, failed, removed, or cross-workspace assets appear in `rejected_items` as `drive_asset_unresolved`.
+Plainrouter resolves every Drive link against already-synced inventory in the token workspace. Unknown, stale, failed, removed, or cross-workspace assets appear in `rejected_items` as `drive_asset_unresolved`.
 
 The import provenance stores the file's SHA-256 identity, format, row count, and import time. The privately staged upload is deleted after parsing, including when the import fails.
 

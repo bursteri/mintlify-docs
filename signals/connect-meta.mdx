@@ -10,9 +10,9 @@ Connect Meta to send consented Signals events to one dataset through both the ma
 You need:
 
 - An active Signal and collection domain.
-- Workspace-owner access in PlainRouter.
+- Workspace-owner access in Plainrouter.
 - Access to the required Meta Business assets, ad account, and dataset.
-- Permission to grant PlainRouter access to those assets.
+- Permission to grant Plainrouter access to those assets.
 
 ## Connect the destination
 
@@ -23,7 +23,7 @@ You need:
   <Step title="Authorize Meta">
     Click **Connect Meta** and complete Meta's authorization flow.
 
-    PlainRouter requests the business assets required to configure and operate the destination. Access tokens stay on the server and never enter the browser snippet or publishable-key configuration.
+    Plainrouter requests the business assets required to configure and operate the destination. Access tokens stay on the server and never enter the browser snippet or publishable-key configuration.
   </Step>
   <Step title="Choose an ad account">
     Select the Meta ad account associated with the website and dataset.
@@ -32,12 +32,12 @@ You need:
     Select the **Meta dataset / Pixel** that should receive this Signal's browser and server events, then click **Connect Meta dataset**.
   </Step>
   <Step title="Confirm the destination">
-    PlainRouter shows **Destination active** with the dataset ID and ad-account name. Return to **Signals** to monitor delivery and measurement health.
+    Plainrouter shows **Destination active** with the dataset ID and ad-account name. Return to **Signals** to monitor delivery and measurement health.
   </Step>
 </Steps>
 
 <Warning>
-  Remove other Pixel or CAPI integrations that send the same events to this dataset after validating PlainRouter. Multiple independent integrations can create duplicate conversions.
+  Remove other Pixel or CAPI integrations that send the same events to this dataset after validating Plainrouter. Multiple independent integrations can create duplicate conversions.
 </Warning>
 
 ## How managed delivery works
@@ -46,14 +46,14 @@ After consent is granted:
 
 1. The Signals browser library fetches the public dataset ID from your first-party collector.
 2. It loads Meta's browser library and sends the browser event.
-3. PlainRouter sends the matching server event through Conversions API.
+3. Plainrouter sends the matching server event through Conversions API.
 4. Both copies use the same event ID so Meta can deduplicate them.
 
 If the Meta browser library is blocked, server delivery can still continue. If browser configuration is temporarily unavailable, server collection continues and the browser Pixel is skipped.
 
 ## Refresh available assets
 
-If a new ad account or dataset does not appear, click **Reconnect Meta to refresh assets** and complete authorization again. This refreshes the assets PlainRouter can list without exposing the access token.
+If a new ad account or dataset does not appear, click **Reconnect Meta to refresh assets** and complete authorization again. This refreshes the assets Plainrouter can list without exposing the access token.
 
 ## Troubleshoot
 

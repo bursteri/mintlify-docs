@@ -1,30 +1,30 @@
 ---
 title: "Configure DNS and CNAME"
-description: "Connect a first-party collection subdomain to PlainRouter, publish the required DNS record, and confirm managed-hostname validation."
+description: "Connect a first-party collection subdomain to Plainrouter, publish the required DNS record, and confirm managed-hostname validation."
 ---
 
-PlainRouter collects Signals through a subdomain you control, such as `collect.example.com`. Connecting this collection domain requires one CNAME record.
+Plainrouter collects Signals through a subdomain you control, such as `collect.example.com`. Connecting this collection domain requires one CNAME record.
 
-The change applies only to the collection subdomain. It does not move your website, email, or root domain to PlainRouter.
+The change applies only to the collection subdomain. It does not move your website, email, or root domain to Plainrouter.
 
 ## Website address or collection domain?
 
 Signals setup asks for your **Website address**, such as `www.example.com`, to authorize the site that sends events. The form supplies `https://`; enter the exact host rather than a page URL. `example.com` and `www.example.com` are different website hosts.
 
-The **collection domain**, such as `collect.example.com`, receives those events. Add DNS records for the collection domain shown in PlainRouter. Do not replace the DNS records that serve your website.
+The **collection domain**, such as `collect.example.com`, receives those events. Add DNS records for the collection domain shown in Plainrouter. Do not replace the DNS records that serve your website.
 
 ## How the CNAME works
 
 | Record | Purpose |
 | --- | --- |
-| `CNAME` | Routes the collection subdomain to PlainRouter so Cloudflare can validate ownership and provision HTTPS automatically. |
+| `CNAME` | Routes the collection subdomain to Plainrouter so Cloudflare can validate ownership and provision HTTPS automatically. |
 
 <Warning>
-  Add the CNAME exactly as shown in PlainRouter. The name and value displayed in your setup are specific to your collection domain.
+  Add the CNAME exactly as shown in Plainrouter. The name and value displayed in your setup are specific to your collection domain.
 </Warning>
 
 <Note>
-  You do not need to create a Cloudflare Worker Route or configure application routing. PlainRouter registers the collection hostname automatically after DNS and HTTPS validation succeeds.
+  You do not need to create a Cloudflare Worker Route or configure application routing. Plainrouter registers the collection hostname automatically after DNS and HTTPS validation succeeds.
 </Note>
 
 ## Before you begin
@@ -41,17 +41,17 @@ You can identify the active DNS provider by checking where your domain's nameser
 
 <Steps>
   <Step title="Open the DNS configuration">
-    In PlainRouter, open **Signals** and continue setup.
+    In Plainrouter, open **Signals** and continue setup.
 
-    In the collection-domain step, PlainRouter displays the exact **Type**, **Name**, and **Value** for the required CNAME. If the record is still being prepared, use **Check again** before editing DNS.
+    In the collection-domain step, Plainrouter displays the exact **Type**, **Name**, and **Value** for the required CNAME. If the record is still being prepared, use **Check again** before editing DNS.
   </Step>
   <Step title="Add the CNAME record">
-    In your DNS provider, create the CNAME using the collection domain as its name and the PlainRouter target as its value.
+    In your DNS provider, create the CNAME using the collection domain as its name and the Plainrouter target as its value.
 
     Enter only the hostname in the value field. Do not include `https://`, a path, or a trailing slash.
   </Step>
   <Step title="Save and validate">
-    Save the CNAME and return to PlainRouter.
+    Save the CNAME and return to Plainrouter.
 
     CNAME changes are typically detected within five minutes. Cloudflare then validates ownership and provisions HTTPS automatically. If setup remains pending after five minutes, click **Retry validation**.
   </Step>
@@ -61,39 +61,39 @@ You can identify the active DNS provider by checking where your domain's nameser
 
 DNS providers use different labels for the same fields:
 
-| PlainRouter | Other common labels | What to enter |
+| Plainrouter | Other common labels | What to enter |
 | --- | --- | --- |
 | **Type** | Record type | `CNAME` |
-| **Name** | Host, hostname, alias | The record name shown in PlainRouter |
-| **Value** | Target, points to, content | The record value shown in PlainRouter |
+| **Name** | Host, hostname, alias | The record name shown in Plainrouter |
+| **Value** | Target, points to, content | The record value shown in Plainrouter |
 | TTL | Time to live | Use **Auto** or the provider default |
 
 Some providers automatically append your root domain to the **Name** field. If entering `collect.example.com` produces `collect.example.com.example.com`, enter only the host portion, such as `collect`.
 
 <Tip>
-  Use the copy buttons beside the CNAME name and value in PlainRouter. This avoids typing mistakes.
+  Use the copy buttons beside the CNAME name and value in Plainrouter. This avoids typing mistakes.
 </Tip>
 
 ## Continue setup
 
-PlainRouter validates ownership and HTTPS automatically after the CNAME points to PlainRouter. Keep the setup screen open, or return later through **Signals**.
+Plainrouter validates ownership and HTTPS automatically after the CNAME points to Plainrouter. Keep the setup screen open, or return later through **Signals**.
 
-When validation succeeds, PlainRouter moves setup to **Install Signals and wait for a real arrival**. Keep the CNAME in place after setup completes.
+When validation succeeds, Plainrouter moves setup to **Install Signals and wait for a real arrival**. Keep the CNAME in place after setup completes.
 
 ## Troubleshoot validation
 
 ### The CNAME does not validate
 
 - Remove any existing `A`, `AAAA`, or CNAME record using the same collection hostname. A hostname cannot point to multiple services at once.
-- Confirm the CNAME value contains only the target hostname shown in PlainRouter.
+- Confirm the CNAME value contains only the target hostname shown in Plainrouter.
 - Check that you edited the DNS zone used by your domain's active nameservers.
 - If your DNS provider adds the root domain automatically, make sure the record name is not duplicated.
 
 ### HTTPS validation fails
 
-HTTPS becomes available after the collection hostname points to PlainRouter and Cloudflare completes automatic validation.
+HTTPS becomes available after the collection hostname points to Plainrouter and Cloudflare completes automatic validation.
 
-If PlainRouter reports a CAA conflict, review the CAA records on your domain and allow the certificate authority named in the validation error. If you do not manage those restrictions, ask your DNS administrator to update them.
+If Plainrouter reports a CAA conflict, review the CAA records on your domain and allow the certificate authority named in the validation error. If you do not manage those restrictions, ask your DNS administrator to update them.
 
 ### Setup is still pending
 

@@ -55,7 +55,7 @@ response = await get_event.asyncio(
 
 ## Send a Meta conversion
 
-This recipe sends a purchase through PlainRouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
+This recipe sends a purchase through Plainrouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
 
 Replace the sample order, identity, browser identifiers and timestamps with your actual purchase and consent records. Keep the same event ID and purchase time on retries. Omit browser identifiers when unavailable.
 
@@ -116,7 +116,7 @@ if response.status_code not in {HTTPStatus.OK, HTTPStatus.ACCEPTED}:
     raise RuntimeError(response.content.decode("utf-8"))
 
 if response.parsed is None:
-    raise RuntimeError("PlainRouter returned an empty response")
+    raise RuntimeError("Plainrouter returned an empty response")
 
 print(
     {
@@ -128,7 +128,7 @@ print(
 
 Replace the example `fbp` and `fbc` values with values captured from the consenting browser. Omit a field when you do not have a valid value; do not send placeholders in production.
 
-PlainRouter normalizes and hashes raw supported identity values before Meta delivery. A 64-character SHA-256 value is accepted as already hashed. Browser identifiers such as `fbp` and `fbc` remain unhashed.
+Plainrouter normalizes and hashes raw supported identity values before Meta delivery. A 64-character SHA-256 value is accepted as already hashed. Browser identifiers such as `fbp` and `fbc` remain unhashed.
 
 ### Send the same model asynchronously
 
@@ -145,7 +145,7 @@ The client reuses an `httpx` session. Create one client per service configuratio
 
 ### Retry safely
 
-Use the same `event_id` for every retry of the same purchase. PlainRouter returns:
+Use the same `event_id` for every retry of the same purchase. Plainrouter returns:
 
 - HTTP `202` and `duplicate: false` for a new accepted event.
 - HTTP `200` and `duplicate: true` for an already accepted event ID.
@@ -211,7 +211,7 @@ client = create_client(
 )
 ```
 
-Override the production origin only for a PlainRouter-provided region or a controlled test environment.
+Override the production origin only for a Plainrouter-provided region or a controlled test environment.
 
 ## Handle credentials safely
 

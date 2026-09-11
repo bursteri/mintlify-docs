@@ -1,6 +1,6 @@
-# PlainRouter documentation
+# Plainrouter documentation
 
-This repository contains the customer-facing PlainRouter documentation built
+This repository contains the customer-facing Plainrouter documentation built
 with [Mintlify](https://www.mintlify.com/docs).
 
 ## Before editing
@@ -30,7 +30,7 @@ npx skills add https://mintlify.com/docs
 ```
 
 The Mintlify skill supplies platform and component guidance. The repository's
-`.mintlify/AGENTS.md` supplies the PlainRouter-specific rules.
+`.mintlify/AGENTS.md` supplies the Plainrouter-specific rules.
 
 ## Validate changes
 

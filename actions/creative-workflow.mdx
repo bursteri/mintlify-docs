@@ -3,7 +3,7 @@ title: "Create governed Meta creatives"
 description: "Use the creative library to stage an image, create a paused ad draft, and verify the provider result without bypassing approval safeguards."
 ---
 
-PlainRouter's creative tools let an authorized agent inspect account-owned assets and submit governed Meta changes. Every proposal stays bound to the account selected when its workspace execution token was issued.
+Plainrouter's creative tools let an authorized agent inspect account-owned assets and submit governed Meta changes. Every proposal stays bound to the account selected when its workspace execution token was issued.
 
 ## Creative tool flow
 
@@ -12,19 +12,19 @@ PlainRouter's creative tools let an authorized agent inspect account-owned asset
     Call `get-creative-library` to list images or videos from the approved account. Select an `asset_id` such as `image:<hash>` or `video:<id>`.
   </Step>
   <Step title="Stage an image when needed">
-    Call `upload-asset` with a JPEG or PNG filename, raw base64 content, a rationale, and an idempotency key. PlainRouter validates the bytes, freezes a private staged copy, and creates an `upload_asset` proposal.
+    Call `upload-asset` with a JPEG or PNG filename, raw base64 content, a rationale, and an idempotency key. Plainrouter validates the bytes, freezes a private staged copy, and creates an `upload_asset` proposal.
   </Step>
   <Step title="Review or approve the upload">
     In **Suggest only**, approval records the recommendation without uploading to Meta. In an executable mode, approval queues the provider upload after a fresh policy check. After the upload is verified, call `get-creative-library` again to obtain its `image:<hash>` asset ID.
   </Step>
   <Step title="Propose a paused ad copy">
-    Call `duplicate-ad-with-creative` with the human-selected source ad ID and an asset ID returned by PlainRouter. The proposal is hard-coded to `paused`.
+    Call `duplicate-ad-with-creative` with the human-selected source ad ID and an asset ID returned by Plainrouter. The proposal is hard-coded to `paused`.
   </Step>
   <Step title="Review the proposal">
     Confirm the source ad, selected asset, rationale, evidence provenance, policy snapshot, and the **Approve and execute** consequence.
   </Step>
   <Step title="Wait for exact verification">
-    PlainRouter creates the copy as `PAUSED`, records its provider ID in a durable receipt, and re-reads that exact ad. Only an exact account, creative, `status=PAUSED`, and `effective_status=PAUSED` match becomes Landed.
+    Plainrouter creates the copy as `PAUSED`, records its provider ID in a durable receipt, and re-reads that exact ad. Only an exact account, creative, `status=PAUSED`, and `effective_status=PAUSED` match becomes Landed.
   </Step>
 </Steps>
 
@@ -54,9 +54,9 @@ Video assets can be read from the Meta creative library and used for ad duplicat
 
 ## Paused-copy invariant
 
-PlainRouter exposes no action that activates a copied ad. A duplicate must be created and verified with both configured and effective status equal to `PAUSED`.
+Plainrouter exposes no action that activates a copied ad. A duplicate must be created and verified with both configured and effective status equal to `PAUSED`.
 
-If Meta reports `IN_PROCESS`, the batch moves to **Executed pending verification** and remains **Not Landed**. PlainRouter performs scheduled reads for up to 48 hours. Contradictory state, rejection, or expiry triggers verified compensation, which archives the receipt-addressed copy.
+If Meta reports `IN_PROCESS`, the batch moves to **Executed pending verification** and remains **Not Landed**. Plainrouter performs scheduled reads for up to 48 hours. Contradictory state, rejection, or expiry triggers verified compensation, which archives the receipt-addressed copy.
 
 ## Safe retries
 

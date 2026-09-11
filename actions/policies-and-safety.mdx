@@ -7,9 +7,9 @@ Open **Settings** → **Action policy** to review the workspace's non-negotiable
 
 Only the workspace owner can save policy changes. Other workspace members can review the current settings.
 
-When the owner changes a policy setting, PlainRouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the owner and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
+When the owner changes a policy setting, Plainrouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the owner and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
 
-Policy changes that allow execution are saved atomically with their audit event. If audit-ledger integrity prevents the event from being appended, PlainRouter does not save the executable change. You can still switch to **Suggest only** as a safe fallback, but PlainRouter warns that the audit ledger requires repair if it cannot record that change.
+Policy changes that allow execution are saved atomically with their audit event. If audit-ledger integrity prevents the event from being appended, Plainrouter does not save the executable change. You can still switch to **Suggest only** as a safe fallback, but Plainrouter warns that the audit ledger requires repair if it cannot record that change.
 
 ## Execution mode
 
@@ -62,7 +62,7 @@ Supported prefixes are `campaign`, `ad_set`, and `ad`. An exact match blocks the
 
 ### Protect learning phase
 
-When enabled, PlainRouter blocks applicable delivery changes while the target is learning. Creative duplication re-reads the source ad and nested ad-set learning state from Meta. If the required learning state is unknown, execution is blocked.
+When enabled, Plainrouter blocks applicable delivery changes while the target is learning. Creative duplication re-reads the source ad and nested ad-set learning state from Meta. If the required learning state is unknown, execution is blocked.
 
 Image upload does not require target learning-phase state.
 
@@ -70,7 +70,7 @@ Image upload does not require target learning-phase state.
 
 ### Quiet hours
 
-Set both a start and end time. PlainRouter evaluates the window in the advertising account's timezone, falling back to the application timezone if the account has none.
+Set both a start and end time. Plainrouter evaluates the window in the advertising account's timezone, falling back to the application timezone if the account has none.
 
 Quiet hours can cross midnight. For example, `22:00` to `06:00` blocks proposals and execution during the overnight window.
 
@@ -86,7 +86,7 @@ Aggregate Signals reconciliation is never substituted for target-level provider 
 
 ## Verification and compensation
 
-PlainRouter does not treat a successful provider response as proof that an action Landed. It persists an execution receipt and re-reads the exact object.
+Plainrouter does not treat a successful provider response as proof that an action Landed. It persists an execution receipt and re-reads the exact object.
 
 - Image upload verification matches the receipt asset, frozen content hash, and provider readiness.
 - Ad-copy verification matches the receipt ad, approved account, selected creative, and permanent `PAUSED` state.
@@ -94,7 +94,7 @@ PlainRouter does not treat a successful provider response as proof that an actio
 - Hard mismatches, provider rejection, verification expiry, or later anomaly trigger compensation.
 - Compensation is itself verified: an uploaded image must be absent after deletion, and a copied ad must be `ARCHIVED` after rollback.
 
-If commit state is unknown, PlainRouter reconciles before retrying. It does not issue unsafe compensation without a trustworthy receipt target.
+If commit state is unknown, Plainrouter reconciles before retrying. It does not issue unsafe compensation without a trustworthy receipt target.
 
 ## Current enforcement boundary
 

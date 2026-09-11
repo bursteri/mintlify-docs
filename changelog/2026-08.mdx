@@ -1,10 +1,10 @@
 ---
 title: "August 2026"
-description: "Review PlainRouter product updates shipped in August 2026, including Signals, Actions, Launcher, API, SDK, CLI, MCP, and documentation changes."
+description: "Review Plainrouter product updates shipped in August 2026, including Signals, Actions, Launcher, API, SDK, CLI, MCP, and documentation changes."
 rss: true
 ---
 
-PlainRouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
+Plainrouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
 
 <Update label="August 30, 2026">
 
@@ -14,7 +14,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## Google Ads connection reaches Workspace Settings
 
-  **New** · When the Google Ads integration is configured, workspace owners can connect, reconnect, or disconnect Google Ads from **Workspace Settings**. PlainRouter stores the encrypted refresh credential and shows the customer IDs the connection can access. This connection does not turn Meta-only Actions into Google Ads execution.
+  **New** · When the Google Ads integration is configured, workspace owners can connect, reconnect, or disconnect Google Ads from **Workspace Settings**. Plainrouter stores the encrypted refresh credential and shows the customer IDs the connection can access. This connection does not turn Meta-only Actions into Google Ads execution.
 
   ## The dashboard shows completed-month workspace usage
 
@@ -33,7 +33,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## Retention instructions become visible and auditable
 
-  **Privacy** · PlainRouter now records the current visitor-identity retention instruction with its effective time, controller identity, selected duration, selecting user, and supporting context. Existing workspaces without an instruction are reported as deliberately undocumented rather than receiving a fabricated historical record. [Review identity retention](/signals/overview#identity-retention).
+  **Privacy** · Plainrouter now records the current visitor-identity retention instruction with its effective time, controller identity, selected duration, selecting user, and supporting context. Existing workspaces without an instruction are reported as deliberately undocumented rather than receiving a fabricated historical record. [Review identity retention](/signals/overview#identity-retention).
 </Update>
 
 <Update label="August 28, 2026">
@@ -44,7 +44,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## Signals identity lookup becomes workspace-keyed
 
-  **Security** · PlainRouter now separates its private per-workspace identity lookup from the platform-format digests returned by `user_data_hashed`. User-data deletion accepts a verified raw identifier or legacy SHA-256 digest only in the JSON body and rejects identifiers placed in a URL query string. [Review deletion and identity fields](/reference/conversion-api#delete-retained-user-data).
+  **Security** · Plainrouter now separates its private per-workspace identity lookup from the platform-format digests returned by `user_data_hashed`. User-data deletion accepts a verified raw identifier or legacy SHA-256 digest only in the JSON body and rejects identifiers placed in a URL query string. [Review deletion and identity fields](/reference/conversion-api#delete-retained-user-data).
 
   ## Visitor identity retention is bounded to 30 or 90 days
 
@@ -103,7 +103,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## Signal arrival verification is more durable
 
-  **Improved** · A verified managed-hostname arrival stays latched after recent activity ages out. During same-origin secret rotation, PlainRouter now acknowledges the new forwarding secret only after a successfully ingested authenticated arrival, so malformed or failed requests cannot end the overlap. [Review serving verification](/signals/configure-serving#generate-your-setup).
+  **Improved** · A verified managed-hostname arrival stays latched after recent activity ages out. During same-origin secret rotation, Plainrouter now acknowledges the new forwarding secret only after a successfully ingested authenticated arrival, so malformed or failed requests cannot end the overlap. [Review serving verification](/signals/configure-serving#generate-your-setup).
 
   ## Strict-EU passive totals honor small-cell privacy
 
@@ -132,7 +132,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## New Signal installs use the v3 browser contract
 
-  **Fixed** · PlainRouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. Its `v3.0.1` patch also preserves previously consented visitor state while a returning page waits for the consent platform to restore its decision; no measurement resumes before that decision arrives. [Install the current pixel](/signals/install-pixel).
+  **Fixed** · Plainrouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. Its `v3.0.1` patch also preserves previously consented visitor state while a returning page waits for the consent platform to restore its decision; no measurement resumes before that decision arrives. [Install the current pixel](/signals/install-pixel).
 
   ## Action verification commits atomically
 
@@ -155,14 +155,14 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## Actions and operational monitoring are more deterministic
 
-  **Improved** · PlainRouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
+  **Improved** · Plainrouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
 </Update>
 
 <Update label="August 18, 2026">
 
   ## Launcher draft batches arrive in MCP
 
-  **New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured PlainRouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/reference/mcp-tools).
+  **New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured Plainrouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/reference/mcp-tools).
 
   ## Consent-first Signals and simpler activation
 
@@ -189,7 +189,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## The redesigned Signals ledger reached production
 
-  **Improved** · PlainRouter shipped partitioned event storage, exact rollup coverage, bounded retention paths, replay protection, and privacy erasure that preserves the accounting spine while removing subject data.
+  **Improved** · Plainrouter shipped partitioned event storage, exact rollup coverage, bounded retention paths, replay protection, and privacy erasure that preserves the accounting spine while removing subject data.
 
   ## Drive sync gained durable operation receipts
 
@@ -200,7 +200,7 @@ PlainRouter ships continuously. This page collects the customer-facing changes f
 
   ## Workspace-scoped MCP tokens
 
-  **New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. PlainRouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/actions/workspace-tokens).
+  **New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. Plainrouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/actions/workspace-tokens).
 
   ## Policy changes joined the audit chain
 

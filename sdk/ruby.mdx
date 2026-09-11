@@ -3,7 +3,7 @@ title: "Ruby SDK"
 description: "Install and authenticate the plainrouter-sdk gem for the Signals Conversion API and zero-auth sandbox."
 ---
 
-[`plainrouter-sdk`](https://rubygems.org/gems/plainrouter-sdk) is the official Ruby SDK for PlainRouter's signed OpenAPI contract. Gem `0.1.1` targets signed API contract `0.5.0` and exposes a compact client over the generated API.
+[`plainrouter-sdk`](https://rubygems.org/gems/plainrouter-sdk) is the official Ruby SDK for Plainrouter's signed OpenAPI contract. Gem `0.1.1` targets signed API contract `0.5.0` and exposes a compact client over the generated API.
 
 The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/ruby). Review release notes before upgrading while the gem remains in the `0.x` series.
 
@@ -75,7 +75,7 @@ Sandbox operations accept only identity-free synthetic data. They do not read or
 
 ## Configure another API origin or timeout
 
-The default API base URL is `https://plainrouter.com/api/v1` and the default timeout is 30 seconds. Override either value only for a PlainRouter-provided region or a controlled test environment:
+The default API base URL is `https://plainrouter.com/api/v1` and the default timeout is 30 seconds. Override either value only for a Plainrouter-provided region or a controlled test environment:
 
 ```ruby
 client = PlainRouter::Client.new(

@@ -1,9 +1,9 @@
 ---
 title: "Audit log"
-description: "Trace workspace security, Drive ownership, governed execution, verification, and restoration events through the PlainRouter audit history."
+description: "Trace workspace security, Drive ownership, governed execution, verification, and restoration events through the Plainrouter audit history."
 ---
 
-Open **Audit log** from the PlainRouter sidebar to review chronological security and Actions history for the current workspace.
+Open **Audit log** from the Plainrouter sidebar to review chronological security and Actions history for the current workspace.
 
 ## What an audit event contains
 
@@ -25,7 +25,7 @@ The top of the audit page reports separate integrity segments:
 | --- | --- |
 | Historical v1 | Preserves predecessor continuity, but the stored hash cannot be recomputed completely from durable row fields. It is labeled `v1_non_recomputable`. |
 | Checkpoint | Bridges the preserved v1 tail into the v2 segment. The page reports whether it is present and valid. |
-| v2 | Uses a durable canonical representation. PlainRouter recomputes every stored v2 row and reports whether the current database snapshot matches. |
+| v2 | Uses a durable canonical representation. Plainrouter recomputes every stored v2 row and reports whether the current database snapshot matches. |
 
 <Warning>
   The hash chain has no external tail anchor. Successful v2 recomputation detects changed stored rows within the current snapshot, but it cannot independently prove that no tail events were deleted outside that snapshot.
@@ -70,6 +70,6 @@ Measurement-only events explicitly say **NOT LANDED**. Do not count them as prod
     For failed work, find the compensation and provider-read proof. Escalate any `rollback_incomplete` event.
   </Step>
   <Step title="Revoke access if necessary">
-    Revoke the PlainRouter agent connection or workspace token. Revocation disables its principal and associated credential.
+    Revoke the Plainrouter agent connection or workspace token. Revocation disables its principal and associated credential.
   </Step>
 </Steps>

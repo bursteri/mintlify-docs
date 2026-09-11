@@ -3,10 +3,10 @@ title: "Actions overview"
 description: "Understand how agents propose, approve, execute, verify, and audit governed advertising changes within workspace and Meta ad-account boundaries."
 ---
 
-Actions is PlainRouter's governed workflow for AI-proposed advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy.
+Actions is Plainrouter's governed workflow for AI-proposed advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy.
 
 <Info>
-  New workspaces start in **Suggest only**. Executable modes can run supported creative actions, but only after policy allows them. New ad copies are always created and verified as `PAUSED`; PlainRouter exposes no activation action in this release.
+  New workspaces start in **Suggest only**. Executable modes can run supported creative actions, but only after policy allows them. New ad copies are always created and verified as `PAUSED`; Plainrouter exposes no activation action in this release.
 </Info>
 
 ## The governed loop
@@ -21,13 +21,13 @@ Actions is PlainRouter's governed workflow for AI-proposed advertising changes. 
   <Step title="The agent submits a proposal">
     Each batch includes typed actions, a plain-language rationale, exact evidence fields, a stable idempotency key, and a human-supplied target.
   </Step>
-  <Step title="PlainRouter applies policy">
+  <Step title="Plainrouter applies policy">
     Policy evaluates the proposal against protected entities, quiet hours, provider state, and the selected execution mode. Unknown execution-critical state blocks execution.
   </Step>
   <Step title="A person or policy approves">
     Creative proposals require a person at proposal time. In **Suggest only**, approval records agreement without execution. Executable modes queue the approved batch for a fresh policy check.
   </Step>
-  <Step title="PlainRouter executes and verifies">
+  <Step title="Plainrouter executes and verifies">
     The execution worker rechecks current policy before any provider write. It records a durable receipt, reads the exact provider object back, and marks the action verified only when the receipt-addressed state matches.
   </Step>
   <Step title="The result becomes audit history">
@@ -54,17 +54,17 @@ Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/
 | **Auto within limits** | Supported creative proposals still require a person. Approval queues governed execution. |
 | **Full auto** | Uses the same hard safeguards. Supported creative proposals still require a person in this release. |
 
-The mode is frozen into each proposal. Before execution, PlainRouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
+The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
 
 ## Verification and Landed
 
 **Landed** means every action in the batch has an exact, durable provider receipt and a matching verification read. A provider write alone is not Landed.
 
-Most verification settles in the immediate bounded read window. A paused Meta ad that remains `IN_PROCESS` can move to **Executed pending verification**. PlainRouter then performs scheduled receipt-addressed reads for up to 48 hours. It remains **Not Landed** during that period.
+Most verification settles in the immediate bounded read window. A paused Meta ad that remains `IN_PROCESS` can move to **Executed pending verification**. Plainrouter then performs scheduled receipt-addressed reads for up to 48 hours. It remains **Not Landed** during that period.
 
-If verification finds contradictory state or cannot complete inside the safety window, PlainRouter fails closed and attempts verified compensation. A failed or incomplete restoration is surfaced as **Rollback incomplete** for operator attention.
+If verification finds contradictory state or cannot complete inside the safety window, Plainrouter fails closed and attempts verified compensation. A failed or incomplete restoration is surfaced as **Rollback incomplete** for operator attention.
 
-For synchronous verification, the receipt state, verification summary, terminal action state, and audit events commit atomically. If local terminal persistence fails, PlainRouter can replay its durable classified evidence without another provider mutation or provider read. If retry exhaustion occurs after durable verified-creation evidence exists, PlainRouter suppresses destructive compensation and records the case for manual remediation.
+For synchronous verification, the receipt state, verification summary, terminal action state, and audit events commit atomically. If local terminal persistence fails, Plainrouter can replay its durable classified evidence without another provider mutation or provider read. If retry exhaustion occurs after durable verified-creation evidence exists, Plainrouter suppresses destructive compensation and records the case for manual remediation.
 
 ## Evidence boundaries
 
@@ -72,19 +72,19 @@ Signals reads provide aggregate account and dataset evidence. They do not prove 
 
 `get_signal_health` is diagnostic and cannot support a proposal containing a budget, status, or creative-spend action. Use `get_performance` for admissible stored reconciliation evidence. A batch is treated as spend-affecting when any action in it can affect spend or delivery; only an upload-only asset proposal may retain signal-health context.
 
-Modeled and portfolio-only events are excluded from reconciliation-derived proposal evidence. PlainRouter does not blend them into observed performance used by governed actions.
+Modeled and portfolio-only events are excluded from reconciliation-derived proposal evidence. Plainrouter does not blend them into observed performance used by governed actions.
 
 Creative-library evidence proves the selected asset's identity, approved-account ownership, readiness, and status. Although the library response includes last-30-day performance, that performance is excluded from the durable proposal citation and cannot be used as a winning-creative claim.
 
 <Note>
-  A human-supplied campaign, ad set, ad, or asset establishes selection only. PlainRouter re-reads execution-critical provider state instead of treating the supplied ID as current state.
+  A human-supplied campaign, ad set, ad, or asset establishes selection only. Plainrouter re-reads execution-critical provider state instead of treating the supplied ID as current state.
 </Note>
 
 ## Next steps
 
 <CardGroup cols={2}>
   <Card title="Connect a Meta Ads MCP client" icon="bot" href="/actions/connect-agent">
-    Test Claude Code with synthetic data, then connect one Meta ad account through PlainRouter.
+    Test Claude Code with synthetic data, then connect one Meta ad account through Plainrouter.
   </Card>
   <Card title="Use creative actions" icon="images" href="/actions/creative-workflow">
     Read assets, stage an image, and propose a paused ad copy.

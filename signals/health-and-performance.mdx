@@ -12,13 +12,13 @@ The page refreshes its stored measurements about once per minute. Opening it doe
 | State | Meaning | What to do |
 | --- | --- | --- |
 | **Setup required** | The Signal or first-party hostname is not fully active. | Finish CNAME and HTTPS validation. |
-| **Awaiting data** | Setup is active, but PlainRouter has not received a measurement event. | Send a server event or install the optional pixel and visit the live site. |
+| **Awaiting data** | Setup is active, but Plainrouter has not received a measurement event. | Send a server event or install the optional pixel and visit the live site. |
 | **Measurement pending** | Events are arriving, but delivery, EMQ, or reconciliation measurements are incomplete. | Allow the first measurement cycles to complete and watch diagnostics. |
 | **Needs attention** | At least one warning or critical diagnostic is active. | Open **Diagnostics** and address each item. |
 | **Healthy** | Event flow exists and all required recent measurement categories are present without warnings. | Continue monitoring. |
 
 <Note>
-  Event activity alone is not enough for **Healthy**. PlainRouter waits for recent delivery outcomes, an EMQ snapshot, and measurable reconciliation history before claiming measured health.
+  Event activity alone is not enough for **Healthy**. Plainrouter waits for recent delivery outcomes, an EMQ snapshot, and measurable reconciliation history before claiming measured health.
 </Note>
 
 ## Summary metrics
@@ -76,7 +76,7 @@ Each row shows one stored daily reconciliation report:
 - The signed number is that day's observed gap.
 - An amber gap indicates the day exceeded the configured residual threshold.
 
-If no rows appear, PlainRouter has not stored a daily reconciliation report for the window.
+If no rows appear, Plainrouter has not stored a daily reconciliation report for the window.
 
 ## Arrivals vs platform-claimed clicks
 
@@ -85,21 +85,21 @@ The **Arrivals vs platform-claimed clicks** panel compares customer-visible obse
 | Metric | Meaning |
 | --- | --- |
 | **Total arrivals** | Valid observed arrival records after the customer-visible privacy rules. Conversion events and legacy exposure rows do not contribute; a withheld component can make the result suppressed or partial. |
-| **Platform-claimed clicks** | Clicks stored by PlainRouter during scheduled reconciliation for the same account and daily period. |
+| **Platform-claimed clicks** | Clicks stored by Plainrouter during scheduled reconciliation for the same account and daily period. |
 | **Difference** | Total arrivals minus platform-claimed clicks. |
 | **Difference vs claimed** | The difference as a percentage of platform-claimed clicks. It is unavailable when the claimed-click total is zero. |
 
 The channel table reads consented, attributed conversion-event data separately from arrival totals. It includes global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows never appear in the channel view. Because arrival records carry no channel identity, the channel rows do not allocate or sum to the total arrival count.
 
-Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. PlainRouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
+Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. Plainrouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
 
 ## Why numbers differ
 
-PlainRouter arrivals, ad clicks, pageviews, sessions and visitors count different things. A difference between them does not, by itself, measure lost visitors or failed conversion delivery.
+Plainrouter arrivals, ad clicks, pageviews, sessions and visitors count different things. A difference between them does not, by itself, measure lost visitors or failed conversion delivery.
 
 ### Meta clicks
 
-Compare against the connected Meta ad account's `clicks` metric, not outbound clicks or landing-page views. PlainRouter arrivals can include traffic from other sources, and the ad account may advertise other websites. The totals do not pair individual clicks with individual arrivals.
+Compare against the connected Meta ad account's `clicks` metric, not outbound clicks or landing-page views. Plainrouter arrivals can include traffic from other sources, and the ad account may advertise other websites. The totals do not pair individual clicks with individual arrivals.
 
 Match the account, complete dates and timezone shown in the comparison. Check the stored data's availability before treating a missing value as zero. Keep this arrival comparison separate from [Verified gap](/signals/health-and-performance#verified-gap), which compares conversion counts.
 
@@ -114,11 +114,11 @@ Keep unique visitors, visits, pageviews and custom-event goals separate. Start w
 ### Check the collection difference
 
 1. Match the metric, website and reporting period before comparing totals.
-2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by PlainRouter. Arrivals do not wait for consent; conversion events and the channel breakdown do. Keep these counts separate.
+2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by Plainrouter. Arrivals do not wait for consent; conversion events and the channel breakdown do. Keep these counts separate.
 3. Test one page load and one in-app navigation with your actual consent choices. Confirm which requests reach each collector using the [installation checks](/signals/install-pixel#verify-the-installation).
 4. Inspect duplicate tags, redirects and blocked requests. Record the settings and request outcomes needed to reproduce an unexplained change.
 
-Compare GA4 and Plausible using their own reports alongside PlainRouter. The platform-claimed-clicks panel reads stored Meta data; it does not reconcile those analytics reports.
+Compare GA4 and Plausible using their own reports alongside Plainrouter. The platform-claimed-clicks panel reads stored Meta data; it does not reconcile those analytics reports.
 
 ## Diagnostics
 
@@ -140,7 +140,7 @@ Diagnostics explain the state behind the summary. Common messages include:
 
 ## Measurement freshness
 
-Reconciliation normally runs daily. PlainRouter marks history stale after 48 hours. Until a recent report exists, the read is `not_measurable` and its quantitative values cannot be cited as evidence for an Actions proposal.
+Reconciliation normally runs daily. Plainrouter marks history stale after 48 hours. Until a recent report exists, the read is `not_measurable` and its quantitative values cannot be cited as evidence for an Actions proposal.
 
 The **Measurement state** panel shows the connected domain, dataset ID, last event, and the time the health response was generated.
 
@@ -165,7 +165,7 @@ The **Measurement state** panel shows the connected domain, dataset ID, last eve
 
 Workspace owners can delete a Signal from the delete control in the Signal health header.
 
-Deletion first deactivates collection and removes the hostname from PlainRouter's edge mapping. It then deletes the Signal and its related events and destination configuration. You can create a new Signal afterward, but the deleted Signal cannot be restored from the dashboard.
+Deletion first deactivates collection and removes the hostname from Plainrouter's edge mapping. It then deletes the Signal and its related events and destination configuration. You can create a new Signal afterward, but the deleted Signal cannot be restored from the dashboard.
 
 <Warning>
   Deleting a Signal is permanent. It does not retract events that a destination already accepted. Use the destination's own privacy controls or support process for data already held there.

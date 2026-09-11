@@ -1,6 +1,6 @@
 ---
 title: "Test Signal ingestion"
-description: "Write an identity-free diagnostic event through REST or MCP to confirm that PlainRouter accepts the workspace-scoped request."
+description: "Write an identity-free diagnostic event through REST or MCP to confirm that Plainrouter accepts the workspace-scoped request."
 ---
 
 Use the server-side verification event when you want to confirm that a Signals workspace secret or MCP connection can write to the authorized Signal ledger without sending customer identity or destination data.
@@ -44,7 +44,7 @@ Repeating the request is safe. It returns HTTP `200` with `duplicate: true` and 
 
 ## Test with MCP
 
-If you already have an authorized PlainRouter MCP connection, ask the client to call:
+If you already have an authorized Plainrouter MCP connection, ask the client to call:
 
 ```text
 verify_signal_ingestion

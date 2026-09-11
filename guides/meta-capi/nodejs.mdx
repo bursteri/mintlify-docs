@@ -1,10 +1,10 @@
 ---
 title: "Send Meta conversions with Node.js and TypeScript"
 sidebarTitle: "Send Meta conversions"
-description: "Send Meta conversions through PlainRouter from Node.js or TypeScript, using consented purchase examples, stable event IDs, and delivery checks."
+description: "Send Meta conversions through Plainrouter from Node.js or TypeScript, using consented purchase examples, stable event IDs, and delivery checks."
 ---
 
-Send a purchase to Meta through PlainRouter using the [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) package from server-side Node.js code. PlainRouter validates the event, normalizes and hashes supported identity fields, and sends eligible events to the Meta dataset connected to your workspace.
+Send a purchase to Meta through Plainrouter using the [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) package from server-side Node.js code. Plainrouter validates the event, normalizes and hashes supported identity fields, and sends eligible events to the Meta dataset connected to your workspace.
 
 ## Before you begin
 
@@ -164,7 +164,7 @@ export async function sendPurchase(
   const result = await createEvent({ body: purchaseBody(purchase) });
 
   if (result.error) {
-    throw new Error(`PlainRouter rejected the event (HTTP ${result.response.status})`);
+    throw new Error(`Plainrouter rejected the event (HTTP ${result.response.status})`);
   }
 
   return result.data;
@@ -190,7 +190,7 @@ if (!parsed.success) {
 }
 ```
 
-Passing this schema check does not establish consent or final API acceptance. PlainRouter still validates the submitted event.
+Passing this schema check does not establish consent or final API acceptance. Plainrouter still validates the submitted event.
 
 ## Retry without creating another event
 
@@ -200,11 +200,11 @@ Keep the same `event_id` when a timeout or queue retry repeats the same logical 
 - A previously accepted `event_id` returns HTTP `200` with `duplicate: true`.
 - Changing the ID on each retry defeats idempotency and can create duplicate conversions.
 
-PlainRouter also passes the event ID to Meta. When you use the managed browser Pixel for the same event, PlainRouter uses one ID for the Pixel `eventID` and the server `event_id`. See [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
+Plainrouter also passes the event ID to Meta. When you use the managed browser Pixel for the same event, Plainrouter uses one ID for the Pixel `eventID` and the server `event_id`. See [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
 
 ## Confirm delivery
 
-The `202` response means PlainRouter accepted the event for processing. It does not mean Meta has accepted the destination delivery yet.
+The `202` response means Plainrouter accepted the event for processing. It does not mean Meta has accepted the destination delivery yet.
 
 Use [Signal health and performance](/signals/health-and-performance) or retrieve the event with `getEvent` to inspect its delivery state. During setup, you can also use Meta Test Events mode through the destination operations in the [Conversion API reference](/reference/conversion-api).
 
@@ -213,4 +213,4 @@ Use [Signal health and performance](/signals/health-and-performance) or retrieve
 - [`configurePlainrouter` source at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/config.ts)
 - [`createEvent` generated operation at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/generated/sdk.gen.ts)
 - [`CreateEventData` request type at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/generated/types.gen.ts)
-- [PlainRouter Conversion API reference](/reference/conversion-api)
+- [Plainrouter Conversion API reference](/reference/conversion-api)

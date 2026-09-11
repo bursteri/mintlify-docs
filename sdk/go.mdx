@@ -1,9 +1,9 @@
 ---
 title: "Go SDK"
-description: "Install and authenticate the generated PlainRouter Go client, then send typed requests to the Signals Conversion API and zero-auth sandbox."
+description: "Install and authenticate the generated Plainrouter Go client, then send typed requests to the Signals Conversion API and zero-auth sandbox."
 ---
 
-[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from PlainRouter's signed OpenAPI contract. Release `v0.5.2` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
+[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from Plainrouter's signed OpenAPI contract. Release `v0.5.2` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
 
 ## Requirements
 
@@ -55,7 +55,7 @@ Load the secret from your environment or secret manager rather than writing it i
 
 ## Send a Meta conversion
 
-This recipe sends a purchase through PlainRouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
+This recipe sends a purchase through Plainrouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
 
 Replace the sample order, identity, browser identifiers and timestamps with your actual purchase and consent records. Keep the same event ID and purchase time on retries. Omit browser identifiers when unavailable.
 
@@ -144,7 +144,7 @@ func main() {
 }
 ```
 
-Replace the example browser identifiers with real values from a consenting browser, or omit `SetClickIds` when none are available. PlainRouter accepts raw supported identity fields and performs Meta-compatible normalization and SHA-256 hashing before delivery.
+Replace the example browser identifiers with real values from a consenting browser, or omit `SetClickIds` when none are available. Plainrouter accepts raw supported identity fields and performs Meta-compatible normalization and SHA-256 hashing before delivery.
 
 ### Reuse the client and context safely
 
@@ -158,7 +158,7 @@ The create response confirms ingestion only. Use `client.EventAPI.GetEvent(ctx, 
 
 ## Configure another API origin
 
-The generated configuration defaults to the PlainRouter Conversion API. Override its server only for a PlainRouter-provided region or a controlled test environment.
+The generated configuration defaults to the Plainrouter Conversion API. Override its server only for a Plainrouter-provided region or a controlled test environment.
 
 ## Handle credentials safely
 

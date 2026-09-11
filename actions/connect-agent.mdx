@@ -1,12 +1,12 @@
 ---
-title: "Meta Ads MCP: connect your agent with PlainRouter"
+title: "Meta Ads MCP: connect your agent with Plainrouter"
 sidebarTitle: "Connect your agent"
-description: "Connect Claude Code to PlainRouter's Meta Ads MCP server, read signal health, and submit creative proposals for approval in one Meta ad account."
+description: "Connect Claude Code to Plainrouter's Meta Ads MCP server, read signal health, and submit creative proposals for approval in one Meta ad account."
 ---
 
-Connect your AI agent to a Meta ad account through PlainRouter's Model Context Protocol (MCP) server. You can inspect conversion signal health, read the account's creative library, and submit supported creative changes for approval.
+Connect your AI agent to a Meta ad account through Plainrouter's Model Context Protocol (MCP) server. You can inspect conversion signal health, read the account's creative library, and submit supported creative changes for approval.
 
-This guide sets up the PlainRouter connection for Facebook and Instagram advertising. Start with synthetic data, then connect your own Meta ad account with a workspace execution token.
+This guide sets up the Plainrouter connection for Facebook and Instagram advertising. Start with synthetic data, then connect your own Meta ad account with a workspace execution token.
 
 ## Choose your MCP endpoint
 
@@ -15,7 +15,7 @@ This guide sets up the PlainRouter connection for Facebook and Instagram adverti
 | `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
 | `https://plainrouter.com/mcp` | Read one approved account and submit governed proposals. | Workspace execution token for tool calls and account data |
 
-PlainRouter MCP uses owner-issued workspace execution tokens. Each token binds the client to one workspace, one Meta ad account, and an explicit access tier.
+Plainrouter MCP uses owner-issued workspace execution tokens. Each token binds the client to one workspace, one Meta ad account, and an explicit access tier.
 
 If you are choosing between a Signals workspace secret, workspace execution token,
 or OAuth management credential, see [Authentication and
@@ -33,7 +33,7 @@ In a terminal with [Claude Code](https://code.claude.com/docs/en/mcp) installed,
 claude mcp add --transport http plainrouter-test https://plainrouter.com/mcp/sandbox
 ```
 
-Open Claude Code in the same directory and run `/mcp` to check the connection. No PlainRouter account or credential is required. Other MCP clients can use the same URL with HTTP transport.
+Open Claude Code in the same directory and run `/mcp` to check the connection. No Plainrouter account or credential is required. Other MCP clients can use the same URL with HTTP transport.
 
 The endpoint exposes:
 
@@ -84,7 +84,7 @@ token. The three read-tool names and their argument shapes match production.
 
 You need:
 
-- A PlainRouter account with access to the intended workspace.
+- A Plainrouter account with access to the intended workspace.
 - An active Meta ad account connection.
 - An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
 - A workspace owner who can issue the token.
@@ -96,12 +96,12 @@ For creative-library reads, the Meta connection needs `ads_read` or `ads_managem
 
 <Steps>
   <Step title="Issue the token">
-    In PlainRouter, switch to the intended workspace and open **Account** → **API**. Choose the exact ad account, a Read, Write, or Admin tier, and an expiry.
+    In Plainrouter, switch to the intended workspace and open **Account** → **API**. Choose the exact ad account, a Read, Write, or Admin tier, and an expiry.
   </Step>
   <Step title="Copy it once">
-    Copy the complete token immediately after issuance. PlainRouter cannot display it again.
+    Copy the complete token immediately after issuance. Plainrouter cannot display it again.
   </Step>
-  <Step title="Add the PlainRouter MCP server">
+  <Step title="Add the Plainrouter MCP server">
     In your MCP client, add `https://plainrouter.com/mcp` as a remote HTTP server and configure the token as its bearer credential.
   </Step>
   <Step title="Confirm the bound account">
@@ -150,7 +150,7 @@ For the returned fields and their meaning, see the [MCP tool reference](/referen
 
 | Permission | Allows |
 | --- | --- |
-| `ad-account.read` | Read the approved account and its PlainRouter Signals context. |
+| `ad-account.read` | Read the approved account and its Plainrouter Signals context. |
 | `signals.verify` | Write an identity-free, consent-safe Signal ingestion diagnostic. It does not complete onboarding. |
 | `actions.propose` | Submit actions through workspace policy and the approval pipeline. |
 | `creative.read` | Read the approved Meta account's creative library. |
@@ -177,7 +177,7 @@ For a creative variant:
 1. `get_account_state`
 2. `get-creative-library`
 3. `upload-asset` if the approved account does not already contain the intended image
-4. `duplicate-ad-with-creative` using an asset ID returned by a PlainRouter tool
+4. `duplicate-ad-with-creative` using an asset ID returned by a Plainrouter tool
 5. Direct the person to the returned `approval_queue_url`
 
 Ask the agent to state clearly whether a proposal is suggest-only, pending approval, blocked, awaiting verification, or Landed.
@@ -191,7 +191,7 @@ Use the source ad and asset I selected to propose a paused ad copy.
 Summarize the proposed change and show its approval link. Stop for my review.
 ```
 
-The creative tool submits a proposal to PlainRouter; it does not change Meta during that MCP call. In **Suggest only**, approval records agreement without execution. In an executable mode, supported creative work still requires policy checks and human approval. A new ad copy remains `PAUSED`.
+The creative tool submits a proposal to Plainrouter; it does not change Meta during that MCP call. In **Suggest only**, approval records agreement without execution. In an executable mode, supported creative work still requires policy checks and human approval. A new ad copy remains `PAUSED`.
 
 Follow the [creative workflow](/actions/creative-workflow) and [proposal review guide](/actions/review-proposals) for the next steps. Use the [Actions overview](/actions/overview) to check supported changes before requesting a different operation.
 
@@ -199,7 +199,7 @@ Follow the [creative workflow](/actions/creative-workflow) and [proposal review 
 
 Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revoke them immediately from **Account** → **API**.
 
-PlainRouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
+Plainrouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 
 ## Troubleshoot
 
@@ -217,7 +217,7 @@ If the client is sending an OAuth access token, the rejection is expected. Repla
 
 Issue a token with the required tier. Use Read for library access and Write or Admin for proposal-producing creative tools and Launcher draft batches.
 
-### PlainRouter asks you to reconnect Meta
+### Plainrouter asks you to reconnect Meta
 
 The selected account may lack an active Meta connection or the required `ads_read` or `ads_management` access. Reconnect Meta, confirm the same ad account, and retry the same idempotent request.
 

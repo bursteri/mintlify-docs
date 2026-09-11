@@ -3,7 +3,7 @@ title: "Connect Google Drive"
 description: "Claim and verify a client-owned creative folder for read-only Launcher inventory sync before importing assets into governed drafts."
 ---
 
-Launcher connects to client-owned Google Drive folders through a read-only service account. PlainRouter verifies ownership before it inventories any media, so knowing a folder link is never enough to claim another workspace's creative library.
+Launcher connects to client-owned Google Drive folders through a read-only service account. Plainrouter verifies ownership before it inventories any media, so knowing a folder link is never enough to claim another workspace's creative library.
 
 <Info>
   This release inventories Drive media metadata only. It does not download media bytes, upload media to Meta, create ads, or activate spend.
@@ -13,18 +13,18 @@ Launcher connects to client-owned Google Drive folders through a read-only servi
 
 You need:
 
-- Workspace-owner access in PlainRouter.
-- A verified email address on your PlainRouter account.
+- Workspace-owner access in Plainrouter.
+- A verified email address on your Plainrouter account.
 - Permission to share the intended Google Drive folder.
 - A Launcher service-account email on the workspace settings page.
 
-If **Drive access is not provisioned for this workspace cell yet** appears, contact PlainRouter support before continuing.
+If **Drive access is not provisioned for this workspace cell yet** appears, contact Plainrouter support before continuing.
 
 ## Connect a folder
 
 <Steps>
   <Step title="Open workspace settings">
-    In the PlainRouter sidebar, open **Account** → **Workspace**. Find **Launcher Drive access**.
+    In the Plainrouter sidebar, open **Account** → **Workspace**. Find **Launcher Drive access**.
   </Step>
   <Step title="Share the folder">
     Copy the displayed service-account email. In Google Drive, add that address to the intended folder as a **Viewer**.
@@ -32,13 +32,13 @@ If **Drive access is not provisioned for this workspace cell yet** appears, cont
     Share a top-level folder when you want Launcher to include its subfolders.
   </Step>
   <Step title="Submit the folder link">
-    Copy the folder's HTTPS Google Drive link into **Google Drive folder link**, then click **Claim folder**. PlainRouter starts ownership verification and reserves the claim for 72 hours.
+    Copy the folder's HTTPS Google Drive link into **Google Drive folder link**, then click **Claim folder**. Plainrouter starts ownership verification and reserves the claim for 72 hours.
   </Step>
   <Step title="Complete ownership verification">
-    PlainRouter first attempts owner-domain verification. If the page presents a challenge filename, create an empty file with that exact name directly inside the claimed folder. Return to PlainRouter and click **Verify ownership**.
+    Plainrouter first attempts owner-domain verification. If the page presents a challenge filename, create an empty file with that exact name directly inside the claimed folder. Return to Plainrouter and click **Verify ownership**.
   </Step>
   <Step title="Wait for the verified state">
-    The folder becomes **Verified** only after ownership proof succeeds. PlainRouter then starts the first read-only inventory sync automatically.
+    The folder becomes **Verified** only after ownership proof succeeds. Plainrouter then starts the first read-only inventory sync automatically.
   </Step>
 </Steps>
 
@@ -46,10 +46,10 @@ If **Drive access is not provisioned for this workspace cell yet** appears, cont
 
 | Situation | Verification path |
 | --- | --- |
-| The folder is not link-public, Drive exposes its owners and permissions, and an owner domain matches your verified PlainRouter email domain | PlainRouter verifies the claim automatically with **Domain** verification. |
+| The folder is not link-public, Drive exposes its owners and permissions, and an owner domain matches your verified Plainrouter email domain | Plainrouter verifies the claim automatically with **Domain** verification. |
 | The owner domain differs or Drive does not expose enough owner or visibility metadata | You must use the challenge file shown in workspace settings. |
 | The folder is available to anyone with its link | Challenge-file verification is always required, even when the owner domain matches. |
-| The folder is already verified by another workspace | PlainRouter rejects the claim. A verified folder can belong to only one workspace. |
+| The folder is already verified by another workspace | Plainrouter rejects the claim. A verified folder can belong to only one workspace. |
 | Another workspace has an unverified claim | The claim remains reserved until its 72-hour verification window ends. An expired unverified claim can then be reclaimed. |
 
 The challenge file must use the exact generated `verify-<token>.txt` filename. Put it directly inside the claimed folder, not in a subfolder. Workspace members can view claim state, but only the workspace owner receives the challenge filename or can manage the connection.

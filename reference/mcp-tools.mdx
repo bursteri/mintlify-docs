@@ -1,11 +1,11 @@
 ---
-title: "PlainRouter MCP server"
-description: "Reference for the 13 production tools and four synthetic test-mode tools exposed by PlainRouter MCP."
+title: "Plainrouter MCP server"
+description: "Reference for the 13 production tools and four synthetic test-mode tools exposed by Plainrouter MCP."
 ---
 
-PlainRouter MCP server version `0.3.2` exposes 13 production tools. Account-scoped tools use the advertising account selected during workspace-token issuance.
+Plainrouter MCP server version `0.3.2` exposes 13 production tools. Account-scoped tools use the advertising account selected during workspace-token issuance.
 
-For client configuration and your first account read, follow [Connect your agent to PlainRouter's Meta Ads MCP server](/actions/connect-agent).
+For client configuration and your first account read, follow [Connect your agent to Plainrouter's Meta Ads MCP server](/actions/connect-agent).
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -13,13 +13,13 @@ For client configuration and your first account read, follow [Connect your agent
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
 | `get_performance` | Read-only, idempotent | Read the admissible 1–90 day stored gateway-versus-Meta comparison for proposal evidence. |
 | `verify_signal_ingestion` | Idempotent verification write | Write one identity-free verification event and confirm ledger receipt. |
-| `propose-actions` | Idempotent write to PlainRouter | Submit an evidence-backed recommendation to policy and approval. |
+| `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed recommendation to policy and approval. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a permanently paused copy of a source Meta ad with a selected asset. |
-| `launcher.draft_batch` | Non-destructive PlainRouter write | Create a Launcher draft batch from already-synced Drive assets. |
+| `launcher.draft_batch` | Non-destructive Plainrouter write | Create a Launcher draft batch from already-synced Drive assets. |
 | `launcher.batch_status` | Read-only, idempotent | Read the bounded status of one Launcher batch. |
-| `launcher.preview_batch` | Non-destructive PlainRouter write | Evaluate the authoritative preflight gate without provider work. |
+| `launcher.preview_batch` | Non-destructive Plainrouter write | Evaluate the authoritative preflight gate without provider work. |
 | `launcher.execute_batch` | Closed execution entry | Returns a bounded refusal during Launcher Phase B-1 and performs no mutation. |
 | `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
 
@@ -113,14 +113,14 @@ This tool accepts no input. It returns the shared scope plus:
 The tool reads `event_ledger`, `delivery_ledger`, `emq_snapshots`, and `reconciliation_reports`. It reports `marketing_api_called: false`.
 
 <Warning>
-  Treat this tool as diagnostic. PlainRouter rejects it as evidence for any proposal that can affect spend or delivery, including a mixed batch containing one such action. Use `get_performance` for stored reconciliation-derived performance evidence.
+  Treat this tool as diagnostic. Plainrouter rejects it as evidence for any proposal that can affect spend or delivery, including a mixed batch containing one such action. Use `get_performance` for stored reconciliation-derived performance evidence.
 </Warning>
 
 ## `get_performance`
 
 Use this tool for a stored reconciliation window.
 
-PlainRouter excludes modeled and portfolio-only events from this proposal-evidence path. Only eligible observed reconciliation data contributes to its performance fields.
+Plainrouter excludes modeled and portfolio-only events from this proposal-evidence path. Only eligible observed reconciliation data contributes to its performance fields.
 
 ### Input
 
@@ -196,11 +196,11 @@ The card contains fixed demonstration values and is labeled **Preview — not a
 live control**. Its **Approve** and **Reject** buttons are disabled. The tool
 does not read an account, submit an approval, call another tool, persist data,
 contact Meta, or change spend. Use it only to verify that an MCP host can render
-PlainRouter's app presentation.
+Plainrouter's app presentation.
 
 ## `launcher.draft_batch`
 
-This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the PlainRouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
+This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the Plainrouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
 
 It requires an owner-issued [workspace token](/actions/workspace-tokens) with the **Write** or **Admin** tier.
 
@@ -217,7 +217,7 @@ It requires an owner-issued [workspace token](/actions/workspace-tokens) with th
 
 Overrides use contract version `v: 1` and can contain up to five `primary_texts`, `headlines`, and `descriptions`, plus `website_url` and `display_link`.
 
-Workspace and account IDs are never accepted as input. PlainRouter derives them from the execution token. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
+Workspace and account IDs are never accepted as input. Plainrouter derives them from the execution token. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
 
 ### Output
 
@@ -235,7 +235,7 @@ The current MCP entry point returns an advisory gate with `not_evaluated`. Treat
 
 ## Launcher batch status and preview
 
-These tools accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. PlainRouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
+These tools accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. Plainrouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
 
 ### `launcher.batch_status`
 
@@ -251,7 +251,7 @@ The tool requires only a Read-tier token and the shared `ad-account.read` scope.
 
 ### `launcher.preview_batch`
 
-Use this non-destructive checkpoint before presenting a batch as ready. PlainRouter re-evaluates the authoritative gate and returns `status: "previewed"` or `status: "gated"`, the resulting batch status, and checks for source relationships, tracking verification, tracked-domain coverage, ledger health, and Actions readiness.
+Use this non-destructive checkpoint before presenting a batch as ready. Plainrouter re-evaluates the authoritative gate and returns `status: "previewed"` or `status: "gated"`, the resulting batch status, and checks for source relationships, tracking verification, tracked-domain coverage, ledger health, and Actions readiness.
 
 The `previews` array is intentionally empty in this release. No provider preview, Meta write, Actions proposal, or spend activation happens during the call. A successful preview is not execution authorization; any future execution path must evaluate the gate again.
 
@@ -337,7 +337,7 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 
 ### Evidence restrictions
 
-PlainRouter rejects evidence paths that claim campaign, ad set, ad, target, CPA, spend, budget, or learning-phase state from aggregate Signals reads.
+Plainrouter rejects evidence paths that claim campaign, ad set, ad, target, CPA, spend, budget, or learning-phase state from aggregate Signals reads.
 
 `get_signal_health` is diagnostic and cannot support a batch containing `adjust_budget`, `set_status`, or `duplicate_ad_with_creative`. This rule applies to the entire batch: adding an `upload_asset` action does not make a mixed spend-affecting proposal eligible. An upload-only `upload_asset` batch is the current non-spend exception and may retain signal-health context.
 
@@ -381,7 +381,7 @@ The response includes:
 - `performance_window: "last_30d"`.
 
 <Warning>
-  The performance block is descriptive account history, not causal lift. When this tool supplies proposal provenance, PlainRouter persists only the selected asset's identity, account ownership, readiness, and status.
+  The performance block is descriptive account history, not causal lift. When this tool supplies proposal provenance, Plainrouter persists only the selected asset's identity, account ownership, readiness, and status.
 </Warning>
 
 ## `upload-asset`
@@ -398,7 +398,7 @@ This tool validates and privately stages an image, then creates one canonical `u
 
 The response wraps the canonical proposal with its ID, scope, evidence provenance, immutable execution-mode snapshot, status, policy result, approval requirement, approval-queue URL, and action record.
 
-PlainRouter freezes the staged bytes and records only the approved manifest fields: staged ID, SHA-256 digest, detected MIME type, byte size, account binding, and frozen/immutable state. Raw bytes do not enter the action or audit record.
+Plainrouter freezes the staged bytes and records only the approved manifest fields: staged ID, SHA-256 digest, detected MIME type, byte size, account binding, and frozen/immutable state. Raw bytes do not enter the action or audit record.
 
 Only JPEG and PNG upload execution is supported. Video upload execution remains blocked.
 
@@ -409,11 +409,11 @@ This tool creates one canonical `duplicate_ad_with_creative` proposal. It requir
 | Field | Required | Rules |
 | --- | --- | --- |
 | `source_ad` | Yes | Numeric Meta ID of the human-selected ad to copy. |
-| `asset_id` | Yes | `image:<hash>` or `video:<id>` returned by PlainRouter. |
+| `asset_id` | Yes | `image:<hash>` or `video:<id>` returned by Plainrouter. |
 | `rationale` | Yes | 1–1,000 characters. |
 | `name_suffix` | No | Optional copied-ad name suffix up to 100 characters. |
 | `idempotency_key` | Yes | Stable retry key up to 64 characters. |
 
-PlainRouter re-reads the source ad and selected asset under the approved account before creating the proposal. The normalized action always contains `status: "paused"`.
+Plainrouter re-reads the source ad and selected asset under the approved account before creating the proposal. The normalized action always contains `status: "paused"`.
 
 If approved in an executable mode, the worker rechecks policy, creates the copy as `PAUSED`, persists the provider ad ID in a durable receipt, and verifies the exact receipt-addressed object. `IN_PROCESS` can enter scheduled verification for up to 48 hours. The batch is not Landed until every receipt is exactly verified.

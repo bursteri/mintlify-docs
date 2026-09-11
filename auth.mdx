@@ -1,9 +1,9 @@
 ---
-title: "PlainRouter auth docs"
-description: "Choose the correct PlainRouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
+title: "Plainrouter auth docs"
+description: "Choose the correct Plainrouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
 ---
 
-PlainRouter uses a per-workspace Signals secret for the Signals Conversion API, an
+Plainrouter uses a per-workspace Signals secret for the Signals Conversion API, an
 account-bound workspace execution token for production MCP tool calls, and a
 narrowly scoped OAuth management credential for account discovery. Public MCP
 discovery and the synthetic MCP sandbox require no credential.
@@ -17,7 +17,7 @@ Conversion API and all use the same Signals workspace secret.
 | --- | --- | --- | --- |
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signals workspace secret | One workspace and its Signals resources |
 | Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
-| Call PlainRouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
+| Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
 
@@ -26,7 +26,7 @@ execution tokens and OAuth management credentials. MCP rejects Signals workspace
 secrets and OAuth management credentials.
 
 <Warning>
-  Never paste any PlainRouter credential into an agent prompt. Inject credentials
+  Never paste any Plainrouter credential into an agent prompt. Inject credentials
   through your server-side secret manager or the client's protected credential
   configuration.
 </Warning>
@@ -153,7 +153,7 @@ resource listing, and reads of static `ui://` app shells. Every production tool
 call and every account-data read still requires an account-bound workspace
 execution token.
 
-## How do I authenticate PlainRouter MCP?
+## How do I authenticate Plainrouter MCP?
 
 Configure an MCP-compatible client with these exact connection values:
 
@@ -218,8 +218,8 @@ command. Use REST, an SDK, or MCP for ingestion verification.
 - A browser session cannot replace an API or MCP bearer credential.
 - A same-origin Path B forwarding secret authenticates generated forwarding
   infrastructure only. It is not an API, SDK, CLI, or MCP credential.
-- Meta access tokens remain on the PlainRouter server. Do not place a Meta token
-  in a PlainRouter client configuration.
+- Meta access tokens remain on the Plainrouter server. Do not place a Meta token
+  in a Plainrouter client configuration.
 
 For complete request and response fields, use the [Conversion API
 reference](/reference/conversion-api). For token tiers and lifecycle, use
