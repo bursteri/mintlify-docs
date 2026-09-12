@@ -141,6 +141,20 @@ class LiveChecks(unittest.TestCase):
             self.assertEqual(calls.count(URL + ".md"), 2)
             self.assertEqual(check.json.loads(report.read_text())["failed"], 0)
 
+    def test_post_deployment_mode_fails_on_known_warnings(self):
+        task = {"kind": "llms-full", "url": check.DOCS + "/llms-full.txt"}
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            with patch("sys.argv", ["check.py", "--fail-on-warnings", "--report", str(report)]), \
+                    patch("check.source_inventory", return_value=({}, PAGES, [])), \
+                    patch("check.initial_tasks", return_value=[task]), \
+                    patch("check.run_check", return_value={**task, "ok": True, "warnings": ["Stale aggregate"]}), \
+                    patch("builtins.print"):
+                self.assertEqual(check.main(), 1)
+            result = check.json.loads(report.read_text())
+            self.assertEqual(result["failed"], 1)
+            self.assertEqual(result["rows"][0]["error"], "Stale aggregate")
+
 
 if __name__ == "__main__":
     unittest.main()

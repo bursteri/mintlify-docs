@@ -35,6 +35,35 @@ Mintlify returns 404 from its reserved API-catalog handler even with the existin
 `docs.json` redirect. Laravel already serves the working root catalog; do not
 duplicate that catalog in Mintlify or route the root namespace into this Worker.
 
+## Aggregate freshness and retired Markdown aliases
+
+The next source change is based on deployed version
+`c3071038-0fec-454a-af2c-11323c529001`. It has two bounded behaviors:
+
+- GET/HEAD on nine retired `.md` paths return 308 to the exact Markdown
+  destinations and fragments already configured in `docs.json`. Mintlify's
+  reserved Markdown handler currently sends 307 to the corresponding HTML
+  pages. Tests compare every authored Markdown redirect with the Worker output.
+- GET/HEAD on `/docs/llms-full.txt` and its documented
+  `/docs/.well-known/llms-full.txt` alias fetch with `cache: "no-store"` and return
+  `no-store` browser/CDN cache headers. The body streams unchanged from Mintlify.
+  Other docs, assets and methods retain their existing caching and routing.
+
+The public aggregate was stale while a query-varied request and Mintlify's
+public origin returned identical current content. A normal `Cache-Control:
+no-cache` client request still hit the stale public object. The fix bypasses
+Cloudflare's fetch cache and prevents storage downstream; it cannot refresh
+already-cached browser objects before they make another request or guarantee
+that Mintlify's own generator is always current. No custom aggregate is stored
+in this repository and no per-request page fan-out is introduced.
+
+This source update is **not deployed by a Mintlify main push**. After an
+authorized Worker deployment, use `npm run docs:live -- --fail-on-warnings`
+to require the old discovery warnings to disappear. Check GET and HEAD on both
+aggregate routes for `no-store`, verify all nine redirects return 308 to their
+configured `.md` destinations, and then enable strict checks in the live
+workflow. Retain the current Worker routes, bindings and runtime settings.
+
 ## Validation and release
 
 Run `npm run docs:check`; `docs:proxy` exercises the redirect and existing
@@ -55,3 +84,6 @@ correct. Do not infer indexing or AI citations from those responses.
 
 References: [Mintlify Cloudflare proxy setup](https://www.mintlify.com/docs/deploy/cloudflare),
 [Cloudflare Response API](https://developers.cloudflare.com/workers/runtime-apis/response/).
+
+Discovery references: [Cloudflare fetch cache modes](https://developers.cloudflare.com/workers/runtime-apis/fetch/),
+[Mintlify aggregate files and aliases](https://www.mintlify.com/docs/ai/llmstxt).

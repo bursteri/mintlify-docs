@@ -23,7 +23,7 @@ for (const method of ["GET", "HEAD"]) {
 
 for (const path of [
   "/docs", "/docs/quickstart", "/docs/quickstart.md", "/docs.md",
-  "/docs/llms.txt", "/docs/llms-full.txt", "/docs/sitemap.xml",
+  "/docs/llms.txt", "/docs/sitemap.xml",
   "/docs/.well-known/mcp/server-card.json", "/docs/.well-known/agent-card.json",
   "/docs/.well-known/agent-skills/index.json", "/mintlify-assets/main.css",
   "/_mintlify/api/example", alias + ".md", alias + "/extra", alias + "/",
@@ -63,7 +63,7 @@ for (const path of ["/", "/login", "/docs-other", "/.well-known/api-catalog", "/
   });
 }
 
-for (const path of [alias, "/_mintlify/api/example"]) {
+for (const path of [alias, "/_mintlify/api/example", "/docs/guides/meta-capi/python.md", "/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
   test(`POST ${path} still forwards its method and body`, async (t) => {
     const upstream = new Response("upstream response", { status: 202 });
     t.mock.method(globalThis, "fetch", async (request) => {
@@ -85,3 +85,73 @@ test("hosting source and operational notes stay out of the published docs", () =
   const ignore = readFileSync(new URL("../../.mintignore", import.meta.url), "utf8");
   assert.match(ignore, /^hosting\/$/m);
 });
+
+const config = JSON.parse(readFileSync(new URL("../../docs.json", import.meta.url), "utf8"));
+const markdownRules = config.redirects.filter(rule => rule.source.endsWith(".md"));
+for (const rule of markdownRules) {
+  test(`${rule.source} GET and HEAD honor the authored permanent Markdown destination`, async (t) => {
+    t.mock.method(globalThis, "fetch", () => assert.fail("Retired Markdown aliases must not fetch upstream"));
+    assert.equal(rule.permanent, true);
+    for (const method of ["GET", "HEAD"]) {
+      for (const query of ["", "?next=https://example.org&source=docs"]) {
+        const response = await worker.fetch(new Request(origin + "/docs" + rule.source + query, { method }));
+        assert.equal(response.status, 308);
+        assert.equal(response.headers.get("location"), rule.destination);
+        assert.equal(await response.text(), "");
+      }
+    }
+  });
+}
+
+for (const path of ["/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
+  for (const method of ["GET", "HEAD"]) {
+    test(`${method} ${path} bypasses upstream cache and disables downstream storage`, async (t) => {
+      const upstream = new Response(method === "GET" ? "# Current documentation" : null, {
+        headers: {
+          "content-type": "text/plain", "cache-control": "public, max-age=86400",
+          "cdn-cache-control": "max-age=86400", "cloudflare-cdn-cache-control": "max-age=86400",
+          expires: "Wed, 01 Jan 2031 00:00:00 GMT", etag: '"origin-version"',
+          link: "</docs/llms.txt>; rel=llms-txt",
+        },
+      });
+      t.mock.method(globalThis, "fetch", async (request, options) => {
+        assert.equal(request.url, "https://plainrouter.mintlify.site" + path + "?source=test");
+        assert.equal(request.method, method);
+        assert.equal(request.headers.get("host"), "plainrouter.mintlify.site");
+        assert.equal(request.headers.get("x-forwarded-host"), "plainrouter.com");
+        assert.deepEqual(options, { cache: "no-store" });
+        return upstream;
+      });
+      const response = await worker.fetch(new Request(origin + path + "?source=test", { method }));
+      assert.equal(response.body, upstream.body, "Stream the upstream body without buffering or rewriting it");
+      assert.equal(response.status, 200);
+      for (const name of ["cache-control", "cdn-cache-control", "cloudflare-cdn-cache-control"]) {
+        assert.equal(response.headers.get(name), "no-store");
+      }
+      assert.equal(response.headers.get("expires"), null);
+      assert.equal(response.headers.get("content-type"), "text/plain");
+      assert.equal(response.headers.get("etag"), '"origin-version"');
+      assert.equal(response.headers.get("link"), "</docs/llms.txt>; rel=llms-txt");
+      assert.equal(await response.text(), method === "GET" ? "# Current documentation" : "");
+    });
+  }
+}
+
+test("aggregate failures retain upstream status and never become a successful stale fallback", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => new Response("Unavailable", { status: 503 }));
+  const response = await worker.fetch(new Request(origin + "/docs/llms-full.txt"));
+  assert.equal(response.status, 503);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(await response.text(), "Unavailable");
+});
+
+for (const path of ["/docs/llms-full.txt/extra", "/docs/.well-known/llms-full.txt/extra", "/llms-full.txt", "/docs/guides/meta-capi/python.md/extra"]) {
+  test(`${path} is outside the exact discovery exceptions`, async (t) => {
+    const upstream = new Response("Existing behavior", { headers: { "cache-control": "max-age=3600" } });
+    t.mock.method(globalThis, "fetch", async (_, options) => {
+      assert.equal(options, undefined);
+      return upstream;
+    });
+    assert.equal(await worker.fetch(new Request(origin + path)), upstream);
+  });
+}

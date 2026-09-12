@@ -10,6 +10,8 @@ from Mintlify publication by `.mintignore`.
 ```sh
 npm run docs:live
 npm run docs:live -- --attempts 6 --retry-delay 30 --report /tmp/docs-live.json
+# After deploying the separate docs proxy discovery fix:
+npm run docs:live -- --fail-on-warnings --report /tmp/docs-live-strict.json
 npm run docs:live:test
 ```
 
@@ -64,7 +66,13 @@ making every run fail:
    retain older titles while individual HTML/Markdown pages are current. Missing
    authored source entries fail; stale titles warn and retain cache headers in
    the report. Inspect aggregate content before claiming it reflects a new
-   publication. Cache invalidation is a separate hosting dependency.
+  publication. Cache invalidation is a separate hosting dependency.
+
+The proxy source now contains fixes for both behaviors; they require a separate
+Worker deployment. `--fail-on-warnings` makes these unresolved behaviors fail
+the command so deployment verification cannot pass with the old warnings.
+The main-only workflow keeps its current warning policy until the Worker fix
+has been deployed and verified.
 
 A successful job means its blocking public-response contracts passed. Warnings
 are unresolved evidence, not proof of freshness. These checks do not establish

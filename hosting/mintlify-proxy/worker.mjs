@@ -1,12 +1,31 @@
 // Based on the deployed mintlify-plainrouter Worker; see README.md.
+// Mintlify's reserved Markdown handler currently ignores these docs.json rules.
+// Keep this finite map in sync with those authored permanent redirects.
+const markdownRedirects = new Map([
+  ["/docs/signals/why-numbers-differ-meta.md", "/docs/signals/health-and-performance.md#meta-clicks"],
+  ["/docs/signals/compare-meta-clicks.md", "/docs/signals/health-and-performance.md#meta-clicks"],
+  ["/docs/signals/why-numbers-differ-ga4.md", "/docs/signals/health-and-performance.md#ga4"],
+  ["/docs/signals/compare-ga4.md", "/docs/signals/health-and-performance.md#ga4"],
+  ["/docs/signals/why-numbers-differ-plausible.md", "/docs/signals/health-and-performance.md#plausible"],
+  ["/docs/signals/compare-plausible.md", "/docs/signals/health-and-performance.md#plausible"],
+  ["/docs/guides/meta-capi/typescript.md", "/docs/guides/meta-capi/nodejs.md"],
+  ["/docs/guides/meta-capi/python.md", "/docs/sdk/python.md#send-a-meta-conversion"],
+  ["/docs/guides/meta-capi/go.md", "/docs/sdk/go.md#send-a-meta-conversion"],
+]);
+
 export default {
   async fetch(request) {
     const urlObject = new URL(request.url);
+    const isRead = request.method === "GET" || request.method === "HEAD";
+    const markdownDestination = markdownRedirects.get(urlObject.pathname);
+    if (isRead && markdownDestination) {
+      return Response.redirect("https://plainrouter.com" + markdownDestination, 308);
+    }
     // The hosted reserved endpoint returns 404 despite the docs.json redirect.
     // Keep the application catalog as the sole source.
     if (
       urlObject.pathname === "/docs/.well-known/api-catalog" &&
-      (request.method === "GET" || request.method === "HEAD")
+      isRead
     ) {
       return Response.redirect("https://plainrouter.com/.well-known/api-catalog", 308);
     }
@@ -30,6 +49,21 @@ export default {
       const clientIp = request.headers.get("CF-Connecting-IP");
       if (clientIp) {
         proxyRequest.headers.set("CF-Connecting-IP", clientIp);
+      }
+      if (isRead && (
+        urlObject.pathname === "/docs/llms-full.txt" ||
+        urlObject.pathname === "/docs/.well-known/llms-full.txt"
+      )) {
+        // The public aggregate can retain a day-old cache object while page
+        // Markdown and Mintlify's origin are current. Bypass the fetch cache
+        // and prevent downstream storage for these two aggregate URLs only.
+        const upstream = await fetch(proxyRequest, { cache: "no-store" });
+        const response = new Response(upstream.body, upstream);
+        response.headers.set("Cache-Control", "no-store");
+        response.headers.set("CDN-Cache-Control", "no-store");
+        response.headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+        response.headers.delete("Expires");
+        return response;
       }
       return fetch(proxyRequest);
     }

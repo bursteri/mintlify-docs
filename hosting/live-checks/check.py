@@ -289,6 +289,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--attempts", type=int, default=1, choices=range(1, 11))
     parser.add_argument("--retry-delay", type=int, default=30, choices=range(0, 61))
+    parser.add_argument("--fail-on-warnings", action="store_true", help="Require known discovery warnings to be resolved, for post-Worker-deployment verification")
     parser.add_argument("--report", type=Path, default=Path("/tmp/plainrouter-docs-live.json"))
     args = parser.parse_args()
     config, pages, operations = source_inventory()
@@ -307,6 +308,10 @@ def main():
             new_tasks = [task for task in tasks if (task["url"], task.get("method", "GET")) not in results]
             for row in pool.map(lambda task: run_check(task, pages, len(operations)), new_tasks):
                 results[(row["url"], row.get("method", "GET"))] = row
+        if args.fail_on_warnings:
+            for row in results.values():
+                if row.get("warnings"):
+                    row.update(ok=False, error="; ".join(row["warnings"]))
         failed = [row for row in results.values() if not row["ok"]]
         warning_count = sum(len(row.get("warnings", [])) for row in results.values())
         report = {"observed_at": datetime.now(timezone.utc).isoformat(), "attempt": attempt,
