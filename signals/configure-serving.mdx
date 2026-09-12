@@ -1,11 +1,20 @@
 ---
-title: "Configure Signal serving"
-description: "Use Plainrouter's generated managed-hostname or same-origin forwarding setup for your hosting stack."
+title: "Set up and troubleshoot same-origin Signals collection"
+sidebarTitle: "Configure Signal serving"
+description: "Configure the Signals same-origin proxy, verify browser request paths, and resolve forwarding, cookie, CORS, CSP, and cache failures."
 ---
 
-After the initial Signal setup completes, the **One-screen serving setup** checks your hosting stack and produces one copy-ready configuration. You do not need to compare installation methods yourself.
+Use Plainrouter's generated forwarding block to collect Signals through a route on your own website. This is **Path B — same-origin proxy**. A working setup keeps browser requests on your website origin, passes forwarding verification, and records an authenticated arrival. **Path A — managed hostname** remains the default and uses your collection subdomain.
 
 Plainrouter uses the same managed collector, consent rules, and event contract for both serving paths. Only the route from your website to the collector changes.
+
+## Before you begin
+
+- Complete [DNS validation](/signals/configure-dns) and the initial [Signals installation](/signals/install-pixel).
+- Use a workspace member with management permission to activate Path B and copy its forwarding block.
+- Have access to deploy your website's rewrite or reverse-proxy configuration and edit the installed script tag.
+- Configure an exact HTTPS website domain for verification. Check whether visitors land on the apex domain, `www`, or another hostname.
+- Keep your [consent integration](/signals/track-events#set-consent) in place. Same-origin forwarding does not grant advertising consent.
 
 ## How Plainrouter selects a path
 
@@ -36,6 +45,17 @@ Path A sends collection traffic through your Plainrouter-managed subdomain. Path
 
     For Path A, keep the displayed CNAME in place. Plainrouter manages the collector and HTTPS certificate behind it.
   </Step>
+  <Step title="Use the public same-origin script path">
+    For Path B, replace the existing Signals script tag's `src` with the public route on your website. Use the prefix from the **source** side of your generated forwarding block:
+
+    ```html
+    <script async src="/YOUR_GENERATED_PREFIX/s/v4.js"></script>
+    ```
+
+    Replace `YOUR_GENERATED_PREFIX` with your generated prefix. Keep the existing `signalq("init", ...)` block and publishable key before this tag. Replace the old tag rather than loading both copies.
+
+    The browser URL contains the public prefix only. The upstream destination and forwarding secret belong in the hosting configuration. Activating Path B and deploying a rewrite do not change an already-installed script tag.
+  </Step>
   <Step title="Verify the live path">
     Deploy the hosting change and load your live website. The **First arrival check** turns green after Plainrouter stores the first valid arrival.
 
@@ -61,7 +81,9 @@ Arrival collection uses the snippet's `POST /v1/arrival` through the generated p
 
 ## Exact site domains
 
-Credentialed browser collection requires at least one exact HTTPS site domain in your Signal configuration. Wildcards remain available for their existing matching behavior, but they do not grant credentialed CORS coverage. Add the apex domain explicitly when you need apex coverage.
+Configure the HTTPS origin visitors actually use. `https://example.com` and `https://www.example.com` are different origins. The forwarding probe requires an exact domain; a wildcard-only configuration does not provide a probe target. Add the apex domain explicitly when you need apex coverage.
+
+Managed-hostname browser collection also requires an exact origin for credentialed CORS. Wildcards do not grant that coverage. Correctly configured Path B stays on the website origin and does not need a CORS preflight. If an `OPTIONS` request or CORS error appears, inspect whether an old script URL, explicit `endpoint` override, or redirect moved collection to another origin. Do not add `Access-Control-Allow-Origin: *` to fix credentialed requests; see [MDN's credentialed CORS guidance](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#requests_with_credentials).
 
 ## Rotate a Path B secret
 
@@ -84,19 +106,75 @@ The side-effect-free forwarding probe attests only the currently active secret. 
   **Retry detection** and **Retry verification** start fresh background checks. DNS and forwarding probes never run inside the page request.
 </Tip>
 
+## What should I see in the Network panel?
+
+Open the actual website origin, select **Network**, enable **Preserve log**, disable the browser cache for the check, and reload. Filter by the public forwarding prefix. Append the paths below to that prefix to find the full request URLs.
+
+| Request | Expected observation |
+| --- | --- |
+| `GET /s/v4.js` | A JavaScript response from your website origin, not HTML, a login page, or a redirect to the collector. |
+| `POST /v1/arrival` | `202` edge receipt before consent, without a visitor cookie in the request or response. The dashboard's arrival state follows stored ingestion. |
+| `POST /v1/config` | After full consent, JSON with `serves_identity: true` for Path B. `meta_pixel_id: null` can simply mean no Meta dataset is configured. |
+| `POST /v1/events` | A separate consented `PageView` or business event reaches the collector. Inspect its receipt and [delivery state](/signals/connect-meta#how-do-i-verify-meta-delivery) separately. |
+| `POST /v1/identify` | Appears when your application calls `identify` with eligible identity after consent. It is not required for the arrival check. |
+| `POST /v1/withdrawal` | Can appear when leaving an active grant to clear the server-owned browser identity. Do not expect it on every denied page load. |
+
+For example, a script served at `https://shop.example/YOUR_GENERATED_PREFIX/s/v4.js` derives an events URL at `https://shop.example/YOUR_GENERATED_PREFIX/v1/events`. Configuration, identity, withdrawal and arrival requests keep that prefix too. An explicit `endpoint` in `init` overrides script-based endpoint selection; remove an obsolete override when switching to this generated route.
+
+A successful **Run verification** probe proves forwarding, not a browser visit or Meta delivery. It does not create an arrival, set a visitor cookie, or end secret rotation. Complete the browser arrival check separately.
+
 ## Troubleshoot
 
-<AccordionGroup>
-  <Accordion title="Hosting detection cannot identify my stack">
-    Enter the exact hosting provider or server name. Plainrouter uses that declaration when DNS and response headers are unavailable. If the answer is not recognized, confirm the public site domain and retry when the site is reachable.
-  </Accordion>
-  <Accordion title="Path B verification failed">
-    The probe reached your site but did not observe the expected forwarding response. Reinstall the complete generated block and confirm that no proxy, middleware, or transform removes the original path, cookies, `Sec-Fetch-*`, or `Accept` headers.
-  </Accordion>
-  <Accordion title="Path B is waiting for its first arrival">
-    Open the live website through the exact configured domain. Invalid or unauthenticated traffic does not complete the arrival check.
-  </Accordion>
-  <Accordion title="I need to return to the managed hostname">
-    A member with workspace management permission can click **Revert to Path A**. Keep the validated CNAME in place before reverting.
-  </Accordion>
-</AccordionGroup>
+### The script or collector route returns HTML, a redirect, or `404`
+
+| Symptom | Check and correction |
+| --- | --- |
+| `v4.js` returns your site's HTML, sometimes with HTTP `200` | A fallback or application route may be handling the request. Make the generated prefix reach the forwarding rule before the fallback. Confirm the response is JavaScript, not just that its status is successful. |
+| The browser follows a redirect to another hostname or a login page | Path B needs an internal rewrite/proxy. Check redirect rules and authentication middleware on the generated prefix. Keep the visitor-facing origin unchanged. |
+| Prefixed routes return `404` | Check the deployed source prefix, full upstream destination, Path B activation, original host, and configured website domain. An invalid forwarding secret can also produce `404`; the status alone does not identify the cause. |
+| The script loads but requests go to the old collection domain or unprefixed `/v1/events` | Check the rendered script `src`, an explicit `endpoint` override, duplicate snippets, and stale HTML. The script and collector requests must use the same intended public prefix. |
+| Requests fail only on `www`, the apex domain, or a preview deployment | Compare the actual origin with the configured domains and deployment receiving the rewrite. A successful check on one hostname does not verify another. |
+
+Use the complete block generated for your hosting stack. Preserve its upstream TLS host/SNI configuration as well as the original website host. Do not replace the destination with a bare collector hostname or remove path segments to silence a `404`.
+
+### The probe passes but Path B is waiting for its first arrival
+
+1. Confirm the browser is loading the prefixed script and sending the prefixed `POST /v1/arrival` on the configured website.
+2. Inspect the response body and status. An HTML `200` from the application is not a collector receipt. A `429` requires a later retry after the rate limit; a failed arrival is not retried by the snippet.
+3. After correcting the issue, reload the page to create a new document and check for `202`, then allow the dashboard to reflect stored ingestion.
+
+Granting consent, calling `track`, or using the [identity-free ingestion diagnostic](/signals/verify-ingestion) does not substitute for this arrival. Conversely, an arrival alone does not prove the forwarding probe passed.
+
+### Arrivals work but conversions or visitor cookies do not
+
+First check all three advertising permissions in your [CMP integration](/signals/track-events#verify-grant-partial-consent-and-withdrawal). No visitor cookie on an arrival is expected; it is not evidence of broken forwarding.
+
+After a full grant, inspect the consented event response for `Set-Cookie` and the browser's cookie-storage rejection reason, if any. The server-owned `pr_vid` cookie is `HttpOnly`, so its absence from `document.cookie` is expected. Use the browser's **Application** or **Storage** panel instead. [MDN explains `HttpOnly` and `Secure`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie).
+
+If the browser receives the cookie but later consented requests do not retain it, check HTTPS, the actual request hostname, browser storage restrictions, and whether the proxy strips `Cookie` or `Set-Cookie`. Keep both headers intact. Do not add cookies to the identity-free arrival request as a workaround.
+
+### CSP blocks the script or a request
+
+Check the browser console for the blocked URL and directive. The same-origin script needs permission under your site's `script-src`; collector requests need permission under `connect-src`. Allowing `'self'` in the applicable directive covers the same-origin route, subject to your complete policy. Keep your existing nonce or hash treatment for the inline initialization block.
+
+Do not replace the entire policy with an example allowlist or disable CSP. Follow the [pixel CSP instructions](/signals/install-pixel#content-security-policy) and [MDN's `connect-src` reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src). Meta's external script remains a separate permission after you connect a dataset.
+
+### A deployment or secret rotation still uses old configuration
+
+Check the rendered HTML and Network request URL with browser caching disabled. Then inspect your hosting deployment, CDN rules and any service worker that can serve an older page or intercept the prefix. Updating the forwarding block does not replace cached HTML containing the old script tag.
+
+Keep static snippet caching separate from collection traffic. Exclude the prefixed collector POST routes and cookie-setting responses from shared response caching; do not apply a blanket cache-everything rule to the whole prefix. Preserve the collector's response headers.
+
+During rotation, deploy the complete new block to every serving instance before confirming installation. Follow [Rotate a Path B secret](#rotate-a-path-b-secret): the probe does not acknowledge the replacement secret, and the first valid arrival using it can end the overlap. Instances still using the old secret can then fail.
+
+### Hosting detection cannot identify my stack
+
+Enter the exact hosting provider or server name. Plainrouter uses that declaration when DNS and response headers are unavailable. If the answer is not recognized, confirm the public site domain and retry when the site is reachable.
+
+### I need to return to the managed hostname
+
+A member with workspace management permission can click **Revert to Path A**. Keep the validated CNAME in place and restore the managed-hostname script from the [installation guide](/signals/install-pixel). Check the rendered page for a single initialization block and script, then verify a new arrival. Reverting the Plainrouter setting does not edit your website deployment.
+
+## Next step
+
+Once forwarding and the arrival are verified, test [consent and business events](/signals/track-events). If a conversion is ingested but Meta delivery needs attention, continue with [Connect Meta troubleshooting](/signals/connect-meta#troubleshoot).

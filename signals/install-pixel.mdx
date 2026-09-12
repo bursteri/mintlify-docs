@@ -64,7 +64,7 @@ To test browser collection, open your browser's developer tools and reload the p
 3. Search for `arrival` and confirm one `POST /v1/arrival` request receives `202`. This request occurs before consent evaluation, including when consent is denied or has not been provided.
 4. Grant all three advertising permissions through your consent integration. Confirm the separate `PageView` request to `/v1/events` succeeds.
 
-On a same-origin installation, these requests use the generated forwarding prefix on your website. An accepted arrival confirms edge receipt; setup completes after the arrival is stored for the workspace.
+On a same-origin installation, these requests use the generated forwarding prefix on your website. Confirm both the script and collector requests stay on that origin. Use the [same-origin request checklist](/signals/configure-serving#what-should-i-see-in-the-network-panel) if they return HTML, redirect, or lose the prefix. An accepted arrival confirms edge receipt; setup completes after the arrival is stored for the workspace.
 
 ## What happens on initialization
 
@@ -87,6 +87,8 @@ If your website uses a Content Security Policy, allow the collection domain in b
 - Add `https://YOUR_COLLECTION_DOMAIN` to `script-src`.
 - Add `https://YOUR_COLLECTION_DOMAIN` to `connect-src`.
 - Apply your site's nonce or hash policy to the inline initialization block.
+
+For Path B, allow the website's same-origin script and requests in the applicable directives; an existing `'self'` source may cover them. Keep the inline initialization block under your nonce or hash policy. See [same-origin CSP troubleshooting](/signals/configure-serving#csp-blocks-the-script-or-a-request).
 
 You may need to allow `https://connect.facebook.net` in `script-src` after you [connect Meta](/signals/connect-meta). The Meta library loads only after advertising consent is granted.
 
