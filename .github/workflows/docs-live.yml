@@ -55,7 +55,7 @@ jobs:
       - name: Check published docs with bounded publication retries
         if: steps.current.outputs.run == 'true'
         timeout-minutes: 16
-        run: python3 hosting/live-checks/check.py --attempts 6 --retry-delay 30 --report live-report.json
+        run: python3 hosting/live-checks/check.py --fail-on-warnings --attempts 6 --retry-delay 30 --report live-report.json
 
       - name: Summarize public response evidence
         if: always() && steps.current.outputs.run == 'true'

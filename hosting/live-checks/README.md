@@ -68,11 +68,10 @@ making every run fail:
    the report. Inspect aggregate content before claiming it reflects a new
   publication. Cache invalidation is a separate hosting dependency.
 
-The proxy source now contains fixes for both behaviors; they require a separate
-Worker deployment. `--fail-on-warnings` makes these unresolved behaviors fail
-the command so deployment verification cannot pass with the old warnings.
-The main-only workflow keeps its current warning policy until the Worker fix
-has been deployed and verified.
+The proxy fixes were deployed and verified on 2026-09-12: all 142 live checks
+passed with zero warnings. The main-only workflow now uses `--fail-on-warnings`,
+so either old behavior returning fails the job. Local runs without this flag
+still report warnings for diagnostic use.
 
 A successful job means its blocking public-response contracts passed. Warnings
 are unresolved evidence, not proof of freshness. These checks do not establish

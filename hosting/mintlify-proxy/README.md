@@ -37,7 +37,7 @@ duplicate that catalog in Mintlify or route the root namespace into this Worker.
 
 ## Aggregate freshness and retired Markdown aliases
 
-The next source change is based on deployed version
+This change was based on deployed version
 `c3071038-0fec-454a-af2c-11323c529001`. It has two bounded behaviors:
 
 - GET/HEAD on nine retired `.md` paths return 308 to the exact Markdown
@@ -67,6 +67,12 @@ to require the old discovery warnings to disappear. Check GET and HEAD on both
 aggregate routes for `no-store`, verify all nine redirects return 308 to their
 configured `.md` destinations, and then enable strict checks in the live
 workflow. Retain the current Worker routes, bindings and runtime settings.
+
+Deployed on 2026-09-12 as version `37be626d-0858-4d60-9176-fd7a66f77823`
+at 100% traffic, from source commit `41c71bd`. The inactive preview and production
+both passed 22 targeted GET/HEAD checks; production passed all 142 strict live
+checks with zero warnings. Deployed source matched the tested bundle and all
+settings/routes were preserved. The live GitHub workflow now fails on warnings.
 
 ## Validation and release
 
