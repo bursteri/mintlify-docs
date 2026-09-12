@@ -115,9 +115,9 @@ for (const path of ["/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
         },
       });
       t.mock.method(globalThis, "fetch", async (request, options) => {
-        assert.equal(request.url, "https://plainrouter.mintlify.site" + path + "?source=test");
+        assert.equal(request.url, "https://plainrouter.subdirectory-docs.mintlify.me" + path + "?source=test");
         assert.equal(request.method, method);
-        assert.equal(request.headers.get("host"), "plainrouter.mintlify.site");
+        assert.equal(request.headers.get("host"), "plainrouter.subdirectory-docs.mintlify.me");
         assert.equal(request.headers.get("x-forwarded-host"), "plainrouter.com");
         assert.deepEqual(options, { cache: "no-store" });
         return upstream;

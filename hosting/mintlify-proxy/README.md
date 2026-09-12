@@ -45,14 +45,18 @@ The next source change is based on deployed version
   reserved Markdown handler currently sends 307 to the corresponding HTML
   pages. Tests compare every authored Markdown redirect with the Worker output.
 - GET/HEAD on `/docs/llms-full.txt` and its documented
-  `/docs/.well-known/llms-full.txt` alias fetch with `cache: "no-store"` and return
-  `no-store` browser/CDN cache headers. The body streams unchanged from Mintlify.
+  `/docs/.well-known/llms-full.txt` alias fetch directly from the verified
+  `plainrouter.subdirectory-docs.mintlify.me` origin with `cache: "no-store"`
+  and return `no-store` browser/CDN cache headers. The body streams unchanged.
   Other docs, assets and methods retain their existing caching and routing.
 
 The public aggregate was stale while a query-varied request and Mintlify's
 public origin returned identical current content. A normal `Cache-Control:
-no-cache` client request still hit the stale public object. The fix bypasses
-Cloudflare's fetch cache and prevents storage downstream; it cannot refresh
+no-cache` client request still hit the stale public object. An inactive Worker
+preview also proved that `no-store` against the legacy `.mintlify.site` proxy
+alone was insufficient: that extra proxy still returned an old cache object.
+The fix uses the current origin directly for the two aggregate URLs and
+prevents storage downstream; it cannot refresh
 already-cached browser objects before they make another request or guarantee
 that Mintlify's own generator is always current. No custom aggregate is stored
 in this repository and no per-request page fan-out is introduced.

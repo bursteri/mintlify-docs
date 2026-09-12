@@ -54,10 +54,14 @@ export default {
         urlObject.pathname === "/docs/llms-full.txt" ||
         urlObject.pathname === "/docs/.well-known/llms-full.txt"
       )) {
-        // The public aggregate can retain a day-old cache object while page
-        // Markdown and Mintlify's origin are current. Bypass the fetch cache
-        // and prevent downstream storage for these two aggregate URLs only.
-        const upstream = await fetch(proxyRequest, { cache: "no-store" });
+        // The legacy .site proxy retains this aggregate even with no-store.
+        // Fetch the verified Mintlify subdirectory origin directly for these
+        // two URLs, bypassing that extra cache and downstream storage.
+        const aggregateUrl = new URL(proxyRequest.url);
+        aggregateUrl.hostname = "plainrouter.subdirectory-docs.mintlify.me";
+        const aggregateRequest = new Request(aggregateUrl, proxyRequest);
+        aggregateRequest.headers.set("Host", aggregateUrl.hostname);
+        const upstream = await fetch(aggregateRequest, { cache: "no-store" });
         const response = new Response(upstream.body, upstream);
         response.headers.set("Cache-Control", "no-store");
         response.headers.set("CDN-Cache-Control", "no-store");
