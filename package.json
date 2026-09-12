@@ -10,8 +10,10 @@
     "docs:validate": "npx --yes mint@4.2.824 validate",
     "docs:links": "npx --yes mint@4.2.824 broken-links --check-redirects --check-snippets",
     "docs:a11y": "npx --yes mint@4.2.824 a11y --skip-contrast",
-    "docs:check": "npm run docs:proxy && npm run docs:structure && npm run docs:validate && npm run docs:links && npm run docs:a11y",
+    "docs:check": "npm run docs:proxy && npm run docs:live:test && npm run docs:structure && npm run docs:validate && npm run docs:links && npm run docs:a11y",
     "docs:score": "npx --yes mint@4.2.824 score",
-    "docs:proxy": "node --test hosting/mintlify-proxy/worker.test.mjs"
+    "docs:proxy": "node --test hosting/mintlify-proxy/worker.test.mjs",
+    "docs:live": "python3 hosting/live-checks/check.py",
+    "docs:live:test": "python3 -m unittest discover -s hosting/live-checks -p \"test_*.py\""
   }
 }

@@ -1,0 +1,90 @@
+name: Docs live
+
+on:
+  workflow_run:
+    workflows: [Docs quality]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-live-main
+  cancel-in-progress: true
+
+jobs:
+  published-docs:
+    # Never run a workflow_run checkout of PR code. No credentials or deploy steps.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Skip a superseded main revision
+        id: current
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          current_sha=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha)
+          if [ "$current_sha" = "$SOURCE_SHA" ]; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+            echo 'Skipped: main advanced beyond this validated revision.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Check out validated main source
+        if: steps.current.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        if: steps.current.outputs.run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check published docs with bounded publication retries
+        if: steps.current.outputs.run == 'true'
+        timeout-minutes: 16
+        run: python3 hosting/live-checks/check.py --attempts 6 --retry-delay 30 --report live-report.json
+
+      - name: Summarize public response evidence
+        if: always() && steps.current.outputs.run == 'true'
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          path = pathlib.Path('live-report.json')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f"Checked source: `{os.environ['SOURCE_SHA']}`\n\n")
+              if path.exists():
+                  report = json.loads(path.read_text())
+                  summary.write(f"{report['checks'] - report['failed']}/{report['checks']} public response checks passed after {report['attempt']} attempt(s), with {report['warnings']} warning(s).\n\n")
+                  summary.write(report['limitations'] + '\n\n')
+                  for row in report['rows']:
+                      if not row['ok']:
+                          summary.write(f"- {row['url']}: {row['error']}\n")
+                      for warning in row.get('warnings', []):
+                          summary.write(f"- WARNING {row['url']}: {warning}\n")
+              else:
+                  summary.write('No report was produced; inspect the failed or interrupted step.\n')
+          PY
+
+      - name: Save live response report
+        if: always() && steps.current.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-live-report
+          path: live-report.json
+          if-no-files-found: warn
+          retention-days: 14
