@@ -1,6 +1,7 @@
 ---
-title: "Python SDK and CLI"
-description: "Install and use the generated plainrouter Python client, or run its CLI from PyPI for authenticated Signals and sandbox workflows."
+title: "Python SDK: send and verify conversions"
+sidebarTitle: "Python SDK and CLI"
+description: "Send consented purchases with the Plainrouter Python SDK, preserve event IDs and timestamps on retries, and verify ingestion separately from Meta delivery."
 ---
 
 [`plainrouter`](https://pypi.org/project/plainrouter/) contains the generated Python SDK and the `plainrouter` command-line interface. The SDK exposes synchronous and asynchronous Conversion API operations, with ten convenience imports at the package root. The CLI exposes nine API commands.
@@ -55,106 +56,134 @@ response = await get_event.asyncio(
 
 ## Send a Meta conversion
 
-This recipe sends a purchase through Plainrouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
+Send a server-side purchase through Plainrouter to your [connected Meta destination](/signals/connect-meta). This is a Plainrouter SDK recipe, not a direct Meta Graph API tutorial. A successful create response confirms ingestion; inspect destination delivery separately.
 
-Replace the sample order, identity, browser identifiers and timestamps with your actual purchase and consent records. Keep the same event ID and purchase time on retries. Omit browser identifiers when unavailable.
+Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
 
 ### Send a purchase synchronously
 
-The generated nested consent, identity, and click-ID models accept dictionaries through `from_dict`. This keeps the request readable while preserving the generated top-level event type.
+The example accepts an `order` mapping from your application:
+
+| Input | What to supply |
+| --- | --- |
+| `id` | Stable, non-personal order ID, unique within the workspace. |
+| `paid_at` | Original purchase time as a timezone-aware Python `datetime`. |
+| `total`, `currency`, `source_url` | Decimal-string amount, currency code, and actual checkout URL without personal data. |
+| `consent` | Recorded `ad_storage`, `ad_user_data`, `ad_personalization`, `source`, and timezone-aware `captured_at`. |
+| `email`, `phone`, `fbp`, `fbc` | Optional values you have permission to use; omit unavailable values. |
+
+The local consent check requires three recorded grants. It does not obtain consent or establish permission by itself. Do not replace an unknown decision with `granted`, or an old purchase or consent time with the current time.
 
 ```python
+from datetime import datetime, timezone
 from http import HTTPStatus
-import os
 
-from plainrouter import create_client, create_event
-from plainrouter.generated.models import CreateEventBodyType0
+from plainrouter import create_event
+from plainrouter.generated.models import (
+    CreateEventBodyType0,
+    CreateEventResponse200,
+    CreateEventResponse202,
+)
 
 
-signal_secret = os.environ["PLAINROUTER_SIGNAL_SECRET"]
-client = create_client(signal_secret)
+def utc_time(value: datetime) -> str:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("Purchase and consent times must include a timezone")
+    return value.astimezone(timezone.utc).isoformat()
 
-order_id = "ORDER-1042"
-event = CreateEventBodyType0.from_dict(
-    {
-        "event_id": f"purchase:{order_id}",
+
+def purchase_event(order):
+    if not isinstance(order["id"], str) or not order["id"].strip():
+        raise ValueError("A stable order ID is required")
+    consent = order["consent"]
+    states = ("ad_storage", "ad_user_data", "ad_personalization")
+    if any(consent.get(key) != "granted" for key in states):
+        raise ValueError("Recorded advertising consent must permit this purchase")
+
+    payload = {
+        "event_id": f"purchase:{order['id']}",
         "event_name": "Purchase",
-        "event_time": 1786272000,
-        "event_source": "https://shop.example/checkout/success",
+        "event_time": utc_time(order["paid_at"]),
+        "event_source": order["source_url"],
         "action_source": "website",
         "consent_basis": "consent",
         "consent": {
-            "ad_storage": "granted",
-            "ad_user_data": "granted",
-            "ad_personalization": "granted",
-            "captured_at": "2026-08-09T12:00:00Z",
-            "source": "checkout_cmp",
-        },
-        "user_data": {
-            "email": "buyer@example.com",
-            "phone": "+358401234567",
-            "client_ip_address": "203.0.113.10",
-            "client_user_agent": "ExampleCheckout/1.0",
-        },
-        "click_ids": {
-            "fbp": "fb.1.1786271000000.1234567890",
-            "fbc": "fb.1.1786271000000.EXAMPLE_FBCLID",
+            **{key: consent[key] for key in states},
+            "captured_at": utc_time(consent["captured_at"]),
+            "source": consent["source"],
         },
         "value_data": {
-            "value": "49.90",
-            "currency": "EUR",
-            "order_id": order_id,
-            "contents": [{"id": "SKU-1", "quantity": 2}],
-            "num_items": 2,
+            "value": order["total"],
+            "currency": order["currency"],
+            "order_id": order["id"],
         },
     }
-)
+    for section, keys in (
+        ("user_data", ("email", "phone")),
+        ("click_ids", ("fbp", "fbc")),
+    ):
+        values = {key: order[key] for key in keys if order.get(key)}
+        if values:
+            payload[section] = values
+    return CreateEventBodyType0.from_dict(payload)
 
-response = create_event.sync_detailed(client=client, body=event)
 
-if response.status_code not in {HTTPStatus.OK, HTTPStatus.ACCEPTED}:
-    raise RuntimeError(response.content.decode("utf-8"))
+def accepted_event(response):
+    if response.status_code not in {HTTPStatus.OK, HTTPStatus.ACCEPTED}:
+        raise RuntimeError(f"Create event returned HTTP {response.status_code}")
+    if not isinstance(response.parsed, (CreateEventResponse200, CreateEventResponse202)):
+        raise RuntimeError("Create event returned no recognized receipt")
+    return response.parsed
 
-if response.parsed is None:
-    raise RuntimeError("Plainrouter returned an empty response")
 
-print(
-    {
-        "event_id": response.parsed.event_id,
-        "duplicate": response.parsed.duplicate,
-    }
-)
+def send_purchase(client, event):
+    return accepted_event(create_event.sync_detailed(client=client, body=event))
 ```
 
-Replace the example `fbp` and `fbc` values with values captured from the consenting browser. Omit a field when you do not have a valid value; do not send placeholders in production.
+Create the authenticated client once in your service, loading `PLAINROUTER_SIGNAL_SECRET` from your secret manager. After loading `order` from your database, build `event = purchase_event(order)` and call `send_purchase(client, event)`. The returned receipt exposes `event_id` and `duplicate`; it is not a Meta delivery receipt.
 
-Plainrouter normalizes and hashes raw supported identity values before Meta delivery. A 64-character SHA-256 value is accepted as already hashed. Browser identifiers such as `fbp` and `fbc` remain unhashed.
+`CreateEventBodyType0.from_dict` constructs the published consented request model. It does not prove that input meets every server validation rule. Plainrouter normalizes and hashes supported raw identity fields before Meta delivery. Include only actual browser identifiers; see [identifier formats](https://plainrouter.com/library/fbp-fbc).
 
 ### Send the same model asynchronously
 
-Reuse the event model with the generated async operation:
+Reuse the same event model and receipt check in an async service:
 
 ```python
-response = await create_event.asyncio_detailed(client=client, body=event)
-
-if response.status_code not in {HTTPStatus.OK, HTTPStatus.ACCEPTED}:
-    raise RuntimeError(response.content.decode("utf-8"))
+async def send_purchase_async(client, event):
+    response = await create_event.asyncio_detailed(client=client, body=event)
+    return accepted_event(response)
 ```
 
-The client reuses an `httpx` session. Create one client per service configuration rather than constructing a new client for every event.
+Await `send_purchase_async(client, event)` from your application's async context. The client reuses an `httpx` session. Reuse a client per service configuration and close it at shutdown; the generated client supports `with` for synchronous use and `async with` for asynchronous use.
 
 ### Retry safely
 
-Use the same `event_id` for every retry of the same purchase. Plainrouter returns:
+Persist one payload per paid order before sending, including the event ID, original purchase time, amount and applicable consent snapshot. Reconstruct the generated model from that stored payload for a later job. Do not rebuild it with new timestamps or identity values. Recheck that advertising use is still permitted before retrying.
 
-- HTTP `202` and `duplicate: false` for a new accepted event.
-- HTTP `200` and `duplicate: true` for an already accepted event ID.
+- HTTP `202`, `duplicate: false`: a new event was accepted for processing.
+- HTTP `200`, `duplicate: true`: the event was already accepted. Inspect the original event; the retry does not update or enrich it.
+- A timeout or lost response leaves acceptance uncertain. Retry the same stored ID and payload rather than minting a new ID.
 
-You can use the generated `idempotency_key` argument instead of a body `event_id`. When both are present, they must match. See [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication) before pairing this event with a browser Pixel event.
+You can use the generated `idempotency_key` argument instead of a body `event_id`. When both are present, they must match. Your application owns durable job retries and concurrent-order guards; the SDK does not implement that workflow for you.
+
+A separate browser `signalq("track", ...)` call generates its own ID and cannot accept this recipe's order ID. Choose one [purchase owner](/signals/track-events#avoid-duplicate-meta-events), and avoid sending the same checkout through SDK, managed browser tracking and Stripe verified revenue. See [event-ID deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
 
 ### Confirm Meta delivery
 
-An accepted ingestion response is not a final Meta delivery receipt. Use `get_event.sync` with the returned event ID or read [Signal health and performance](/signals/health-and-performance) to inspect queued, accepted, skipped, and failed delivery states.
+Use `get_event.sync_detailed(client=client, event=receipt.event_id)` for the receipt returned by `send_purchase`. Check HTTP `200` before reading its parsed event and deliveries. The async equivalent is `get_event.asyncio_detailed`. Import `get_event` from `plainrouter`.
+
+A delivery marked `accepted` confirms Meta acceptance. `queued`, `sent` and `retrying` are pending; an empty delivery list is not a success receipt. Follow [delivery statuses](/reference/statuses-and-terms#destination-delivery) and [Meta troubleshooting](/signals/connect-meta#troubleshoot) for failed or skipped deliveries. Acceptance does not guarantee attribution.
+
+### Troubleshoot a purchase request
+
+| Symptom | What to do |
+| --- | --- |
+| Local consent or timezone error | Load the recorded decision and timezone-aware original times. Do not invent replacement values. |
+| HTTP `401` | Stop automatic retries and check the Signals workspace secret. MCP tokens and browser publishable keys cannot authenticate this API. |
+| HTTP `422` | Inspect the field errors in the detailed response. Check consent, decimal-string amounts and matching idempotency keys; redact identity and credentials before sharing diagnostics. |
+| `httpx.TimeoutException` or a connection failure | Acceptance may be uncertain. Use a bounded retry of the same stored payload after checking consent. |
+| Unexpected status or response parsing failure | Keep the original ID. Inspect the detailed HTTP result or the event resource before deciding whether to retry; do not count the request as confirmed ingestion. |
+| Receipt exists but Meta has no event | Inspect the delivery trace and connected destination; repeating the create call is not a delivery replay. |
 
 ## Verify Signal ingestion
 
@@ -220,3 +249,8 @@ The Python SDK accepts a Signals workspace secret. It does not accept an MCP wor
 Keep the secret in a server-side secret manager. Never include it in prompts, URLs, logs, source control, or client-side code.
 
 For request and response fields, use the [API reference](/reference/conversion-api).
+
+## Implementation references
+
+- [Published Python package `0.5.2`](https://pypi.org/project/plainrouter/0.5.2/)
+- [Plainrouter event request and delivery reference](/reference/conversion-api)

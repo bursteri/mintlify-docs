@@ -1,6 +1,7 @@
 ---
-title: "Go SDK"
-description: "Install and authenticate the generated Plainrouter Go client, then send typed requests to the Signals Conversion API and zero-auth sandbox."
+title: "Go SDK: send and verify conversions"
+sidebarTitle: "Go SDK"
+description: "Send consented purchases with the Plainrouter Go SDK, preserve original timestamps and event IDs on retries, and check ingestion and Meta delivery."
 ---
 
 [`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from Plainrouter's signed OpenAPI contract. Release `v0.5.2` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
@@ -55,106 +56,152 @@ Load the secret from your environment or secret manager rather than writing it i
 
 ## Send a Meta conversion
 
-This recipe sends a purchase through Plainrouter to your connected [Meta destination](/signals/connect-meta). Set `PLAINROUTER_SIGNAL_SECRET` in your server environment and run it only when your recorded consent permits advertising use.
+Send a server-side purchase through Plainrouter to your [connected Meta destination](/signals/connect-meta). This recipe uses Plainrouter's SDK and credentials, not the direct Meta Graph API. A successful create response confirms ingestion; inspect destination delivery separately.
 
-Replace the sample order, identity, browser identifiers and timestamps with your actual purchase and consent records. Keep the same event ID and purchase time on retries. Omit browser identifiers when unavailable.
+Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
 
 ### Create and send a purchase
 
-The generated `v0.5.2` request uses an `anyOf` wrapper. Construct the consented branch, then place it in `CreateEventRequest`:
+The following helper package accepts a paid order from your application. Use a stable, non-personal order ID, a decimal-string total, an actual checkout URL without personal data, and the original purchase and consent times. Parse stored times with their timezone; do not replace them with `time.Now()` during retries.
+
+The published `v0.5.2` client wraps consented requests in `CreateEventRequestAnyOf`. Its `event_time` wrapper supports an ISO-8601 string; this example uses that branch rather than narrowing a Unix timestamp to `int32`.
 
 ```go
-package main
+package conversions
 
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
+	"net/http"
+	"strings"
+	"time"
 
 	plainrouter "github.com/plainrouter/sdk-go"
 )
 
-func field(value any) *interface{} {
-	boxed := interface{}(value)
-	return &boxed
+type Consent struct {
+	AdStorage, AdUserData, AdPersonalization, Source string
+	CapturedAt                                       time.Time
 }
 
-func main() {
-	secret := os.Getenv("PLAINROUTER_SIGNAL_SECRET")
-	if secret == "" {
-		log.Fatal("PLAINROUTER_SIGNAL_SECRET is required")
+type Purchase struct {
+	ID, Total, Currency, SourceURL string
+	PaidAt                         time.Time
+	Consent                        Consent
+	Email, Phone, Fbp, Fbc         string // Optional; leave unavailable values empty.
+}
+
+func field(value any) *interface{} {
+	return &value
+}
+
+func PurchaseEvent(p Purchase) (plainrouter.CreateEventRequest, error) {
+	if strings.TrimSpace(p.ID) == "" || p.PaidAt.IsZero() || p.Consent.CapturedAt.IsZero() {
+		return plainrouter.CreateEventRequest{}, fmt.Errorf("order ID and original timestamps are required")
 	}
-
-	config := plainrouter.NewConfiguration()
-	client := plainrouter.NewAPIClient(config)
-	ctx := context.WithValue(
-		context.Background(),
-		plainrouter.ContextAccessToken,
-		secret,
-	)
-
-	orderID := "ORDER-1042"
-	consented := plainrouter.NewCreateEventRequestAnyOf("Purchase", "consent")
-	consented.SetEventId("purchase:" + orderID)
-	consented.SetEventSource("https://shop.example/checkout/success")
-	consented.SetActionSource("website")
-	consented.SetConsent(map[string]*interface{}{
-		"ad_storage":        field("granted"),
-		"ad_user_data":      field("granted"),
-		"ad_personalization": field("granted"),
-		"captured_at":       field("2026-08-09T12:00:00Z"),
-		"source":            field("checkout_cmp"),
+	c := p.Consent
+	if c.AdStorage != "granted" || c.AdUserData != "granted" || c.AdPersonalization != "granted" {
+		return plainrouter.CreateEventRequest{}, fmt.Errorf("recorded advertising consent must permit this purchase")
+	}
+	eventTime := p.PaidAt.UTC().Format(time.RFC3339)
+	event := plainrouter.NewCreateEventRequestAnyOf("Purchase", "consent")
+	event.SetEventId("purchase:" + p.ID)
+	event.SetEventTime(plainrouter.CreateEventRequestAnyOfEventTime{String: &eventTime})
+	event.SetEventSource(p.SourceURL)
+	event.SetActionSource("website")
+	event.SetConsent(map[string]*interface{}{
+		"ad_storage":         field(c.AdStorage),
+		"ad_user_data":       field(c.AdUserData),
+		"ad_personalization": field(c.AdPersonalization),
+		"captured_at":        field(c.CapturedAt.UTC().Format(time.RFC3339)),
+		"source":             field(c.Source),
 	})
-	consented.SetUserData(map[string]*interface{}{
-		"email": field("buyer@example.com"),
-		"phone": field("+358401234567"),
-	})
-	consented.SetClickIds(map[string]*interface{}{
-		"fbp": field("fb.1.1786271000000.1234567890"),
-		"fbc": field("fb.1.1786271000000.EXAMPLE_FBCLID"),
-	})
-
+	identity := map[string]*interface{}{}
+	for key, value := range map[string]string{"email": p.Email, "phone": p.Phone} {
+		if value != "" {
+			identity[key] = field(value)
+		}
+	}
+	if len(identity) > 0 {
+		event.SetUserData(identity)
+	}
+	clickIDs := map[string]*interface{}{}
+	for key, value := range map[string]string{"fbp": p.Fbp, "fbc": p.Fbc} {
+		if value != "" {
+			clickIDs[key] = field(value)
+		}
+	}
+	if len(clickIDs) > 0 {
+		event.SetClickIds(clickIDs)
+	}
 	value := plainrouter.NewCreateEventRequestAnyOfValueData()
-	value.SetValue("49.90")
-	value.SetCurrency("EUR")
-	value.SetOrderId(orderID)
-	value.SetContents([]interface{}{
-		map[string]interface{}{"id": "SKU-1", "quantity": 2},
-	})
-	value.SetNumItems(2)
-	consented.SetValueData(*value)
+	value.SetValue(p.Total)
+	value.SetCurrency(p.Currency)
+	value.SetOrderId(p.ID)
+	event.SetValueData(*value)
+	return plainrouter.CreateEventRequest{CreateEventRequestAnyOf: event}, nil
+}
 
-	request := plainrouter.CreateEventRequest{
-		CreateEventRequestAnyOf: consented,
-	}
-
-	result, response, err := client.EventAPI.
-		CreateEvent(ctx).
-		CreateEventRequest(request).
-		Execute()
+func SendPurchase(
+	ctx context.Context,
+	client *plainrouter.APIClient,
+	event plainrouter.CreateEventRequest,
+) (*plainrouter.CreateEvent200Response, error) {
+	result, response, err := client.EventAPI.CreateEvent(ctx).
+		CreateEventRequest(event).Execute()
 	if response != nil {
 		defer response.Body.Close()
 	}
 	if err != nil {
-		log.Fatal(err)
+		if response != nil {
+			return nil, fmt.Errorf("create event failed (HTTP %d): %w", response.StatusCode, err)
+		}
+		return nil, fmt.Errorf("create event transport failed; acceptance is uncertain: %w", err)
 	}
-
-	fmt.Printf("event_id=%s duplicate=%t\n", result.GetEventId(), result.GetDuplicate())
+	if response == nil || (response.StatusCode != http.StatusOK && response.StatusCode != http.StatusAccepted) {
+		return nil, fmt.Errorf("create event returned no accepted HTTP receipt")
+	}
+	if result == nil || result.GetEventId() == "" {
+		return nil, fmt.Errorf("create event returned no event ID")
+	}
+	return result, nil
 }
 ```
 
-Replace the example browser identifiers with real values from a consenting browser, or omit `SetClickIds` when none are available. Plainrouter accepts raw supported identity fields and performs Meta-compatible normalization and SHA-256 hashing before delivery.
+Load `PLAINROUTER_SIGNAL_SECRET` from your server environment or secret manager and attach it to the context as shown in [Create an authenticated client](#create-an-authenticated-client). Call `PurchaseEvent(purchase)` after loading the paid order; if it succeeds, pass that request to `SendPurchase(ctx, client, event)`. The returned model exposes `GetEventId()` and `GetDuplicate()` for both new and duplicate receipts.
+
+The helper checks the recorded grant values; it does not obtain consent or establish permission by itself. Do not change an unknown decision to `granted`. Generated models also do not replace server-side validation. Include only permitted identity values and actual [browser identifiers](https://plainrouter.com/library/fbp-fbc); empty optional values are omitted. Plainrouter normalizes and hashes supported raw identity fields before Meta delivery.
 
 ### Reuse the client and context safely
 
-Create one `APIClient` per configuration and reuse it. Derive request contexts with timeouts or cancellation from your job or HTTP request context. The bearer token lives in the context in `v0.5.2`; never log the context or token.
+Create one `APIClient` per configuration and reuse it. Derive a request context with a deadline from your job or HTTP request context, and call its cancellation function after the request. The bearer token lives in the context in `v0.5.2`; never log the context or token. A deadline or lost connection can leave acceptance uncertain.
 
-Use one stable event ID for each logical conversion. Retrying `purchase:ORDER-1042` returns the existing event with `duplicate: true`. A new ID represents a new conversion.
+Persist one payload per paid order before sending, including the event ID, original purchase time, amount and applicable consent snapshot. Retry that stored payload after checking that advertising use is still permitted. Do not rebuild it with fresh timestamps or identity data.
+
+- HTTP `202`, `duplicate: false`: a new event was accepted for processing.
+- HTTP `200`, `duplicate: true`: the event was already accepted. The retry does not update or enrich it.
+- An uncertain timeout requires the same event ID and payload on retry. A new ID can represent another conversion.
+
+Your application owns durable job retries and concurrent-order guards. SDK request idempotency does not make a payment operation idempotent.
+
+A separate browser `signalq("track", ...)` call generates its own ID and cannot accept this recipe's order ID. Choose one [purchase owner](/signals/track-events#avoid-duplicate-meta-events), and avoid sending the same checkout through SDK, managed browser tracking and Stripe verified revenue. See [event-ID deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
 
 ### Confirm destination delivery
 
-The create response confirms ingestion only. Use `client.EventAPI.GetEvent(ctx, result.GetEventId()).Execute()` to retrieve the event and delivery trace, or review [Signal health and performance](/signals/health-and-performance).
+Call `client.EventAPI.GetEvent(ctx, receipt.GetEventId()).Execute()` for the receipt returned by `SendPurchase`. Check the error and HTTP status before reading the event and deliveries; close any returned response body. Use a fresh, non-expired request context for this later check.
+
+A delivery marked `accepted` confirms Meta acceptance. `queued`, `sent` and `retrying` are pending; an empty delivery list is not a success receipt. Follow [delivery statuses](/reference/statuses-and-terms#destination-delivery) and [Meta troubleshooting](/signals/connect-meta#troubleshoot) for failed or skipped deliveries. Acceptance does not guarantee attribution.
+
+### Troubleshoot a purchase request
+
+| Symptom | What to do |
+| --- | --- |
+| Local consent or missing-time error | Load the recorded decision and original timestamps. Do not invent replacement values. |
+| HTTP `401` | Stop automatic retries and check the Signals workspace secret. MCP tokens and browser publishable keys cannot authenticate this API. |
+| HTTP `422` | Inspect the protected field errors returned by `Execute()`. Check consent, decimal-string amounts and matching idempotency keys; redact identity and credentials before sharing diagnostics. |
+| Context deadline or transport failure | Acceptance may be uncertain. Use a bounded retry of the same stored payload after checking consent. |
+| Unexpected status, parsing failure or missing receipt | Keep the original ID. Inspect the HTTP result or event resource before deciding whether to retry; do not count it as confirmed ingestion. |
+| Receipt exists but Meta has no event | Inspect the delivery trace and connected destination; repeating the create call is not a delivery replay. |
 
 ## Configure another API origin
 
@@ -165,3 +212,9 @@ The generated configuration defaults to the Plainrouter Conversion API. Override
 Keep the Signals workspace secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
 
 For operation names and request fields, use the [Conversion API reference](/reference/conversion-api).
+
+## Implementation references
+
+- [Published Go package `v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go@v0.5.2)
+- [Generated create operation at `v0.5.2`](https://github.com/plainrouter/sdk-go/blob/v0.5.2/api_event.go)
+- [Plainrouter event request and delivery reference](/reference/conversion-api)
