@@ -200,7 +200,16 @@ Keep the same `event_id` when a timeout or queue retry repeats the same logical 
 - A previously accepted `event_id` returns HTTP `200` with `duplicate: true`.
 - Changing the ID on each retry defeats idempotency and can create duplicate conversions.
 
-Plainrouter also passes the event ID to Meta. When you use the managed browser Pixel for the same event, Plainrouter uses one ID for the Pixel `eventID` and the server `event_id`. See [Meta `event_id` deduplication](https://plainrouter.com/library/meta-event-id-deduplication).
+The SDK sends a server event; it does not trigger the managed browser Pixel. A separate browser `signalq("track", ...)` call generates its own ID and cannot accept the `purchase:${order.id}` ID used here. Choose the backend or the [managed browser purchase recipe](/signals/track-events#avoid-duplicate-meta-events) as the purchase owner. Do not also send a purchase from Stripe verified revenue for the same checkout.
+
+For a durable backend integration:
+
+1. Confirm settlement on your server and read the recorded consent decision. A browser success-page visit is insufficient.
+2. Persist one event payload per paid order, including `event_id`, the original purchase time, decimal amount, and the applicable consent snapshot. Use a unique record in your database to prevent concurrent jobs creating separate purchases.
+3. Send that stored payload from your job. On an uncertain timeout, retry the same ID and payload; do not rebuild it with the current time or fresh identity data. Check that advertising use is still permitted before a later retry.
+4. Mark ingestion complete after `202` or a duplicate `200`; inspect destination delivery separately. A duplicate receipt does not update or enrich the first accepted event.
+
+These database and job steps belong to your application. SDK request idempotency does not make a payment operation idempotent. See [Meta event-ID deduplication](https://plainrouter.com/library/meta-event-id-deduplication) for the distinction between API retries and browser/server pairing.
 
 ## Confirm delivery
 

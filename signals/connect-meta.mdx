@@ -54,7 +54,7 @@ After `ad_storage`, `ad_user_data`, and `ad_personalization` are all `granted`:
 
 If Meta's browser library is blocked, eligible server delivery can still continue. A missing browser event alone does not establish a server-delivery failure.
 
-For your own backend purchase integration, use a [Plainrouter SDK recipe](/guides/meta-capi/nodejs) or the [REST API](/reference/conversion-api). Coordinate the event ID if the browser and your backend report the same purchase. Independent browser and backend calls do not automatically share an ID. See the [deduplication guide](https://plainrouter.com/library/meta-event-id-deduplication).
+For your own backend purchase integration, use a [Plainrouter SDK recipe](/guides/meta-capi/nodejs) or the [REST API](/reference/conversion-api). Choose one purchase owner: the public `signalq("track", ...)` command generates its own ID and cannot accept your backend's ID. Independent calls can create duplicate purchases. Use the [purchase ownership table and managed example](/signals/track-events#avoid-duplicate-meta-events) before combining senders.
 
 ## How do I verify Meta delivery?
 

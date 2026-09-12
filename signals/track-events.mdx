@@ -1,9 +1,19 @@
 ---
-title: "Track events and consent"
-description: "Use the Signals browser API to manage consent, identify visitors, record conversion events, and preserve browser-server deduplication."
+title: "Track purchases and integrate browser consent"
+sidebarTitle: "Track events and consent"
+description: "Connect your CMP to Signals, verify consent changes, and send purchases with the managed Meta browser/server pair without duplicate calls."
 ---
 
-The Signals browser API is available as `window.signalq` after you [install the generated Signals pixel](/signals/install-pixel). Calls made before the asynchronous script loads remain in the queue.
+Use `signalq` to pass your consent platform's current decision to Signals and send business events after a full advertising grant. With a connected Meta dataset, one browser `track` call supplies the managed Pixel and server event with a shared ID.
+
+## Before you begin
+
+- [Install the generated Signals pixel](/signals/install-pixel) once and keep its `init` call before consent and event calls.
+- Configure your consent-management platform (CMP) to report the visitor's actual advertising choices on every page and after changes.
+- [Connect Meta](/signals/connect-meta) if you want managed Meta delivery.
+- Choose whether the browser, your backend, or Stripe owns each purchase. Follow [Avoid duplicate Meta events](#avoid-duplicate-meta-events) before combining integrations.
+
+Calls made before the asynchronous Signals script loads are queued, but the queue stub returns `undefined`. It does not return the later command's result. Run examples that read an event ID, identification result, or visitor ID only after the generated script's `load` event; register that handler before the script can finish loading. Do not install a second snippet to wait for it.
 
 ## Set consent
 
@@ -50,6 +60,76 @@ A complete grant creates or refreshes the first-party identifiers used for sessi
 
 On a returning page, the arrival is sent while your consent platform restores its decision. Plainrouter does not read visitor cookies or send conversion events during that undecided period. Existing cookies are not read or refreshed merely because the snippet initialized.
 
+### Connect Cookiebot callbacks
+
+Install Cookiebot on the same page. This adapter uses [Cookiebot's consent properties and browser events](https://www.cookiebot.com/en/developer/). Use it only when your configured **marketing** choice covers all three Plainrouter advertising permissions. For separate choices, map each permission individually with the structured snapshot above.
+
+Place this code once after your generated `init` call. It handles an already-restored choice and later CMP events. Automatic or implied consent stays `unknown`; only an explicit response can grant permissions.
+
+```js
+function syncCookiebotConsent() {
+  const cmp = window.Cookiebot;
+  const explicit = cmp?.hasResponse === true &&
+    cmp.consent?.method === "explicit";
+  const marketing = cmp?.consent?.marketing;
+  const permission = explicit && typeof marketing === "boolean"
+    ? (marketing ? "granted" : "denied")
+    : "unknown";
+
+  window.signalq("consent", {
+    consent_basis: "consent",
+    consent: {
+      ad_storage: permission,
+      ad_user_data: permission,
+      ad_personalization: permission,
+      captured_at: new Date().toISOString(),
+      source: "cookiebot_marketing"
+    }
+  });
+}
+
+for (const event of [
+  "CookiebotOnConsentReady",
+  "CookiebotOnAccept",
+  "CookiebotOnDecline"
+]) {
+  window.addEventListener(event, syncCookiebotConsent);
+}
+syncCookiebotConsent();
+```
+
+`captured_at` records when this adapter reads the current decision. Retain your CMP's consent record separately. Do not replay purchases from these callbacks: restored consent and multiple CMP events can call the adapter more than once.
+
+For a custom withdrawal button, notify Signals immediately as well as withdrawing in Cookiebot. Attach this function to your site's existing consent-withdrawal control:
+
+```js
+function withdrawAdvertisingConsent() {
+  window.signalq("consent", {
+    consent_basis: "consent",
+    withdrawn: true
+  });
+  window.Cookiebot.withdraw();
+}
+```
+
+Keep the consent bridge running when consent is denied so it can report changes. Check your CMP's script-blocking configuration if callbacks never reach Signals.
+
+### Verify grant, partial consent, and withdrawal
+
+Use a development or test site and inspect its Network panel. Test the installed library, not just the pre-load queue. A successful arrival is a separate initialization check and can appear in every row below.
+
+| Current choice | Expected Signals behavior |
+| --- | --- |
+| CMP not ready, missing permissions, or implied choice in the Cookiebot adapter | No conversion transmission; `track` resolves to `null`. |
+| All three advertising permissions granted | Consented `PageView` on entering a grant; subsequent `track` calls can reach the collector. |
+| `ad_storage: "granted"`, with `ad_user_data` or `ad_personalization` denied or unknown | No conversion transmission. A storage grant alone is insufficient. |
+| Full grant followed by denial or withdrawal | New conversions stop; consent-dependent in-flight work is cancelled. This cannot recall requests already received by a destination. |
+| Returning page with a stored explicit grant | Arrival runs during initialization; conversions wait for the CMP to restore and report the grant. |
+
+For a CMP with separate permissions, exercise a partial choice through its UI and confirm the transmitted snapshot preserves it. Do not replace partial choices with the Cookiebot adapter's shared marketing value.
+
+If the result differs, confirm `init` ran first, inspect the actual three permission values, and check for conflicting adapters. Use [Verify ingestion](/signals/verify-ingestion) to separate a collection problem from consent gating; use [Meta delivery checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for destination acceptance.
+
 ## How landing click IDs are handled
 
 The snippet captures supported landing query parameters in the current document's memory: `fbclid`, `gclid`, `gbraid`, `wbraid`, `ttclid`, and `msclkid`. Unknown or partial consent keeps this temporary buffer available for a later complete grant. Explicit storage denial or withdrawal discards it.
@@ -71,7 +151,11 @@ const eventId = await signalq("track", "purchase", {
 });
 ```
 
-The promise resolves to the collector-accepted event ID. It resolves to `null` if collection fails after one retry.
+After the library loads, the promise normally resolves to the event ID after a successful collector response. If page exit switches delivery to a beacon, the ID can be returned without a collector acknowledgement. Check ingestion and destination delivery separately.
+
+It resolves to `null` when full consent is absent, consent changes stop the request, or collection is not accepted after the permitted attempts. Invalid calls, such as a missing event name or a call before `init`, can reject the promise.
+
+The public `track` command generates its own event ID. An `event_id` in the payload or an extra positional argument does not override it. `order_id` is purchase data, not the deduplication key.
 
 <Note>
   Send monetary `value` as a decimal string, such as `"49.00"`. This avoids floating-point ambiguity.
@@ -210,4 +294,53 @@ Stripe refund webhooks create idempotent custom `Refund` events with a negative 
 
 After you [connect Meta](/signals/connect-meta), continue to track through `signalq`. The managed browser Pixel and Plainrouter server delivery share one event ID.
 
-Remove other Pixel or CAPI integrations that send the same event to the same dataset after you confirm the managed flow is working.
+Choose one purchase owner before adding a confirmation-page event:
+
+| Purchase owner | Event ID and retry behavior |
+| --- | --- |
+| Browser `signalq("track", "purchase", payload)` | Signals generates one ID for its managed browser/server pair. Built-in transport retries preserve it; another `track` call generates another ID. |
+| Your backend using the [Node.js SDK](/guides/meta-capi/nodejs) or [REST API](/reference/conversion-api) | Your application supplies and persists the ID. Reuse the same ID and purchase payload on retries. A separate `signalq` call does not share it. |
+| [Stripe verified revenue](#verify-stripe-checkout-settlement) | Plainrouter derives the canonical purchase from the settled Checkout Session. Do not add a second browser or custom-backend purchase for that session. |
+
+### Send one managed purchase after payment confirmation
+
+Use this recipe when the browser owns the purchase. Your application must first confirm payment on its server and supply the paid order's non-personal string ID, decimal total, currency, and item count. A success URL alone is not proof of payment.
+
+Run this code after the Signals script loads and your CMP has reported the full grant. The map shares one attempt between repeated callbacks for the same order in the current document:
+
+```js
+const purchaseAttempts = new Map();
+
+function trackConfirmedPurchase(paidOrder) {
+  if (!purchaseAttempts.has(paidOrder.id)) {
+    const attempt = window.signalq("track", "purchase", {
+      order_id: paidOrder.id,
+      value: paidOrder.total, // Decimal string, such as "49.00".
+      currency: paidOrder.currency,
+      num_items: paidOrder.itemCount
+    });
+    purchaseAttempts.set(paidOrder.id, attempt);
+  }
+  return purchaseAttempts.get(paidOrder.id);
+}
+
+// Call from your app's confirmed-payment handler, after consent is ready.
+// paidOrder comes from your server's verified order response.
+const eventId = await trackConfirmedPurchase(paidOrder);
+if (eventId === null) {
+  console.warn("Purchase unconfirmed. Check consent and delivery.");
+}
+```
+
+This guard lasts only for the current document. A reload, another tab, or a different sender can still create another purchase. If the same order must survive reloads or job retries with a stable ID, use the backend recipe instead. Do not wrap `track` in an automatic retry loop: an uncertain response can follow an accepted request, and a new call creates a new ID.
+
+The managed flow sends the browser `Purchase` with Pixel `eventID` and submits the matching server `Purchase` with `event_id`. You do not need an additional `fbq` or backend purchase call. Passing the returned ID to another API request does not enrich the already-accepted event.
+
+### Check the purchase pair
+
+1. Confirm the order was paid and the CMP reported all three grants before tracking.
+2. Inspect the conversion request's `event_id`, `event_name`, and value data. Internal retries should retain the same ID.
+3. Check the event's destination delivery trace, then compare the browser and server names and IDs in the intended Meta dataset. [Meta's deduplication guide](https://developers.facebook.com/docs/marketing-api/conversions-api/deduplicate-pixel-and-server-events/) explains the matching fields.
+4. If duplicates remain, inventory confirmation-page handlers, tag-manager tags, theme Pixels, commerce plugins, Stripe webhooks, and backend jobs. Remove overlapping senders after validating the intended flow.
+
+An accepted collector request proves ingestion. It does not establish that Meta received both sides, deduplicated the purchase, or attributed it to an ad. See [How do I verify Meta delivery?](/signals/connect-meta#how-do-i-verify-meta-delivery).
