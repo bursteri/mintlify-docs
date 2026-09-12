@@ -8,3 +8,6 @@ drafts/
 
 # Private authoring instructions
 AGENTS.md
+
+# Infrastructure source and operational notes; never serve as docs
+hosting/
