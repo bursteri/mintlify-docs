@@ -1,17 +1,25 @@
 ---
-title: "Quickstart"
-description: "Set up your workspace, collect your first website signal, and choose your next Plainrouter workflow."
+title: "Set up Plainrouter Signals and verify your first arrival"
+sidebarTitle: "Quickstart"
+description: "Create a workspace, configure your collection domain, install Signals, and verify a real arrival before adding consented conversions and Meta delivery."
 ---
 
+Set up Plainrouter Signals by creating a workspace, activating your collection domain, and installing the generated browser snippet. The browser setup is complete when Plainrouter stores the first qualifying arrival from your website. Connecting a Meta ad account is optional for this first step.
+
+An arrival confirms website collection. Add your consent integration and connect a Meta dataset separately to deliver advertising conversion events.
+
 <Info>
-  Registration is open and requires no contact-sales form. Review [pricing](https://plainrouter.com/pricing) for the Free band's spend threshold, arrival allowance, and overage rules. After workspace and Meta ad-account setup, the workspace owner can manage production tokens from **Account** → **API**.
+  [Registration is open](https://plainrouter.com/register). Review [pricing](https://plainrouter.com/pricing) for the Free band's spend threshold, arrival allowance, and overage rules.
 </Info>
 
-Welcome to Plainrouter. This guide takes you from a new account to the first real arrival through your first-party Signals domain.
+## Which setup path do I need?
 
-<Card title="What you will accomplish" icon="circle-check">
-  Create your account, connect a first-party collection domain, install the generated browser snippet, and observe the first arrival.
-</Card>
+| Your goal | Start here | Expected outcome |
+| --- | --- | --- |
+| Measure website arrivals | Follow this quickstart. | An active collection domain and a stored real arrival. |
+| Send consented conversions to Meta | Finish Signals setup, then [connect Meta](/signals/connect-meta). | A connected dataset and separately verified event delivery. |
+| Add backend conversions | Use the [Conversion API](/reference/conversion-api) or [choose an SDK](/sdk/overview). | A server event accepted by Plainrouter; inspect delivery afterward. |
+| Connect an AI agent to a Meta ad account | Follow [MCP setup](/actions/connect-agent). | A client authenticated to the intended workspace and Meta ad account. |
 
 ## Before you begin
 
@@ -88,6 +96,16 @@ Your initial Plainrouter setup is complete when:
 You can now return to the [dashboard](https://plainrouter.com/dashboard) and continue working from the workspace you created.
 
 The dashboard's customizable charts are labeled **Dashboard preview · Sample data**. Use **Signals** to confirm actual collection, and [billing setup](/billing/overview) to interpret a checkout notice.
+
+## Why is setup still waiting?
+
+| What you see | Check next |
+| --- | --- |
+| Collection domain is pending | Confirm the exact CNAME name and target, then [retry DNS and HTTPS validation](/signals/configure-dns#troubleshoot-validation). |
+| Domain is active, but no arrival appears | Confirm the deployed page loads `v4.js` and sends an accepted `POST /v1/arrival`. Follow the [browser network checks](/signals/install-pixel#verify-the-installation). |
+| The verification API returns `202`, but setup stays open | That response verifies the server write path. It does not replace a real arrival. See [which check proves what](/signals/verify-ingestion#which-check-do-i-need). |
+| Arrivals appear, but Meta has no conversions | Arrivals never create Meta deliveries. Configure consent, send a conversion event, and [verify the Meta destination](/signals/connect-meta#how-do-i-verify-meta-delivery). |
+| Dashboard charts look populated before collection | **Dashboard preview · Sample data** is illustrative. Use **Signals** for actual collection evidence. |
 
 ## Continue from here
 

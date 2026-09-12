@@ -1,76 +1,117 @@
 ---
-title: "Connect Meta"
-description: "Connect a Meta ad account and dataset for managed browser and server event delivery, then verify the selected Signal destination."
+title: "Set up Meta Pixel and Conversions API with Plainrouter"
+sidebarTitle: "Connect Meta"
+description: "Connect a Meta dataset to Plainrouter Signals, verify browser and server conversion delivery, and troubleshoot missing or duplicate events."
 ---
 
-Connect Meta to send consented Signals events to one dataset through both the managed browser Pixel and Meta Conversions API.
+Connect your Meta dataset to Plainrouter to deliver consented Signals events through the managed browser Pixel and Meta Conversions API. First authorize the relevant Meta assets, then select the dataset and verify delivery. **Destination active** confirms the connection; it does not prove that a conversion has reached Meta.
+
+This guide covers Plainrouter's managed integration. For integration choices, start with the [Meta Conversions API overview](https://plainrouter.com/library/meta-conversions-api). If you are writing directly to Meta instead, use [Meta's direct-integration training](https://www.facebookblueprint.com/student/path/219714-set-up-implement-verify-conversions-api).
 
 ## Before you begin
 
 You need:
 
-- An active Signal and collection domain.
+- An active Signal and collection domain. Complete the [Signals quickstart](/quickstart) first.
 - Workspace-owner access in Plainrouter.
-- Access to the required Meta Business assets, ad account, and dataset.
-- Permission to grant Plainrouter access to those assets.
+- Access to the required Meta Business assets, Meta ad account, and dataset, with permission to grant Plainrouter access.
+- The [current Signals snippet](/signals/install-pixel) and a [consent integration](/signals/track-events#set-consent) for browser conversions.
+- For backend conversions or API tests, a server-held [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api).
+
+An identity-free arrival does not require a Meta connection and never triggers Meta delivery. Advertising conversion events require the supported consent grant.
 
 ## Connect the destination
 
 <Steps>
   <Step title="Open Meta setup">
-    Open **Signals**. In the Signal health header, click **Connect Meta**.
+    Open **Signals** and choose **Connect Meta**.
   </Step>
   <Step title="Authorize Meta">
-    Click **Connect Meta** and complete Meta's authorization flow.
+    Complete Meta's authorization flow and grant access to the intended Meta ad account and dataset.
 
-    Plainrouter requests the business assets required to configure and operate the destination. Access tokens stay on the server and never enter the browser snippet or publishable-key configuration.
-  </Step>
-  <Step title="Choose an ad account">
-    Select the Meta ad account associated with the website and dataset.
+    Meta access tokens stay on the server. Do not add a Meta token or Signals workspace secret to your browser snippet.
   </Step>
   <Step title="Choose a dataset">
-    Select the **Meta dataset / Pixel** that should receive this Signal's browser and server events, then click **Connect Meta dataset**.
+    Select the **Meta dataset** that should receive this Signal's events, then choose **Connect Meta dataset**. Check the dataset ID against the one you intend to use in Meta Events Manager.
   </Step>
   <Step title="Confirm the destination">
-    Plainrouter shows **Destination active** with the dataset ID and ad-account name. Return to **Signals** to monitor delivery and measurement health.
+    Plainrouter shows **Destination active**, the dataset ID, and the associated Meta ad account. Verify both identifiers, then continue with the delivery checks below.
   </Step>
 </Steps>
 
 <Warning>
-  Remove other Pixel or CAPI integrations that send the same events to this dataset after validating Plainrouter. Multiple independent integrations can create duplicate conversions.
+  After validating Plainrouter, remove other Pixel or CAPI integrations that send the same events to this dataset. Independent senders can create duplicate conversions even when each integration works on its own.
 </Warning>
 
 ## How managed delivery works
 
-After consent is granted:
+After `ad_storage`, `ad_user_data`, and `ad_personalization` are all `granted`:
 
-1. The Signals browser library fetches the public dataset ID from your first-party collector.
+1. The Signals browser library fetches the public dataset ID from your collector.
 2. It loads Meta's browser library and sends the browser event.
-3. Plainrouter sends the matching server event through Conversions API.
-4. Both copies use the same event ID so Meta can deduplicate them.
+3. Plainrouter sends the eligible matching server event through Conversions API.
+4. The managed pair uses the same event name and event ID for Meta deduplication.
 
-If the Meta browser library is blocked, server delivery can still continue. If browser configuration is temporarily unavailable, server collection continues and the browser Pixel is skipped.
+If Meta's browser library is blocked, eligible server delivery can still continue. A missing browser event alone does not establish a server-delivery failure.
+
+For your own backend purchase integration, use a [Plainrouter SDK recipe](/guides/meta-capi/nodejs) or the [REST API](/reference/conversion-api). Coordinate the event ID if the browser and your backend report the same purchase. Independent browser and backend calls do not automatically share an ID. See the [deduplication guide](https://plainrouter.com/library/meta-event-id-deduplication).
+
+## How do I verify Meta delivery?
+
+Check the stages separately:
+
+| Stage | Check | What the result means |
+| --- | --- | --- |
+| Website collection | [Inspect the arrival request](/signals/install-pixel#verify-the-installation). | An accepted arrival proves collection receipt, not a Meta conversion. |
+| Consented conversion ingestion | Confirm your conversion request succeeds. | `202` means Plainrouter accepted the event for processing. |
+| Destination delivery | Open the event's delivery trace through [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace), or inspect **Delivery acceptance** and **Diagnostics** in Signals. | `accepted` means Meta accepted that delivery. Pending and failed states require separate interpretation. |
+| Browser/server pairing | Inspect the intended dataset in Meta Events Manager and compare the event name and event ID for the pair. | Matching identifiers support deduplication; an API receipt alone does not verify the pair. |
+
+Meta acceptance does not guarantee attribution, an Event Match Quality score, or improved advertising performance. Use [Signal health and performance](/signals/health-and-performance) to interpret stored reporting windows and differences.
+
+### Test without sending a real purchase
+
+Use Plainrouter's destination test operations when you need a controlled Meta-delivery check:
+
+1. Identify the Plainrouter destination you connected. The API's `{destination}` parameter is a Plainrouter destination ID, not your Meta dataset ID.
+2. Use [Configure destination test mode](https://plainrouter.com/docs/api-reference/operations/configure-destination-test-mode) with `enabled: true` and the dataset's Meta Test Events code in `test_event_code`.
+3. Call [Send a controlled test purchase](https://plainrouter.com/docs/api-reference/operations/send-a-controlled-test-purchase). It creates an identity-free synthetic purchase for that destination while test mode is enabled. This operation contacts Meta.
+4. HTTP `200` means Meta accepted the controlled purchase; `502` means Meta did not accept it. Inspect the same dataset's Test Events view separately.
+5. Restore destination test mode to `enabled: false` when the check is finished, before resuming normal conversion delivery.
+
+The [identity-free ingestion diagnostic](/signals/verify-ingestion) is a different test: it contacts no destination and cannot prove Meta delivery.
 
 ## Refresh available assets
 
-If a new ad account or dataset does not appear, click **Reconnect Meta to refresh assets** and complete authorization again. This refreshes the assets Plainrouter can list without exposing the access token.
+If the intended ad account or dataset is missing, choose **Reconnect Meta** and complete authorization again with access to those assets. Then select the intended dataset and recheck the connection details.
 
 ## Troubleshoot
 
 ### No datasets appear
 
-- Confirm the selected Meta user can access the dataset.
+- Confirm the authorizing Meta user can access the dataset.
 - Confirm the dataset belongs to or is shared with the relevant Business portfolio.
-- Reconnect Meta to refresh assets.
-- Try the intended ad account again after the refresh.
+- Reconnect Meta with access to the intended assets, then reopen dataset selection.
 
 ### Browser Pixel events do not appear
 
-- Confirm advertising consent is `granted`.
+- Confirm all three advertising consent values are `granted`.
 - Check whether a content blocker prevents `connect.facebook.net` from loading.
-- Allow the Meta script in your Content Security Policy.
-- Confirm the connected dataset ID is the one you are inspecting.
+- Check your site's [Content Security Policy](/signals/install-pixel#content-security-policy).
+- Confirm you are inspecting the connected dataset and a conversion event, not an arrival.
 
 ### Server delivery needs attention
 
-Open **Signals** and review **Delivery acceptance** and **Diagnostics**. Failed non-test deliveries appear as a critical diagnostic. See [Signal health and performance](/signals/health-and-performance).
+Inspect the event's delivery state before retrying. `queued`, `sent`, and `retrying` are pending; `failed:auth` requires a connection check. A consent-skipped event is not a transient provider error. See the [delivery status reference](/reference/statuses-and-terms#destination-delivery) and keep the original event ID when retrying the same conversion.
+
+### Meta shows duplicate purchases
+
+Inventory every integration that sends the purchase, including a theme Pixel, tag manager, commerce plugin, and backend. Keep one intended browser/server pair with matching event names and IDs. Do not generate a fresh ID on every retry. Follow the [missing and duplicate events checklist](https://plainrouter.com/library/meta-capi-missing-duplicate-events).
+
+### The controlled test returns `422`
+
+Confirm test mode is enabled for the same Plainrouter destination and inspect the response's field errors. A `404` instead means the destination was not found in the authenticated workspace.
+
+## Next step
+
+Add the business events you need in [Track events and consent](/signals/track-events), then monitor [Signal health and performance](/signals/health-and-performance). Keep setup checks, destination acceptance, and advertising results separate when evaluating the integration.

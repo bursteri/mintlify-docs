@@ -333,6 +333,11 @@
       "source": "/guides/meta-capi/go.md",
       "destination": "https://plainrouter.com/docs/sdk/go.md#send-a-meta-conversion",
       "permanent": true
+    },
+    {
+      "source": "/.well-known/api-catalog",
+      "destination": "https://plainrouter.com/.well-known/api-catalog",
+      "permanent": true
     }
   ]
 }

@@ -1,12 +1,21 @@
 ---
-title: "API docs and OpenAPI spec"
-description: "Use the REST API, signed OpenAPI contract, generated SDKs, and command-line clients for Signals operations."
+title: "Plainrouter Conversion API: send and verify server events"
+sidebarTitle: "Conversion API overview"
+description: "Authenticate the Plainrouter Conversion API, submit consented server events, retry safely, inspect Meta delivery, and use the signed OpenAPI contract."
 ---
 
-Plainrouter exposes a server-side Signals Conversion API at `https://plainrouter.com/api/v1`. The signed OpenAPI contract describes the same operations used by generated SDKs and command-line clients.
+Send server-side conversion events to Plainrouter at `https://plainrouter.com/api/v1/events` using a Signals workspace secret. A new event returns `202`; check its delivery trace separately to confirm Meta acceptance. SDKs and command-line clients use the same Signals REST API.
+
+This is Plainrouter's API, with Plainrouter request fields and authentication. It is not a direct Meta Graph API endpoint. To choose between managed and direct Meta integrations, read the [Meta Conversions API overview](https://plainrouter.com/library/meta-conversions-api).
 
 For one fetchable comparison of REST, SDK, CLI, MCP, and management credentials,
 see [Authentication and clients](/auth).
+
+## Before you begin
+
+You need an active Signals workspace, its [server-side secret](/auth#how-do-i-authenticate-the-rest-api), and a recorded consent decision for the conversion. To deliver the event to Meta, [connect the intended dataset](/signals/connect-meta) first.
+
+Start with the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check authentication. Use the [sandbox](/sandbox) for synthetic payload validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) to check Meta delivery. The conversion request below can create a real event and destination delivery.
 
 ## Choose an interface
 
@@ -24,7 +33,7 @@ The signed REST contract is published at version `0.5.0`. TypeScript SDK and npm
 
 ## Authenticate
 
-Every request needs the Signals workspace secret issued during Signals provisioning:
+For authenticated Signals operations, send the Signals workspace secret issued during provisioning:
 
 ```http
 Authorization: Bearer YOUR_SIGNALS_WORKSPACE_SECRET
@@ -32,23 +41,26 @@ Accept: application/json
 Content-Type: application/json
 ```
 
+The [sandbox operations](/sandbox) have separate authentication rules.
+
 Keep this secret on your server or in your CLI's secure credential store. Never put it in browser code, source control, prompts, or logs.
 
 The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Those credentials authorize agent tools, not the workspace's Signals API.
 
 ## Submit an event
 
-Send a stable `event_id` so retries are idempotent. Money values use decimal strings to preserve their exact representation.
+Send the request only after a real purchase and a recorded full advertising consent grant. Replace `order-123`, the source URL, and the value with that purchase's data. The consent fields below describe that prerequisite; they do not obtain consent.
+
+Use a stable, non-personal `event_id` for each logical purchase and reuse it across retries. Money values use decimal strings. This immediate-event example omits `event_time`, so Plainrouter uses receipt time. For delayed or queued events, supply the original Unix timestamp or ISO-8601 time from your order record and preserve it on retries. Do not copy a sample timestamp or change an old purchase to the current time.
 
 ```bash
-curl https://plainrouter.com/api/v1/events \
+curl --include https://plainrouter.com/api/v1/events \
   --request POST \
   --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
   --header "Content-Type: application/json" \
   --data '{
     "event_id": "order-123",
     "event_name": "Purchase",
-    "event_time": 1786272000,
     "event_source": "https://shop.example/thank-you",
     "action_source": "website",
     "consent_basis": "consent",
@@ -66,7 +78,9 @@ curl https://plainrouter.com/api/v1/events \
   }'
 ```
 
-A new event returns HTTP `202`. A retry with the same event ID returns HTTP `200` with `duplicate: true`.
+A new event returns HTTP `202` and a `Location` header for its event resource. A retry with the same event ID returns HTTP `200` with `duplicate: true`; it does not create another conversion. A duplicate response is not a replay of failed destination delivery.
+
+You can supply `Idempotency-Key` instead of a body `event_id`. If you supply both, their values must match. The [submit-event reference](https://plainrouter.com/docs/api-reference/event/submit-a-conversion-event) defines the request and responses.
 
 ```json
 {
@@ -78,6 +92,28 @@ A new event returns HTTP `202`. A retry with the same event ID returns HTTP `200
 For browser consent and visitor joins, see [Track events and consent](/signals/track-events).
 
 Every `POST /events` request must include `consent_basis`. Use `consent` only with granted downstream advertising state. `legitimate_interest` is restricted to allowlisted lifecycle events and does not create an attributed advertising join.
+
+## How do I confirm Meta accepted the event?
+
+Use `GET /events/{event}` for the event ID you submitted. For the example above:
+
+```bash
+curl https://plainrouter.com/api/v1/events/order-123 \
+  --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
+  --header "Accept: application/json"
+```
+
+The response includes the event and its `deliveries`. For IDs containing characters that need URL encoding, use the returned `Location` URL or the SDK's `getEvent` operation. Keep credentials in the authorization header.
+
+| Result | Interpretation | Next step |
+| --- | --- | --- |
+| Ingestion `202` | Plainrouter accepted a new event for processing. | Inspect its delivery trace. |
+| Ingestion `200`, `duplicate: true` | This event ID was already accepted. | Inspect the original event; retain the ID. |
+| Delivery `queued`, `sent`, or `retrying` | Destination outcome is pending. | Check the trace again later. |
+| Delivery `accepted` | Meta accepted this delivery. | Verify browser/server pairing and reporting separately. |
+| Delivery `failed:*` or `skipped:*` | The event failed or was ineligible for delivery. | Read the delivery explanation before taking action. |
+
+Meta acceptance does not establish attribution or improved advertising performance. An empty delivery list does not establish Meta acceptance either. Check the [connected destination](/signals/connect-meta) and the event's eligibility. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for the complete meanings and [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace) for the response schema.
 
 ## Verify Signal ingestion
 
@@ -148,11 +184,13 @@ Install the CLI from [PyPI](https://pypi.org/project/plainrouter/) with `pipx in
 
 ## Handle errors
 
-| Status | Meaning |
-| --- | --- |
-| `401` | The Signals workspace secret is missing or invalid. |
-| `404` | The requested event or destination does not belong to this workspace. |
-| `422` | Request validation failed. |
-| `502` | Meta did not accept a controlled test purchase. |
+| Status | Meaning | What to check |
+| --- | --- | --- |
+| `401` | The Signals workspace secret is missing or invalid. | Use the server secret for the intended workspace, not a publishable key or MCP token. |
+| `404` | The event or destination is unavailable to this workspace. | Check its ID, workspace scope, and event retention. |
+| `422` | Request validation failed. | Read field errors; check `consent_basis`, consent state, decimal-string values, and matching idempotency keys. |
+| `502` on a controlled test purchase | Meta did not accept the test purchase. | Inspect the destination test result and Meta connection. |
 
 Validation responses include a message and field-level errors. Treat `401` as a stopped credential and avoid retrying it indefinitely.
+
+For missing or duplicate conversions after a successful API request, follow [Meta delivery troubleshooting](/signals/connect-meta#troubleshoot).

@@ -1,6 +1,7 @@
 ---
-title: "Test Signal ingestion"
-description: "Write an identity-free diagnostic event through REST or MCP to confirm that Plainrouter accepts the workspace-scoped request."
+title: "Verify Signals API ingestion with REST or MCP"
+sidebarTitle: "Test Signal ingestion"
+description: "Check a Signals workspace secret or MCP connection with an identity-free diagnostic, interpret 202 and duplicate responses, and troubleshoot setup."
 ---
 
 Use the server-side verification event when you want to confirm that a Signals workspace secret or MCP connection can write to the authorized Signal ledger without sending customer identity or destination data.
@@ -8,6 +9,15 @@ Use the server-side verification event when you want to confirm that a Signals w
 <Card title="What the verification does" icon="badge-check">
   It writes one idempotent, identity-free `signal_verification` event to the authorized Signal ledger. It does not count as real arrival evidence, complete onboarding, contact Meta, enter attribution or enforcement, or create spend.
 </Card>
+
+## Which check do I need?
+
+| Question | Check | What success proves |
+| --- | --- | --- |
+| Does the installed website send arrivals? | [Load the site and inspect `/v1/arrival`](/signals/install-pixel#verify-the-installation). | `202` confirms arrival receipt; setup completes after a qualifying arrival is stored. |
+| Can my server credential or MCP token write to Signals? | Use the verification request below. | Plainrouter accepted one identity-free diagnostic for the authorized workspace. |
+| Is my conversion payload valid? | [Validate a synthetic event in the sandbox](/sandbox). | The sandbox accepts the synthetic shape; no production event or Meta delivery is created. |
+| Did a conversion reach Meta? | [Verify destination delivery](/signals/connect-meta#how-do-i-verify-meta-delivery). | An accepted destination delivery or controlled test response; attribution remains separate. |
 
 ## Before you begin
 
@@ -17,6 +27,8 @@ You need:
 - Either the Signals workspace secret for REST authentication or an MCP connection with `signals.verify`.
 
 ## Test with the REST API
+
+Store `PLAINROUTER_SIGNAL_SECRET` in your server environment using your credential manager. Use the Signals workspace secret, not the browser publishable key or a workspace execution token.
 
 Send an authenticated request with no body:
 
@@ -35,6 +47,8 @@ A new verification returns HTTP `202`:
   "duplicate": false
 }
 ```
+
+The request and response are defined by the [published verification operation](https://plainrouter.com/docs/api-reference/event/verify-server-side-signal-ingestion).
 
 Repeating the request is safe. It returns HTTP `200` with `duplicate: true` and does not create another ledger event.
 
