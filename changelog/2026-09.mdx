@@ -6,7 +6,37 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 13, 2026">
+
+  ## Meta comparisons distinguish missing reads from reported data
+
+  **Improved** · Signals and CSV exports show stored Meta clicks, impressions, and account-currency spend with daily **Reported**, **Read but not reported**, and **Not yet read** states. Incomplete reads remain unavailable rather than becoming assumed zeros. [Read the comparison](/signals/health-and-performance#platform-read-state).
+</Update>
+
+<Update label="September 12, 2026">
+
+  ## Connect a Meta ad account for reporting
+
+  **Improved** · The Signals overview's Meta connection flow asks you to select a business portfolio and ad account for platform reporting. Conversion-destination setup remains separate. [Choose the connection you need](/signals/connect-meta#connect-meta-for-reporting).
+</Update>
+
 <Update label="September 10, 2026">
+
+  ## Recover a removed collection hostname
+
+  **Fixed** · Signals now identifies a managed hostname removed at Cloudflare and offers **Re-provision hostname**. Re-provisioning preserves the removed record as history. [Recover the hostname](/signals/configure-dns#cloudflare-removed-the-collection-hostname).
+
+  ## Workspace grants can be revoked through MCP
+
+  **New** · Execution calls check an active workspace grant for the requested operation. The authorized `revoke_grant` tool stops further operations under that grant and records an audit event. [Review grant revocation](/reference/mcp-tools#revokegrant).
+
+  ## Legacy Launcher is disabled by default
+
+  **Changed** · Legacy Drive connection, inventory sync, file import, and `launcher.*` MCP tools require explicit feature enablement. [Check Launcher availability](/launcher/connect-drive).
+
+  ## Free conversion checks are available in the browser
+
+  **New** · Inspect synthetic payloads, event IDs, cookies, and field coverage, or build campaign URLs with the [free tools](https://plainrouter.com/tools). Local checks do not establish platform delivery or Meta match quality.
 
   ## Landing click IDs stay in document memory
 
@@ -17,7 +47,26 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   **Fixed** · Renaming a team in settings or during billing checkout now updates its existing Stripe customer after the name is saved. A temporary Stripe failure leaves the saved name intact. [Review billing setup](/billing/overview).
 </Update>
 
+<Update label="September 9, 2026">
+
+  ## Arrival totals remain complete when a small cell is withheld
+
+  **Improved** · Signals and CSV exports retain complete arrival totals, including totals below five. A withheld strict-EU subtotal is labeled separately and does not reduce the total or difference calculation. Completed reporting windows and **Today so far** remain separate. [Interpret the totals](/signals/health-and-performance#events-received).
+</Update>
+
 <Update label="September 8, 2026">
+
+  ## Find the right Meta Pixel during setup
+
+  **Improved** · Signals setup starts with the website address and offers a searchable dataset/Pixel picker. Saving a destination returns to the overview, where **Install** opens collection-domain setup. [Connect the destination](/signals/connect-meta#connect-the-destination).
+
+  ## Accept and manage team invitations
+
+  **Improved** · Invitations continue through login or registration and require an explicit **Join** action with the invited email. Links last seven days; owners can resend or cancel pending invitations. [Join an invited team](/quickstart#join-an-invited-team).
+
+  ## Retention instruction records are retired
+
+  **Changed** · The former retention-instruction history and export have been removed. Workspace identity-retention policy continues to apply. [Review current retention behavior](/signals/overview#identity-retention).
 
   ## Arrivals are counted on page load
 
@@ -30,6 +79,13 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Dashboard charts are clearly marked as a preview
 
   **Improved** · The dashboard offers customizable charts labeled as sample data. Workspace, team, and profile names save on blur, and appearance settings include System mode. Use Signals for actual website measurements.
+</Update>
+
+<Update label="September 7, 2026">
+
+  ## Signals centers the overview on website measurement
+
+  **Improved** · The workspace Signals page now presents collection status, arrivals and platform activity, and verified revenue. Account-scoped gateway delivery, EMQ, and reconciliation diagnostics remain available through MCP. [Read Signals measurements](/signals/health-and-performance).
 </Update>
 
 <Update label="September 6, 2026">

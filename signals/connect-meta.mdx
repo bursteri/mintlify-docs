@@ -12,7 +12,7 @@ This guide covers Plainrouter's managed integration. For integration choices, st
 
 You need:
 
-- An active Signal and collection domain. Complete the [Signals quickstart](/quickstart) first.
+- A workspace with its website address saved in [Signals setup](/quickstart). You can connect Meta before installing the collection domain; delivery checks require a working installation.
 - Workspace-owner access in Plainrouter.
 - Access to the required Meta Business assets, Meta ad account, and dataset, with permission to grant Plainrouter access.
 - The [current Signals snippet](/signals/install-pixel) and a [consent integration](/signals/track-events#set-consent) for browser conversions.
@@ -20,11 +20,17 @@ You need:
 
 An identity-free arrival does not require a Meta connection and never triggers Meta delivery. Advertising conversion events require the supported consent grant.
 
+## Connect Meta for reporting
+
+The **Connect Meta** action in the Signals overview starts account reporting setup. Complete Meta authorization, choose the business portfolio and active **Ad account**, and select **Confirm account**. The overview then reads stored platform activity for that account.
+
+This reporting connection is separate from selecting a conversion destination. Connecting an ad account alone does not prove that a Pixel is configured or that conversions are being delivered.
+
 ## Connect the destination
 
 <Steps>
   <Step title="Open Meta setup">
-    Open **Signals** and choose **Connect Meta**.
+    Open [Meta destination setup](https://plainrouter.com/signals/meta) for the selected workspace, or continue the Meta step during Signals onboarding.
   </Step>
   <Step title="Authorize Meta">
     Complete Meta's authorization flow and grant access to the intended Meta ad account and dataset.
@@ -32,10 +38,10 @@ An identity-free arrival does not require a Meta connection and never triggers M
     Meta access tokens stay on the server. Do not add a Meta token or Signals workspace secret to your browser snippet.
   </Step>
   <Step title="Choose a dataset">
-    Select the **Meta dataset** that should receive this Signal's events, then choose **Connect Meta dataset**. Check the dataset ID against the one you intend to use in Meta Events Manager.
+    Search the **Pixel** picker by dataset name or ID, select the dataset that should receive this Signal's events, then choose **Connect Meta dataset**. The picker gathers accessible datasets from active authorized ad accounts and keeps each dataset associated with its account. Check the selected ID against Meta Events Manager.
   </Step>
   <Step title="Confirm the destination">
-    Plainrouter shows **Destination active**, the dataset ID, and the associated Meta ad account. Verify both identifiers, then continue with the delivery checks below.
+    After saving the destination, Plainrouter returns to the Signals overview. Use **Install** to finish collection-domain setup if needed, then continue with the delivery checks below.
   </Step>
 </Steps>
 
@@ -64,7 +70,7 @@ Check the stages separately:
 | --- | --- | --- |
 | Website collection | [Inspect the arrival request](/signals/install-pixel#verify-the-installation). | An accepted arrival proves collection receipt, not a Meta conversion. |
 | Consented conversion ingestion | Confirm your conversion request succeeds. | `202` means Plainrouter accepted the event for processing. |
-| Destination delivery | Open the event's delivery trace through [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace), or inspect **Delivery acceptance** and **Diagnostics** in Signals. | `accepted` means Meta accepted that delivery. Pending and failed states require separate interpretation. |
+| Destination delivery | Open the event's delivery trace through [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace), or request the account-scoped [`get_signal_health`](/reference/mcp-tools#getsignalhealth) diagnostic through MCP. | `accepted` means Meta accepted that delivery. Pending and failed states require separate interpretation. |
 | Browser/server pairing | Inspect the intended dataset in Meta Events Manager and compare the event name and event ID for the pair. | Matching identifiers support deduplication; an API receipt alone does not verify the pair. |
 
 Meta acceptance does not guarantee attribution, an Event Match Quality score, or improved advertising performance. Use [Signal health and performance](/signals/health-and-performance) to interpret stored reporting windows and differences.

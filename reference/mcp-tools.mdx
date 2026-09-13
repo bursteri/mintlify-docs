@@ -1,9 +1,9 @@
 ---
 title: "Plainrouter MCP server"
-description: "Reference for the 13 production tools and four synthetic test-mode tools exposed by Plainrouter MCP."
+description: "Reference for Plainrouter MCP tools, workspace grants, conditional Launcher availability, and four synthetic test-mode tools."
 ---
 
-Plainrouter MCP server version `0.3.2` exposes 13 production tools. Account-scoped tools use the advertising account selected during workspace-token issuance.
+Plainrouter MCP server version `0.3.2` exposes ten tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use the advertising account selected during workspace-token issuance.
 
 For client configuration and your first account read, follow [Connect your agent to Plainrouter's Meta Ads MCP server](/actions/connect-agent).
 
@@ -21,7 +21,12 @@ For client configuration and your first account read, follow [Connect your agent
 | `launcher.batch_status` | Read-only, idempotent | Read the bounded status of one Launcher batch. |
 | `launcher.preview_batch` | Non-destructive Plainrouter write | Evaluate the authoritative preflight gate without provider work. |
 | `launcher.execute_batch` | Closed execution entry | Returns a bounded refusal during Launcher Phase B-1 and performs no mutation. |
+| `revoke_grant` | Idempotent authorization write | Revoke an authorized grant in the caller's workspace. |
 | `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
+
+<Note>
+  The four `launcher.*` entries above describe the conditional legacy contract. Launcher is disabled by default, so those tools are absent from discovery and the file-import route returns `404`.
+</Note>
 
 <Warning>
   Proposal-producing tools do not write to Meta during the MCP request. In **Suggest only**, approval ends without execution. In an executable mode, supported creative work can run only after the policy and approval pipeline authorizes it.
@@ -48,6 +53,10 @@ and resource catalogs, and static `ui://` MCP App shells are publicly
 discoverable. Every tool call and account-data read requires an account-bound
 workspace execution token.
 
+## Busy-workspace errors
+
+A concurrent operation can return `workspace_lock_timeout` through MCP. Affected JSON HTTP routes return HTTP `503` with `Retry-After: 1`; the browser shows **The workspace is busy. Retry the operation shortly.** Wait before retrying and retain the original idempotency key for the same operation.
+
 ## Shared authorization and scope
 
 Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`. Every Launcher tool requires the `ad-account.read` baseline.
@@ -55,6 +64,8 @@ Signals read tools require an active principal with `ad-account.read`. `verify_s
 Clients authenticate with an owner-issued [workspace execution token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. OAuth management credentials cannot authenticate to the MCP server.
 
 `launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, `launcher.execute_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview and the closed execution entry require `actions.propose`.
+
+Every production call also checks an active, unexpired grant for the same workspace and the requested operation. Revoked grants cannot authorize a call. The `revoke_grant` tool applies its separate revocation-authority check described below.
 
 Scoped responses identify:
 
@@ -153,6 +164,8 @@ The response includes:
 - `marketing_api_called: false`.
 - Response generation time.
 
+The response also includes stored account-level `platform_claimed_clicks`, `platform_impressions`, `platform_spend`, per-day `platform_daily` read states, and `claimed_clicks_last_read_at` when available. These platform fields are descriptive context, not admissible spend or target-performance evidence for Actions proposals.
+
 ### Measurability
 
 ```json
@@ -186,6 +199,22 @@ The event is identity-free, modeled, excluded from enforcement, and never dispat
 
 The call fails if the connection lacks `signals.verify` or the authorized workspace has no active Signal.
 
+## `revoke_grant`
+
+Revoke a workspace grant using its 26-character ULID in `grant_id`. Obtain the grant ID from the authorized token-management response; it is different from the token ID and plaintext credential.
+
+```json
+{
+  "grant_id": "01K2A000000000000000000001"
+}
+```
+
+The caller needs an active execution credential in the same workspace and either an active `revoke_grant` permission or authority as the human who delegated the target agent. Admin-tier grants include revocation permission. Knowing a grant ID does not grant access to another workspace.
+
+The tool returns `grant_id`, `workspace_id`, and `revoked_at`. It records the revocation in the audit chain and prevents credentials backed by that grant from authorizing subsequent operations. An authorized repeat returns the existing revocation without creating another one. It does not undo previously executed advertising actions.
+
+Invalid grant-ID input fails validation. Missing or inactive caller authorization, another workspace's grant, or insufficient revocation authority is refused.
+
 ## `show_spend_cap_approval`
 
 This read-only, idempotent tool renders the static
@@ -200,7 +229,7 @@ Plainrouter's app presentation.
 
 ## `launcher.draft_batch`
 
-This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the Plainrouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
+Available only when legacy Launcher is enabled. This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the Plainrouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
 
 It requires an owner-issued [workspace token](/actions/workspace-tokens) with the **Write** or **Admin** tier.
 
@@ -235,7 +264,7 @@ The current MCP entry point returns an advisory gate with `not_evaluated`. Treat
 
 ## Launcher batch status and preview
 
-These tools accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. Plainrouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
+These tools are available only when legacy Launcher is enabled. They accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. Plainrouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
 
 ### `launcher.batch_status`
 
@@ -259,7 +288,7 @@ This tool requires a Write or Admin token with `actions.propose`.
 
 ### `launcher.execute_batch`
 
-The execution entry is registered so clients can discover the complete Phase B-1 contract, but it is deliberately closed. After validating the token and token-bound batch, every call returns `not_executable_in_phase_b1`.
+When legacy Launcher is enabled, the execution entry is discoverable but deliberately closed. After validating the token and token-bound batch, every call returns `not_executable_in_phase_b1`.
 
 It does not evaluate the gate, advance the batch, create an Actions proposal or receipt, contact Meta, or mutate provider state.
 

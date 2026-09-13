@@ -3,10 +3,14 @@ title: "Connect Google Drive"
 description: "Claim and verify a client-owned creative folder for read-only Launcher inventory sync before importing assets into governed drafts."
 ---
 
+<Warning>
+  Legacy Launcher is disabled by default. This guide applies only where Plainrouter has explicitly enabled it. While disabled, Drive connection and file-import routes return `404`, inventory sync does not run, and `launcher.*` tools are absent from MCP discovery. A workspace token cannot enable the feature.
+</Warning>
+
 Launcher connects to client-owned Google Drive folders through a read-only service account. Plainrouter verifies ownership before it inventories any media, so knowing a folder link is never enough to claim another workspace's creative library.
 
 <Info>
-  This release inventories Drive media metadata only. It does not download media bytes, upload media to Meta, create ads, or activate spend.
+  When enabled, Launcher inventories Drive media metadata only. It does not download media bytes, upload media to Meta, create ads, or activate spend.
 </Info>
 
 ## Before you begin

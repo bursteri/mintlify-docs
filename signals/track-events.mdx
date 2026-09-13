@@ -344,3 +344,9 @@ The managed flow sends the browser `Purchase` with Pixel `eventID` and submits t
 4. If duplicates remain, inventory confirmation-page handlers, tag-manager tags, theme Pixels, commerce plugins, Stripe webhooks, and backend jobs. Remove overlapping senders after validating the intended flow.
 
 An accepted collector request proves ingestion. It does not establish that Meta received both sides, deduplicated the purchase, or attributed it to an ad. See [How do I verify Meta delivery?](/signals/connect-meta#how-do-i-verify-meta-delivery).
+
+## Check a payload before sending it
+
+Use the free [conversion tools](https://plainrouter.com/tools) to inspect a synthetic Meta payload, event-ID pairing, or `_fbp`/`_fbc` formatting in your browser. These local checks do not submit an event to Plainrouter or Meta. The field-coverage checker is an editorial checklist, not Meta's Event Match Quality score.
+
+Use the [sandbox](/sandbox) for Plainrouter request validation and the [destination checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for actual delivery evidence.

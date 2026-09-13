@@ -49,4 +49,18 @@ plainrouter events list --per-page 25 --json
 
 A successful request returns the workspace's event response. An empty event list can still be a successful authenticated request; it does not prove that browser collection is installed. A `401` means the credential needs attention.
 
+## Trace a conversion from the terminal
+
+After authenticating, inspect an event you already sent and read stored reports:
+
+```bash
+plainrouter events get YOUR_EVENT_ID --json
+plainrouter reports emq --json
+plainrouter reports reconciliation --date 2026-09-12 --json
+```
+
+Replace `YOUR_EVENT_ID` with the original conversion ID and choose the reconciliation date you need. These commands read stored results. Inspect the event's delivery trace separately from ingestion acceptance; `202` alone does not prove Meta delivery.
+
+Arrival totals are aggregate-only. They do not appear in `events list` or `events get`, so an empty event list does not contradict arrivals shown in Signals. Use the [Signals overview and CSV export](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks) for arrivals and platform activity. The CLI's report commands read conversion reconciliation and EMQ, not the dashboard's arrival comparison.
+
 For application code, continue with your language's setup guide above. For identity-free synthetic requests before production setup, see [Try the API without an account](/sandbox).

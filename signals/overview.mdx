@@ -64,7 +64,7 @@ Server-side `POST /events` requests must include a `consent_basis` of `consent` 
 
 New Signals setup uses 90-day visitor identity retention without a retention questionnaire. The authenticated admin API retains the supported 30- and 90-day settings, subject to server-side policy. Identity retention applies to the workspace's retained visitor identity state; it does not widen the fixed retention limits of every ledger table.
 
-Plainrouter records the current retention instruction with its effective time, controller identity, duration, selecting user, and supporting context. Retention changes must pass the server-side retention policy. MCP does not expose a retention setter.
+Retention changes must pass the server-side retention policy. MCP does not expose a retention setter. The former retention-instruction history and export are no longer available; the retention policy still applies.
 
 ## Browser and server deduplication
 

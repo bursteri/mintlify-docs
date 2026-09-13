@@ -1,97 +1,62 @@
 ---
 title: "Signal health and performance"
-description: "Interpret the Signals dashboard, measurement states, and stored gateway-versus-Meta comparisons to diagnose delivery and match-quality changes."
+description: "Read Signals arrival totals, reporting windows, stored Meta activity, and account-scoped delivery diagnostics."
 ---
 
-The **Signals** dashboard answers two questions: whether your first-party measurement path is working, and whether stored conversion counts align with Meta's reports.
+Open **Signals** to check collection status and compare arrivals with stored platform activity. Use **Last 7 days**, **Last 30 days**, or **Last 90 days** to select a completed reporting window. The dates and timezone shown above the metrics define the actual period; retention can shorten it. **Today so far** is a separate, incomplete local-day count.
 
-The page refreshes its stored measurements about once per minute. Opening it does not trigger a live Meta Marketing API request.
-
-## Health states
-
-| State | Meaning | What to do |
-| --- | --- | --- |
-| **Setup required** | The Signal or first-party hostname is not fully active. | Finish CNAME and HTTPS validation. |
-| **Awaiting data** | Setup is active, but Plainrouter has not received a measurement event. | Send a server event or install the optional pixel and visit the live site. |
-| **Measurement pending** | Events are arriving, but delivery, EMQ, or reconciliation measurements are incomplete. | Allow the first measurement cycles to complete and watch diagnostics. |
-| **Needs attention** | At least one warning or critical diagnostic is active. | Open **Diagnostics** and address each item. |
-| **Healthy** | Event flow exists and all required recent measurement categories are present without warnings. | Continue monitoring. |
-
-<Note>
-  Event activity alone is not enough for **Healthy**. Plainrouter waits for recent delivery outcomes, an EMQ snapshot, and measurable reconciliation history before claiming measured health.
-</Note>
+Opening this page or choosing **Export** reads stored data. It does not trigger a live Meta Marketing API request.
 
 ## Summary metrics
 
 ### Events received
 
-Arrival activity counts the dedicated arrival records sent once per document load. A consented `PageView`, purchase, or other conversion does not add another arrival. The completed reporting window and **Today so far** are separate; today's value is an incomplete local-day count.
+The arrival total counts dedicated arrival records sent once per document load. A consented `PageView`, purchase, or other conversion does not add another arrival. Arrivals confirm collection; they never create Meta deliveries.
 
-This metric covers collection. It does not mean every event was eligible for or accepted by Meta.
+Arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their records contain no page URL, referrer, platform or channel source, visitor identity, IP address, user agent, or commerce details. Event time is rounded down to the UTC hour. Invalid traffic, synthetic events, and legacy exposure rows do not enter the arrival total.
 
-Arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their records contain no page URL, referrer, platform or channel source, visitor identity, IP address, user agent, or commerce details. Event time is rounded down to the UTC hour. Arrivals never create destination deliveries, and legacy exposure rows do not enter the new arrival totals. Invalid traffic is excluded.
-
-Privacy-limited display is separate from collection. A strict-EU severed subtotal from one to four arrivals is withheld until it reaches five. If no other component can be shown, the display is **Suppressed (&lt;5)**. If other components can be shown, the displayed number is partial and omits the withheld subtotal. Suppressed and partial values do not mean that collection stopped.
+The total remains a complete number, including when it is below five. A strict-EU severed subtotal from one to four is withheld separately. In that case, the page and CSV say **Complete total; one small cell is withheld**. The `partial` marker refers to the withheld component; it does not subtract arrivals from the total or the difference calculation.
 
 ### Match quality
 
-This is the latest stored Meta Event Match Quality score on a 0–10 scale. The trend compares the current snapshot with the prior week when a comparison exists.
-
-The chart appears after at least two stored snapshots.
-
-### Delivery acceptance
-
-This is the percentage of non-test destination deliveries from events received in the last 24 hours that reached an accepted state.
-
-```text
-acceptance rate = accepted deliveries / total non-test deliveries × 100
-```
-
-The detail separates accepted and failed deliveries. Pending deliveries include queued, sent, and retrying states.
-
-### Verified gap
-
-This compares stored daily reconciliation counts:
-
-```text
-observed gap = gateway-verified accepted conversions - Meta-reported conversions
-```
-
-- A positive value means the gateway count is higher.
-- A negative value means the Meta-reported count is higher.
-- Zero means the stored counts match for the selected window.
-
-Alignment uses the larger of the two totals as the denominator. It is unavailable when both totals are zero.
-
-<Warning>
-  Verified gap is an observed account/dataset-level count difference. It is not CPA, attribution lift, incrementality, spend, or target-level performance.
-</Warning>
-
-## Gateway vs Meta chart
-
-Each row shows one stored daily reconciliation report:
-
-- **Gateway** is the number of gateway-verified accepted conversions.
-- **Meta** is the number reported by Meta in the stored reconciliation run.
-- The signed number is that day's observed gap.
-- An amber gap indicates the day exceeded the configured residual threshold.
-
-If no rows appear, Plainrouter has not stored a daily reconciliation report for the window.
+**Event Match Quality** shows a stored Meta score and its capture date when available. A missing score is not zero. Follow the displayed notice if capture is pending, Meta returns no score, or the connection needs `ads_read` access. Match quality alone does not prove successful delivery or improved advertising results.
 
 ## Arrivals vs platform-claimed clicks
 
-The **Arrivals vs platform-claimed clicks** panel compares customer-visible observed arrivals with account-level clicks reported by the connected platform. It uses the selected complete-day window, shortened when the workspace's Signals retention window does not contain the full period. **Today so far** is shown separately.
+The **Arrivals and platform activity** panel compares observed arrivals with account-level Meta data for the displayed period.
 
 | Metric | Meaning |
 | --- | --- |
-| **Total arrivals** | Valid observed arrival records after the customer-visible privacy rules. Conversion events and legacy exposure rows do not contribute; a withheld component can make the result suppressed or partial. |
-| **Platform-claimed clicks** | Clicks stored by Plainrouter during scheduled reconciliation for the same account and daily period. |
+| **Last N days** | Complete arrival total for the retained completed-day window. |
+| **Today so far** | Arrivals since the start of the current local day, separate from the completed window. |
+| **Platform-claimed clicks** | Account-level clicks captured from Meta for the same period. |
+| **Impressions** | Stored Meta impressions for the connected account. |
+| **Platform spend** | Stored account spend in the displayed account currency. |
 | **Difference** | Total arrivals minus platform-claimed clicks. |
-| **Difference vs claimed** | The difference as a percentage of platform-claimed clicks. It is unavailable when the claimed-click total is zero. |
 
-The channel table reads consented, attributed conversion-event data separately from arrival totals. It includes global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows never appear in the channel view. Because arrival records carry no channel identity, the channel rows do not allocate or sum to the total arrival count.
+These platform metrics describe the ad account, which may advertise more than this website. They do not match individual clicks to individual arrivals or establish attribution, incrementality, or return on ad spend.
 
-Opening the dashboard or clicking **Export CSV** reads stored data only and does not make a live Marketing API request. Plainrouter reports **Not connected** when no active platform connection exists and **Unavailable** when the retained period is incomplete or stored click history is missing or stale.
+### Platform read state
+
+The panel shows the last platform read time and counts days in three states:
+
+| State | Meaning |
+| --- | --- |
+| **Reported** | A successful read stored a daily Meta row. |
+| **Read but not reported** | A successful read covered the date, but Meta returned no row for it. |
+| **Not yet read** | No qualifying successful read covers the date. |
+
+A completed read with no reported row is different from a missing read. Missing or incomplete platform evidence stays unavailable; do not turn a dash into zero. An actual zero-spend result can show **This account reported no spend in this period**.
+
+### Channel details and export
+
+Channel details read consented, attributed conversion-event data separately from arrival totals. They include global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows do not appear in the channel view. Because arrival records carry no channel identity, channel rows do not allocate or sum to the arrival total.
+
+Choose **Export** to download the stored comparison as CSV with its reporting period and total-basis labels. The export preserves the distinction between unavailable data and zero.
+
+### Verified revenue
+
+**Verified revenue** shows eligible settled revenue grouped by currency. Connect [Stripe verified revenue](/signals/track-events#verify-stripe-checkout-settlement) from workspace settings. Revenue, arrivals, and platform spend are different measurements; do not combine currencies or infer attribution from their proximity on the page.
 
 ## Why numbers differ
 
@@ -120,53 +85,64 @@ Keep unique visitors, visits, pageviews and custom-event goals separate. Start w
 
 Compare GA4 and Plausible using their own reports alongside Plainrouter. The platform-claimed-clicks panel reads stored Meta data; it does not reconcile those analytics reports.
 
+## Health states
+
+Account-scoped health remains available through [`get_signal_health`](/reference/mcp-tools#getsignalhealth). These diagnostic states are separate from the Signals overview's collection status.
+
+| State | Meaning | What to do |
+| --- | --- | --- |
+| **Setup required** | Signals or the collection hostname is not active. | Finish installation or recover the hostname. |
+| **Awaiting data** | Setup is active, but no retained arrival evidence exists. | Visit the installed website and check its arrival request. |
+| **Quiet** | Retained arrivals exist, but none fall in the selected window or today. | Check current traffic and the selected dates before reinstalling. |
+| **Measurement pending** | Arrival activity exists, but delivery, EMQ, or reconciliation evidence is incomplete. | Check eligible conversions and allow scheduled measurements to complete. |
+| **Needs attention** | A warning or critical diagnostic is active. | Follow the returned diagnostic. |
+| **Healthy** | Required recent measurements exist without active warnings. | Continue monitoring. |
+
+## Delivery acceptance
+
+The account-scoped health response reports the percentage of non-test destination deliveries from events received in the last 24 hours that reached an accepted state:
+
+```text
+acceptance rate = accepted deliveries / total non-test deliveries × 100
+```
+
+Pending includes queued, sent, and retrying deliveries. Inspect an individual conversion through [the event API](/reference/conversion-api) or the [CLI](/cli/commands#events) to check its delivery trace.
+
+## Verified gap
+
+[`get_performance`](/reference/mcp-tools#getperformance) reads stored reconciliation counts:
+
+```text
+observed gap = gateway-verified accepted conversions - Meta-reported conversions
+```
+
+A positive gap means the gateway count is higher; a negative gap means Meta's count is higher. Alignment uses the larger total as the denominator and is unavailable when both are zero. This is a conversion-count comparison, separate from arrivals versus clicks.
+
+## Gateway vs Meta chart
+
+The daily rows in the stored performance response identify gateway-verified conversions, Meta-reported conversions, and the observed gap for each report date. Use those rows or the [reconciliation report API](/reference/conversion-api) when investigating a conversion-count difference. The Signals overview no longer presents the old gateway chart.
+
 ## Diagnostics
 
-Diagnostics explain the state behind the summary. Common messages include:
-
-| Diagnostic | Meaning |
-| --- | --- |
-| **Collection setup is incomplete** | The Signal or collection certificate is not active. |
-| **Waiting for the first event** | No server or browser measurement event has arrived yet. |
-| **No events received in 24 hours** | Historical events exist, but recent collection stopped. |
-| **Meta comparison is not active** | No active Meta destination is connected. |
-| **Delivery measurement pending** | Events exist, but no recent delivery outcome exists. |
-| **Meta deliveries are failing** | One or more non-test deliveries failed in the last 24 hours. |
-| **Match quality measurement pending** | No stored EMQ snapshot exists yet. |
-| **Match quality dropped** | The latest EMQ snapshot crossed the configured week-over-week alert threshold. |
-| **Reconciliation measurement pending** | No measurable report history exists yet. |
-| **Reconciliation measurements are stale** | The latest report is more than 48 hours old. |
-| **A reconciliation gap needs review** | At least one day exceeded the configured residual threshold. |
+Use `get_signal_health` for account-scoped delivery, match-quality, and reconciliation diagnostics. An arrival proves collection but cannot satisfy every health check. A missing Meta destination, failed deliveries, missing snapshots, stale reports, and a reconciliation gap require different follow-up actions.
 
 ## Measurement freshness
 
-Reconciliation normally runs daily. Plainrouter marks history stale after 48 hours. Until a recent report exists, the read is `not_measurable` and its quantitative values cannot be cited as evidence for an Actions proposal.
-
-The **Measurement state** panel shows the connected domain, dataset ID, last event, and the time the health response was generated.
+Reconciliation normally runs daily. History older than 48 hours is stale. When `get_performance` returns `not_measurable`, its quantitative values cannot support an Actions proposal. Check the response's reporting period, data source, and generation time before using it.
 
 ## Troubleshoot by symptom
 
-<AccordionGroup>
-  <Accordion title="No events received in 24 hours">
-    Confirm the snippet still loads from the collection domain. Check `/v1/arrival` for arrival collection and `/v1/events` for consented conversions, then review recent deployment changes, your content security policy, and the workspace's allowed website domain.
-  </Accordion>
-  <Accordion title="Meta deliveries are failing">
-    Reconnect Meta if access changed or expired. Confirm the intended dataset is still available, then review whether failures continue on new events.
-  </Accordion>
-  <Accordion title="Measurement remains pending">
-    Confirm events are arriving and Meta is connected. Delivery outcomes need eligible consented events. EMQ and reconciliation also require their scheduled measurement jobs to create stored snapshots and reports.
-  </Accordion>
-  <Accordion title="Gateway and Meta differ">
-    Review the affected dates and event types. Check consent-skipped events, pending or failed deliveries, late reporting, deduplication, and any duplicate integration that still sends to the same dataset.
-  </Accordion>
-</AccordionGroup>
+| Symptom | Check next |
+| --- | --- |
+| **Not receiving yet** | Confirm the deployed snippet sends an accepted `/v1/arrival` request, then wait for stored arrival evidence. |
+| Previously installed, now quiet | Check the selected dates and current site traffic. A quiet window does not erase earlier installation evidence. |
+| Collection hostname removed | Follow [managed-hostname recovery](/signals/configure-dns#cloudflare-removed-the-collection-hostname). |
+| Arrivals appear but conversions do not reach Meta | Check consent, the destination, and the individual event's delivery trace. |
+| Platform numbers are unavailable | Check connection permissions, the selected account, retained dates, and platform read states. |
+| Gateway and Meta conversion counts differ | Review consent-skipped, pending or failed deliveries, late reporting, deduplication, and duplicate integrations. |
 
 ## Delete a Signal
 
-Workspace owners can delete a Signal from the delete control in the Signal health header.
+The Signals overview no longer has the old health-header delete control. During collection-domain setup, workspace owners can use the domain's delete control to reset Signals. This removes its collection configuration and related data; accepted events already held by Meta are not retracted.
 
-Deletion first deactivates collection and removes the hostname from Plainrouter's edge mapping. It then deletes the Signal and its related events and destination configuration. You can create a new Signal afterward, but the deleted Signal cannot be restored from the dashboard.
-
-<Warning>
-  Deleting a Signal is permanent. It does not retract events that a destination already accepted. Use the destination's own privacy controls or support process for data already held there.
-</Warning>
+Deleting the entire workspace is a separate permanent action under **Account** → **Workspace** and also removes its linked accounts and workspace data.

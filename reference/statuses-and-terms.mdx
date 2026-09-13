@@ -5,10 +5,13 @@ description: "Interpret the Signals and Actions states shown in Plainrouter, inc
 
 ## Signal health
 
+These labels come from the account-scoped `get_signal_health` diagnostic. The Signals overview presents collection status and arrival metrics separately.
+
 | API value | UI label | Meaning |
 | --- | --- | --- |
 | `setup_required` | Setup required | Signal collection or hostname activation is incomplete. |
-| `awaiting_data` | Awaiting data | Setup is active, but no event has been recorded. |
+| `awaiting_data` | Awaiting data | Setup is active, but no retained arrival evidence exists. |
+| `quiet` | Quiet | Retained arrival evidence exists, but none falls in the selected window or today. |
 | `active_unmeasured` | Measurement pending | Events exist, but required delivery, EMQ, or reconciliation measurements are incomplete. |
 | `needs_attention` | Needs attention | At least one warning or critical diagnostic is active. |
 | `healthy` | Healthy | Event activity and all required measurement categories are recent and have no active warning. |
@@ -25,12 +28,15 @@ description: "Interpret the Signals and Actions states shown in Plainrouter, inc
 
 ### Collection hostname
 
+`removed_at_cloudflare` means Cloudflare removed the managed hostname. Automatic refresh stops; use **Re-provision hostname** to recover. The removed record remains as history.
+
 | Value | Meaning |
 | --- | --- |
 | `pending_validation` | Plainrouter is waiting for DNS or certificate validation. |
 | `active` | The hostname and HTTPS certificate are active. |
 | `failed` | Hostname provisioning or validation failed. |
 | `deactivated` | The hostname is no longer active. |
+| `removed_at_cloudflare` | The managed hostname was removed at Cloudflare and requires re-provisioning. |
 
 ## Destination delivery
 

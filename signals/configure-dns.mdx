@@ -99,6 +99,12 @@ If Plainrouter reports a CAA conflict, review the CAA records on your domain and
 
 DNS updates can take longer than the provider's dashboard suggests. Leave the CNAME in place and retry after several minutes. Changing the value repeatedly restarts the validation process.
 
+### Cloudflare removed the collection hostname
+
+If Plainrouter reports **Cloudflare removed this collection hostname**, choose **Re-provision hostname** and complete the managed-hostname setup again. Plainrouter stops retrying the removed hostname, and installation cannot verify green while that state remains.
+
+Re-provisioning creates a new current hostname record and preserves the removed record as history. Check the DNS instructions shown for the replacement, then wait for HTTPS validation and repeat the installation check. This recovery applies to managed-hostname installations.
+
 ## Next step
 
 After the collection domain becomes active, [install the Signals pixel](/signals/install-pixel) and wait for the first qualifying arrival.

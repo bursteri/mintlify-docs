@@ -47,6 +47,12 @@ Before you begin, you need:
   </Step>
 </Steps>
 
+## Join an invited team
+
+Open the invitation email, sign in or register with the invited email address, and choose **Join** on the invitation page. Opening the link alone does not add you to the team. If you are signed in with a different email, use the account-switch option and continue with the invited address.
+
+Invitation links last seven days. After acceptance, Plainrouter opens the invited team's settings. Owners can resend or cancel pending invitations from team settings. Ask the owner to resend an expired or older link; accepted and cancelled invitations cannot be reused.
+
 ## Set up Signals
 
 Signals collects first-party conversion events from your website through a collection subdomain you control.
@@ -57,8 +63,8 @@ Signals collects first-party conversion events from your website through a colle
 
     The form supplies `https://`. Use the exact website host, without a page path, query string, or fragment. The website address identifies the site allowed to send events; it is separate from your collection subdomain, such as `collect.example.com`.
   </Step>
-  <Step title="Continue to collection-domain setup">
-    Follow the setup flow to the collection-domain and DNS instructions. Meta connection and dataset selection are separate from installing first-party Signals.
+  <Step title="Open installation from the overview">
+    The website step leads into Meta connection and the searchable Pixel picker. After saving a destination, you return to the Signals overview. Choose **Install** for the collection-domain and DNS instructions. You can close Meta setup and return later; arrival collection does not require a Meta destination.
 
     Use the collection domain displayed by Plainrouter. When entering a collection subdomain, use a hostname such as `collect.example.com`, without `https://` or a path.
   </Step>
@@ -125,7 +131,7 @@ Choose the next step that matches your goal:
     Send paired browser Pixel and server events with automatic deduplication.
   </Card>
   <Card title="Read signal health" icon="activity" href="/signals/health-and-performance">
-    Learn when measurement is healthy, pending, or needs attention.
+    Read arrival windows, platform read states, and account-scoped delivery diagnostics.
   </Card>
   <Card title="Connect an agent" icon="bot" href="/actions/connect-agent">
     Authorize one ad account for a compatible MCP client.

@@ -9,7 +9,7 @@ See [Authentication and clients](/auth) for the canonical
 comparison with Signals workspace secrets, OAuth management credentials, and
 browser sessions.
 
-Only the workspace owner can issue, rotate, or revoke workspace tokens. A client cannot use the token to select another workspace or advertising account.
+Only the workspace owner can issue, rotate, or revoke workspace tokens. An active destination binding can make a Meta ad account visible in another workspace without transferring ownership; issue execution tokens from the owning workspace. A client cannot use the token to select another workspace or advertising account.
 
 ## Management and execution credentials
 
@@ -52,6 +52,8 @@ Authorization: Bearer <workspace-token>
 
 ## Access tiers
 
+Legacy Launcher is disabled by default. A Read, Write, or Admin token does not make its tools or file-import route available; the Launcher permissions below apply only where the feature is enabled.
+
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
 | **Read** | `workspace:read` | Read account, Signals, creative context, and Launcher batch status, and submit the consent-safe Signal verification event. |
@@ -67,6 +69,12 @@ Plainrouter rechecks the issuing person's live workspace role on every authentic
 </Note>
 
 To change a token's account or tier, issue a new token and revoke the old one. Plainrouter does not elevate an existing token in place.
+
+## Workspace grants
+
+Each execution credential is linked to a grant that identifies its principal, workspace, allowed operations, and expiry. Plainrouter checks that the grant is active and covers the requested operation, in addition to the credential's existing account and role restrictions.
+
+Token-management responses include `grant_id`. An authorized administrator can use [`revoke_grant`](/reference/mcp-tools#revokegrant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
 
 ## Rotate or revoke a token
 
