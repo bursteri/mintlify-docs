@@ -6,6 +6,21 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 14, 2026">
+
+  ## Inspect workspace grants and verify revocation
+
+  **Documentation** · The workspace-token guide now covers **Workspace settings → Workspace grants**, exact operations, revocation confirmation, and the resulting audit receipt. Authentication troubleshooting explains why a bearer token cannot replace a dashboard session. [Review grant management](/actions/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) and [dashboard authentication](/auth#why-does-a-dashboard-url-reject-my-bearer-token).
+
+  ## Interpret Event Match Quality and Meta recovery evidence
+
+  **Documentation** · Signals troubleshooting now distinguishes a pending EMQ capture from a capture without scores, and separates **observed**, **not observed**, and **unknown** browser-pixel observations. It explains the UTC dates and inspection limits without treating server acceptance as proof of attribution or incremental conversions. [Read EMQ states](/signals/health-and-performance#why-is-event-match-quality-blank) and [Meta recovery evidence](/signals/health-and-performance#what-does-meta-recovery-evidence-show).
+
+  ## Check consent separately from installation
+
+  **Documentation** · The installation guide now explains that a consent-source message is separate from the **Verified** arrival status. It links to the grant, partial-consent, and withdrawal checks required to verify conversion behavior. [Check consent after installation](/signals/install-pixel#does-the-consent-message-verify-installation).
+</Update>
+
 <Update label="September 13, 2026">
 
   ## Meta comparisons distinguish missing reads from reported data
