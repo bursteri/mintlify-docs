@@ -21,6 +21,8 @@ Replace the order ID, source URL, amount and currency with the actual purchase. 
 
 <RequestExample>
 ```bash Consented purchase
+: "${PLAINROUTER_SIGNAL_SECRET:?Set your Signals workspace secret in the server environment}"
+
 curl --include https://plainrouter.com/api/v1/events \
   --request POST \
   --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
