@@ -1,7 +1,10 @@
 ---
-title: "Statuses and terms"
-description: "Interpret the Signals and Actions states shown in Plainrouter, including delivery, proposal, execution, verification, and landing terminology."
+title: "Plainrouter delivery statuses and workflow terms"
+sidebarTitle: "Statuses and terms"
+description: "Diagnose Meta delivery statuses and interpret Signals health, Actions proposals, execution, verification, and landing terms in Plainrouter."
 ---
+
+Use the exact status from an event trace or workflow record to choose the next step. Ingestion receipt, Meta acceptance, and verified Actions execution describe different outcomes.
 
 ## Signal health
 
@@ -49,10 +52,21 @@ These labels come from the account-scoped `get_signal_health` diagnostic. The Si
 | `failed:auth` | Failed | Meta rejected the access token. |
 | `failed:permanent` | Failed | A non-retryable payload or destination error occurred. |
 | `failed:unknown` | Failed | Delivery stopped after an unclassified failure. |
-| `expired` | Terminal | The event is outside Meta's seven-day freshness window. |
+| `expired` | Terminal | The event exceeded delivery freshness or its retained payload is unavailable. |
 | `skipped:consent` | Terminal | Advertising user-data consent was denied. |
 | `skipped:no_destination` | Terminal | No active destination was configured. |
 | `skipped:duplicate` | Terminal | The destination had already received the event. |
+
+### What should I do after a delivery fails?
+
+| State | Recovery |
+| --- | --- |
+| `failed:auth` | [Reconnect Meta](/signals/connect-meta#refresh-available-assets), then [replay the eligible delivery](/reference/conversion-api#how-do-i-replay-a-failed-delivery). |
+| `failed:permanent` or `failed:unknown` | Read the [trace explanation](/reference/conversion-api#read-a-failed-delivery-trace). Correct the cause before considering replay; replay preserves the existing payload. |
+| `expired` | Check payload availability and original event time. [Replay limits](/reference/conversion-api#how-do-i-replay-a-failed-delivery) still apply; do not reset timestamps. |
+| `skipped:consent` | [Fix consent handling](/signals/track-events#set-consent) for future eligible events. Skipped deliveries cannot be replayed. |
+| `skipped:no_destination` | [Connect the intended destination](/signals/connect-meta#connect-the-destination) for future events. This does not replay skipped history. |
+| `skipped:duplicate` | Inspect the original delivery; do not send another purchase with a new ID. |
 
 The dashboard's acceptance-rate denominator includes recent non-test deliveries in the delivery ledger. Its pending count groups `queued`, `sent`, and `retrying`. Its failed count groups the three `failed:*` states.
 

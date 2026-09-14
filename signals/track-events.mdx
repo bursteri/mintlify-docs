@@ -1,7 +1,7 @@
 ---
-title: "Track purchases and integrate browser consent"
+title: "Track purchases, browser consent, and Stripe revenue"
 sidebarTitle: "Track events and consent"
-description: "Connect your CMP to Signals, verify consent changes, and send purchases with the managed Meta browser/server pair without duplicate calls."
+description: "Integrate browser consent, send one managed Meta purchase, and configure Stripe Checkout webhooks to verify settled revenue in Plainrouter."
 ---
 
 Use `signalq` to pass your consent platform's current decision to Signals and send business events after a full advertising grant. With a connected Meta dataset, one browser `track` call supplies the managed Pixel and server event with a shared ID.
@@ -235,52 +235,86 @@ The browser normalizes and SHA-256 hashes the values before sending them. Plainr
 const visitorId = signalq("getVisitorId");
 ```
 
-One use is attaching the value to a checkout session so a later server webhook can join the purchase to the browser visit:
-
-```js
-await fetch("/create-checkout-session", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ visitor_id: signalq("getVisitorId") })
-});
-```
-
-Your server must copy the value into the payment or checkout metadata used by its integration.
+For a custom backend integration, a visitor ID alone is not an advertising consent grant. Follow the [server-event recipe](/guides/meta-capi/nodejs) and preserve the actual consent decision. The Stripe verified-revenue adapter below does not use checkout metadata to establish an attributed visitor join.
 
 ## Verify Stripe Checkout settlement
 
-Connect Stripe from **Workspace Settings** → **Revenue sources** → **Stripe verified revenue**:
+Stripe verified revenue records paid Checkout Sessions in Plainrouter. This is a revenue connection, not a Meta Conversions API integration: do not expect `metadata.visitor_id` to join the purchase to a browser visit or trigger Meta delivery. For consented advertising conversions, use the [managed browser purchase](#avoid-duplicate-meta-events) or [backend recipe](/guides/meta-capi/nodejs).
 
-1. Copy the workspace's webhook callback URL and add it as an endpoint in Stripe.
-2. Select the event types listed below.
-3. Copy Stripe's endpoint signing secret into **Endpoint signing secret** in Plainrouter, then choose **Save secret**.
-4. Confirm that Plainrouter shows **Webhook configured**. Complete a paid Checkout Session and check Signals for the resulting purchase.
+### What do I need before connecting Stripe?
 
-Plainrouter clears the signing-secret field after saving. Use **Rotate secret** when replacing the Stripe endpoint's signing secret. This revenue connection measures your customers' purchases; it is separate from [paying for Plainrouter](/billing/overview).
+You need an active Signals workspace, access to its **Workspace Settings**, and permission to configure webhook endpoints for the Stripe account that receives your customers' payments. Your application must already create Checkout Sessions and handle order fulfillment. This connection is separate from [paying for Plainrouter](/billing/overview).
 
-If Plainrouter is configured to receive Stripe webhooks for your Signal, copy the browser visitor ID into the Checkout Session's `metadata.visitor_id`. This lets the settled server-side purchase join the consenting browser visit.
+The supported settlement flow uses Checkout Session events. It does not establish support for every Stripe payment flow or recurring invoice event. Stripe's [fulfillment guide](https://docs.stripe.com/checkout/fulfillment) explains delayed payments and why returning to a success URL does not prove payment.
 
-Configure the Stripe webhook endpoint to receive:
+### Configure the webhook
 
-- `checkout.session.completed`
-- `checkout.session.async_payment_succeeded`
-- `checkout.session.async_payment_failed`
-- `refund.created` and `charge.refunded` when you track refunds
+1. Open **Workspace Settings** → **Revenue sources** → **Stripe verified revenue**.
+2. Copy the workspace's webhook callback URL and add it as an endpoint in the intended Stripe account.
+3. Subscribe to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.async_payment_failed`. Add `refund.created` and `charge.refunded` if you track refunds.
+4. Copy that endpoint's signing secret into **Endpoint signing secret** in Plainrouter and choose **Save secret**. This is the webhook signing secret, not your Stripe API key.
+5. Confirm **Webhook configured**. That label confirms configuration; verify a settled payment separately below.
 
-Plainrouter creates Stripe Checkout revenue only after Stripe confirms an exact `payment_status` of `paid`:
+Plainrouter clears the secret field after saving. Use **Rotate secret** when replacing the endpoint's signing secret.
 
-| Stripe state | Signals result |
+### Associate a Checkout Session with your order
+
+Set `client_reference_id` to your application's non-personal order ID when creating the Session on your server. Plainrouter uses it as the purchase's order ID; without it, the Checkout Session ID is the fallback. Keep order IDs within 128 characters so they remain readable.
+
+This request calls Stripe directly, not the Plainrouter SDK. It creates a hosted, one-time Checkout Session. Set the variables from trusted server configuration and an existing order: select the Stripe Price on your server and persist one idempotency key for that checkout attempt. Reuse the key only when retrying the same request. Keep the Stripe secret key server-side.
+
+```bash
+curl https://api.stripe.com/v1/checkout/sessions \
+  --user "$STRIPE_SECRET_KEY:" \
+  --header "Idempotency-Key: $CHECKOUT_ATTEMPT_KEY" \
+  --data-urlencode "mode=payment" \
+  --data-urlencode "line_items[0][price]=$STRIPE_PRICE_ID" \
+  --data-urlencode "line_items[0][quantity]=1" \
+  --data-urlencode "client_reference_id=$ORDER_ID" \
+  --data-urlencode "success_url=https://shop.example/checkout/success" \
+  --data-urlencode "cancel_url=https://shop.example/cart"
+```
+
+Replace the example return URLs with your application's URLs. Store the returned Session `id` alongside your order and redirect the customer to its `url`. See Stripe's [Create a Checkout Session reference](https://docs.stripe.com/api/checkout/sessions/create) for the complete request. Session creation and the success-page redirect are not payment verification.
+
+### How do I verify a settled purchase?
+
+Inspect the endpoint's delivery in Stripe for a known Checkout Session, then compare the order and amount with Signals. Plainrouter records revenue only when the settlement event has `payment_status` exactly `paid`.
+
+| Stripe state | Expected result |
 | --- | --- |
-| `checkout.session.completed` with `payment_status=paid` | Creates one canonical `Purchase`. |
-| `checkout.session.completed` with `payment_status=unpaid` | Records no `Purchase` and waits for asynchronous success. |
-| `checkout.session.async_payment_succeeded` with `payment_status=paid` | Creates the canonical `Purchase` at the asynchronous settlement time. |
-| `checkout.session.async_payment_failed` | Creates no `Purchase` or `Refund`. |
-| `payment_status=no_payment_required` | Creates no revenue event. |
-| Missing, unknown, or malformed payment status | Fails closed and creates no `Purchase`. |
+| `checkout.session.completed`, `paid` | Records the paid Checkout Session. |
+| `checkout.session.completed`, `unpaid` | No purchase yet; the response reports `pending: true` and `reason: "payment_pending"`. |
+| `checkout.session.async_payment_succeeded`, `paid` | Records the settled purchase. |
+| `checkout.session.async_payment_failed` | No purchase or refund; reason is `async_payment_failed`. |
+| `no_payment_required` | No revenue event; reason is `no_payment_required`. |
+| Missing or unknown payment status | No purchase; reason is `unverified_payment_status`. |
 
-Duplicate or out-of-order paid webhooks for the same Checkout Session converge on one `Purchase`. Plainrouter uses the settlement-confirming webhook time as the event time. Until settlement is confirmed, the Checkout Session does not enter Signals rollups or Meta delivery.
+An illustrative paid-webhook response is:
 
-Stripe refund webhooks create idempotent custom `Refund` events with a negative refunded value. Plainrouter links the refund to its known purchase when the order lineage is available.
+```json
+{
+  "received": true,
+  "event_id": "stripe_checkout:cs_example",
+  "duplicate": false
+}
+```
+
+Use the returned `event_id` to find the retained record through [GET event](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event). For this revenue flow, the check is the purchase record and value, not a Meta `accepted` delivery. A `404` can mean the wrong workspace or that the record is outside read retention.
+
+Duplicate paid notifications for the same Session reuse one purchase record and return `duplicate: true`. The first recorded purchase uses its settlement-confirming webhook's time. Supported refund notifications record an idempotent negative revenue adjustment; purchase lineage is attached only when Plainrouter can find the matching order. Do not assume Stripe copies Session metadata onto refund objects; see [Stripe metadata propagation](https://docs.stripe.com/metadata).
+
+### Why is the Stripe purchase missing?
+
+| Symptom | Check or recovery |
+| --- | --- |
+| Signature rejected with `400` | Check that Plainrouter holds this endpoint's signing secret. After fixing it, resend through Stripe so the delivery has a fresh signature. |
+| `received: true` but `ignored: true` | Read `reason`; `workspace_inactive` requires activating the workspace. A successful HTTP response alone is not a recorded purchase. |
+| Completed Session, no purchase | Inspect `payment_status` and subscribe to asynchronous success. Do not create a purchase while payment is pending. |
+| Paid Session, duplicate response | Inspect the original returned event ID; do not create another Session or purchase to force a new record. |
+| Revenue exists but no Meta delivery | This adapter does not establish advertising consent or an attributed visitor join. Review your [purchase owner](#avoid-duplicate-meta-events) before adding another sender. |
+
+Stripe webhook redelivery and [Plainrouter destination replay](/reference/conversion-api#how-do-i-replay-a-failed-delivery) are different operations. Destination replay cannot create a missing Stripe revenue record.
 
 ## Reliability behavior
 

@@ -108,7 +108,9 @@ If the intended ad account or dataset is missing, choose **Reconnect Meta** and 
 
 ### Server delivery needs attention
 
-Inspect the event's delivery state before retrying. `queued`, `sent`, and `retrying` are pending; `failed:auth` requires a connection check. A consent-skipped event is not a transient provider error. See the [delivery status reference](/reference/statuses-and-terms#destination-delivery) and keep the original event ID when retrying the same conversion.
+Start with the [worked event trace](/reference/conversion-api#read-a-failed-delivery-trace). `queued`, `sent`, and `retrying` are pending; let delivery complete before taking further action. For `failed:auth`, [reconnect the intended assets](#refresh-available-assets), then [replay the eligible delivery](/reference/conversion-api#how-do-i-replay-a-failed-delivery) using its numeric delivery ID.
+
+A consent-skipped event is not a transient provider error and is excluded from replay. Fix the [consent integration](/signals/track-events#set-consent) for future eligible events. Reposting an existing event ID only returns the original ingestion receipt; it does not restart destination delivery. Use the [status reference](/reference/statuses-and-terms#destination-delivery) for other failures.
 
 ### Meta shows duplicate purchases
 

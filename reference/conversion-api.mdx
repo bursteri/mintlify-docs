@@ -115,6 +115,74 @@ The response includes the event and its `deliveries`. For IDs containing charact
 
 Meta acceptance does not establish attribution or improved advertising performance. An empty delivery list does not establish Meta acceptance either. Check the [connected destination](/signals/connect-meta) and the event's eligibility. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for the complete meanings and [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace) for the response schema.
 
+### Read a failed delivery trace
+
+The following is an illustrative excerpt from `GET /events/order-123`; other response fields are omitted. `event.id` identifies the conversion. The numeric delivery `id` identifies one destination attempt record and is the value used for replay.
+
+```json
+{
+  "event": {
+    "id": "order-123",
+    "event_name": "Purchase",
+    "payload_expired": false
+  },
+  "deliveries": [
+    {
+      "id": 1042,
+      "event_id": "order-123",
+      "status": "failed:auth",
+      "attempt_count": 1,
+      "explanation": "Meta rejected the access token; update credentials before retrying."
+    }
+  ]
+}
+```
+
+Here, ingestion succeeded but Meta authentication failed. [Reconnect the intended Meta assets](/signals/connect-meta#refresh-available-assets), then consider replay of this delivery. Repeating `POST /events` with `order-123` only returns the existing event; it does not repair or replay the delivery.
+
+## How do I replay a failed delivery?
+
+Use `POST /deliveries/replay` after correcting the destination problem. Replay sends the existing retained payload again; it does not edit the purchase or create a new event.
+
+Before replay, inspect the event trace and confirm:
+
+- You are using the [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) for the event and destination.
+- The destination is active, and the event is eligible for attributed advertising delivery.
+- The delivery is in a `failed:*` or `expired` state. Pending, accepted, and skipped deliveries are excluded.
+- The retained payload is available and the original event time remains within the configured replay window, which cannot exceed seven days. A recent event can still have an unavailable payload.
+
+Replace `1042` with the delivery ID from your trace. This request can contact Meta. Always provide the specific `delivery_ids` you intend to replay: omitting the field or sending an empty array selects a broader set of eligible workspace deliveries.
+
+```bash
+curl --include https://plainrouter.com/api/v1/deliveries/replay \
+  --request POST \
+  --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{"delivery_ids":[1042],"limit":1}'
+```
+
+HTTP `202` returns counts, for example:
+
+```json
+{
+  "queued": 1,
+  "expired": 0,
+  "payload_expired": 0,
+  "capped": false
+}
+```
+
+| Field | Meaning and next step |
+| --- | --- |
+| `queued` | Deliveries queued again. Read the original event trace until each delivery has an outcome; this count does not prove Meta acceptance. |
+| `expired` | Candidates that could not be queued because their event was unavailable or outside the replay freshness window. Preserve the real event time. |
+| `payload_expired` | Candidates whose retained payload is unavailable. Replay cannot recover the deleted payload. |
+| `capped` | More candidates matched than the request's processing limit. Inspect the intended IDs before making another bounded request. |
+
+These counts are not a per-ID rejection report. All-zero counts can mean the selected ID is outside the workspace or does not meet eligibility requirements. Inspect the trace and [delivery status](/reference/statuses-and-terms#destination-delivery) instead of repeatedly replaying it.
+
+For `failed:permanent`, read the explanation before replaying: sending the same invalid payload again will not correct it. Do not change an old purchase's timestamp or generate a new event ID to bypass duplicate detection or expiry. See the [replay operation reference](https://plainrouter.com/docs/api-reference/operations/replay-eligible-deliveries) for optional filters and the complete schema.
+
 ## Verify Signal ingestion
 
 The verification operation proves that the authenticated Signal can write to the event ledger without sending identity or destination data:
@@ -156,7 +224,7 @@ Signals configuration now belongs directly to the workspace. API responses use t
 
 The currently published `0.5.x` SDKs were generated before `workspace_id` became canonical, so their models may expose only `signal_tracker_id`. You can continue reading that compatibility field until a regenerated client release adds `workspace_id`. Do not treat the two fields as different tenants.
 
-The `user_data_hashed` response field contains the identity representation sent to the advertising platform: normalized Meta-format SHA-256 digests plus the network fields Meta requires verbatim. It never contains Plainrouter's internal per-workspace keyed lookup values.
+The signed contract marks `user_data_hashed` as a deprecated compatibility field whose value is always `null`. Delivery identity is never returned. Use delivery status and explanation to diagnose the outcome, rather than expecting identity hashes in the trace.
 
 ## Delete retained user data
 

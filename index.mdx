@@ -11,7 +11,7 @@ Choose a task to set up first-party Signals, send consented conversions to Meta,
     Create a workspace, connect your collection domain, and verify the first real arrival.
   </Card>
   <Card title="Send purchases to Meta" icon="shopping-cart" href="#choose-one-purchase-sender">
-    Choose a browser, backend, or Stripe workflow, then verify delivery without duplicate purchases.
+    Choose a browser or backend workflow, then verify delivery without duplicate purchases.
   </Card>
   <Card title="Connect an AI agent" icon="bot" href="/actions/connect-agent">
     Try MCP with synthetic data, then connect a workspace token for your Meta ad account.
@@ -23,13 +23,13 @@ Choose a task to set up first-party Signals, send consented conversions to Meta,
 
 ## Choose one purchase sender
 
-Start with an active [Signal](/quickstart), a [connected Meta dataset](/signals/connect-meta), and a recorded consent decision. Select one owner for each logical purchase; enabling multiple senders for the same checkout can create duplicates.
+Start with an active [Signal](/quickstart). Advertising delivery also requires a [connected Meta dataset](/signals/connect-meta) and a recorded consent decision. Select one owner for each logical purchase; enabling multiple senders for the same checkout can create duplicates.
 
 | Your integration | Start here | Expected result |
 | --- | --- | --- |
 | Browser checkout with server-confirmed payment | [Managed browser purchase](/signals/track-events#avoid-duplicate-meta-events) | Signals sends the managed browser/server pair with shared event identity. |
 | Backend or job queue | [Node.js and TypeScript recipe](/guides/meta-capi/nodejs), [Python](/sdk/python#send-a-meta-conversion), or [Ruby](/sdk/ruby#send-a-meta-conversion) | Your backend sends a stable purchase ID and the original payment time through the Conversion API. |
-| Stripe Checkout | [Verified Stripe settlement](/signals/track-events#verify-stripe-checkout-settlement) | The configured Stripe settlement flow owns the purchase. Follow its visitor and consent requirements. |
+| Stripe Checkout | [Verified Stripe settlement](/signals/track-events#verify-stripe-checkout-settlement) | Records settled revenue without an attributed visitor join or Meta delivery. |
 
 An API receipt confirms ingestion. [Inspect destination delivery](/signals/connect-meta#how-do-i-verify-meta-delivery) to check Meta acceptance; acceptance does not establish attribution or improved advertising performance.
 
