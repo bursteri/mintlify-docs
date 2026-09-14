@@ -1,90 +1,52 @@
 ---
-title: "Plainrouter documentation"
-description: "Guides for first-party Signals measurement, Launcher Drive inventory, and governed AI action execution."
+title: "Plainrouter docs: Signals, Meta CAPI and MCP"
+sidebarTitle: "Start here"
+description: "Set up first-party Signals, send consented Meta conversions, connect an AI agent through MCP, and troubleshoot collection and delivery."
 ---
 
-Welcome to the Plainrouter help center. These guides help you collect first-party conversion signals, connect a verified Drive creative library, and govern evidence-backed actions proposed by an AI agent.
-
-If this is your first visit, begin with the Quickstart. It takes you from account creation to an active collection domain and the first real Signal arrival. You can then connect Meta, test server-side ingestion, and authorize an MCP-compatible agent when you are ready.
-
-## Start free with self-serve onboarding
-
-Registration and production-token management are self-serve. See [Plainrouter pricing](https://plainrouter.com/pricing) for the Free band's spend threshold, included arrivals, and overage rules.
-
-<CardGroup cols={3}>
-  <Card title="Start on the Free tier" icon="badge-dollar-sign" href="https://plainrouter.com/register">
-    Create a workspace, then review the Free band's included arrivals and usage limits.
-  </Card>
-  <Card title="Set up Signals yourself" icon="radio" href="/quickstart">
-    Follow the production path from account creation through an active collection domain and the first identity-free arrival.
-  </Card>
-  <Card title="Issue a production token" icon="key-round" href="/actions/workspace-tokens">
-    After workspace and Meta ad-account setup, the workspace owner can issue, scope, rotate, and revoke production tokens without contacting sales.
-  </Card>
-</CardGroup>
-
-AI coding agents can start with Plainrouter's [public SDK and agent-integration repository](https://github.com/plainrouter/sdk) and its [AGENTS.md instructions](https://github.com/plainrouter/sdk/blob/main/AGENTS.md). The repository also publishes Claude Code, Codex, Cursor, and Windsurf configuration, Agent Plugin manifests, and three official Agent Skills.
-
-<CardGroup cols={1}>
-  <Card title="Start the Quickstart" icon="rocket" href="/quickstart">
-    Create your account, prepare your collection domain, and verify your first Signal end to end.
-  </Card>
-</CardGroup>
-
-## Browse the guides
+Choose a task to set up first-party Signals, send consented conversions to Meta, or connect an AI agent.
 
 <CardGroup cols={2}>
-  <Card title="Quickstart" icon="list-checks" href="/quickstart">
-    Follow the complete first-time setup from registration through activation.
+  <Card title="Measure website arrivals" icon="radio" href="/quickstart">
+    Create a workspace, connect your collection domain, and verify the first real arrival.
   </Card>
-  <Card title="Choose authentication" icon="key-round" href="/auth">
-    Match REST, SDK, CLI, MCP, and management requests to the correct credential.
+  <Card title="Send purchases to Meta" icon="shopping-cart" href="#choose-one-purchase-sender">
+    Choose a browser, backend, or Stripe workflow, then verify delivery without duplicate purchases.
   </Card>
-  <Card title="Understand billing setup" icon="credit-card" href="/billing/overview">
-    Review the EUR pricing basis, arrival allowance, and checkout steps for your team.
+  <Card title="Connect an AI agent" icon="bot" href="/actions/connect-agent">
+    Try MCP with synthetic data, then connect a workspace token for your Meta ad account.
   </Card>
-  <Card title="Discover API resources" icon="file-search" href="/reference/api-resource-index">
-    Give an agent a compact index of API, OpenAPI, authentication, and MCP entry points.
-  </Card>
-  <Card title="Read the API catalog" icon="waypoints" href="/reference/api-catalog">
-    Follow typed RFC 9727 relations to Plainrouter's public developer resources.
-  </Card>
-  <Card title="Open the public agent repository" icon="github" href="https://github.com/plainrouter/sdk">
-    Read AGENTS.md, coding-tool rules, Agent Plugin manifests, MCP configuration, and the official Agent Skills.
-  </Card>
-  <Card title="Choose an official SDK or CLI" icon="boxes" href="/sdk/overview">
-    Compare TypeScript, Python, Ruby, Go, and terminal clients, then follow the setup guide for your workflow.
-  </Card>
-  <Card title="Install the Plainrouter CLI" icon="terminal" href="/cli/quickstart">
-    Install the CLI from [PyPI](https://pypi.org/project/plainrouter/), [npm](https://www.npmjs.com/package/@plainrouter/cli), or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap), then use JSON output in scripts and agents.
-  </Card>
-  <Card title="Understand Signals" icon="radio" href="/signals/overview">
-    Learn how first-party collection, consent, Meta delivery, and measurement fit together.
-  </Card>
-  <Card title="Configure DNS and CNAME" icon="network" href="/signals/configure-dns">
-    Connect your first-party collection subdomain and complete validation.
-  </Card>
-  <Card title="Install the Signals pixel" icon="code" href="/signals/install-pixel">
-    Add consent-aware browser measurement, complete setup with a real arrival, and troubleshoot the snippet.
-  </Card>
-  <Card title="Read signal health" icon="activity" href="/signals/health-and-performance">
-    Interpret event flow, delivery acceptance, match quality, and reconciliation.
-  </Card>
-  <Card title="Legacy Launcher availability" icon="folder-open" href="/launcher/connect-drive">
-    Check availability before using the legacy Drive workflow, which is disabled by default.
-  </Card>
-  <Card title="Review agent actions" icon="shield-check" href="/actions/overview">
-    See how evidence becomes a policy-gated proposal, verified provider action, and audit history.
-  </Card>
-  <Card title="Create governed creatives" icon="images" href="/actions/creative-workflow">
-    Read the Meta creative library, stage an image, and propose a permanently paused ad copy.
+  <Card title="Troubleshoot measurement" icon="activity" href="/signals/health-and-performance#troubleshoot-by-symptom">
+    Diagnose missing arrivals, delivery failures, stale platform data, and reporting differences.
   </Card>
 </CardGroup>
 
-<Info>
-  Actions defaults to **Suggest only**. Executable modes currently support a narrow creative path with policy rechecks, durable receipts, exact provider verification, and compensation.
-</Info>
+## Choose one purchase sender
 
-<Note>
-  Already have an account? Open the [Plainrouter dashboard](https://plainrouter.com/dashboard) to continue setup.
-</Note>
+Start with an active [Signal](/quickstart), a [connected Meta dataset](/signals/connect-meta), and a recorded consent decision. Select one owner for each logical purchase; enabling multiple senders for the same checkout can create duplicates.
+
+| Your integration | Start here | Expected result |
+| --- | --- | --- |
+| Browser checkout with server-confirmed payment | [Managed browser purchase](/signals/track-events#avoid-duplicate-meta-events) | Signals sends the managed browser/server pair with shared event identity. |
+| Backend or job queue | [Node.js and TypeScript recipe](/guides/meta-capi/nodejs), [Python](/sdk/python#send-a-meta-conversion), or [Ruby](/sdk/ruby#send-a-meta-conversion) | Your backend sends a stable purchase ID and the original payment time through the Conversion API. |
+| Stripe Checkout | [Verified Stripe settlement](/signals/track-events#verify-stripe-checkout-settlement) | The configured Stripe settlement flow owns the purchase. Follow its visitor and consent requirements. |
+
+An API receipt confirms ingestion. [Inspect destination delivery](/signals/connect-meta#how-do-i-verify-meta-delivery) to check Meta acceptance; acceptance does not establish attribution or improved advertising performance.
+
+## Set up access and development tools
+
+- [Choose the correct credential](/auth): Signals secrets for REST, SDKs, and CLI; workspace execution tokens for MCP.
+- [Try the API sandbox](/sandbox): validate synthetic requests without an account or Meta delivery.
+- [Choose an SDK or CLI](/sdk/overview), or open the [Conversion API overview](/reference/conversion-api).
+- [Read MCP tool inputs and limits](/reference/mcp-tools), then [create a governed creative proposal](/actions/creative-workflow).
+- [Review pricing and billing](/billing/overview) before moving from testing to ongoing production use.
+
+Actions defaults to **Suggest only**. Supported creative execution requires policy checks and human approval; budget changes, ad activation, and delivery-status execution are unavailable.
+
+## Resources for coding agents
+
+Use the [API resource index](/reference/api-resource-index) and [API catalog](/reference/api-catalog) to discover authentication, schemas, and documentation. The public [SDK and agent repository](https://github.com/plainrouter/sdk) includes [agent instructions](https://github.com/plainrouter/sdk/blob/main/AGENTS.md), coding-tool configuration, and official Agent Skills.
+
+## Legacy Launcher
+
+[Drive inventory](/launcher/connect-drive) and [draft-file import](/launcher/import-draft-batch) apply only where legacy Launcher is explicitly enabled. They are disabled by default and are not prerequisites for Signals or the active Meta creative tools.

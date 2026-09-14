@@ -62,7 +62,7 @@ function headingSlug(text) {
     .replace(/`([^`]+)`/g, "$1")
     .replace(/<[^>]+>/g, "")
     .replace(/&[a-z]+;/g, "")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .replace(/[^\p{L}\p{N}\s_-]/gu, "")
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
@@ -198,7 +198,7 @@ for (const page of mdxPages) {
 }
 
 const requiredAgentPages = new Map([
-  ["auth", "title: \"Plainrouter auth docs\""],
+  ["auth", "title: \"Plainrouter authentication: API secrets and MCP tokens\""],
   [
     "reference/api-resource-index",
     "https://plainrouter.com/api/llms.txt",

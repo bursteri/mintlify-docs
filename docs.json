@@ -58,12 +58,6 @@
             ]
           },
           {
-            "group": "Launcher",
-            "pages": [
-              "launcher/connect-drive"
-            ]
-          },
-          {
             "group": "Actions",
             "pages": [
               "actions/overview",
@@ -81,6 +75,13 @@
               "reference/api-catalog",
               "reference/statuses-and-terms"
             ]
+          },
+          {
+            "group": "Legacy Launcher",
+            "pages": [
+              "launcher/connect-drive",
+              "launcher/import-draft-batch"
+            ]
           }
         ]
       },
@@ -97,8 +98,7 @@
           {
             "group": "Reference",
             "pages": [
-              "reference/mcp-tools",
-              "launcher/import-draft-batch"
+              "reference/mcp-tools"
             ]
           }
         ]

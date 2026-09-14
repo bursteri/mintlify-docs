@@ -5,6 +5,12 @@ description: "Use the creative library to stage an image, create a paused ad dra
 
 Plainrouter's creative tools let an authorized agent inspect account-owned assets and submit governed Meta changes. Every proposal stays bound to the account selected when its workspace execution token was issued.
 
+## Before you begin
+
+You need a [connected agent](/actions/connect-agent), an owner-issued **Write** or **Admin** [workspace token](/actions/workspace-tokens) for the intended Meta account, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.
+
+Check the workspace's [action policy](/actions/policies-and-safety). **Suggest only** records recommendations without a provider write. Supported executable creative proposals still require human approval. These tools cannot activate a copied ad or execute budget and delivery-status changes.
+
 ## Creative tool flow
 
 <Steps>
@@ -27,6 +33,32 @@ Plainrouter's creative tools let an authorized agent inspect account-owned asset
     Plainrouter creates the copy as `PAUSED`, records its provider ID in a durable receipt, and re-reads that exact ad. Only an exact account, creative, `status=PAUSED`, and `effective_status=PAUSED` match becomes Landed.
   </Step>
 </Steps>
+
+## Example: propose a paused creative variant
+
+After reading `get-creative-library`, call `duplicate-ad-with-creative` with these arguments. Replace both illustrative IDs with the human-selected source ad and an asset ID returned for the same account; preserve the idempotency key when retrying this proposal.
+
+```json
+{
+  "source_ad": "120012345678901",
+  "asset_id": "image:REPLACE_WITH_RETURNED_HASH",
+  "rationale": "Create the requested image variant for human review while keeping the copy paused.",
+  "name_suffix": "review variant",
+  "idempotency_key": "creative-review-order-123"
+}
+```
+
+There is no `status` argument: Plainrouter fixes the proposed copy to `paused`. The MCP request creates a Plainrouter proposal, not a Meta ad. Inspect these fields in the returned `proposal`:
+
+| Field | What to verify |
+| --- | --- |
+| `id` and `scope` | Save the proposal ID and confirm the account and workspace. |
+| `execution_mode_snapshot` | Determine whether approval records a recommendation or can authorize execution. |
+| `status`, `policy_decision`, and `policy_reasons` | Read any block before requesting another proposal. |
+| `approval_required` and `approval_queue_url` | Follow the returned queue link when a human decision is required. |
+| `actions` | Confirm the source ad, chosen asset, and `params.status: "paused"`. |
+
+Follow [Review action proposals](/actions/review-proposals) for the decision and [Audit log](/actions/audit-log) for receipt and verification evidence. A pending proposal is not proof that a Meta object was created.
 
 ## Creative library output
 
@@ -63,3 +95,13 @@ If Meta reports `IN_PROCESS`, the batch moves to **Executed pending verification
 Both proposal-producing creative tools are idempotent. Reuse the same idempotency key when retrying the same intent. Do not generate a new key merely because an MCP request timed out.
 
 After a timeout, check the returned or existing proposal in **Approval queue** before attempting another action. Provider reconciliation uses the durable execution key and receipt to avoid silently creating duplicate objects.
+
+## Common failures
+
+| Symptom | Next step |
+| --- | --- |
+| Missing creative permission | Check the token tier, active grant, and account scope in [workspace tokens](/actions/workspace-tokens). |
+| Source ad or asset rejected | Re-read the intended account's library and confirm the human-selected source belongs to that account. Do not substitute a guessed asset ID. |
+| Upload rejected | Check detected JPEG/PNG content, filename, byte limit, and reuse of the idempotency key. |
+| Proposal blocked | Read its policy reasons and current [policy constraints](/actions/policies-and-safety); approval does not bypass them. |
+| Ad remains Not Landed | Follow the receipt and scheduled verification in [proposal history](/actions/review-proposals). Do not activate or duplicate it to bypass verification. |

@@ -45,7 +45,7 @@ The [sandbox operations](/sandbox) have separate authentication rules.
 
 Keep this secret on your server or in your CLI's secure credential store. Never put it in browser code, source control, prompts, or logs.
 
-The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Those credentials authorize agent tools, not the workspace's Signals API.
+The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Workspace execution tokens authorize scoped agent tools. OAuth management credentials are limited to management discovery and cannot authenticate MCP tool calls. Neither authenticates the Signals API.
 
 ## Submit an event
 
@@ -134,17 +134,17 @@ SDKs and CLI clients derive their method and command names from these semantic o
 
 | Operation ID | Method and path | Purpose |
 | --- | --- | --- |
-| `createEvent` | `POST /events` | Submit an idempotent conversion event. |
-| `verifySignalIngestion` | `POST /verification-events` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
-| `getEvent` | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
-| `listEvents` | `GET /dashboard/events` | List recent events and delivery metrics. |
-| `listEventsByCursor` | `GET /dashboard/events/cursor` | Page through retained events with an opaque cursor. |
-| `setDestinationTestMode` | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |
-| `sendTestPurchase` | `POST /destinations/{destination}/test-purchase` | Send a controlled test purchase. |
-| `replayDeliveries` | `POST /deliveries/replay` | Replay eligible recent deliveries. |
-| `getReconciliationReport` | `GET /reports/reconciliation` | Retrieve reconciliation results for a date. |
-| `getEmqReport` | `GET /reports/emq` | Retrieve recent Event Match Quality snapshots. |
-| `deleteUserData` | `DELETE /user-data` | Delete data matching a hashed user identifier. |
+| [`createEvent`](https://plainrouter.com/docs/api-reference/event/submit-a-conversion-event) | `POST /events` | Submit an idempotent conversion event. |
+| [`verifySignalIngestion`](https://plainrouter.com/docs/api-reference/event/verify-server-side-signal-ingestion) | `POST /verification-events` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
+| [`getEvent`](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace) | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
+| [`listEvents`](https://plainrouter.com/docs/api-reference/operations/list-recent-events) | `GET /dashboard/events` | List recent events and delivery metrics. |
+| [`listEventsByCursor`](https://plainrouter.com/docs/api-reference/operations/list-recent-events-by-cursor) | `GET /dashboard/events/cursor` | Page through retained events with an opaque cursor. |
+| [`setDestinationTestMode`](https://plainrouter.com/docs/api-reference/operations/configure-destination-test-mode) | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |
+| [`sendTestPurchase`](https://plainrouter.com/docs/api-reference/operations/send-a-controlled-test-purchase) | `POST /destinations/{destination}/test-purchase` | Send a controlled test purchase. |
+| [`replayDeliveries`](https://plainrouter.com/docs/api-reference/operations/replay-eligible-deliveries) | `POST /deliveries/replay` | Replay eligible recent deliveries. |
+| [`getReconciliationReport`](https://plainrouter.com/docs/api-reference/operations/get-a-reconciliation-report) | `GET /reports/reconciliation` | Retrieve reconciliation results for a date. |
+| [`getEmqReport`](https://plainrouter.com/docs/api-reference/operations/get-event-match-quality-history) | `GET /reports/emq` | Retrieve recent Event Match Quality snapshots. |
+| [`deleteUserData`](https://plainrouter.com/docs/api-reference/operations/delete-user-data-by-verified-identifier) | `DELETE /user-data` | Delete data matching a hashed user identifier. |
 
 Resource IDs remain scoped to the authenticated workspace. A client cannot use its Signals secret to read another workspace's events or destinations.
 

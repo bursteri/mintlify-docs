@@ -32,8 +32,24 @@ The CLI resolves configuration in this order:
 
 ## Events
 
+This request can send a real conversion. Use it only for an actual paid order with recorded full advertising consent and a [connected Meta destination](/signals/connect-meta). Replace the order ID and decimal amount; the example omits `event_time` for an immediate event. Queued events must preserve their original payment timestamp.
+
 ```bash
-plainrouter events create --data '{"event_name":"Purchase","event_id":"order-123","consent_basis":"consent","consent":{"ad_storage":"granted","ad_user_data":"granted","ad_personalization":"granted"}}'
+plainrouter events create --data '{
+  "event_name": "Purchase",
+  "event_id": "order-123",
+  "consent_basis": "consent",
+  "consent": {
+    "ad_storage": "granted",
+    "ad_user_data": "granted",
+    "ad_personalization": "granted"
+  },
+  "value_data": {
+    "value": "49.90",
+    "currency": "EUR",
+    "order_id": "order-123"
+  }
+}'
 plainrouter events get order-123
 plainrouter events list --per-page 25
 ```
@@ -44,14 +60,18 @@ plainrouter events list --per-page 25
 | `events get <id>` | Event ID as the positional argument. |
 | `events list` | Optional `--per-page <count>`. |
 
-Use a stable event ID when creating an event so retries remain idempotent.
+Use a stable event ID when creating an event so retries remain idempotent. A `duplicate: true` receipt means the original event exists, not that Meta accepted it. Inspect `events get` before considering a delivery replay. Use the [sandbox](/sandbox) for synthetic validation without production writes.
 
 ## Destination test operations
 
+Use a controlled destination and its current Meta Test Events code. Test mode changes delivery behavior for that destination: coordinate the test window, send the test purchase while mode is enabled, inspect Meta Test Events, and restore normal mode afterward even if the test fails. See [destination testing](/signals/connect-meta#test-without-sending-a-real-purchase).
+
 ```bash
-plainrouter destinations test-mode DESTINATION_ID --on --test-event-code TEST42
+plainrouter destinations test-mode DESTINATION_ID \
+  --on --test-event-code TEST42
+plainrouter destinations test-purchase DESTINATION_ID \
+  --value 25.00 --currency EUR --order-id test-order-123
 plainrouter destinations test-mode DESTINATION_ID --off
-plainrouter destinations test-purchase DESTINATION_ID --value 25.00 --currency USD --order-id order-123
 ```
 
 `destinations test-mode` requires exactly one of `--on` or `--off`. The test purchase accepts optional `--value`, `--currency`, and `--order-id` values.

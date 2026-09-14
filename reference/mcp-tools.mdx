@@ -1,5 +1,6 @@
 ---
-title: "Plainrouter MCP server"
+title: "Plainrouter Meta Ads MCP tools: inputs and limits"
+sidebarTitle: "MCP tool reference"
 description: "Reference for Plainrouter MCP tools, workspace grants, conditional Launcher availability, and four synthetic test-mode tools."
 ---
 
@@ -17,12 +18,17 @@ For client configuration and your first account read, follow [Connect your agent
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a permanently paused copy of a source Meta ad with a selected asset. |
+| `revoke_grant` | Idempotent authorization write | Revoke an authorized grant in the caller's workspace. |
+| `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
+
+**Conditional legacy tools**
+
+| Tool | Type | Purpose |
+| --- | --- | --- |
 | `launcher.draft_batch` | Non-destructive Plainrouter write | Create a Launcher draft batch from already-synced Drive assets. |
 | `launcher.batch_status` | Read-only, idempotent | Read the bounded status of one Launcher batch. |
 | `launcher.preview_batch` | Non-destructive Plainrouter write | Evaluate the authoritative preflight gate without provider work. |
 | `launcher.execute_batch` | Closed execution entry | Returns a bounded refusal during Launcher Phase B-1 and performs no mutation. |
-| `revoke_grant` | Idempotent authorization write | Revoke an authorized grant in the caller's workspace. |
-| `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
 
 <Note>
   The four `launcher.*` entries above describe the conditional legacy contract. Launcher is disabled by default, so those tools are absent from discovery and the file-import route returns `404`.
@@ -108,20 +114,31 @@ Current capability flags are intentionally explicit:
 
 ## `get_signal_health`
 
-This tool accepts no input. It returns the shared scope plus:
+Use this diagnostic for collection, delivery, and stored account health. Both production and sandbox accept the same optional reporting window:
 
-- Overall status, label, and summary.
-- Signal, hostname, Meta connection, and dataset state.
-- Event counts for 24 hours, seven days, and all time.
-- Last event time.
-- Accepted, failed, pending, and total non-test deliveries from the last 24 hours.
-- Delivery acceptance rate.
-- Latest Event Match Quality score, week-over-week change, alert state, measurement time, and recent history.
-- A seven-day stored performance comparison by default.
-- Structured diagnostics.
-- Data-source names and response generation time.
+| Field | Type | Required | Rules |
+| --- | --- | --- | --- |
+| `days` | Integer | No | `7`, `30`, or `90`. Default is `7`. |
 
-The tool reads `event_ledger`, `delivery_ledger`, `emq_snapshots`, and `reconciliation_reports`. It reports `marketing_api_called: false`.
+```json
+{
+  "days": 30
+}
+```
+
+The result includes the shared scope, status, label, summary, Signal and destination state, and:
+
+- `activity.completed_window`: arrivals for the retained completed-day reporting window.
+- `activity.today_so_far`: the separate incomplete local-day arrival count.
+- `activity.receiving` and `activity.last_event_at`: collection activity and freshness.
+- `delivery`: non-test delivery counts and acceptance rate for the last 24 hours, independently of the requested arrival window.
+- `match_quality`: the latest stored Meta score, measurement time, and history when available.
+- `performance`: stored reconciliation for the requested window.
+- `diagnostics`, `data_sources`, and `generated_at`: explanations, provenance, and response freshness.
+
+Arrival windows use completed days in the account timezone and are clipped to retention. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Arrival totals remain complete when a strict-EU component is withheld: `partial` marks that component, not a reduced total. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
+
+This call reads stored measurements. It does not trigger a live Meta Marketing API read.
 
 <Warning>
   Treat this tool as diagnostic. Plainrouter rejects it as evidence for any proposal that can affect spend or delivery, including a mixed batch containing one such action. Use `get_performance` for stored reconciliation-derived performance evidence.
@@ -227,75 +244,6 @@ does not read an account, submit an approval, call another tool, persist data,
 contact Meta, or change spend. Use it only to verify that an MCP host can render
 Plainrouter's app presentation.
 
-## `launcher.draft_batch`
-
-Available only when legacy Launcher is enabled. This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the Plainrouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
-
-It requires an owner-issued [workspace token](/actions/workspace-tokens) with the **Write** or **Admin** tier.
-
-### Input
-
-| Field | Required | Rules |
-| --- | --- | --- |
-| `source_adset_id` | Yes | Numeric Meta ad set ID used as the duplication or destination template. |
-| `source_ad_id` | Yes | Numeric Meta ad ID used as the creative template. |
-| `mode` | Yes | `duplicate_adset`, `duplicate_adset_per_media`, or `add_to_adset`. |
-| `folder_to_adset` | No | Map each source folder to its own ad set. Defaults to `false`. |
-| `grouping_enabled` | No | Select current placement groups together. Defaults to `true`. |
-| `items` | Yes | One or more ordered items containing an already-synced `drive_link` and optional copy or link overrides. |
-
-Overrides use contract version `v: 1` and can contain up to five `primary_texts`, `headlines`, and `descriptions`, plus `website_url` and `display_link`.
-
-Workspace and account IDs are never accepted as input. Plainrouter derives them from the execution token. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
-
-### Output
-
-The response includes the draft batch ID and status, frozen tier and capacity limits, item and media counts, accepted items, bounded rejected-item reason codes, import provenance when present, and an advisory gate result.
-
-Possible rejection codes are:
-
-- `drive_asset_unresolved`
-- `overrides_invalid`
-- `overrides_limit_exceeded`
-- `batch_limit_exceeded`
-- `media_limit_exceeded`
-
-The current MCP entry point returns an advisory gate with `not_evaluated`. Treat the result as a draft, not authorization to execute.
-
-## Launcher batch status and preview
-
-These tools are available only when legacy Launcher is enabled. They accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. Plainrouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
-
-### `launcher.batch_status`
-
-Use this read-only tool to inspect a batch without evaluating its gate or contacting a provider. It returns:
-
-- Batch status, mode, and item counts.
-- Sub-batch status.
-- The latest stored gate result.
-- Ordered item status, bounded failure stage and code, and linked Actions proposal IDs.
-- Partition status and latest proposal attempts for duplicate-ad-set modes.
-
-The tool requires only a Read-tier token and the shared `ad-account.read` scope.
-
-### `launcher.preview_batch`
-
-Use this non-destructive checkpoint before presenting a batch as ready. Plainrouter re-evaluates the authoritative gate and returns `status: "previewed"` or `status: "gated"`, the resulting batch status, and checks for source relationships, tracking verification, tracked-domain coverage, ledger health, and Actions readiness.
-
-The `previews` array is intentionally empty in this release. No provider preview, Meta write, Actions proposal, or spend activation happens during the call. A successful preview is not execution authorization; any future execution path must evaluate the gate again.
-
-This tool requires a Write or Admin token with `actions.propose`.
-
-### `launcher.execute_batch`
-
-When legacy Launcher is enabled, the execution entry is discoverable but deliberately closed. After validating the token and token-bound batch, every call returns `not_executable_in_phase_b1`.
-
-It does not evaluate the gate, advance the batch, create an Actions proposal or receipt, contact Meta, or mutate provider state.
-
-### Refusals
-
-All three tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `batch_not_found`, or `internal_error`. Preview can also return `batch_not_operable` or `gate_receipt_raced`. Execute returns `not_executable_in_phase_b1` after successful authorization and batch resolution.
-
 ## `propose-actions`
 
 This tool validates the action shapes, captures fresh evidence provenance, evaluates policy, and creates one batch.
@@ -328,7 +276,7 @@ Every field path must exist in a fresh server-side capture. Aggregate sources ca
 
 ### Action object
 
-Every action has this common shape:
+Every action has this common shape. The `set_status` example below describes a recommendation only: delivery-status and budget execution are disabled, even after approval. For the executable creative path, use [Create governed Meta creatives](/actions/creative-workflow).
 
 ```json
 {
@@ -446,3 +394,72 @@ This tool creates one canonical `duplicate_ad_with_creative` proposal. It requir
 Plainrouter re-reads the source ad and selected asset under the approved account before creating the proposal. The normalized action always contains `status: "paused"`.
 
 If approved in an executable mode, the worker rechecks policy, creates the copy as `PAUSED`, persists the provider ad ID in a durable receipt, and verifies the exact receipt-addressed object. `IN_PROCESS` can enter scheduled verification for up to 48 hours. The batch is not Landed until every receipt is exactly verified.
+
+## `launcher.draft_batch`
+
+Available only when legacy Launcher is enabled. This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the Plainrouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
+
+It requires an owner-issued [workspace token](/actions/workspace-tokens) with the **Write** or **Admin** tier.
+
+### Input
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `source_adset_id` | Yes | Numeric Meta ad set ID used as the duplication or destination template. |
+| `source_ad_id` | Yes | Numeric Meta ad ID used as the creative template. |
+| `mode` | Yes | `duplicate_adset`, `duplicate_adset_per_media`, or `add_to_adset`. |
+| `folder_to_adset` | No | Map each source folder to its own ad set. Defaults to `false`. |
+| `grouping_enabled` | No | Select current placement groups together. Defaults to `true`. |
+| `items` | Yes | One or more ordered items containing an already-synced `drive_link` and optional copy or link overrides. |
+
+Overrides use contract version `v: 1` and can contain up to five `primary_texts`, `headlines`, and `descriptions`, plus `website_url` and `display_link`.
+
+Workspace and account IDs are never accepted as input. Plainrouter derives them from the execution token. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
+
+### Output
+
+The response includes the draft batch ID and status, frozen tier and capacity limits, item and media counts, accepted items, bounded rejected-item reason codes, import provenance when present, and an advisory gate result.
+
+Possible rejection codes are:
+
+- `drive_asset_unresolved`
+- `overrides_invalid`
+- `overrides_limit_exceeded`
+- `batch_limit_exceeded`
+- `media_limit_exceeded`
+
+The current MCP entry point returns an advisory gate with `not_evaluated`. Treat the result as a draft, not authorization to execute.
+
+## Launcher batch status and preview
+
+These tools are available only when legacy Launcher is enabled. They accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. Plainrouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
+
+### `launcher.batch_status`
+
+Use this read-only tool to inspect a batch without evaluating its gate or contacting a provider. It returns:
+
+- Batch status, mode, and item counts.
+- Sub-batch status.
+- The latest stored gate result.
+- Ordered item status, bounded failure stage and code, and linked Actions proposal IDs.
+- Partition status and latest proposal attempts for duplicate-ad-set modes.
+
+The tool requires only a Read-tier token and the shared `ad-account.read` scope.
+
+### `launcher.preview_batch`
+
+Use this non-destructive checkpoint before presenting a batch as ready. Plainrouter re-evaluates the authoritative gate and returns `status: "previewed"` or `status: "gated"`, the resulting batch status, and checks for source relationships, tracking verification, tracked-domain coverage, ledger health, and Actions readiness.
+
+The `previews` array is intentionally empty in this release. No provider preview, Meta write, Actions proposal, or spend activation happens during the call. A successful preview is not execution authorization; any future execution path must evaluate the gate again.
+
+This tool requires a Write or Admin token with `actions.propose`.
+
+### `launcher.execute_batch`
+
+When legacy Launcher is enabled, the execution entry is discoverable but deliberately closed. After validating the token and token-bound batch, every call returns `not_executable_in_phase_b1`.
+
+It does not evaluate the gate, advance the batch, create an Actions proposal or receipt, contact Meta, or mutate provider state.
+
+### Refusals
+
+All three tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `batch_not_found`, or `internal_error`. Preview can also return `batch_not_operable` or `gate_receipt_raced`. Execute returns `not_executable_in_phase_b1` after successful authorization and batch resolution.

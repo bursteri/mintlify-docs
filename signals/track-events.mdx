@@ -347,6 +347,12 @@ An accepted collector request proves ingestion. It does not establish that Meta 
 
 ## Check a payload before sending it
 
-Use the free [conversion tools](https://plainrouter.com/tools) to inspect a synthetic Meta payload, event-ID pairing, or `_fbp`/`_fbc` formatting in your browser. These local checks do not submit an event to Plainrouter or Meta. The field-coverage checker is an editorial checklist, not Meta's Event Match Quality score.
+Use the local checks alongside the relevant troubleshooting guide:
+
+- [Missing or duplicate Meta events](https://plainrouter.com/library/meta-capi-missing-duplicate-events#local-check): inspect a synthetic native Meta payload. This checker expects Meta's `data` envelope, not a Plainrouter `POST /events` body.
+- [Event-ID deduplication](https://plainrouter.com/library/meta-event-id-deduplication#local-check): compare browser/server event names and IDs.
+- [Browser identifiers](https://plainrouter.com/library/fbp-fbc#local-check): inspect `_fbp` and `_fbc` formatting.
+
+These checks run locally in your browser and do not send events to Plainrouter or Meta. A valid payload or matched event ID does not prove delivery or attribution.
 
 Use the [sandbox](/sandbox) for Plainrouter request validation and the [destination checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for actual delivery evidence.

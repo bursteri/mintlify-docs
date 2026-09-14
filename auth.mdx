@@ -1,5 +1,6 @@
 ---
-title: "Plainrouter auth docs"
+title: "Plainrouter authentication: API secrets and MCP tokens"
+sidebarTitle: "Authentication"
 description: "Choose the correct Plainrouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
 ---
 
@@ -163,7 +164,7 @@ Configure an MCP-compatible client with these exact connection values:
 | Server URL | `https://plainrouter.com/mcp` |
 | Authorization | `Bearer <workspace-execution-token>` |
 
-A workspace owner issues the token from **Account** → **API** for one workspace,
+A workspace owner issues the token from **API** in the dashboard for one workspace,
 one active Meta ad account, one Read, Write, or Admin tier, and a 30, 90, or 365
 day expiry.
 
@@ -198,11 +199,11 @@ discovery.
 | Client | Package or endpoint | Current version | Authentication |
 | --- | --- | --- | --- |
 | REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Signals workspace secret |
-| TypeScript | `@plainrouter/sdk` | `0.5.1` | Signals workspace secret passed through `signalTrackerSecret` |
-| Python | `plainrouter` | `0.5.2` | Signals workspace secret passed to `create_client` |
-| Ruby | `plainrouter-sdk` | `0.1.1` | Signals workspace secret passed to `PlainRouter::Client.new` |
-| Go | `github.com/plainrouter/sdk-go` | `v0.5.2` | Signals workspace secret attached to the request context |
-| CLI | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
+| [TypeScript setup](/sdk/typescript) | `@plainrouter/sdk` | `0.5.1` | Signals workspace secret passed through `signalTrackerSecret` |
+| [Python setup](/sdk/python) | `plainrouter` | `0.5.2` | Signals workspace secret passed to `create_client` |
+| [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.1.1` | Signals workspace secret passed to `PlainRouter::Client.new` |
+| [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.5.2` | Signals workspace secret attached to the request context |
+| [CLI setup](/cli/quickstart) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
 | MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.3.2` | None |
 | MCP production | `https://plainrouter.com/mcp` | Server `0.3.2` | Workspace execution token for tool calls and account data |
 

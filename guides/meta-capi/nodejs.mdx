@@ -29,7 +29,7 @@ The package is an ES module. Use `import` from a `.mjs` file or from a project w
 
 Store `PLAINROUTER_SIGNAL_SECRET` in your server environment. The SDK option `signalTrackerSecret` is its compatibility name; it expects a Signals workspace secret. Keep the configured client out of browser bundles.
 
-Call the example only after confirming the recorded consent permits advertising use. Supply the actual purchase time and consent-capture time from your order records. Reuse a stable, non-personal order ID for retries, and send money as a decimal string such as `"49.90"`.
+Pass the recorded three-field `consent` object from your order or CMP records. The function refuses partial or denied advertising consent; it does not obtain consent. Supply the actual purchase time and consent-capture time from your order records. Reuse a stable, non-personal order ID for retries, and send money as a decimal string such as `"49.90"`.
 
 <Tabs>
   <Tab title="JavaScript">
@@ -46,6 +46,14 @@ if (!signalSecret) throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
 configurePlainrouter({ signalTrackerSecret: signalSecret });
 
 export async function sendPurchase(order) {
+  const fields = ["ad_storage", "ad_user_data", "ad_personalization"];
+  if (!fields.every((field) => order.consent?.[field] === "granted")) {
+    throw new Error("Recorded advertising consent is required");
+  }
+  if (!order.id) throw new Error("A stable order ID is required");
+  if (!Number.isFinite(order.paidAt.getTime())) {
+    throw new Error("A valid original payment time is required");
+  }
   const eventId = `purchase:${order.id}`;
 
   const { data, response } = await createEvent({
@@ -57,9 +65,9 @@ export async function sendPurchase(order) {
       action_source: "website",
       consent_basis: "consent",
       consent: {
-        ad_storage: "granted",
-        ad_user_data: "granted",
-        ad_personalization: "granted",
+        ad_storage: order.consent.ad_storage,
+        ad_user_data: order.consent.ad_user_data,
+        ad_personalization: order.consent.ad_personalization,
         captured_at: order.consentCapturedAt.toISOString(),
         source: "checkout_cmp",
       },
@@ -115,6 +123,11 @@ export type PurchaseInput = {
   fbp?: string;
   fbc?: string;
   consentCapturedAt: Date;
+  consent: {
+    ad_storage: "granted" | "denied";
+    ad_user_data: "granted" | "denied";
+    ad_personalization: "granted" | "denied";
+  };
 };
 
 type ConsentedEventBody = Extract<
@@ -128,6 +141,18 @@ if (!signalSecret) throw new Error("PLAINROUTER_SIGNAL_SECRET is required");
 configurePlainrouter({ signalTrackerSecret: signalSecret });
 
 function purchaseBody(purchase: PurchaseInput): ConsentedEventBody {
+  const consent = purchase.consent;
+  if (
+    consent.ad_storage !== "granted" ||
+    consent.ad_user_data !== "granted" ||
+    consent.ad_personalization !== "granted"
+  ) {
+    throw new Error("Recorded advertising consent is required");
+  }
+  if (!purchase.orderId) throw new Error("A stable order ID is required");
+  if (!Number.isFinite(purchase.paidAt.getTime())) {
+    throw new Error("A valid original payment time is required");
+  }
   return {
     event_id: `purchase:${purchase.orderId}`,
     event_name: "Purchase",
@@ -136,9 +161,9 @@ function purchaseBody(purchase: PurchaseInput): ConsentedEventBody {
     action_source: "website",
     consent_basis: "consent",
     consent: {
-      ad_storage: "granted",
-      ad_user_data: "granted",
-      ad_personalization: "granted",
+      ad_storage: consent.ad_storage,
+      ad_user_data: consent.ad_user_data,
+      ad_personalization: consent.ad_personalization,
       captured_at: purchase.consentCapturedAt.toISOString(),
       source: "checkout_cmp",
     },
@@ -163,8 +188,8 @@ export async function sendPurchase(
 ): Promise<CreateEventResponse> {
   const result = await createEvent({ body: purchaseBody(purchase) });
 
-  if (result.error) {
-    throw new Error(`Plainrouter rejected the event (HTTP ${result.response.status})`);
+  if (!result.response?.ok || !result.data) {
+    throw new Error(`Plainrouter request failed (HTTP ${result.response?.status ?? "no response"})`);
   }
 
   return result.data;
@@ -216,6 +241,20 @@ These database and job steps belong to your application. SDK request idempotency
 The `202` response means Plainrouter accepted the event for processing. It does not mean Meta has accepted the destination delivery yet.
 
 Use [Signal health and performance](/signals/health-and-performance) or retrieve the event with `getEvent` to inspect its delivery state. During setup, you can also use Meta Test Events mode through the destination operations in the [Conversion API reference](/reference/conversion-api).
+
+```ts
+import { getEvent } from "@plainrouter/sdk";
+
+export async function deliveryStatuses(eventId: string) {
+  const result = await getEvent({ path: { event: eventId } });
+  if (!result.response?.ok || !result.data) {
+    throw new Error(`Event lookup failed (HTTP ${result.response?.status ?? "no response"})`);
+  }
+  return result.data.deliveries.map((delivery) => delivery.status);
+}
+```
+
+Pass the `event_id` returned by `sendPurchase`. An `accepted` delivery confirms Meta acceptance; `queued`, `sent`, or `retrying` remains pending. An empty list is not acceptance. For `failed:*` or `skipped:*`, inspect the [delivery explanation](/reference/statuses-and-terms#destination-delivery) before replaying anything. Handle `401` by checking credentials, `404` by checking ID, scope, and retention, and `422` by correcting the request fields.
 
 ## Implementation references
 

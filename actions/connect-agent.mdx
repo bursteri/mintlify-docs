@@ -98,7 +98,7 @@ For creative-library reads, the Meta connection needs `ads_read` or `ads_managem
 
 <Steps>
   <Step title="Issue the token">
-    In Plainrouter, switch to the intended workspace and open **Account** → **API**. Choose the exact ad account, a Read, Write, or Admin tier, and an expiry.
+    In Plainrouter, switch to the intended workspace and open **API** in the dashboard. Choose the exact ad account, a Read, Write, or Admin tier, and an expiry.
   </Step>
   <Step title="Copy it once">
     Copy the complete token immediately after issuance. Plainrouter cannot display it again.
@@ -199,7 +199,7 @@ Follow the [creative workflow](/actions/creative-workflow) and [proposal review 
 
 ## Authorization lifetime and revocation
 
-Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revoke them immediately from **Account** → **API**.
+Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revoke them immediately from **API** in the dashboard.
 
 Plainrouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 

@@ -1,6 +1,7 @@
 ---
-title: "Ruby SDK"
-description: "Install and authenticate the plainrouter-sdk gem for the Signals Conversion API and zero-auth sandbox."
+title: "Ruby SDK: send and verify Meta conversions"
+sidebarTitle: "Ruby SDK"
+description: "Install the official Ruby SDK, send a consented purchase through Plainrouter, retry safely, inspect delivery, and handle API errors."
 ---
 
 [`plainrouter-sdk`](https://rubygems.org/gems/plainrouter-sdk) is the official Ruby SDK for Plainrouter's signed OpenAPI contract. Gem `0.1.1` targets signed API contract `0.5.0` and exposes a compact client over the generated API.
@@ -39,10 +40,77 @@ client = PlainRouter::Client.new(
 )
 
 events = client.operations.list_events(per_page: 25)
-event = client.events.get_event("event-id")
 ```
 
 The client sends the Signals workspace secret as a bearer token. It does not read credentials from the environment automatically.
+
+## Send a Meta conversion
+
+This recipe calls Plainrouter's Conversion API, not Meta Graph API directly. Before sending a real purchase, [connect a Meta destination](/signals/connect-meta) and read the actual payment and advertising-consent records from your application. Keep Ruby as the purchase owner; do not also send this purchase through the managed browser or Stripe settlement flow.
+
+The function takes your persisted order ID, original payment time, decimal amount, currency, and consent snapshot. `paid_at` and `consent_captured_at` are Ruby `Time` objects. The consent hash uses symbol keys matching the three API consent fields. Replace the source URL with your checkout URL.
+
+```ruby
+require "time"
+
+def send_purchase(client, order_id:, paid_at:, value:, currency:,
+                  consent:, consent_captured_at:)
+  grants = %i[ad_storage ad_user_data ad_personalization]
+  unless grants.all? { |field| consent[field] == "granted" }
+    raise ArgumentError, "Recorded advertising consent is required"
+  end
+  raise ArgumentError, "A stable order ID is required" if order_id.to_s.empty?
+
+  body = {
+    event_id: "purchase:#{order_id}",
+    event_name: "Purchase",
+    event_time: paid_at.to_i,
+    event_source: "https://shop.example/checkout/success",
+    action_source: "website",
+    consent_basis: "consent",
+    consent: {
+      ad_storage: consent.fetch(:ad_storage),
+      ad_user_data: consent.fetch(:ad_user_data),
+      ad_personalization: consent.fetch(:ad_personalization),
+      captured_at: consent_captured_at.iso8601,
+      source: "checkout_cmp"
+    },
+    value_data: { value: value, currency: currency, order_id: order_id }
+  }
+
+  receipt, status, _headers = client.events.create_event_with_http_info(body)
+  { event_id: receipt.event_id, duplicate: receipt.duplicate, status: status }
+rescue PlainRouter::OpenAPI::ApiError => error
+  # Keep credentials and customer payloads out of logs.
+  raise "Plainrouter rejected the request (HTTP #{error.code})"
+end
+```
+
+A new event returns `status: 202`; a retry of the same event ID returns `status: 200` and `duplicate: true`. Persist the payload before sending, and reuse its ID and original payment time after an uncertain timeout. Check that advertising use remains permitted before a later retry. Duplicate ingestion does not resend a failed Meta delivery or update the original event.
+
+### How do I confirm delivery?
+
+Use the returned receipt ID to read the event. This function returns delivery statuses without logging identity fields:
+
+```ruby
+def delivery_statuses(client, event_id)
+  trace = client.events.get_event(event_id)
+  trace.deliveries.map { |delivery| delivery.status }
+end
+```
+
+`accepted` means Meta accepted a delivery. `queued`, `sent`, or `retrying` means its outcome is pending. An empty list proves no delivery acceptance; inspect the [destination and event eligibility](/signals/connect-meta#troubleshoot). Meta acceptance does not prove ad attribution. See [all delivery statuses](/reference/statuses-and-terms#destination-delivery).
+
+### Handle API failures
+
+| Result | Action |
+| --- | --- |
+| `401` | Stop retries and check the Signals workspace secret and workspace. |
+| `404` when reading | Check the event ID, workspace scope, and retention. |
+| `422` | Correct the field errors in `ApiError#response_body`; check consent, timestamps, and decimal-string values. |
+| Network timeout | The request may have been accepted. Retry the persisted payload with the same event ID. |
+
+Inspect validation details in a controlled development environment. Do not log the complete exception or response body in production; it can include request-related details. Generated Ruby models do not replace server-side validation.
 
 ## Choose an API group
 

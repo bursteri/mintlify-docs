@@ -1,5 +1,6 @@
 ---
-title: "CLI quickstart"
+title: "Plainrouter CLI: install, authenticate and inspect events"
+sidebarTitle: "CLI quickstart"
 description: "Install the Plainrouter CLI, store a Signals workspace secret securely, and run your first authenticated event or diagnostics command."
 ---
 
@@ -87,7 +88,27 @@ Request machine-readable output for scripts:
 plainrouter events list --per-page 25 --json
 ```
 
-Without `--json`, the CLI prints a human-readable summary or table.
+Without `--json`, the CLI prints a human-readable summary or table. A successful command exits with status `0`. In JSON output, `events.data` is the returned event list; an empty array is a valid response and does not prove collection is configured.
+
+To inspect one event, use its returned ID:
+
+```bash
+plainrouter events get EVENT_ID --json
+```
+
+Read `deliveries[].status`: `accepted` confirms destination acceptance, while queued or retrying delivery remains pending. Do not treat a successful list request as evidence of Meta delivery. See [delivery status meanings](/reference/statuses-and-terms#destination-delivery).
+
+## What if the first command fails?
+
+| Symptom | Next step |
+| --- | --- |
+| Command not found | Check your package manager's binary directory is on `PATH`; rerun `plainrouter --version`. |
+| Missing or rejected credential | Run `plainrouter auth status`, then check whether `PLAINROUTER_TOKEN` overrides the stored secret. Use a Signals secret, not an MCP token. |
+| No returned events | Confirm the correct workspace and retention. Arrival-only records are aggregate and are not listed as conversion events. |
+| Event lookup returns `404` | Copy the event ID from ingestion or the list response and check workspace scope. |
+| Request validation fails | Read standard error for field details; the CLI exits with status `1`. |
+
+For a request that writes data, follow the [event example and destination test sequence](/cli/commands).
 
 ## Use an environment variable
 

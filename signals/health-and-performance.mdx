@@ -1,11 +1,23 @@
 ---
-title: "Signal health and performance"
+title: "Signals arrivals, Meta clicks and delivery troubleshooting"
+sidebarTitle: "Health and troubleshooting"
 description: "Read Signals arrival totals, reporting windows, stored Meta activity, and account-scoped delivery diagnostics."
 ---
 
 Open **Signals** to check collection status and compare arrivals with stored platform activity. Use **Last 7 days**, **Last 30 days**, or **Last 90 days** to select a completed reporting window. The dates and timezone shown above the metrics define the actual period; retention can shorten it. **Today so far** is a separate, incomplete local-day count.
 
 Opening this page or choosing **Export** reads stored data. It does not trigger a live Meta Marketing API request.
+
+## What do you need to check?
+
+| Question | Where to look |
+| --- | --- |
+| Are website arrivals being collected? | [Arrival totals](#events-received) and [symptom checks](#troubleshoot-by-symptom) |
+| Why do Meta, GA4, or Plausible counts differ? | [Measurement differences](#why-numbers-differ) |
+| Did Meta accept a conversion? | [Delivery acceptance](#delivery-acceptance) and the [event trace](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event) |
+| Is platform data fresh or missing? | [Platform read state](#platform-read-state) and [freshness](#measurement-freshness) |
+
+You need an active Signal for arrival collection and a connected Meta destination for platform and delivery diagnostics. Missing platform history does not mean zero activity.
 
 ## Summary metrics
 
@@ -87,7 +99,7 @@ Compare GA4 and Plausible using their own reports alongside Plainrouter. The pla
 
 ## Health states
 
-Account-scoped health remains available through [`get_signal_health`](/reference/mcp-tools#getsignalhealth). These diagnostic states are separate from the Signals overview's collection status.
+Account-scoped health remains available through [`get_signal_health`](/reference/mcp-tools#get_signal_health). These diagnostic states are separate from the Signals overview's collection status.
 
 | State | Meaning | What to do |
 | --- | --- | --- |
@@ -110,7 +122,7 @@ Pending includes queued, sent, and retrying deliveries. Inspect an individual co
 
 ## Verified gap
 
-[`get_performance`](/reference/mcp-tools#getperformance) reads stored reconciliation counts:
+[`get_performance`](/reference/mcp-tools#get_performance) reads stored reconciliation counts:
 
 ```text
 observed gap = gateway-verified accepted conversions - Meta-reported conversions
@@ -145,4 +157,4 @@ Reconciliation normally runs daily. History older than 48 hours is stale. When `
 
 The Signals overview no longer has the old health-header delete control. During collection-domain setup, workspace owners can use the domain's delete control to reset Signals. This removes its collection configuration and related data; accepted events already held by Meta are not retracted.
 
-Deleting the entire workspace is a separate permanent action under **Account** → **Workspace** and also removes its linked accounts and workspace data.
+Deleting the entire workspace is a separate permanent action in workspace settings and also removes its linked accounts and workspace data.

@@ -27,7 +27,7 @@ Management credentials are rejected by default on agent-authenticated routes. Th
     Switch to the workspace that owns the Meta ad account you want the client to use.
   </Step>
   <Step title="Open the token page">
-    In the Plainrouter sidebar, open **Account** → **API**.
+    Open **API** in the Plainrouter dashboard.
   </Step>
   <Step title="Choose the scope">
     Enter a descriptive name. Select one active advertising account, an access tier, and a 30, 90, or 365 day expiry.
@@ -74,11 +74,11 @@ To change a token's account or tier, issue a new token and revoke the old one. P
 
 Each execution credential is linked to a grant that identifies its principal, workspace, allowed operations, and expiry. Plainrouter checks that the grant is active and covers the requested operation, in addition to the credential's existing account and role restrictions.
 
-Token-management responses include `grant_id`. An authorized administrator can use [`revoke_grant`](/reference/mcp-tools#revokegrant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
+Token-management responses include `grant_id`. An authorized administrator can use [`revoke_grant`](/reference/mcp-tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
 
 ## Rotate or revoke a token
 
-Open **Account** → **API** to review active and revoked tokens.
+Open **API** in the dashboard to review active and revoked tokens.
 
 - Click **Rotate** to issue a replacement with the same workspace, account, and tier. Choose a new expiry and copy the replacement immediately. The previous token stops authenticating as soon as rotation succeeds.
 - Click **Revoke** to stop a token immediately. Plainrouter retains the revoked record as durable security history.

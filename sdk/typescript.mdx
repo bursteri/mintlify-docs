@@ -1,5 +1,6 @@
 ---
-title: "TypeScript SDK"
+title: "TypeScript SDK: authenticate, send and verify events"
+sidebarTitle: "TypeScript SDK"
 description: "Install and use the generated @plainrouter/sdk client and Zod schemas to send authenticated Signals Conversion API requests safely."
 ---
 
@@ -33,19 +34,20 @@ import {
   listEvents,
 } from "@plainrouter/sdk";
 
-configurePlainrouter({
-  signalTrackerSecret: process.env.PLAINROUTER_TOKEN!,
-});
+const token = process.env.PLAINROUTER_TOKEN;
+if (!token) throw new Error("PLAINROUTER_TOKEN is required");
+
+configurePlainrouter({ signalTrackerSecret: token });
 
 const result = await listEvents({
   query: { per_page: 25 },
 });
 
-if (result.error) {
-  console.error(result.error);
-} else {
-  console.log(result.data);
+if (!result.response?.ok || !result.data) {
+  throw new Error(`Plainrouter request failed (HTTP ${result.response?.status ?? "no response"})`);
 }
+
+console.log({ returnedEvents: result.data.events.data.length });
 ```
 
 The client sends the Signals workspace secret as a bearer token. The `signalTrackerSecret` property keeps its compatibility name in `0.5.1`. The client does not read credentials from the environment automatically.
@@ -89,14 +91,30 @@ import {
   verifySignalIngestion,
 } from "@plainrouter/sdk";
 
-configurePlainrouter({
-  signalTrackerSecret: process.env.PLAINROUTER_TOKEN!,
-});
+const token = process.env.PLAINROUTER_TOKEN;
+if (!token) throw new Error("PLAINROUTER_TOKEN is required");
+
+configurePlainrouter({ signalTrackerSecret: token });
 
 const result = await verifySignalIngestion();
+if (!result.response?.ok || !result.data) {
+  throw new Error(`Verification failed (HTTP ${result.response?.status ?? "no response"})`);
+}
+
+console.log({
+  status: result.response.status,
+  eventId: result.data.event_id,
+  duplicate: result.data.duplicate,
+});
 ```
 
 The first successful call returns the accepted verification result. Repeating it is safe and returns `duplicate: true`. The event confirms ledger receipt but is not real arrival evidence and does not complete onboarding.
+
+## Send a purchase and inspect its delivery
+
+Follow the [Node.js and TypeScript purchase recipe](/guides/meta-capi/nodejs) for a complete `createEvent` request, recorded consent checks, stable retry IDs, and a typed `getEvent` delivery check. It sends through Plainrouter; it is not a direct Meta Graph API tutorial.
+
+By default, operations return `data`, `error`, and `response`; an HTTP failure must be checked before using `data`. A transport failure may have no `response`; check it before reading the status. Code using `throwOnError: true` must also catch thrown failures. Stop on `401`, inspect field errors on `422`, and retry an uncertain purchase timeout only with its original persisted ID and payload. Avoid logging entire request or error objects. See the [API error table](/reference/conversion-api#handle-errors).
 
 ## Handle credentials safely
 

@@ -3,6 +3,8 @@ title: "Try the API without an account"
 description: "Make a successful synthetic event request, then test bearer authentication with a short-lived sandbox key."
 ---
 
+The Plainrouter sandbox validates identity-free synthetic events without an account. It does not write production events or contact Meta. You need only an HTTP client; short-lived sandbox keys let you also test bearer authentication.
+
 ## Make your first request
 
 Call the sandbox discovery endpoint. You do not need an account or a credential.
@@ -131,6 +133,16 @@ The keyed endpoint returns HTTP `401` when its bearer credential is missing, inv
 
 Each error includes an `error.resolution` field that tells you to supply or issue a replacement sandbox key. The response also includes `WWW-Authenticate: Bearer`.
 
+## Sandbox endpoint reference
+
+| Operation | Reference |
+| --- | --- |
+| Discover the request contract | [GET sandbox](https://plainrouter.com/docs/api-reference/sandbox/discover-the-zero-auth-sandbox) |
+| Issue a key with GET | [GET sandbox key](https://plainrouter.com/docs/api-reference/sandbox/get-a-sandbox-api-key) |
+| Issue a key with POST | [POST sandbox key](https://plainrouter.com/docs/api-reference/sandbox/create-a-sandbox-api-key) |
+| Validate without a key | [Synthetic event](https://plainrouter.com/docs/api-reference/sandbox/validate-a-synthetic-event) |
+| Validate bearer authentication | [Keyed synthetic event](https://plainrouter.com/docs/api-reference/sandbox/validate-a-synthetic-event-with-a-sandbox-key) |
+
 ## Stay within the rate limits
 
 Sandbox limits are per client IP address:
@@ -144,7 +156,7 @@ Key issuance and keyed validation use independent budgets. Validation traffic ca
 
 ## Move to production
 
-Plainrouter is free while monthly managed ad spend is under &#36;300. Registration is self-serve, and a workspace admin can issue scoped workspace execution tokens from the dashboard without a contact-sales step.
+Registration is self-serve. Review the current EUR pricing bands, included arrivals, and overage rules in [Pricing and billing](/billing/overview). The workspace owner can issue scoped [workspace execution tokens](/actions/workspace-tokens) from the dashboard.
 
 Keep the production credential types separate. A Signals workspace secret authenticates the Signals Conversion API for one workspace. A workspace execution token authenticates MCP and authorized workspace routes for one workspace and one Meta ad account. Neither credential is a sandbox key.
 
