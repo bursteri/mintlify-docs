@@ -194,6 +194,12 @@ credential cannot call MCP tools, Launcher imports, or other agent-authenticated
 routes. Use a separately issued workspace execution token for MCP after
 discovery.
 
+## Why does a dashboard URL reject my bearer token?
+
+Dashboard settings and approval pages require a signed-in browser session. A valid workspace execution token or OAuth management credential cannot replace that session, even with an active grant or Admin tier.
+
+If an automation receives `401` on a dashboard URL, check the requested interface before rotating credentials. Use the documented MCP or API operation with its matching credential, or sign in to complete the interactive action. For grant management, follow [the dashboard revocation steps](/actions/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) or the separately authorized [`revoke_grant` MCP tool](/reference/mcp-tools#revoke_grant).
+
 ## Which clients are available?
 
 | Client | Package or endpoint | Current version | Authentication |

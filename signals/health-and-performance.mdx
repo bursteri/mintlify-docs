@@ -1,7 +1,7 @@
 ---
 title: "Signals arrivals, Meta clicks and delivery troubleshooting"
 sidebarTitle: "Health and troubleshooting"
-description: "Read Signals arrival totals, reporting windows, stored Meta activity, and account-scoped delivery diagnostics."
+description: "Troubleshoot Signals arrivals, Meta reporting, Event Match Quality, browser observations, and accepted conversion deliveries."
 ---
 
 Open **Signals** to check collection status and compare arrivals with stored platform activity. Use **Last 7 days**, **Last 30 days**, or **Last 90 days** to select a completed reporting window. The dates and timezone shown above the metrics define the actual period; retention can shorten it. **Today so far** is a separate, incomplete local-day count.
@@ -15,6 +15,8 @@ Opening this page or choosing **Export** reads stored data. It does not trigger 
 | Are website arrivals being collected? | [Arrival totals](#events-received) and [symptom checks](#troubleshoot-by-symptom) |
 | Why do Meta, GA4, or Plausible counts differ? | [Measurement differences](#why-numbers-differ) |
 | Did Meta accept a conversion? | [Delivery acceptance](#delivery-acceptance) and the [event trace](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event) |
+| Why is Event Match Quality blank? | [EMQ states](#why-is-event-match-quality-blank) |
+| What does Meta recovery evidence show? | [Browser observations](#what-does-meta-recovery-evidence-show) |
 | Is platform data fresh or missing? | [Platform read state](#platform-read-state) and [freshness](#measurement-freshness) |
 
 You need an active Signal for arrival collection and a connected Meta destination for platform and delivery diagnostics. Missing platform history does not mean zero activity.
@@ -133,6 +135,36 @@ A positive gap means the gateway count is higher; a negative gap means Meta's co
 ## Gateway vs Meta chart
 
 The daily rows in the stored performance response identify gateway-verified conversions, Meta-reported conversions, and the observed gap for each report date. Use those rows or the [reconciliation report API](/reference/conversion-api) when investigating a conversion-count difference. The Signals overview no longer presents the old gateway chart.
+
+## Why is Event Match Quality blank?
+
+**Event Match Quality** in Signals reads the latest stored Meta composite score for the workspace's active destination. A dash means the score is unavailable; it does not mean zero. Read the accompanying notice and UTC date before comparing scores.
+
+| Display | Meaning and next step |
+| --- | --- |
+| A score and UTC date | A stored capture contains a Meta composite score. Check its date; opening Signals does not refresh it. |
+| **Connect Meta to read Event Match Quality.** | No active Meta destination is available. [Connect the conversion destination](/signals/connect-meta#connect-the-destination). |
+| **Reconnect Meta with ads_read to read Event Match Quality. Delivery is unchanged.** | The active connection lacks the required read access. Reconnect the intended Meta connection; inspect delivery separately. |
+| **Pending first capture.** | No stored capture is available yet. This is different from Meta returning no scores. |
+| **Meta returned no composite Event Match Quality scores.** | A capture completed without a usable composite score. Treat the score as unavailable and check the capture date. |
+
+EMQ is match-quality evidence, not confirmation of an individual conversion's acceptance, attribution, or revenue impact. Use the [event delivery trace](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event) to investigate a purchase and the [EMQ guide](https://plainrouter.com/library/meta-event-match-quality) for matching concepts.
+
+## What does Meta recovery evidence show?
+
+The **Meta recovery** panel groups eligible server-side Meta `Purchase` deliveries by UTC day and separates their browser-pixel observations. It includes non-test, accepted deliveries for consented, observed, joined, attributed purchase events. It does not count identity-free arrivals or every purchase recorded in Plainrouter.
+
+Expand a day to inspect `event_id`, **Provenance**, `observed_browser`, and **Source**:
+
+| Browser observation | Interpretation |
+| --- | --- |
+| **observed** | The snippet reported a browser-pixel observation. This is not a Meta attribution receipt. |
+| **not observed** | The snippet reported no browser-pixel observation. Server delivery does not prove the browser event would otherwise have been lost. |
+| **unknown** | No definite browser observation is available. Keep it separate from **not observed**. |
+
+Daily totals can exceed the inspection list, which shows at most 100 events per day. These rows use UTC delivery-record dates; do not assume they align with the overview's local-day arrival windows.
+
+For a disputed event, copy its non-secret `event_id`, open [its delivery trace](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event), and compare the matching event in Meta Events Manager. Keep browser observation, server acceptance, and Meta reporting as separate evidence. An empty panel means no eligible delivery evidence is available for that period; it does not establish that the website had no purchases. These counts do not measure incremental conversions, recovered revenue, or a guaranteed performance improvement.
 
 ## Diagnostics
 

@@ -66,6 +66,12 @@ To test browser collection, open your browser's developer tools and reload the p
 
 On a same-origin installation, these requests use the generated forwarding prefix on your website. Confirm both the script and collector requests stay on that origin. Use the [same-origin request checklist](/signals/configure-serving#what-should-i-see-in-the-network-panel) if they return HTML, redirect, or lose the prefix. An accepted arrival confirms edge receipt; setup completes after the arrival is stored for the workspace.
 
+### Does the consent message verify installation?
+
+The consent-source message on **Install** is separate from the **Verified** arrival status. It describes the configured consent surface or the latest eligible retained consent-source observation; it is not a live test of your CMP on the current page.
+
+A detected consent source does not prove that a new purchase was delivered to Meta. An arrival can be verified while advertising consent is absent. Complete the [grant, partial-consent, and withdrawal checks](/signals/track-events#verify-grant-partial-consent-and-withdrawal) after checking collection, then inspect the purchase's delivery separately.
+
 ## What happens on initialization
 
 `signalq("init", ...)` sends one arrival per document and publishable key before checking consent. It does not create or read visitor cookies for that request. Repeating initialization with the same key, changing consent, navigating with the History API, or restoring the page from the back-forward cache does not send another arrival. A full page reload starts a new document and can send a new arrival.
