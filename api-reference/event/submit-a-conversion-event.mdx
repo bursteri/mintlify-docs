@@ -1,0 +1,77 @@
+---
+title: "Submit a conversion event"
+description: "Send a consented purchase through Plainrouter's Conversion API, preserve its event ID on retries, and inspect the event trace for Meta acceptance."
+openapi: "POST /events"
+---
+
+Submit a server-side conversion to Plainrouter with a Signals workspace secret. A new event returns `202`; a retry of the same event ID returns `200` with `duplicate: true`. Neither receipt alone confirms Meta delivery.
+
+## Before sending a purchase
+
+- Use the [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) on your server. MCP execution tokens and OAuth management credentials cannot authenticate this endpoint.
+- [Connect the intended Meta dataset](/signals/connect-meta) for eligible destination delivery.
+- Read the actual paid order and its recorded advertising consent. The example assumes all three grants; setting these fields does not obtain consent.
+- Choose one purchase sender. Do not also send the same checkout through a browser purchase or Stripe settlement flow.
+
+This endpoint uses Plainrouter's request shape, not Meta's Graph API `data` envelope. For synthetic payload checks without production writes, use the [sandbox](/sandbox).
+
+## Example: an immediate, consented purchase
+
+Replace the order ID, source URL, amount and currency with the actual purchase. This immediate-event example omits `event_time`, so Plainrouter uses receipt time. For queued events, supply the original Unix timestamp or ISO-8601 payment time from your order record and preserve it on retries. Do not replace an old payment time with the current time.
+
+<RequestExample>
+```bash Consented purchase
+curl --include https://plainrouter.com/api/v1/events \
+  --request POST \
+  --header "Authorization: Bearer $PLAINROUTER_SIGNAL_SECRET" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "event_id": "order-123",
+    "event_name": "Purchase",
+    "event_source": "https://shop.example/thank-you",
+    "action_source": "website",
+    "consent_basis": "consent",
+    "consent": {
+      "ad_storage": "granted",
+      "ad_user_data": "granted",
+      "ad_personalization": "granted",
+      "source": "checkout-consent"
+    },
+    "value_data": {
+      "value": "49.90",
+      "currency": "EUR",
+      "order_id": "order-123"
+    }
+  }'
+```
+</RequestExample>
+
+Use a stable, non-personal `event_id` for the logical purchase. You can use `Idempotency-Key` instead; if you supply both, they must match. Reuse the original payload after an uncertain timeout, subject to continued consent eligibility. A duplicate receipt does not update the accepted event or replay a failed Meta delivery.
+
+<ResponseExample>
+```json 202 — New event
+{
+  "event_id": "order-123",
+  "duplicate": false
+}
+```
+
+```json 200 — Duplicate event
+{
+  "event_id": "order-123",
+  "duplicate": true
+}
+```
+</ResponseExample>
+
+## How do I verify the result?
+
+Follow the returned `Location` header or [retrieve the event and delivery trace](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace). A delivery with `status: "accepted"` confirms Meta acceptance. Queued or retrying delivery remains pending, and an empty delivery list is not acceptance. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for failed and skipped outcomes. Acceptance does not establish ad attribution or better performance.
+
+| Failure | Next step |
+| --- | --- |
+| `401` | Stop retries and check the Signals secret and workspace. |
+| `422` | Read field errors; check consent, decimal-string values, original event time and matching idempotency keys. |
+| Timeout without a receipt | The write may have succeeded. Retry the original ID and payload rather than creating a new ID. |
+
+For a complete backend integration, use the [Node.js and TypeScript recipe](/guides/meta-capi/nodejs), [Python recipe](/sdk/python#send-a-meta-conversion), or [Ruby recipe](/sdk/ruby#send-a-meta-conversion). The parameter and response schemas below come from the [signed OpenAPI contract](https://plainrouter.com/openapi.json).

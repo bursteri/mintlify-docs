@@ -156,7 +156,7 @@
           "POST /sandbox/keys",
           "POST /sandbox/events",
           "POST /sandbox/keyed-events",
-          "POST /events",
+          "api-reference/event/submit-a-conversion-event",
           "POST /verification-events",
           "GET /events/{event}",
           "GET /dashboard/events",
