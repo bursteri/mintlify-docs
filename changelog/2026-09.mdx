@@ -8,6 +8,22 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="September 14, 2026">
 
+  ## Install Signals before connecting Meta
+
+  **Improved** · Saving a website address now opens **Install** directly. Meta authorization and dataset selection remain optional for arrival collection, and **Continue without Meta** provides a way back when assets are unavailable. [Follow the updated quickstart](/quickstart#set-up-signals).
+
+  ## Choose the collection hostname before provisioning
+
+  **Improved** · Managed-hostname setup suggests `t` on your website domain and lets you edit that DNS label on Install before confirming it. The final stored hostname supplies the CNAME and snippet; it cannot be renamed after provisioning. [Choose your hostname](/signals/configure-dns#choose-your-collection-hostname).
+
+  ## Server-event acknowledgements flag invalid consent timestamps
+
+  **New** · New secret-authenticated event acknowledgements include `warnings`. The `consent_captured_at_invalid` warning identifies a missing or invalid capture time when visitor or user identity is supplied. Event acceptance and duplicate responses retain their existing semantics. [Handle the warning](/reference/conversion-api#why-is-the-consent-capture-time-invalid).
+
+  ## Published agent skills use workspace execution tokens
+
+  **Fixed** · The published account-context, ingestion-verification, and governed-proposal skills now distinguish workspace execution tokens from OAuth management credentials and Signals workspace secrets. The proposal skill uses the supported creative workflow and preserves human approval and verification requirements. [Choose the correct MCP credential](/auth#how-do-i-authenticate-plainrouter-mcp) and [follow the creative walkthrough](/actions/creative-workflow).
+
   ## Inspect workspace grants and verify revocation
 
   **Documentation** · The workspace-token guide now covers **Workspace settings → Workspace grants**, exact operations, revocation confirmation, and the resulting audit receipt. Authentication troubleshooting explains why a bearer token cannot replace a dashboard session. [Review grant management](/actions/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) and [dashboard authentication](/auth#why-does-a-dashboard-url-reject-my-bearer-token).

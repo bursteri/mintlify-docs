@@ -85,13 +85,42 @@ You can supply `Idempotency-Key` instead of a body `event_id`. If you supply bot
 ```json
 {
   "event_id": "order-123",
-  "duplicate": false
+  "duplicate": false,
+  "warnings": []
 }
 ```
 
 For browser consent and visitor joins, see [Track events and consent](/signals/track-events).
 
 Every `POST /events` request must include `consent_basis`. Use `consent` only with granted downstream advertising state. `legitimate_interest` is restricted to allowlisted lifecycle events and does not create an attributed advertising join.
+
+## Why is the consent capture time invalid?
+
+A new server event authenticated with a Signals workspace secret returns HTTP `202` with a `warnings` array. The array is empty when no warning applies. If you supply `visitor_id` or `user_data` without a parseable consent capture time, the acknowledgement includes `consent_captured_at_invalid`:
+
+```json
+{
+  "event_id": "order-123",
+  "duplicate": false,
+  "warnings": [
+    {
+      "code": "consent_captured_at_invalid",
+      "field": "consent.captured_at",
+      "message": "The event will not join identity data because consent.captured_at is missing or invalid."
+    }
+  ]
+}
+```
+
+The event was accepted; the warning does not mean the request failed. A `202` alone does not prove an identity join or Meta delivery. Inspect the acknowledgement before treating the event as fully linked.
+
+1. Read the consent snapshot captured by your application or CMP. Supply its actual decision time in `consent.captured_at`; do not invent consent or replace a missing historical decision with the current time.
+2. Use a timestamp with seconds and a timezone, such as `2026-09-14T10:30:00Z` or `2026-09-14T13:30:00+03:00`. An optional fractional second may contain one to six digits. Date-only values, timestamps without a timezone, and impossible calendar dates are invalid.
+3. Correct future submissions and inspect the original event's [delivery trace](#how-do-i-confirm-meta-accepted-the-event). Reusing an accepted event ID returns the original duplicate acknowledgement; it does not update that event's consent. Do not create another purchase ID just to remove a warning.
+
+Duplicate HTTP `200` acknowledgements keep their existing response shape and do not include this new array. Browser/publishable-key and sandbox acknowledgements are unchanged. An empty array is not proof of fresh consent: a parseable but stale capture time can still fail the existing identity freshness checks. The warning does not broaden consent, identity, or destination eligibility.
+
+For a server implementation that retains the original consent timestamp, use the [Plainrouter SDK purchase recipe](/guides/meta-capi/nodejs). The [published OpenAPI contract](https://plainrouter.com/openapi.json) defines the acknowledgement fields; older generated SDK models may not expose newly added fields.
 
 ## How do I confirm Meta accepted the event?
 

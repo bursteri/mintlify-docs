@@ -30,7 +30,7 @@ This reporting connection is separate from selecting a conversion destination. C
 
 <Steps>
   <Step title="Open Meta setup">
-    Open [Meta destination setup](https://plainrouter.com/signals/meta) for the selected workspace, or continue the Meta step during Signals onboarding.
+    Choose **Connect or manage Meta** on **Install**, or open [Meta destination setup](https://plainrouter.com/signals/meta) for the selected workspace. Website setup opens Install first; this Meta flow is optional for arrival collection.
   </Step>
   <Step title="Authorize Meta">
     Complete Meta's authorization flow and grant access to the intended Meta ad account and dataset.
@@ -48,6 +48,12 @@ This reporting connection is separate from selecting a conversion destination. C
 <Warning>
   After validating Plainrouter, remove other Pixel or CAPI integrations that send the same events to this dataset. Independent senders can create duplicate conversions even when each integration works on its own.
 </Warning>
+
+### Can I finish Signals setup without Meta?
+
+Yes. Choose **Continue without Meta** to return to Signals if authorization is unavailable, no usable ad account or Page appears, or the dataset list is empty. Continue installation from **Install** and return to Meta setup later. For a missing asset, use **Reconnect Meta** and grant access to the intended assets before retrying.
+
+Continuing without Meta does not connect a destination or make conversions eligible for delivery. Verify the [arrival](/signals/install-pixel#verify-the-installation) and [Meta delivery](#how-do-i-verify-meta-delivery) independently.
 
 ## How managed delivery works
 

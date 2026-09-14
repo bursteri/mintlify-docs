@@ -1,6 +1,7 @@
 ---
-title: "Configure DNS and CNAME"
-description: "Connect a first-party collection subdomain to Plainrouter, publish the required DNS record, and confirm managed-hostname validation."
+title: "Choose a Signals collection hostname and configure CNAME"
+sidebarTitle: "Configure DNS and CNAME"
+description: "Choose your Signals collection-hostname label, add the exact CNAME record, and troubleshoot hostname provisioning and HTTPS validation."
 ---
 
 Plainrouter collects Signals through a subdomain you control, such as `collect.example.com`. Connecting this collection domain requires one CNAME record.
@@ -13,6 +14,22 @@ Signals setup asks for your **Website address**, such as `www.example.com`, to a
 
 The **collection domain**, such as `collect.example.com`, receives those events. Add DNS records for the collection domain shown in Plainrouter. Do not replace the DNS records that serve your website.
 
+## Choose your collection hostname
+
+After saving the website address, **Install** shows **Choose your collection hostname**. Plainrouter suggests `t` on the website's registrable domain. You can keep that label or choose another before provisioning; the domain suffix stays fixed.
+
+| Website address | Label you enter | Proposed collection hostname |
+| --- | --- | --- |
+| `www.example.com` | `t` | `t.example.com` |
+| `shop.example.com` | `collect` | `collect.example.com` |
+| `www.example.co.uk` | `events` | `events.example.co.uk` |
+
+Use one label containing 1–63 letters, numbers, or interior hyphens. The form lowercases letters. Dots, underscores, spaces, and leading or trailing hyphens are invalid. Enter `collect`, not `collect.example.com` or `https://collect.example.com`.
+
+Click **Use t** or the button matching your edited label. If the hostname is already allocated, Plainrouter can choose a suffixed label. Use the final **Name** and **Target** shown after provisioning for DNS; do not assume the proposal became the stored hostname unchanged. Once provisioned, the hostname cannot be renamed in this field.
+
+This label choice applies to managed-hostname setup (Path A). [Same-origin forwarding](/signals/configure-serving) uses its existing installation flow.
+
 ## How the CNAME works
 
 | Record | Purpose |
@@ -24,7 +41,7 @@ The **collection domain**, such as `collect.example.com`, receives those events.
 </Warning>
 
 <Note>
-  You do not need to create a Cloudflare Worker Route or configure application routing. Plainrouter registers the collection hostname automatically after DNS and HTTPS validation succeeds.
+  You do not need to create a Cloudflare Worker Route or configure application routing. Plainrouter provisions the collection hostname when you confirm it. DNS, HTTPS, and collector configuration must be ready before the hostname becomes active.
 </Note>
 
 ## Before you begin
@@ -43,7 +60,7 @@ You can identify the active DNS provider by checking where your domain's nameser
   <Step title="Open the DNS configuration">
     In Plainrouter, open **Signals** and continue setup.
 
-    In the collection-domain step, Plainrouter displays the exact **Type**, **Name**, and **Value** for the required CNAME. If the record is still being prepared, use **Check again** before editing DNS.
+    After confirming the hostname on **Install**, **1. Create the CNAME record** displays the exact **Type**, **Name**, and **Target**. If the record is still being prepared, refresh the screen after provisioning; do not invent a target.
   </Step>
   <Step title="Add the CNAME record">
     In your DNS provider, create the CNAME using the collection domain as its name and the Plainrouter target as its value.
@@ -53,7 +70,7 @@ You can identify the active DNS provider by checking where your domain's nameser
   <Step title="Save and validate">
     Save the CNAME and return to Plainrouter.
 
-    CNAME changes are typically detected within five minutes. Cloudflare then validates ownership and provisions HTTPS automatically. If setup remains pending after five minutes, click **Retry validation**.
+    DNS propagation and HTTPS validation can take several minutes. Keep the CNAME in place and return to **Install** to check progress. DNS visibility alone does not prove that the collection hostname is active.
   </Step>
 </Steps>
 
@@ -65,7 +82,7 @@ DNS providers use different labels for the same fields:
 | --- | --- | --- |
 | **Type** | Record type | `CNAME` |
 | **Name** | Host, hostname, alias | The record name shown in Plainrouter |
-| **Value** | Target, points to, content | The record value shown in Plainrouter |
+| **Target** | Value, points to, content | The record value shown in Plainrouter |
 | TTL | Time to live | Use **Auto** or the provider default |
 
 Some providers automatically append your root domain to the **Name** field. If entering `collect.example.com` produces `collect.example.com.example.com`, enter only the host portion, such as `collect`.
@@ -78,9 +95,17 @@ Some providers automatically append your root domain to the **Name** field. If e
 
 Plainrouter validates ownership and HTTPS automatically after the CNAME points to Plainrouter. Keep the setup screen open, or return later through **Signals**.
 
-When validation succeeds, Plainrouter moves setup to **Install Signals and wait for a real arrival**. Keep the CNAME in place after setup completes.
+When the collection hostname is active, **2. Add the browser snippet** provides the generated code. Keep the CNAME in place after setup completes.
 
 ## Troubleshoot validation
+
+### The hostname field rejects my input
+
+Enter only one DNS label, such as `collect`, and keep the fixed website-domain suffix. If the domain is wrong, check the website address before confirming provisioning. An already provisioned hostname cannot be changed by editing the label or pointing a different DNS name at the same target.
+
+### Hostname provisioning fails before DNS instructions appear
+
+Correct any field-validation error first. For a temporary provisioning error, retry the confirmation on **Install**. If Plainrouter says the hostname is not configured on this installation, contact support with the displayed error and workspace name. No DNS change can supply a missing installation configuration; never include the workspace secret in the report.
 
 ### The CNAME does not validate
 

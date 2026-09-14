@@ -63,22 +63,24 @@ Signals collects first-party conversion events from your website through a colle
 
     The form supplies `https://`. Use the exact website host, without a page path, query string, or fragment. The website address identifies the site allowed to send events; it is separate from your collection subdomain, such as `collect.example.com`.
   </Step>
-  <Step title="Open installation from the overview">
-    The website step leads into Meta connection and the searchable Pixel picker. After saving a destination, you return to the Signals overview. Choose **Install** for the collection-domain and DNS instructions. You can close Meta setup and return later; arrival collection does not require a Meta destination.
+  <Step title="Confirm your collection hostname on Install">
+    Saving your website address opens **Install** directly. Meta authorization and dataset selection are optional and do not gate installation or arrival collection.
 
-    Use the collection domain displayed by Plainrouter. When entering a collection subdomain, use a hostname such as `collect.example.com`, without `https://` or a path.
+    Under **Choose your collection hostname**, keep the suggested `t` label or edit it, for example to `collect`. For `www.example.com`, the fixed domain suffix is `example.com`, giving `t.example.com` or `collect.example.com`. Click **Use t** or **Use collect** to confirm. Enter only the label, not a complete hostname, URL, or path.
+
+    The hostname cannot be edited after provisioning. Copy the final hostname shown in the DNS instructions; if your choice is already allocated, Plainrouter can add a suffix. See [hostname rules](/signals/configure-dns#choose-your-collection-hostname).
   </Step>
   <Step title="Add the CNAME record">
     Copy the CNAME name and target from Plainrouter into your DNS provider. Keep the setup screen open or return to it from **Signals**.
 
-    CNAME detection and automatic HTTPS validation can take several minutes. If setup remains pending, click **Retry validation** after your provider has published the change.
+    CNAME detection and automatic HTTPS validation can take several minutes. If setup remains pending, leave the record in place and return to **Install** after your provider has published the change.
 
     See [Configure DNS and CNAME](/signals/configure-dns) for provider field guidance and troubleshooting.
   </Step>
   <Step title="Install Signals and wait for an arrival">
     When the collection domain becomes active, copy the generated snippet into the shared `<head>` of your site, deploy, and visit a page. The snippet sends one identity-free arrival before evaluating consent.
 
-    Plainrouter completes setup after the first qualifying arrival is stored for the workspace. The setup screen polls automatically, backs off while it waits, and resumes after you return to the tab. Connect your consent flow separately before sending conversion events or advertising identity.
+    After installing, choose **I’ve added the CNAME and snippet** to record the setup path. This confirmation alone does not verify traffic. Plainrouter verifies the browser installation after the first qualifying arrival is stored for the workspace. The setup screen polls automatically, backs off while it waits, and resumes after you return to the tab. Connect your consent flow separately before sending conversion events or advertising identity.
 
     See [Install the Signals pixel](/signals/install-pixel) for the snippet and consent requirements.
   </Step>

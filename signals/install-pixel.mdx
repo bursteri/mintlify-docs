@@ -23,9 +23,9 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
 
 <Steps>
   <Step title="Copy your snippet">
-    Open **Signals**, continue setup, and find **Install Signals and wait for a real arrival**.
+    Open **Signals → Install**. For managed-hostname setup, confirm your [collection-hostname label](/signals/configure-dns#choose-your-collection-hostname) and add the CNAME. When the hostname is active, find **2. Add the browser snippet**.
 
-    Click **Copy code**. Use the complete snippet exactly as Plainrouter provides it. Its key and script URL are unique to your workspace.
+    Click **Copy snippet**. Use the complete snippet exactly as Plainrouter provides it. Its key and script URL are unique to your workspace.
   </Step>
   <Step title="Add it to every page">
     Paste the snippet immediately before the closing `</head>` tag in your site-wide layout.
@@ -47,7 +47,9 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   <Step title="Deploy and visit your site">
     Publish the change, then open any page on the connected website.
 
-    Use the network checks below to confirm that the pixel loads and sends an arrival. Then test your consent integration separately for conversion events and Meta delivery.
+    For managed-hostname setup, choose **I’ve added the CNAME and snippet** after installing. This records your setup path; the **Verified** status still requires stored arrival evidence.
+
+    Use the network checks below to confirm that the pixel loads and sends an arrival. Then test your consent integration separately for conversion events and Meta delivery. You can use **Connect or manage Meta** on Install when you are ready; Meta setup is not required for the arrival check.
   </Step>
 </Steps>
 
