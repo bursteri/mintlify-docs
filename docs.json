@@ -117,7 +117,7 @@
       },
       {
         "tab": "SDKs",
-        "icon": "code",
+        "icon": "package",
         "groups": [
           {
             "group": "Overview",
@@ -147,7 +147,7 @@
       },
       {
         "tab": "CLI",
-        "icon": "terminal",
+        "icon": "square-terminal",
         "groups": [
           {
             "group": "Get started",
@@ -167,7 +167,7 @@
       },
       {
         "tab": "API",
-        "icon": "braces",
+        "icon": "code-xml",
         "groups": [
           {
             "group": "Overview",
@@ -249,7 +249,7 @@
       },
       {
         "tab": "Changelog",
-        "icon": "history",
+        "icon": "list",
         "groups": [
           {
             "group": "2026",
