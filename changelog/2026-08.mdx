@@ -33,7 +33,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Signals becomes workspace-native
 
-  **Improved** · Signals configuration and tenancy now belong directly to the workspace. Conversion API responses use numeric `workspace_id` as the canonical identifier and retain `signal_tracker_id` as a deprecated decimal-string alias. Published `0.5.x` SDKs can continue reading that compatibility alias until regenerated clients add the canonical field. [Read the identifier transition](/reference/conversion-api#read-workspace-identifiers).
+  **Improved** · Signals configuration and tenancy now belong directly to the workspace. Conversion API responses use numeric `workspace_id` as the canonical identifier and retain `signal_tracker_id` as a deprecated decimal-string alias. Published `0.5.x` SDKs can continue reading that compatibility alias until regenerated clients add the canonical field. [Read the identifier transition](/api/conversions#read-workspace-identifiers).
 
   ## Retention instructions become visible and auditable
 
@@ -48,7 +48,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Signals identity lookup becomes workspace-keyed
 
-  **Security** · Plainrouter now separates its private per-workspace identity lookup from the platform-format digests returned by `user_data_hashed`. User-data deletion accepts a verified raw identifier or legacy SHA-256 digest only in the JSON body and rejects identifiers placed in a URL query string. [Review deletion and identity fields](/reference/conversion-api#delete-retained-user-data).
+  **Security** · Plainrouter now separates its private per-workspace identity lookup from the platform-format digests returned by `user_data_hashed`. User-data deletion accepts a verified raw identifier or legacy SHA-256 digest only in the JSON body and rejects identifiers placed in a URL query string. [Review deletion and identity fields](/api/conversions#delete-retained-user-data).
 
   ## Visitor identity retention is bounded to 30 or 90 days
 
@@ -59,18 +59,18 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Ruby SDK and PyPI CLI expand the official clients
 
-  **New** · Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk) brings the signed Conversion API contract to Ruby 3.2 and newer. Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/) now also includes the `plainrouter` command: install it with `pipx install plainrouter==0.5.1` or run `python -m plainrouter` from an active environment. [Install the Ruby SDK](/sdk/ruby) or [choose a CLI distribution](/cli/quickstart).
+  **New** · Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk) brings the signed Conversion API contract to Ruby 3.2 and newer. Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/) now also includes the `plainrouter` command: install it with `pipx install plainrouter==0.5.1` or run `python -m plainrouter` from an active environment. [Install the Ruby SDK](/sdk/ruby) or [choose a CLI distribution](/sdk/cli/quickstart).
 
   ## MCP hosts can render an approval-card preview
 
-  **Preview** · The production MCP catalog now includes `show_spend_cap_approval`, a read-only MCP App presentation with fixed demonstration values and disabled controls. It performs no account read, approval, provider call, or spend change. [Review the preview boundary](/reference/mcp-tools#show_spend_cap_approval).
+  **Preview** · The production MCP catalog now includes `show_spend_cap_approval`, a read-only MCP App presentation with fixed demonstration values and disabled controls. It performs no account read, approval, provider call, or spend change. [Review the preview boundary](/mcp/tools#show_spend_cap_approval).
 </Update>
 
 <Update label="August 26, 2026">
 
   ## Official clients publish API 0.5.0
 
-  **New** · TypeScript SDK [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python SDK [`plainrouter==0.5.0`](https://pypi.org/project/plainrouter/), Go SDK [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go), and CLI [`@plainrouter/cli@0.5.0`](https://www.npmjs.com/package/@plainrouter/cli) are published from the signed API contract. Install the CLI from [npm](https://www.npmjs.com/package/@plainrouter/cli) or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. [Choose an official client](/reference/conversion-api#client-releases).
+  **New** · TypeScript SDK [`@plainrouter/sdk@0.5.0`](https://www.npmjs.com/package/@plainrouter/sdk), Python SDK [`plainrouter==0.5.0`](https://pypi.org/project/plainrouter/), Go SDK [`github.com/plainrouter/sdk-go@v0.5.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go), and CLI [`@plainrouter/cli@0.5.0`](https://www.npmjs.com/package/@plainrouter/cli) are published from the signed API contract. Install the CLI from [npm](https://www.npmjs.com/package/@plainrouter/cli) or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap) with `brew install plainrouter/tap/plainrouter`. [Choose an official client](/api/conversions#client-releases).
 
   ## Go SDK package documentation improves
 
@@ -78,11 +78,11 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Try the API without an account
 
-  **New** · The public sandbox now lets you validate an identity-free synthetic event without an account or credential. One read-only request also returns a short-lived sandbox key for testing bearer-authenticated client setup. Sandbox requests read no production data, persist nothing, and contact no advertising provider. [Try the sandbox](/sandbox).
+  **New** · The public sandbox now lets you validate an identity-free synthetic event without an account or credential. One read-only request also returns a short-lived sandbox key for testing bearer-authenticated client setup. Sandbox requests read no production data, persist nothing, and contact no advertising provider. [Try the sandbox](/api/sandbox).
 
   ## Test MCP integrations without an account
 
-  **New** · `https://plainrouter.com/mcp/sandbox` exposes synthetic `get_account_state`, `get_signal_health`, `get_performance`, and `validate_sandbox_event` calls without a credential or human step. The endpoint is separate from account-bound production MCP, exposes no proposal or spend tools, stores nothing, and contacts no advertising provider. [Start in MCP test mode](/actions/connect-agent#start-in-test-mode).
+  **New** · `https://plainrouter.com/mcp/sandbox` exposes synthetic `get_account_state`, `get_signal_health`, `get_performance`, and `validate_sandbox_event` calls without a credential or human step. The endpoint is separate from account-bound production MCP, exposes no proposal or spend tools, stores nothing, and contacts no advertising provider. [Start in MCP test mode](/mcp/setup#start-in-test-mode).
 </Update>
 
 <Update label="August 25, 2026">
@@ -100,7 +100,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Launcher batches gain MCP status and preflight preview
 
-  **New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/reference/mcp-tools#launcher-batch-status-and-preview).
+  **New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/mcp/tools#launcher-batch-status-and-preview).
 </Update>
 
 <Update label="August 23, 2026">
@@ -147,7 +147,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Spend proposals now require performance evidence
 
-  **Improved** · Signal health remains available for diagnostics, but it can no longer support budget, status, creative-spend, or mixed proposals. Agents must use eligible observed reconciliation data from `get_performance`; modeled and portfolio-only events remain outside that evidence path. Upload-only asset proposals keep the narrow non-spend exception. [Review the MCP evidence rules](/reference/mcp-tools#evidence-restrictions).
+  **Improved** · Signal health remains available for diagnostics, but it can no longer support budget, status, creative-spend, or mixed proposals. Agents must use eligible observed reconciliation data from `get_performance`; modeled and portfolio-only events remain outside that evidence path. Upload-only asset proposals keep the narrow non-spend exception. [Review the MCP evidence rules](/mcp/tools#evidence-restrictions).
 
   ## Import Launcher drafts from CSV or XLSX
 
@@ -155,7 +155,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## MCP execution credentials fail closed
 
-  **Security** · OAuth management credentials are now rejected by default on MCP and agent-authenticated routes. The read-only agent-context route is the sole discovery exception; MCP tools require an account-bound workspace execution token whose tier is capped by the issuer's current workspace role. [Connect an agent](/actions/connect-agent).
+  **Security** · OAuth management credentials are now rejected by default on MCP and agent-authenticated routes. The read-only agent-context route is the sole discovery exception; MCP tools require an account-bound workspace execution token whose tier is capped by the issuer's current workspace role. [Connect an agent](/mcp/setup).
 
   ## Actions and operational monitoring are more deterministic
 
@@ -166,15 +166,15 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Launcher draft batches arrive in MCP
 
-  **New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured Plainrouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/reference/mcp-tools).
+  **New** · Agents can use `launcher.draft_batch` to turn already-synced Drive assets into a structured Plainrouter draft. It requires a Write or Admin workspace token and does not write to Meta or activate spend. [Read the MCP reference](/mcp/tools).
 
   ## Consent-first Signals and simpler activation
 
-  **New** · Signal activation now uses an identity-free server verification event through REST or MCP, making the browser pixel optional for setup. Event ingestion now requires an explicit consent basis and fails closed before ineligible Meta delivery. [See what changed in API 0.3.1](/reference/conversion-api).
+  **New** · Signal activation now uses an identity-free server verification event through REST or MCP, making the browser pixel optional for setup. Event ingestion now requires an explicit consent basis and fails closed before ineligible Meta delivery. [See what changed in API 0.3.1](/api/conversions).
 
   ## SDKs and CLI ship API 0.3.1
 
-  **New** · TypeScript SDK `0.3.1`, Python SDK `0.3.1`, and CLI `0.3.1` are now published. Both SDKs expose all ten signed API operations, including ingestion verification and the consent-aware event contract. [Choose a client](/reference/conversion-api#client-releases).
+  **New** · TypeScript SDK `0.3.1`, Python SDK `0.3.1`, and CLI `0.3.1` are now published. Both SDKs expose all ten signed API operations, including ingestion verification and the consent-aware event contract. [Choose a client](/api/conversions#client-releases).
 
   ## Stripe revenue waits for settlement
 
@@ -204,7 +204,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Workspace-scoped MCP tokens
 
-  **New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. Plainrouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/actions/workspace-tokens).
+  **New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. Plainrouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/mcp/workspace-tokens).
 
   ## Policy changes joined the audit chain
 

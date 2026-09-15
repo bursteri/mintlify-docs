@@ -6,7 +6,7 @@ description: "Issue account-bound MCP tokens, inspect workspace grant permission
 
 Workspace tokens are the execution credentials for Plainrouter MCP clients and automations. Each token is bound to exactly one workspace and one active Meta ad account in that workspace.
 
-See [Authentication and clients](/auth) for the canonical
+See [Authentication and clients](/api/authentication) for the canonical
 comparison with Signals workspace secrets, OAuth management credentials, and
 browser sessions.
 
@@ -75,7 +75,7 @@ To change a token's account or tier, issue a new token and revoke the old one. P
 
 Each execution credential is linked to a grant that identifies its principal, workspace, allowed operations, and expiry. Plainrouter checks that the grant is active and covers the requested operation, in addition to the credential's existing account and role restrictions.
 
-Token-management responses include `grant_id`. An authorized administrator can use [`revoke_grant`](/reference/mcp-tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
+Token-management responses include `grant_id`. An authorized administrator can use [`revoke_grant`](/mcp/tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
 
 ### Inspect and revoke a grant in the dashboard
 

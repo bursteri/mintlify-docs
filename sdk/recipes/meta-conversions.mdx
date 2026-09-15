@@ -11,7 +11,7 @@ Send a purchase to Meta through Plainrouter using the [`@plainrouter/sdk`](https
 You need:
 
 - Node.js `22.22.2` or later in the Node 22 release line.
-- A [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) stored only on your server.
+- A [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api) stored only on your server.
 - An active [Meta destination](/signals/connect-meta).
 - A consent decision that permits downstream advertising use. See [Server-side tracking consent](https://plainrouter.com/library/server-side-consent).
 
@@ -240,7 +240,7 @@ These database and job steps belong to your application. SDK request idempotency
 
 The `202` response means Plainrouter accepted the event for processing. It does not mean Meta has accepted the destination delivery yet.
 
-Use [Signal health and performance](/signals/health-and-performance) or retrieve the event with `getEvent` to inspect its delivery state. During setup, you can also use Meta Test Events mode through the destination operations in the [Conversion API reference](/reference/conversion-api).
+Use [Signal health and performance](/signals/health-and-performance) or retrieve the event with `getEvent` to inspect its delivery state. During setup, you can also use Meta Test Events mode through the destination operations in the [Conversion API reference](/api/conversions).
 
 ```ts
 import { getEvent } from "@plainrouter/sdk";
@@ -261,4 +261,4 @@ Pass the `event_id` returned by `sendPurchase`. An `accepted` delivery confirms 
 - [`configurePlainrouter` source at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/config.ts)
 - [`createEvent` generated operation at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/generated/sdk.gen.ts)
 - [`CreateEventData` request type at SDK `0.5.1`](https://github.com/plainrouter/sdk/blob/v0.5.1/packages/sdk/src/generated/types.gen.ts)
-- [Plainrouter Conversion API reference](/reference/conversion-api)
+- [Plainrouter Conversion API reference](/api/conversions)

@@ -1,5 +1,6 @@
 """Offline response mutations; never fetch public or product endpoints."""
 import unittest
+import json
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -32,8 +33,18 @@ class LiveChecks(unittest.TestCase):
                 run.assert_not_called()
         config, pages, operations = check.source_inventory()
         self.assertGreater(len(pages), 0)
-        self.assertGreater(len(operations), 0)
+        # Authored OpenAPI wrappers are checked as pages, not extra sitemap URLs.
+        self.assertIn(check.public_url("api/events/create"), pages)
         self.assertTrue(all(check.safe_url(task["url"]) for task in check.initial_tasks(config, pages)))
+
+    def test_inventory_distinguishes_wrapped_and_generated_operations(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "docs.json").write_text(json.dumps({"navigation": {"pages": ["event", "GET /events"]}}))
+            (root / "event.mdx").write_text('---\ntitle: "Send event"\ndescription: "Submit a conversion."\nopenapi: "POST /events"\n---\n')
+            _, pages, operations = check.source_inventory(root)
+            self.assertEqual(pages, {check.DOCS + "/event": {"title": "Send event", "description": "Submit a conversion."}})
+            self.assertEqual(operations, ["GET /events"])
 
     def test_html_control_and_mutations(self):
         task = {"kind": "html", "url": URL}
@@ -84,7 +95,7 @@ class LiveChecks(unittest.TestCase):
             check.validate(task, response("# Quickstart", "text/plain"), PAGES, 0)
 
     def test_sitemap_missing_duplicate_and_unsafe_pages(self):
-        generated = check.DOCS + "/api-reference/send-event"
+        generated = check.DOCS + "/api/send-event"
         def sitemap(urls):
             return '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{url}</loc></url>' for url in urls) + '</urlset>'
         task = {"kind": "sitemap", "url": check.DOCS + "/sitemap.xml"}

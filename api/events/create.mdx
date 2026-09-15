@@ -8,12 +8,12 @@ Submit a server-side conversion to Plainrouter with a Signals workspace secret. 
 
 ## Before sending a purchase
 
-- Use the [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) on your server. MCP execution tokens and OAuth management credentials cannot authenticate this endpoint.
+- Use the [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api) on your server. MCP execution tokens and OAuth management credentials cannot authenticate this endpoint.
 - [Connect the intended Meta dataset](/signals/connect-meta) for eligible destination delivery.
 - Read the actual paid order and its recorded advertising consent. The example assumes all three grants; setting these fields does not obtain consent.
 - Choose one purchase sender. Do not also send the same checkout through a browser purchase or Stripe settlement flow.
 
-This endpoint uses Plainrouter's request shape, not Meta's Graph API `data` envelope. For synthetic payload checks without production writes, use the [sandbox](/sandbox).
+This endpoint uses Plainrouter's request shape, not Meta's Graph API `data` envelope. For synthetic payload checks without production writes, use the [sandbox](/api/sandbox).
 
 ## Example: an immediate, consented purchase
 
@@ -67,11 +67,11 @@ Use a stable, non-personal `event_id` for the logical purchase. You can use `Ide
 ```
 </ResponseExample>
 
-New-event acknowledgements include `warnings`. If you supply identity data without a valid consent capture time, read the [consent warning guidance](/reference/conversion-api#why-is-the-consent-capture-time-invalid) before treating the event as linked. Duplicate acknowledgements retain the response shape shown above.
+New-event acknowledgements include `warnings`. If you supply identity data without a valid consent capture time, read the [consent warning guidance](/api/conversions#why-is-the-consent-capture-time-invalid) before treating the event as linked. Duplicate acknowledgements retain the response shape shown above.
 
 ## How do I verify the result?
 
-Follow the returned `Location` header or [retrieve the event and delivery trace](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace). A delivery with `status: "accepted"` confirms Meta acceptance. Queued or retrying delivery remains pending, and an empty delivery list is not acceptance. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for failed and skipped outcomes. Acceptance does not establish ad attribution or better performance.
+Follow the returned `Location` header or [retrieve the event and delivery trace](https://plainrouter.com/docs/api/events/get). A delivery with `status: "accepted"` confirms Meta acceptance. Queued or retrying delivery remains pending, and an empty delivery list is not acceptance. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for failed and skipped outcomes. Acceptance does not establish ad attribution or better performance.
 
 | Failure | Next step |
 | --- | --- |
@@ -79,4 +79,4 @@ Follow the returned `Location` header or [retrieve the event and delivery trace]
 | `422` | Read field errors; check consent, decimal-string values, original event time and matching idempotency keys. |
 | Timeout without a receipt | The write may have succeeded. Retry the original ID and payload rather than creating a new ID. |
 
-For a complete backend integration, use the [Node.js and TypeScript recipe](/guides/meta-capi/nodejs), [Python recipe](/sdk/python#send-a-meta-conversion), or [Ruby recipe](/sdk/ruby#send-a-meta-conversion). The parameter and response schemas below come from the [signed OpenAPI contract](https://plainrouter.com/openapi.json).
+For a complete backend integration, use the [Node.js and TypeScript recipe](/sdk/recipes/meta-conversions), [Python recipe](/sdk/python#send-a-meta-conversion), or [Ruby recipe](/sdk/ruby#send-a-meta-conversion). The parameter and response schemas below come from the [signed OpenAPI contract](https://plainrouter.com/openapi.json).

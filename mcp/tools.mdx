@@ -6,7 +6,7 @@ description: "Reference for Plainrouter MCP tools, workspace grants, conditional
 
 Plainrouter MCP server version `0.3.2` exposes ten tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use the advertising account selected during workspace-token issuance.
 
-Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/actions/connect-agent).
+Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
@@ -67,7 +67,7 @@ A concurrent operation can return `workspace_lock_timeout` through MCP. Affected
 
 Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`. Every Launcher tool requires the `ad-account.read` baseline.
 
-Clients authenticate with an owner-issued [workspace execution token](/actions/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. OAuth management credentials cannot authenticate to the MCP server.
+Clients authenticate with an owner-issued [workspace execution token](/mcp/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. OAuth management credentials cannot authenticate to the MCP server.
 
 `launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, `launcher.execute_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview and the closed execution entry require `actions.propose`.
 
@@ -399,7 +399,7 @@ If approved in an executable mode, the worker rechecks policy, creates the copy 
 
 Available only when legacy Launcher is enabled. This tool creates a Launcher draft batch from Drive assets already synced into the token's workspace. It writes only the Plainrouter draft model; it does not write to Meta, evaluate the final execution gate, or activate spend.
 
-It requires an owner-issued [workspace token](/actions/workspace-tokens) with the **Write** or **Admin** tier.
+It requires an owner-issued [workspace token](/mcp/workspace-tokens) with the **Write** or **Admin** tier.
 
 ### Input
 

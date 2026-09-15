@@ -235,11 +235,11 @@ The browser normalizes and SHA-256 hashes the values before sending them. Plainr
 const visitorId = signalq("getVisitorId");
 ```
 
-For a custom backend integration, a visitor ID alone is not an advertising consent grant. Follow the [server-event recipe](/guides/meta-capi/nodejs) and preserve the actual consent decision. The Stripe verified-revenue adapter below does not use checkout metadata to establish an attributed visitor join.
+For a custom backend integration, a visitor ID alone is not an advertising consent grant. Follow the [server-event recipe](/sdk/recipes/meta-conversions) and preserve the actual consent decision. The Stripe verified-revenue adapter below does not use checkout metadata to establish an attributed visitor join.
 
 ## Verify Stripe Checkout settlement
 
-Stripe verified revenue records paid Checkout Sessions in Plainrouter. This is a revenue connection, not a Meta Conversions API integration: do not expect `metadata.visitor_id` to join the purchase to a browser visit or trigger Meta delivery. For consented advertising conversions, use the [managed browser purchase](#avoid-duplicate-meta-events) or [backend recipe](/guides/meta-capi/nodejs).
+Stripe verified revenue records paid Checkout Sessions in Plainrouter. This is a revenue connection, not a Meta Conversions API integration: do not expect `metadata.visitor_id` to join the purchase to a browser visit or trigger Meta delivery. For consented advertising conversions, use the [managed browser purchase](#avoid-duplicate-meta-events) or [backend recipe](/sdk/recipes/meta-conversions).
 
 ### What do I need before connecting Stripe?
 
@@ -300,7 +300,7 @@ An illustrative paid-webhook response is:
 }
 ```
 
-Use the returned `event_id` to find the retained record through [GET event](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event). For this revenue flow, the check is the purchase record and value, not a Meta `accepted` delivery. A `404` can mean the wrong workspace or that the record is outside read retention.
+Use the returned `event_id` to find the retained record through [GET event](/api/conversions#how-do-i-confirm-meta-accepted-the-event). For this revenue flow, the check is the purchase record and value, not a Meta `accepted` delivery. A `404` can mean the wrong workspace or that the record is outside read retention.
 
 Duplicate paid notifications for the same Session reuse one purchase record and return `duplicate: true`. The first recorded purchase uses its settlement-confirming webhook's time. Supported refund notifications record an idempotent negative revenue adjustment; purchase lineage is attached only when Plainrouter can find the matching order. Do not assume Stripe copies Session metadata onto refund objects; see [Stripe metadata propagation](https://docs.stripe.com/metadata).
 
@@ -314,7 +314,7 @@ Duplicate paid notifications for the same Session reuse one purchase record and 
 | Paid Session, duplicate response | Inspect the original returned event ID; do not create another Session or purchase to force a new record. |
 | Revenue exists but no Meta delivery | This adapter does not establish advertising consent or an attributed visitor join. Review your [purchase owner](#avoid-duplicate-meta-events) before adding another sender. |
 
-Stripe webhook redelivery and [Plainrouter destination replay](/reference/conversion-api#how-do-i-replay-a-failed-delivery) are different operations. Destination replay cannot create a missing Stripe revenue record.
+Stripe webhook redelivery and [Plainrouter destination replay](/api/conversions#how-do-i-replay-a-failed-delivery) are different operations. Destination replay cannot create a missing Stripe revenue record.
 
 ## Reliability behavior
 
@@ -333,7 +333,7 @@ Choose one purchase owner before adding a confirmation-page event:
 | Purchase owner | Event ID and retry behavior |
 | --- | --- |
 | Browser `signalq("track", "purchase", payload)` | Signals generates one ID for its managed browser/server pair. Built-in transport retries preserve it; another `track` call generates another ID. |
-| Your backend using the [Node.js SDK](/guides/meta-capi/nodejs) or [REST API](/reference/conversion-api) | Your application supplies and persists the ID. Reuse the same ID and purchase payload on retries. A separate `signalq` call does not share it. |
+| Your backend using the [Node.js SDK](/sdk/recipes/meta-conversions) or [REST API](/api/conversions) | Your application supplies and persists the ID. Reuse the same ID and purchase payload on retries. A separate `signalq` call does not share it. |
 | [Stripe verified revenue](#verify-stripe-checkout-settlement) | Plainrouter derives the canonical purchase from the settled Checkout Session. Do not add a second browser or custom-backend purchase for that session. |
 
 ### Send one managed purchase after payment confirmation
@@ -389,4 +389,4 @@ Use the local checks alongside the relevant troubleshooting guide:
 
 These checks run locally in your browser and do not send events to Plainrouter or Meta. A valid payload or matched event ID does not prove delivery or attribution.
 
-Use the [sandbox](/sandbox) for Plainrouter request validation and the [destination checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for actual delivery evidence.
+Use the [sandbox](/api/sandbox) for Plainrouter request validation and the [destination checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for actual delivery evidence.

@@ -1,66 +1,76 @@
 ---
-title: "Choose an SDK or CLI"
-description: "Choose an official Plainrouter client for server-side conversions, terminal diagnostics, or account-bound AI workflows."
+title: "Plainrouter SDKs and CLI"
+sidebarTitle: "Introduction"
+description: "Choose an official Plainrouter SDK, check runtime requirements, authenticate server-side requests, and verify conversions or use the CLI."
 ---
 
-Use an SDK to add the Signals Conversion API to your application. Use the CLI to inspect events and reports from a terminal or script. To give an AI agent access to governed advertising workflows, [connect it through MCP](/actions/connect-agent).
+Use an official Plainrouter SDK to send consented conversions from your server and inspect their delivery. Use the CLI for terminal diagnostics and scripts. All clients call the Plainrouter Conversion API; they do not call Meta's Graph API directly.
 
-## Which client should I use?
+## Choose your language
 
-| Client | Published version | Best fit | Guide |
-| --- | --- | --- | --- |
-| [TypeScript SDK](https://www.npmjs.com/package/@plainrouter/sdk) | `0.5.1` | Typed server-side requests and Zod validation. | [TypeScript setup](/sdk/typescript) |
-| [Python SDK](https://pypi.org/project/plainrouter/) | `0.5.2` | Synchronous or asynchronous Python applications. | [Python setup](/sdk/python) |
-| [Ruby SDK](https://rubygems.org/gems/plainrouter-sdk) | `0.1.1` | Ruby applications using the curated client facade. | [Ruby setup](/sdk/ruby) |
-| [Go SDK](https://pkg.go.dev/github.com/plainrouter/sdk-go) | `v0.5.2` | Typed Go applications. | [Go setup](/sdk/go) |
-| [npm CLI](https://www.npmjs.com/package/@plainrouter/cli) | `0.5.1` | Terminal commands and JSON output for scripts. | [CLI setup](/cli/quickstart) |
-| [Python CLI](https://pypi.org/project/plainrouter/) | `0.5.2` | The same command tree installed through `pipx`. | [CLI setup](/cli/quickstart) |
+Each language guide covers installation, authentication, requests, and verification.
 
-The CLI is also available from the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap). Choose one global CLI installation so your shell consistently runs the intended `plainrouter` executable.
+<CardGroup cols={2}>
+  <Card title="TypeScript" icon="braces" href="/sdk/typescript">
+    Typed operations and Zod schemas for server-side Node.js applications.
+  </Card>
+  <Card title="Python" icon="code" href="/sdk/python">
+    Synchronous and asynchronous clients with typed request models.
+  </Card>
+  <Card title="Ruby" icon="gem" href="/sdk/ruby">
+    A client facade for sending events and reading delivery results.
+  </Card>
+  <Card title="Go" icon="code" href="/sdk/go">
+    Typed requests with context-based authentication and error handling.
+  </Card>
+</CardGroup>
+
+For a terminal workflow, start with the [CLI quickstart](/sdk/cli/quickstart), then use the [command reference](/sdk/cli/commands). To connect an AI agent to governed advertising workflows, use [MCP setup](/mcp/setup).
+
+## Before you begin
+
+| Client | Runtime | Published package |
+| --- | --- | --- |
+| TypeScript | Node.js `22.22.2` or newer | [`@plainrouter/sdk` `0.5.1`](https://www.npmjs.com/package/@plainrouter/sdk) |
+| Python | Python 3.11 or newer | [`plainrouter` `0.5.2`](https://pypi.org/project/plainrouter/) |
+| Ruby | Ruby 3.2 or newer | [`plainrouter-sdk` `0.1.1`](https://rubygems.org/gems/plainrouter-sdk) |
+| Go | Go 1.23 or newer | [`sdk-go` `v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go) |
+
+Production requests require a **Signals workspace secret** stored on your server. Published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential. An MCP workspace execution token is a separate credential and cannot authenticate Conversion API requests. See [Authentication](/api/authentication).
+
+To deliver conversions to Meta, [connect the intended dataset](/signals/connect-meta) and capture the required [event consent](/signals/track-events). Without production setup, you can explore the request contract in the [synthetic API sandbox](/api/sandbox).
+
+## Build your first integration
+
+1. **Install and configure one client.** Follow your language guide above. Pin its package version and keep the Signals secret out of browser bundles.
+2. **Check access.** Read recent events using the guide's authenticated client. A successful empty response is valid; it does not prove that browser collection is installed.
+3. **Verify ingestion.** Use the SDK's ingestion diagnostic. It records an identity-free verification event; it does not establish real arrival evidence or complete onboarding. See [Verify Signal ingestion](/signals/verify-ingestion).
+4. **Send a conversion and inspect delivery.** Follow the [Node.js and TypeScript recipe](/sdk/recipes/meta-conversions), or the purchase example in the [Python](/sdk/python#send-a-meta-conversion), [Ruby](/sdk/ruby#send-a-meta-conversion), or [Go](/sdk/go#send-a-meta-conversion) guide. Preserve the original event ID and payload on retries.
+
+A new event's `202` acknowledgement confirms ingestion. Check the event's delivery trace separately: a delivery with `status: "accepted"` confirms destination acceptance. Acceptance does not establish attribution or improved advertising performance. See [delivery status meanings](/reference/statuses-and-terms#destination-delivery).
 
 ## What do the clients cover?
 
-All four SDKs target signed API contract `0.5.0` and cover event creation and retrieval, ingestion verification, destination testing, delivery replay, reports, and user-data deletion. The CLI exposes nine API commands. It has no command for ingestion verification or cursor-based event listing; use the relevant SDK operation or direct REST. MCP also provides an ingestion diagnostic.
+All four SDKs target signed API contract `0.5.0` and cover event creation and retrieval, ingestion verification, destination testing, delivery replay, reports, and user-data deletion. Package versions are independent of the API contract version. Review release notes before upgrading. For compatibility in published `0.5.x` clients, see [Read workspace identifiers](/api/conversions#read-workspace-identifiers).
 
-SDK and CLI package versions are independent of the API contract version. Pin the package you install and review changes before upgrading. For the workspace identifier compatibility boundary in published `0.5.x` clients, see [Read workspace identifiers](/reference/conversion-api#read-workspace-identifiers).
-
-| Task | Use |
+| Task | Documentation |
 | --- | --- |
-| Send purchases, leads, or other conversions from your server | An SDK and the [event consent contract](/signals/track-events). |
-| Inspect recent events, delivery status, or stored reports | The [CLI command reference](/cli/commands) or an SDK. |
-| Confirm that authenticated ingestion works | An SDK or [REST/MCP ingestion diagnostic](/signals/verify-ingestion). |
-| Install browser measurement | The [Signals browser snippet](/signals/install-pixel). |
-| Read account context or propose governed advertising actions | An [MCP connection](/actions/connect-agent). |
+| Send purchases or leads from application code | Your language guide and the [event consent contract](/signals/track-events). |
+| Inspect events or stored reports in a terminal | [CLI commands](/sdk/cli/commands). |
+| Review request fields, responses, and API failures | [API reference](/api/introduction) and [conversion handling](/api/conversions). |
+| Install browser measurement | [Signals browser snippet](/signals/install-pixel). |
+| Read account context or propose advertising actions | [MCP introduction](/mcp/overview). |
 
-## Which credential do I need?
+The CLI exposes nine API commands. It has no ingestion-verification or cursor-based event-listing command; use an SDK or REST for those operations. Install the CLI from [npm](https://www.npmjs.com/package/@plainrouter/cli), [PyPI](https://pypi.org/project/plainrouter/), or the [official Homebrew tap](https://github.com/plainrouter/homebrew-tap). Choose one global installation so your shell runs the intended executable.
 
-Production Conversion API calls use a **Signals workspace secret**. Keep it on your server or in the CLI's local credential storage. The published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential.
+## What if the integration does not work?
 
-MCP uses a separate **workspace execution token** bound to one workspace and one Meta ad account. SDK or CLI installation does not grant MCP access or widen permissions. See [Authentication](/auth) before choosing a credential.
+| Symptom | Check |
+| --- | --- |
+| `401` authentication failure | Use the Signals secret for the intended workspace. MCP tokens are not API credentials. |
+| `422` validation failure | Inspect the returned field errors and the [event contract](/api/conversions#handle-errors), including consent fields. |
+| Timeout while sending a purchase | Retry with its original persisted event ID and payload; do not generate another conversion ID. |
+| Event accepted but Meta delivery is pending | Read the event trace and check the [connected destination](/signals/connect-meta). Ingestion and delivery are separate results. |
+| Empty event list despite visible arrivals | Arrival totals are aggregate-only and do not appear as conversion events. Use [Signals reporting](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks). |
 
-## Start with a read-only command
-
-After [installing the CLI](/cli/quickstart), store your Signals workspace secret at the hidden prompt and list recent events:
-
-```bash
-plainrouter auth login
-plainrouter events list --per-page 25 --json
-```
-
-A successful request returns the workspace's event response. An empty event list can still be a successful authenticated request; it does not prove that browser collection is installed. A `401` means the credential needs attention.
-
-## Trace a conversion from the terminal
-
-After authenticating, inspect an event you already sent and read stored reports:
-
-```bash
-plainrouter events get YOUR_EVENT_ID --json
-plainrouter reports emq --json
-plainrouter reports reconciliation --date 2026-09-12 --json
-```
-
-Replace `YOUR_EVENT_ID` with the original conversion ID and choose the reconciliation date you need. These commands read stored results. Inspect the event's delivery trace separately from ingestion acceptance; `202` alone does not prove Meta delivery.
-
-Arrival totals are aggregate-only. They do not appear in `events list` or `events get`, so an empty event list does not contradict arrivals shown in Signals. Use the [Signals overview and CSV export](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks) for arrivals and platform activity. The CLI's report commands read conversion reconciliation and EMQ, not the dashboard's arrival comparison.
-
-For application code, continue with your language's setup guide above. For identity-free synthetic requests before production setup, see [Try the API without an account](/sandbox).
+The language guides describe each client's response and error handling. For terminal-specific failures, see [CLI troubleshooting](/sdk/cli/quickstart#what-if-the-first-command-fails).

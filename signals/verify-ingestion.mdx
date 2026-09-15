@@ -16,7 +16,7 @@ Use the server-side verification event when you want to confirm that a Signals w
 | --- | --- | --- |
 | Does the installed website send arrivals? | [Load the site and inspect `/v1/arrival`](/signals/install-pixel#verify-the-installation). | `202` confirms arrival receipt; setup completes after a qualifying arrival is stored. |
 | Can my server credential or MCP token write to Signals? | Use the verification request below. | Plainrouter accepted one identity-free diagnostic for the authorized workspace. |
-| Is my conversion payload valid? | [Validate a synthetic event in the sandbox](/sandbox). | The sandbox accepts the synthetic shape; no production event or Meta delivery is created. |
+| Is my conversion payload valid? | [Validate a synthetic event in the sandbox](/api/sandbox). | The sandbox accepts the synthetic shape; no production event or Meta delivery is created. |
 | Did a conversion reach Meta? | [Verify destination delivery](/signals/connect-meta#how-do-i-verify-meta-delivery). | An accepted destination delivery or controlled test response; attribution remains separate. |
 
 ## Before you begin
@@ -48,7 +48,7 @@ A new verification returns HTTP `202`:
 }
 ```
 
-The request and response are defined by the [published verification operation](https://plainrouter.com/docs/api-reference/event/verify-server-side-signal-ingestion).
+The request and response are defined by the [published verification operation](https://plainrouter.com/docs/api/events/verify-ingestion).
 
 Repeating the request is safe. It returns HTTP `200` with `duplicate: true` and does not create another ledger event.
 
@@ -66,7 +66,7 @@ verify_signal_ingestion
 
 The tool accepts no input. It uses the Signal in the authorized workspace and returns the same `event_id` and `duplicate` fields as the REST endpoint.
 
-The connection needs the `signals.verify` permission. Read-tier workspace tokens include this permission. See [Connect an AI agent](/actions/connect-agent) or [Workspace tokens](/actions/workspace-tokens).
+The connection needs the `signals.verify` permission. Read-tier workspace tokens include this permission. See [Connect an AI agent](/mcp/setup) or [Workspace tokens](/mcp/workspace-tokens).
 
 ## Interpret the result
 
@@ -75,7 +75,7 @@ The result confirms that the authenticated request reached the workspace's Signa
 You can use the successful diagnostic before or after you:
 
 - [Install the Signals pixel](/signals/install-pixel) for consent-aware browser measurement and onboarding evidence.
-- [Submit server conversion events](/reference/conversion-api).
+- [Submit server conversion events](/api/conversions).
 - [Connect Meta](/signals/connect-meta) for eligible destination delivery.
 
 ## Troubleshoot

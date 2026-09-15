@@ -1,6 +1,6 @@
 ---
 title: "Ruby SDK: send and verify Meta conversions"
-sidebarTitle: "Ruby SDK"
+sidebarTitle: "Ruby"
 description: "Install the official Ruby SDK, send a consented purchase through Plainrouter, retry safely, inspect delivery, and handle API errors."
 ---
 
@@ -139,7 +139,7 @@ sandbox = PlainRouter::Client.new
 example = sandbox.sandbox.get_sandbox
 ```
 
-Sandbox operations accept only identity-free synthetic data. They do not read or write the production Signal ledger and do not contact an advertising provider. Read [Try the API without an account](/sandbox) before submitting a synthetic request.
+Sandbox operations accept only identity-free synthetic data. They do not read or write the production Signal ledger and do not contact an advertising provider. Read [Try the API without an account](/api/sandbox) before submitting a synthetic request.
 
 ## Configure another API origin or timeout
 
@@ -159,4 +159,4 @@ The Ruby SDK accepts a Signals workspace secret for production Conversion API ca
 
 Keep the secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
 
-For request and response fields, use the [Conversion API reference](/reference/conversion-api).
+For request and response fields, use the [Conversion API reference](/api/conversions).

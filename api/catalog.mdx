@@ -15,7 +15,7 @@ https://plainrouter.com/.well-known/api-catalog
 
 The response uses `application/linkset+json` with the RFC 9727 profile. This
 Mintlify explanation is also available as a Markdown page at
-`/reference/api-catalog.md`.
+`/api/catalog.md`.
 
 ## Which relations does the catalog publish?
 
@@ -39,15 +39,15 @@ guide, or MCP tool reference.
 
 1. Fetch the catalog without a credential.
 2. Select a relation based on the task and declared media type.
-3. Read [Authentication and clients](/auth) before sending
+3. Read [Authentication and clients](/api/authentication) before sending
    any bearer credential.
 4. Confirm the token-bound workspace and Meta ad account before using MCP.
 5. Treat every proposal, approval, provider write, and verification as a
    separate governed state.
 
 For a compact human- and agent-readable inventory, use the [API resource
-index](/reference/api-resource-index). For request and response schemas, use the
-[Conversion API reference](/reference/conversion-api).
+index](/api/resources). For request and response schemas, use the
+[Conversion API reference](/api/conversions).
 
 <Warning>
   A catalog relation is discovery metadata, not authorization. Never send a

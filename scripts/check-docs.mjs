@@ -185,6 +185,30 @@ const mdxPages = new Set(
   mdxFiles.map((file) => relative(root, file).replace(/\.mdx$/, "")),
 );
 
+for (const [tabName, prefix] of [["MCP", "mcp/"], ["SDK & CLI", "sdk/"], ["API", "api/"], ["Changelog", "changelog/"]]) {
+  const tab = tabs?.find((item) => item.tab === tabName);
+  if (!tab || navigationPages(tab).some((page) => !page.startsWith(prefix))) {
+    fail(`${tabName} navigation must use authored pages under ${prefix}`);
+  }
+}
+
+const redirectSources = new Set();
+for (const redirect of config.redirects ?? []) {
+  if (redirectSources.has(redirect.source)) {
+    fail(`Duplicate redirect source: ${redirect.source}`);
+  }
+  redirectSources.add(redirect.source);
+  if (mdxPages.has(redirect.source.slice(1).replace(/\.md$/, ""))) {
+    fail(`Redirect shadows a published page: ${redirect.source}`);
+  }
+}
+for (const redirect of config.redirects ?? []) {
+  const destination = redirect.destination.replace(/^https:\/\/plainrouter\.com\/docs(?=\/)/, "").split("#")[0];
+  if (redirectSources.has(destination)) {
+    fail(`Redirect chain or loop: ${redirect.source} -> ${destination}`);
+  }
+}
+
 for (const page of configuredPages) {
   if (!existsSync(join(root, `${page}.mdx`))) {
     fail(`Navigation page does not exist: ${page}.mdx`);
@@ -198,13 +222,13 @@ for (const page of mdxPages) {
 }
 
 const requiredAgentPages = new Map([
-  ["auth", "title: \"Plainrouter authentication: API secrets and MCP tokens\""],
+  ["api/authentication", "title: \"Plainrouter authentication: API secrets and MCP tokens\""],
   [
-    "reference/api-resource-index",
+    "api/resources",
     "https://plainrouter.com/api/llms.txt",
   ],
   [
-    "reference/api-catalog",
+    "api/catalog",
     "https://plainrouter.com/.well-known/api-catalog",
   ],
 ]);

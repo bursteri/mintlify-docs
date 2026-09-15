@@ -74,8 +74,6 @@
             "group": "Reference",
             "icon": "library",
             "pages": [
-              "reference/api-resource-index",
-              "reference/api-catalog",
               "reference/statuses-and-terms"
             ]
           },
@@ -98,21 +96,21 @@
             "icon": "plug",
             "pages": [
               "mcp/overview",
-              "actions/connect-agent"
+              "mcp/setup"
             ]
           },
           {
             "group": "Access",
             "icon": "key-round",
             "pages": [
-              "actions/workspace-tokens"
+              "mcp/workspace-tokens"
             ]
           },
           {
             "group": "Reference",
             "icon": "library",
             "pages": [
-              "reference/mcp-tools"
+              "mcp/tools"
             ]
           }
         ]
@@ -122,64 +120,51 @@
         "icon": "terminal",
         "groups": [
           {
-            "group": "Get started",
-            "icon": "rocket",
+            "group": "Overview",
+            "icon": "book-open",
             "pages": [
               "sdk/overview"
             ]
           },
           {
-            "group": "TypeScript SDK",
+            "group": "SDKs",
             "icon": "code",
             "pages": [
               "sdk/typescript",
-              "guides/meta-capi/nodejs"
-            ]
-          },
-          {
-            "group": "Python SDK",
-            "icon": "code",
-            "pages": [
-              "sdk/python"
-            ]
-          },
-          {
-            "group": "Ruby SDK",
-            "icon": "code",
-            "pages": [
-              "sdk/ruby"
-            ]
-          },
-          {
-            "group": "Go SDK",
-            "icon": "code",
-            "pages": [
+              "sdk/python",
+              "sdk/ruby",
               "sdk/go"
+            ]
+          },
+          {
+            "group": "Recipes",
+            "icon": "send",
+            "pages": [
+              "sdk/recipes/meta-conversions"
             ]
           },
           {
             "group": "CLI",
             "icon": "terminal",
             "pages": [
-              "cli/quickstart",
-              "cli/commands"
+              "sdk/cli/quickstart",
+              "sdk/cli/commands"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API",
         "icon": "braces",
-        "openapi": "https://plainrouter.com/openapi.json",
         "groups": [
           {
             "group": "Overview",
             "icon": "book-open",
             "pages": [
-              "api-reference/introduction",
-              "auth",
-              "sandbox",
-              "reference/conversion-api"
+              "api/introduction",
+              "api/authentication",
+              "api/sandbox",
+              "api/conversions"
             ]
           },
           {
@@ -190,54 +175,62 @@
                 "group": "Sandbox",
                 "icon": "flask-conical",
                 "pages": [
-                  "GET /sandbox",
-                  "GET /sandbox/keys",
-                  "POST /sandbox/keys",
-                  "POST /sandbox/events",
-                  "POST /sandbox/keyed-events"
+                  "api/sandbox/discover",
+                  "api/sandbox/get-key",
+                  "api/sandbox/create-key",
+                  "api/sandbox/validate-event",
+                  "api/sandbox/validate-keyed-event"
                 ]
               },
               {
                 "group": "Events",
                 "icon": "send",
                 "pages": [
-                  "api-reference/event/submit-a-conversion-event",
-                  "POST /verification-events",
-                  "GET /events/{event}",
-                  "GET /dashboard/events",
-                  "GET /dashboard/events/cursor"
+                  "api/events/create",
+                  "api/events/verify-ingestion",
+                  "api/events/get",
+                  "api/events/list",
+                  "api/events/list-by-cursor"
                 ]
               },
               {
                 "group": "Destination testing",
                 "icon": "test-tube-diagonal",
                 "pages": [
-                  "PATCH /destinations/{destination}/test-mode",
-                  "POST /destinations/{destination}/test-purchase"
+                  "api/destinations/test-mode",
+                  "api/destinations/test-purchase"
                 ]
               },
               {
                 "group": "Delivery replay",
                 "icon": "rotate-cw",
                 "pages": [
-                  "POST /deliveries/replay"
+                  "api/deliveries/replay"
                 ]
               },
               {
                 "group": "Reports",
                 "icon": "chart-no-axes-combined",
                 "pages": [
-                  "GET /reports/reconciliation",
-                  "GET /reports/emq"
+                  "api/reports/reconciliation",
+                  "api/reports/emq"
                 ]
               },
               {
                 "group": "Privacy",
                 "icon": "shield",
                 "pages": [
-                  "DELETE /user-data"
+                  "api/privacy/delete-user-data"
                 ]
               }
+            ]
+          },
+          {
+            "group": "Resources",
+            "icon": "library",
+            "pages": [
+              "api/resources",
+              "api/catalog"
             ]
           }
         ]
@@ -302,7 +295,8 @@
   "redirects": [
     {
       "source": "/reference/authentication",
-      "destination": "/auth"
+      "destination": "https://plainrouter.com/docs/api/authentication",
+      "permanent": true
     },
     {
       "source": "/guides/meta-capi/without-gtm",
@@ -386,12 +380,12 @@
     },
     {
       "source": "/guides/meta-capi/typescript",
-      "destination": "https://plainrouter.com/docs/guides/meta-capi/nodejs",
+      "destination": "https://plainrouter.com/docs/sdk/recipes/meta-conversions",
       "permanent": true
     },
     {
       "source": "/guides/meta-capi/typescript.md",
-      "destination": "https://plainrouter.com/docs/guides/meta-capi/nodejs.md",
+      "destination": "https://plainrouter.com/docs/sdk/recipes/meta-conversions.md",
       "permanent": true
     },
     {
@@ -418,6 +412,294 @@
       "source": "/.well-known/api-catalog",
       "destination": "https://plainrouter.com/.well-known/api-catalog",
       "permanent": true
+    },
+    {
+      "source": "/actions/connect-agent",
+      "destination": "https://plainrouter.com/docs/mcp/setup",
+      "permanent": true
+    },
+    {
+      "source": "/actions/connect-agent.md",
+      "destination": "https://plainrouter.com/docs/mcp/setup.md",
+      "permanent": true
+    },
+    {
+      "source": "/actions/workspace-tokens",
+      "destination": "https://plainrouter.com/docs/mcp/workspace-tokens",
+      "permanent": true
+    },
+    {
+      "source": "/actions/workspace-tokens.md",
+      "destination": "https://plainrouter.com/docs/mcp/workspace-tokens.md",
+      "permanent": true
+    },
+    {
+      "source": "/reference/mcp-tools",
+      "destination": "https://plainrouter.com/docs/mcp/tools",
+      "permanent": true
+    },
+    {
+      "source": "/reference/mcp-tools.md",
+      "destination": "https://plainrouter.com/docs/mcp/tools.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/introduction",
+      "destination": "https://plainrouter.com/docs/api/introduction",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/introduction.md",
+      "destination": "https://plainrouter.com/docs/api/introduction.md",
+      "permanent": true
+    },
+    {
+      "source": "/auth",
+      "destination": "https://plainrouter.com/docs/api/authentication",
+      "permanent": true
+    },
+    {
+      "source": "/auth.md",
+      "destination": "https://plainrouter.com/docs/api/authentication.md",
+      "permanent": true
+    },
+    {
+      "source": "/sandbox",
+      "destination": "https://plainrouter.com/docs/api/sandbox",
+      "permanent": true
+    },
+    {
+      "source": "/sandbox.md",
+      "destination": "https://plainrouter.com/docs/api/sandbox.md",
+      "permanent": true
+    },
+    {
+      "source": "/reference/conversion-api",
+      "destination": "https://plainrouter.com/docs/api/conversions",
+      "permanent": true
+    },
+    {
+      "source": "/reference/conversion-api.md",
+      "destination": "https://plainrouter.com/docs/api/conversions.md",
+      "permanent": true
+    },
+    {
+      "source": "/reference/api-resource-index",
+      "destination": "https://plainrouter.com/docs/api/resources",
+      "permanent": true
+    },
+    {
+      "source": "/reference/api-resource-index.md",
+      "destination": "https://plainrouter.com/docs/api/resources.md",
+      "permanent": true
+    },
+    {
+      "source": "/reference/api-catalog",
+      "destination": "https://plainrouter.com/docs/api/catalog",
+      "permanent": true
+    },
+    {
+      "source": "/reference/api-catalog.md",
+      "destination": "https://plainrouter.com/docs/api/catalog.md",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/nodejs",
+      "destination": "https://plainrouter.com/docs/sdk/recipes/meta-conversions",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/nodejs.md",
+      "destination": "https://plainrouter.com/docs/sdk/recipes/meta-conversions.md",
+      "permanent": true
+    },
+    {
+      "source": "/cli/quickstart",
+      "destination": "https://plainrouter.com/docs/sdk/cli/quickstart",
+      "permanent": true
+    },
+    {
+      "source": "/cli/quickstart.md",
+      "destination": "https://plainrouter.com/docs/sdk/cli/quickstart.md",
+      "permanent": true
+    },
+    {
+      "source": "/cli/commands",
+      "destination": "https://plainrouter.com/docs/sdk/cli/commands",
+      "permanent": true
+    },
+    {
+      "source": "/cli/commands.md",
+      "destination": "https://plainrouter.com/docs/sdk/cli/commands.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/discover-the-zero-auth-sandbox",
+      "destination": "https://plainrouter.com/docs/api/sandbox/discover",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/discover-the-zero-auth-sandbox.md",
+      "destination": "https://plainrouter.com/docs/api/sandbox/discover.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/get-a-sandbox-api-key",
+      "destination": "https://plainrouter.com/docs/api/sandbox/get-key",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/get-a-sandbox-api-key.md",
+      "destination": "https://plainrouter.com/docs/api/sandbox/get-key.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/create-a-sandbox-api-key",
+      "destination": "https://plainrouter.com/docs/api/sandbox/create-key",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/create-a-sandbox-api-key.md",
+      "destination": "https://plainrouter.com/docs/api/sandbox/create-key.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/validate-a-synthetic-event",
+      "destination": "https://plainrouter.com/docs/api/sandbox/validate-event",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/validate-a-synthetic-event.md",
+      "destination": "https://plainrouter.com/docs/api/sandbox/validate-event.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/validate-a-synthetic-event-with-a-sandbox-key",
+      "destination": "https://plainrouter.com/docs/api/sandbox/validate-keyed-event",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/sandbox/validate-a-synthetic-event-with-a-sandbox-key.md",
+      "destination": "https://plainrouter.com/docs/api/sandbox/validate-keyed-event.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/event/submit-a-conversion-event",
+      "destination": "https://plainrouter.com/docs/api/events/create",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/event/submit-a-conversion-event.md",
+      "destination": "https://plainrouter.com/docs/api/events/create.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/event/verify-server-side-signal-ingestion",
+      "destination": "https://plainrouter.com/docs/api/events/verify-ingestion",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/event/verify-server-side-signal-ingestion.md",
+      "destination": "https://plainrouter.com/docs/api/events/verify-ingestion.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/event/get-an-event-and-delivery-trace",
+      "destination": "https://plainrouter.com/docs/api/events/get",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/event/get-an-event-and-delivery-trace.md",
+      "destination": "https://plainrouter.com/docs/api/events/get.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/list-recent-events",
+      "destination": "https://plainrouter.com/docs/api/events/list",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/list-recent-events.md",
+      "destination": "https://plainrouter.com/docs/api/events/list.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/list-recent-events-by-cursor",
+      "destination": "https://plainrouter.com/docs/api/events/list-by-cursor",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/list-recent-events-by-cursor.md",
+      "destination": "https://plainrouter.com/docs/api/events/list-by-cursor.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/configure-destination-test-mode",
+      "destination": "https://plainrouter.com/docs/api/destinations/test-mode",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/configure-destination-test-mode.md",
+      "destination": "https://plainrouter.com/docs/api/destinations/test-mode.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/send-a-controlled-test-purchase",
+      "destination": "https://plainrouter.com/docs/api/destinations/test-purchase",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/send-a-controlled-test-purchase.md",
+      "destination": "https://plainrouter.com/docs/api/destinations/test-purchase.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/replay-eligible-deliveries",
+      "destination": "https://plainrouter.com/docs/api/deliveries/replay",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/replay-eligible-deliveries.md",
+      "destination": "https://plainrouter.com/docs/api/deliveries/replay.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/get-a-reconciliation-report",
+      "destination": "https://plainrouter.com/docs/api/reports/reconciliation",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/get-a-reconciliation-report.md",
+      "destination": "https://plainrouter.com/docs/api/reports/reconciliation.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/get-event-match-quality-history",
+      "destination": "https://plainrouter.com/docs/api/reports/emq",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/get-event-match-quality-history.md",
+      "destination": "https://plainrouter.com/docs/api/reports/emq.md",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/delete-user-data-by-verified-identifier",
+      "destination": "https://plainrouter.com/docs/api/privacy/delete-user-data",
+      "permanent": true
+    },
+    {
+      "source": "/api-reference/operations/delete-user-data-by-verified-identifier.md",
+      "destination": "https://plainrouter.com/docs/api/privacy/delete-user-data.md",
+      "permanent": true
+    },
+    {
+      "source": "/reference/authentication.md",
+      "destination": "https://plainrouter.com/docs/api/authentication.md",
+      "permanent": true
     }
-  ]
+  ],
+  "api": {
+    "openapi": "https://plainrouter.com/openapi.json"
+  }
 }

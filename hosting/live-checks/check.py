@@ -207,7 +207,7 @@ def validate(task, response, pages, operation_count, warnings=None):
         require(set(pages).issubset(urls), "Authored pages missing from sitemap: " + str(sorted(set(pages) - set(urls))))
         generated = set(urls) - set(pages)
         require(len(generated) == operation_count, f"Expected {operation_count} generated API pages, got {len(generated)}")
-        require(all(safe_url(item) and item.startswith(DOCS + "/api-reference/") for item in generated),
+        require(all(safe_url(item) and item.startswith(DOCS + "/api/") for item in generated),
                 "Unexpected sitemap URL outside API docs")
         return sorted(generated)
     elif kind == "robots":

@@ -10,7 +10,7 @@ This walkthrough uses an image already in the connected account's library. It co
 
 ## Before you begin
 
-You need a [connected agent](/actions/connect-agent), an owner-issued **Write** or **Admin** [workspace token](/actions/workspace-tokens) for the intended Meta account, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.
+You need a [connected agent](/mcp/setup), an owner-issued **Write** or **Admin** [workspace token](/mcp/workspace-tokens) for the intended Meta account, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.
 
 Check the workspace's [action policy](/actions/policies-and-safety). **Suggest only** records recommendations without a provider write. Supported executable creative proposals still require human approval. These tools cannot activate a copied ad or execute budget and delivery-status changes.
 
@@ -24,7 +24,7 @@ Check the workspace's [action policy](/actions/policies-and-safety). **Suggest o
 | Decide | **Approval queue** | A human approves the stated consequence or rejects the proposal. |
 | Verify | **History** and [Audit log](/actions/audit-log) | For executed work, receipt and exact verification of the new paused ad. |
 
-The anonymous [MCP sandbox](/actions/connect-agent#start-in-test-mode) has no creative tools. Use the authenticated production connection for this workflow. Reading the library contacts Meta; submitting the proposal writes to Plainrouter and performs account-bound provider reads. It does not itself create the copied Meta ad.
+The anonymous [MCP sandbox](/mcp/setup#start-in-test-mode) has no creative tools. Use the authenticated production connection for this workflow. Reading the library contacts Meta; submitting the proposal writes to Plainrouter and performs account-bound provider reads. It does not itself create the copied Meta ad.
 
 ## Example: propose a paused creative variant
 
@@ -32,7 +32,7 @@ The request examples below contain arguments for the named MCP tools, not Signal
 
 ### 1. Confirm the account and read its images
 
-Call `get_account_state` without arguments. Confirm the returned workspace and Meta ad account, then check `authorization.permissions` for `creative.read`, `creative.write`, and `actions.propose`. Stop if the account or permissions do not match the intended task; [issue the appropriate workspace token](/actions/workspace-tokens) before proceeding.
+Call `get_account_state` without arguments. Confirm the returned workspace and Meta ad account, then check `authorization.permissions` for `creative.read`, `creative.write`, and `actions.propose`. Stop if the account or permissions do not match the intended task; [issue the appropriate workspace token](/mcp/workspace-tokens) before proceeding.
 
 Call `get-creative-library` with:
 
@@ -200,7 +200,7 @@ After a timeout, check the returned or existing proposal in **Approval queue** b
 
 | Symptom | Next step |
 | --- | --- |
-| Missing creative permission | Check the token tier, active grant, and account scope in [workspace tokens](/actions/workspace-tokens). |
+| Missing creative permission | Check the token tier, active grant, and account scope in [workspace tokens](/mcp/workspace-tokens). |
 | Source ad or asset rejected | Re-read the intended account's library and confirm the human-selected source belongs to that account. Do not substitute a guessed asset ID. |
 | Upload rejected | Check detected JPEG/PNG content, a bare filename, raw base64 without a data URI prefix, byte limit, and reuse of the idempotency key. |
 | Cursor rejected | Continue with `asset_type: "image"` or `"video"`, not `"all"`, and use the corresponding returned cursor. |

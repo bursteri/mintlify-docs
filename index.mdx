@@ -13,7 +13,7 @@ Choose a task to set up first-party Signals, send consented conversions to Meta,
   <Card title="Send purchases to Meta" icon="shopping-cart" href="#choose-one-purchase-sender">
     Choose a browser or backend workflow, then verify delivery without duplicate purchases.
   </Card>
-  <Card title="Connect an AI agent" icon="bot" href="/actions/connect-agent">
+  <Card title="Connect an AI agent" icon="bot" href="/mcp/setup">
     Try MCP with synthetic data, then connect a workspace token for your Meta ad account.
   </Card>
   <Card title="Troubleshoot measurement" icon="activity" href="/signals/health-and-performance#troubleshoot-by-symptom">
@@ -28,24 +28,24 @@ Start with an active [Signal](/quickstart). Advertising delivery also requires a
 | Your integration | Start here | Expected result |
 | --- | --- | --- |
 | Browser checkout with server-confirmed payment | [Managed browser purchase](/signals/track-events#avoid-duplicate-meta-events) | Signals sends the managed browser/server pair with shared event identity. |
-| Backend or job queue | [Node.js and TypeScript recipe](/guides/meta-capi/nodejs), [Python](/sdk/python#send-a-meta-conversion), or [Ruby](/sdk/ruby#send-a-meta-conversion) | Your backend sends a stable purchase ID and the original payment time through the Conversion API. |
+| Backend or job queue | [Node.js and TypeScript recipe](/sdk/recipes/meta-conversions), [Python](/sdk/python#send-a-meta-conversion), or [Ruby](/sdk/ruby#send-a-meta-conversion) | Your backend sends a stable purchase ID and the original payment time through the Conversion API. |
 | Stripe Checkout | [Verified Stripe settlement](/signals/track-events#verify-stripe-checkout-settlement) | Records settled revenue without an attributed visitor join or Meta delivery. |
 
 An API receipt confirms ingestion. [Inspect destination delivery](/signals/connect-meta#how-do-i-verify-meta-delivery) to check Meta acceptance; acceptance does not establish attribution or improved advertising performance.
 
 ## Set up access and development tools
 
-- [Choose the correct credential](/auth): Signals secrets for REST, SDKs, and CLI; workspace execution tokens for MCP.
-- [Try the API sandbox](/sandbox): validate synthetic requests without an account or Meta delivery.
-- [Choose an SDK or CLI](/sdk/overview), or open the [Conversion API overview](/reference/conversion-api).
-- [Read MCP tool inputs and limits](/reference/mcp-tools), then [create a governed creative proposal](/actions/creative-workflow).
+- [Choose the correct credential](/api/authentication): Signals secrets for REST, SDKs, and CLI; workspace execution tokens for MCP.
+- [Try the API sandbox](/api/sandbox): validate synthetic requests without an account or Meta delivery.
+- [Choose an SDK or CLI](/sdk/overview), or open the [Conversion API overview](/api/conversions).
+- [Read MCP tool inputs and limits](/mcp/tools), then [create a governed creative proposal](/actions/creative-workflow).
 - [Review pricing and billing](/billing/overview) before moving from testing to ongoing production use.
 
 Actions defaults to **Suggest only**. Supported creative execution requires policy checks and human approval; budget changes, ad activation, and delivery-status execution are unavailable.
 
 ## Resources for coding agents
 
-Use the [API resource index](/reference/api-resource-index) and [API catalog](/reference/api-catalog) to discover authentication, schemas, and documentation. The public [SDK and agent repository](https://github.com/plainrouter/sdk) includes [agent instructions](https://github.com/plainrouter/sdk/blob/main/AGENTS.md), coding-tool configuration, and official Agent Skills.
+Use the [API resource index](/api/resources) and [API catalog](/api/catalog) to discover authentication, schemas, and documentation. The public [SDK and agent repository](https://github.com/plainrouter/sdk) includes [agent instructions](https://github.com/plainrouter/sdk/blob/main/AGENTS.md), coding-tool configuration, and official Agent Skills.
 
 ## Legacy Launcher
 

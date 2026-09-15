@@ -19,7 +19,7 @@ Use the file-import adapter when a Launcher draft is easier to prepare in a spre
 You need:
 
 - A verified Launcher Drive connection whose inventory has already synced.
-- A Write or Admin [workspace execution token](/actions/workspace-tokens).
+- A Write or Admin [workspace execution token](/mcp/workspace-tokens).
 - Numeric source Meta ad set and ad IDs from the account bound to that token.
 
 OAuth management credentials and Read-tier workspace tokens cannot import files.
@@ -101,4 +101,4 @@ The import provenance stores the file's SHA-256 identity, format, row count, and
 | `403` | The workspace token does not have Write or Admin authority. |
 | `422` | Request validation, file format, header, size, row, cell, or zero-valid-row checks failed. |
 
-For direct structured input instead of a file, use [`launcher.draft_batch`](/reference/mcp-tools).
+For direct structured input instead of a file, use [`launcher.draft_batch`](/mcp/tools).

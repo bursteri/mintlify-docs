@@ -8,9 +8,13 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="September 15, 2026">
 
+  ## Follow consistent MCP, API, and SDK documentation paths
+
+  **Documentation** · MCP setup, workspace tokens, and tools now share `/docs/mcp/`. API guides and endpoint references share `/docs/api/`. SDK language guides, recipes, and CLI documentation share `/docs/sdk/`. Previous page URLs have redirects to their new locations. The SDK introduction now puts language selection, prerequisites, verification, and troubleshooting in one place. [Choose an SDK](/sdk/overview).
+
   ## Start an API integration from one place
 
-  **Documentation** · API reference now opens with a synthetic first request, authentication guidance, and endpoint groups for sandbox, events, destination testing, replay, reports, and privacy. The submit-event example also includes the current `warnings` field. [Start with the API introduction](/api-reference/introduction).
+  **Documentation** · API reference now opens with a synthetic first request, authentication guidance, and endpoint groups for sandbox, events, destination testing, replay, reports, and privacy. The submit-event example also includes the current `warnings` field. [Start with the API introduction](/api/introduction).
 
   ## Find MCP setup and reference more easily
 
@@ -37,15 +41,15 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Server-event acknowledgements flag invalid consent timestamps
 
-  **New** · New secret-authenticated event acknowledgements include `warnings`. The `consent_captured_at_invalid` warning identifies a missing or invalid capture time when visitor or user identity is supplied. Event acceptance and duplicate responses retain their existing semantics. [Handle the warning](/reference/conversion-api#why-is-the-consent-capture-time-invalid).
+  **New** · New secret-authenticated event acknowledgements include `warnings`. The `consent_captured_at_invalid` warning identifies a missing or invalid capture time when visitor or user identity is supplied. Event acceptance and duplicate responses retain their existing semantics. [Handle the warning](/api/conversions#why-is-the-consent-capture-time-invalid).
 
   ## Published agent skills use workspace execution tokens
 
-  **Fixed** · The published account-context, ingestion-verification, and governed-proposal skills now distinguish workspace execution tokens from OAuth management credentials and Signals workspace secrets. The proposal skill uses the supported creative workflow and preserves human approval and verification requirements. [Choose the correct MCP credential](/auth#how-do-i-authenticate-plainrouter-mcp) and [follow the creative walkthrough](/actions/creative-workflow).
+  **Fixed** · The published account-context, ingestion-verification, and governed-proposal skills now distinguish workspace execution tokens from OAuth management credentials and Signals workspace secrets. The proposal skill uses the supported creative workflow and preserves human approval and verification requirements. [Choose the correct MCP credential](/api/authentication#how-do-i-authenticate-plainrouter-mcp) and [follow the creative walkthrough](/actions/creative-workflow).
 
   ## Inspect workspace grants and verify revocation
 
-  **Documentation** · The workspace-token guide now covers **Workspace settings → Workspace grants**, exact operations, revocation confirmation, and the resulting audit receipt. Authentication troubleshooting explains why a bearer token cannot replace a dashboard session. [Review grant management](/actions/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) and [dashboard authentication](/auth#why-does-a-dashboard-url-reject-my-bearer-token).
+  **Documentation** · The workspace-token guide now covers **Workspace settings → Workspace grants**, exact operations, revocation confirmation, and the resulting audit receipt. Authentication troubleshooting explains why a bearer token cannot replace a dashboard session. [Review grant management](/mcp/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) and [dashboard authentication](/api/authentication#why-does-a-dashboard-url-reject-my-bearer-token).
 
   ## Interpret Event Match Quality and Meta recovery evidence
 
@@ -78,7 +82,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Workspace grants can be revoked through MCP
 
-  **New** · Execution calls check an active workspace grant for the requested operation. The authorized `revoke_grant` tool stops further operations under that grant and records an audit event. [Review grant revocation](/reference/mcp-tools#revoke_grant).
+  **New** · Execution calls check an active workspace grant for the requested operation. The authorized `revoke_grant` tool stops further operations under that grant and records an audit event. [Review grant revocation](/mcp/tools#revoke_grant).
 
   ## Legacy Launcher is disabled by default
 

@@ -33,20 +33,20 @@ no advertising provider, and exposes no proposal, write, approval, Launcher,
 or spend-affecting tool. When the client works, move it to the production URL
 and configure an account-bound workspace execution token.
 
-Read [Connect an AI agent](https://plainrouter.com/docs/actions/connect-agent)
-and the [MCP tool reference](https://plainrouter.com/docs/reference/mcp-tools)
+Read [Connect an AI agent](https://plainrouter.com/docs/mcp/setup)
+and the [MCP tool reference](https://plainrouter.com/docs/mcp/tools)
 before moving from test mode to production.
 
 ## Select the correct credential
 
 Use
-[Authentication and clients](https://plainrouter.com/docs/auth)
+[Authentication and clients](https://plainrouter.com/docs/api/authentication)
 as the canonical decision guide and copy-ready client reference.
 
 For public discovery, use the
-[API resource index](https://plainrouter.com/docs/reference/api-resource-index)
+[API resource index](https://plainrouter.com/docs/api/resources)
 as the readable inventory and the
-[RFC 9727 API catalog](https://plainrouter.com/docs/reference/api-catalog)
+[RFC 9727 API catalog](https://plainrouter.com/docs/api/catalog)
 for typed relations. Link to these Mintlify pages when explaining discovery so
 agents can fetch their automatic `.md` twins. Treat
 `https://plainrouter.com/api/llms.txt` and
@@ -156,5 +156,5 @@ for upload, verification, retry, and compensation behavior.
 Read
 [Connect Google Drive](https://plainrouter.com/docs/launcher/connect-drive),
 [Import a Launcher draft batch](https://plainrouter.com/docs/launcher/import-draft-batch),
-and the [MCP tool reference](https://plainrouter.com/docs/reference/mcp-tools)
+and the [MCP tool reference](https://plainrouter.com/docs/mcp/tools)
 for current limits and refusal codes.

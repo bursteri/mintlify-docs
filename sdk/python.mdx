@@ -1,6 +1,6 @@
 ---
 title: "Python SDK: send and verify conversions"
-sidebarTitle: "Python SDK and CLI"
+sidebarTitle: "Python"
 description: "Send consented purchases with the Plainrouter Python SDK, preserve event IDs and timestamps on retries, and verify ingestion separately from Meta delivery."
 ---
 
@@ -20,14 +20,7 @@ The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.5.2` and
 python -m pip install plainrouter==0.5.2
 ```
 
-For command-line use, install the package in an isolated environment with [`pipx`](https://pipx.pypa.io/):
-
-```bash
-pipx install plainrouter==0.5.2
-plainrouter --help
-```
-
-You can also run `python -m plainrouter` from an active environment. See the [CLI quickstart](/cli/quickstart) for authentication, configuration, and command examples.
+For terminal commands, follow the [CLI quickstart](/sdk/cli/quickstart) for an isolated installation, authentication, and configuration. This page covers the Python application client.
 
 ## Create a client
 
@@ -58,7 +51,7 @@ response = await get_event.asyncio(
 
 Send a server-side purchase through Plainrouter to your [connected Meta destination](/signals/connect-meta). This is a Plainrouter SDK recipe, not a direct Meta Graph API tutorial. A successful create response confirms ingestion; inspect destination delivery separately.
 
-Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
+Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/api/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
 
 ### Send a purchase synchronously
 
@@ -248,9 +241,9 @@ The Python SDK accepts a Signals workspace secret. It does not accept an MCP wor
 
 Keep the secret in a server-side secret manager. Never include it in prompts, URLs, logs, source control, or client-side code.
 
-For request and response fields, use the [API reference](/reference/conversion-api).
+For request and response fields, use the [API reference](/api/conversions).
 
 ## Implementation references
 
 - [Published Python package `0.5.2`](https://pypi.org/project/plainrouter/0.5.2/)
-- [Plainrouter event request and delivery reference](/reference/conversion-api)
+- [Plainrouter event request and delivery reference](/api/conversions)

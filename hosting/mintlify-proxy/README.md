@@ -97,3 +97,22 @@ References: [Mintlify Cloudflare proxy setup](https://www.mintlify.com/docs/depl
 
 Discovery references: [Cloudflare fetch cache modes](https://developers.cloudflare.com/workers/runtime-apis/fetch/),
 [Mintlify aggregate files and aliases](https://www.mintlify.com/docs/ai/llmstxt).
+
+## September 15 tab URL migration: pending Worker deployment
+
+The Mintlify navigation now uses `/docs/mcp/`, `/docs/api/`, and `/docs/sdk/`.
+The source map in `worker.mjs` includes all 38 authored Markdown redirects:
+the previous nine, 28 moved pages, and the historical authentication alias.
+The TypeScript recipe alias now points directly to the SDK recipe, avoiding
+an intermediate retired Node.js page. HTML redirects are configured in
+`docs.json`; this map preserves Markdown-to-Markdown 308 behavior where
+Mintlify's reserved handler otherwise returns a temporary HTML redirect.
+
+This map update is prepared and locally tested, but pushing Mintlify main
+**does not deploy it**. The exact dependency is a source-only update to the
+separate `mintlify-plainrouter` Worker. Before deployment, retrieve its current
+module and reconcile any changes since the recorded baseline. Retain routes,
+bindings, settings, and the existing catalog and aggregate behavior. Validate
+GET and HEAD for every `.md` rule against `docs.json`, then run the strict live
+checks. Until deployed, report legacy Markdown redirect failures separately
+from working new pages and HTML redirects; do not suppress them in CI.

@@ -25,7 +25,7 @@ One read-only request therefore gives you both a successful API response and wor
 <Note>
   Building an MCP client instead of a REST client? Connect directly to
   `https://plainrouter.com/mcp/sandbox`. It needs no account or credential and
-  exposes four synthetic tools. [Start in MCP test mode](/actions/connect-agent#start-in-test-mode).
+  exposes four synthetic tools. [Start in MCP test mode](/mcp/setup#start-in-test-mode).
 </Note>
 
 ## Test an authenticated client
@@ -137,11 +137,11 @@ Each error includes an `error.resolution` field that tells you to supply or issu
 
 | Operation | Reference |
 | --- | --- |
-| Discover the request contract | [GET sandbox](https://plainrouter.com/docs/api-reference/sandbox/discover-the-zero-auth-sandbox) |
-| Issue a key with GET | [GET sandbox key](https://plainrouter.com/docs/api-reference/sandbox/get-a-sandbox-api-key) |
-| Issue a key with POST | [POST sandbox key](https://plainrouter.com/docs/api-reference/sandbox/create-a-sandbox-api-key) |
-| Validate without a key | [Synthetic event](https://plainrouter.com/docs/api-reference/sandbox/validate-a-synthetic-event) |
-| Validate bearer authentication | [Keyed synthetic event](https://plainrouter.com/docs/api-reference/sandbox/validate-a-synthetic-event-with-a-sandbox-key) |
+| Discover the request contract | [GET sandbox](https://plainrouter.com/docs/api/sandbox/discover) |
+| Issue a key with GET | [GET sandbox key](https://plainrouter.com/docs/api/sandbox/get-key) |
+| Issue a key with POST | [POST sandbox key](https://plainrouter.com/docs/api/sandbox/create-key) |
+| Validate without a key | [Synthetic event](https://plainrouter.com/docs/api/sandbox/validate-event) |
+| Validate bearer authentication | [Keyed synthetic event](https://plainrouter.com/docs/api/sandbox/validate-keyed-event) |
 
 ## Stay within the rate limits
 
@@ -156,7 +156,7 @@ Key issuance and keyed validation use independent budgets. Validation traffic ca
 
 ## Move to production
 
-Registration is self-serve. Review the current EUR pricing bands, included arrivals, and overage rules in [Pricing and billing](/billing/overview). The workspace owner can issue scoped [workspace execution tokens](/actions/workspace-tokens) from the dashboard.
+Registration is self-serve. Review the current EUR pricing bands, included arrivals, and overage rules in [Pricing and billing](/billing/overview). The workspace owner can issue scoped [workspace execution tokens](/mcp/workspace-tokens) from the dashboard.
 
 Keep the production credential types separate. A Signals workspace secret authenticates the Signals Conversion API for one workspace. A workspace execution token authenticates MCP and authorized workspace routes for one workspace and one Meta ad account. Neither credential is a sandbox key.
 

@@ -10,7 +10,7 @@ Use the Plainrouter REST API to send consented conversion events, inspect delive
   <Card title="Make your first request" icon="terminal" href="#make-your-first-request">
     Send an identity-free test event without an account or API key.
   </Card>
-  <Card title="Authenticate production requests" icon="key-round" href="/auth#how-do-i-authenticate-the-rest-api">
+  <Card title="Authenticate production requests" icon="key-round" href="/api/authentication#how-do-i-authenticate-the-rest-api">
     Use the Signals workspace secret for your server integration.
   </Card>
 </CardGroup>
@@ -60,7 +60,7 @@ Expect HTTP `200`. The response includes these fields; this is an excerpt:
 }
 ```
 
-`accepted: true` confirms synthetic validation. It does not test your production credential, store an event, or verify Meta delivery. Continue with the [sandbox quickstart](/sandbox) to test bearer authentication, check allowed fields, or troubleshoot sandbox keys.
+`accepted: true` confirms synthetic validation. It does not test your production credential, store an event, or verify Meta delivery. Continue with the [sandbox quickstart](/api/sandbox) to test bearer authentication, check allowed fields, or troubleshoot sandbox keys.
 
 ## Choose an endpoint group
 
@@ -77,10 +77,10 @@ Expand a group in the sidebar for its request fields, responses, and examples. P
 
 ## Move to production
 
-1. [Set up Signals](/quickstart), then configure your server with its [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api). Keep credentials out of browser code, prompts, and source control.
+1. [Set up Signals](/quickstart), then configure your server with its [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api). Keep credentials out of browser code, prompts, and source control.
 2. Use the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check the authenticated write path. It does not verify a real website arrival.
-3. For advertising delivery, [connect the intended Meta dataset](/signals/connect-meta). Send an actual conversion only with the recorded consent and original event data required by the [conversion guide](/reference/conversion-api#submit-an-event).
-4. Preserve the event ID on retries and [inspect the delivery trace](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event). HTTP `202` is ingestion acceptance; destination acceptance is a separate result.
+3. For advertising delivery, [connect the intended Meta dataset](/signals/connect-meta). Send an actual conversion only with the recorded consent and original event data required by the [conversion guide](/api/conversions#submit-an-event).
+4. Preserve the event ID on retries and [inspect the delivery trace](/api/conversions#how-do-i-confirm-meta-accepted-the-event). HTTP `202` is ingestion acceptance; destination acceptance is a separate result.
 
 ## Handle errors and retries
 
@@ -92,4 +92,4 @@ Expand a group in the sidebar for its request fields, responses, and examples. P
 | Duplicate production event: `200` | Keep the original ID. The response does not replay failed delivery. |
 | Uncertain production write after a timeout | Retry the original event ID and payload, subject to continued consent eligibility. |
 
-See [conversion errors](/reference/conversion-api#handle-errors), [consent warnings](/reference/conversion-api#why-is-the-consent-capture-time-invalid), and [sandbox rate limits](/sandbox#stay-within-the-rate-limits) for the applicable details. Prefer an [official SDK](/sdk/overview) when you want typed operations in application code.
+See [conversion errors](/api/conversions#handle-errors), [consent warnings](/api/conversions#why-is-the-consent-capture-time-invalid), and [sandbox rate limits](/api/sandbox#stay-within-the-rate-limits) for the applicable details. Prefer an [official SDK](/sdk/overview) when you want typed operations in application code.

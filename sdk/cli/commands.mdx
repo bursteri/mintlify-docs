@@ -60,7 +60,7 @@ plainrouter events list --per-page 25
 | `events get <id>` | Event ID as the positional argument. |
 | `events list` | Optional `--per-page <count>`. |
 
-Use a stable event ID when creating an event so retries remain idempotent. A `duplicate: true` receipt means the original event exists, not that Meta accepted it. Inspect `events get` before considering a delivery replay. Use the [sandbox](/sandbox) for synthetic validation without production writes.
+Use a stable event ID when creating an event so retries remain idempotent. A `duplicate: true` receipt means the original event exists, not that Meta accepted it. Inspect `events get` before considering a delivery replay. Use the [sandbox](/api/sandbox) for synthetic validation without production writes.
 
 ## Destination test operations
 

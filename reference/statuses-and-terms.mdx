@@ -61,9 +61,9 @@ These labels come from the account-scoped `get_signal_health` diagnostic. The Si
 
 | State | Recovery |
 | --- | --- |
-| `failed:auth` | [Reconnect Meta](/signals/connect-meta#refresh-available-assets), then [replay the eligible delivery](/reference/conversion-api#how-do-i-replay-a-failed-delivery). |
-| `failed:permanent` or `failed:unknown` | Read the [trace explanation](/reference/conversion-api#read-a-failed-delivery-trace). Correct the cause before considering replay; replay preserves the existing payload. |
-| `expired` | Check payload availability and original event time. [Replay limits](/reference/conversion-api#how-do-i-replay-a-failed-delivery) still apply; do not reset timestamps. |
+| `failed:auth` | [Reconnect Meta](/signals/connect-meta#refresh-available-assets), then [replay the eligible delivery](/api/conversions#how-do-i-replay-a-failed-delivery). |
+| `failed:permanent` or `failed:unknown` | Read the [trace explanation](/api/conversions#read-a-failed-delivery-trace). Correct the cause before considering replay; replay preserves the existing payload. |
+| `expired` | Check payload availability and original event time. [Replay limits](/api/conversions#how-do-i-replay-a-failed-delivery) still apply; do not reset timestamps. |
 | `skipped:consent` | [Fix consent handling](/signals/track-events#set-consent) for future eligible events. Skipped deliveries cannot be replayed. |
 | `skipped:no_destination` | [Connect the intended destination](/signals/connect-meta#connect-the-destination) for future events. This does not replay skipped history. |
 | `skipped:duplicate` | Inspect the original delivery; do not send another purchase with a new ID. |

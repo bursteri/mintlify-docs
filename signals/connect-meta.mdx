@@ -16,7 +16,7 @@ You need:
 - Workspace-owner access in Plainrouter.
 - Access to the required Meta Business assets, Meta ad account, and dataset, with permission to grant Plainrouter access.
 - The [current Signals snippet](/signals/install-pixel) and a [consent integration](/signals/track-events#set-consent) for browser conversions.
-- For backend conversions or API tests, a server-held [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api).
+- For backend conversions or API tests, a server-held [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api).
 
 An identity-free arrival does not require a Meta connection and never triggers Meta delivery. Advertising conversion events require the supported consent grant.
 
@@ -66,7 +66,7 @@ After `ad_storage`, `ad_user_data`, and `ad_personalization` are all `granted`:
 
 If Meta's browser library is blocked, eligible server delivery can still continue. A missing browser event alone does not establish a server-delivery failure.
 
-For your own backend purchase integration, use a [Plainrouter SDK recipe](/guides/meta-capi/nodejs) or the [REST API](/reference/conversion-api). Choose one purchase owner: the public `signalq("track", ...)` command generates its own ID and cannot accept your backend's ID. Independent calls can create duplicate purchases. Use the [purchase ownership table and managed example](/signals/track-events#avoid-duplicate-meta-events) before combining senders.
+For your own backend purchase integration, use a [Plainrouter SDK recipe](/sdk/recipes/meta-conversions) or the [REST API](/api/conversions). Choose one purchase owner: the public `signalq("track", ...)` command generates its own ID and cannot accept your backend's ID. Independent calls can create duplicate purchases. Use the [purchase ownership table and managed example](/signals/track-events#avoid-duplicate-meta-events) before combining senders.
 
 ## How do I verify Meta delivery?
 
@@ -76,7 +76,7 @@ Check the stages separately:
 | --- | --- | --- |
 | Website collection | [Inspect the arrival request](/signals/install-pixel#verify-the-installation). | An accepted arrival proves collection receipt, not a Meta conversion. |
 | Consented conversion ingestion | Confirm your conversion request succeeds. | `202` means Plainrouter accepted the event for processing. |
-| Destination delivery | Open the event's delivery trace through [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace), or request the account-scoped [`get_signal_health`](/reference/mcp-tools#get_signal_health) diagnostic through MCP. | `accepted` means Meta accepted that delivery. Pending and failed states require separate interpretation. |
+| Destination delivery | Open the event's delivery trace through [GET event](https://plainrouter.com/docs/api/events/get), or request the account-scoped [`get_signal_health`](/mcp/tools#get_signal_health) diagnostic through MCP. | `accepted` means Meta accepted that delivery. Pending and failed states require separate interpretation. |
 | Browser/server pairing | Inspect the intended dataset in Meta Events Manager and compare the event name and event ID for the pair. | Matching identifiers support deduplication; an API receipt alone does not verify the pair. |
 
 Meta acceptance does not guarantee attribution, an Event Match Quality score, or improved advertising performance. Use [Signal health and performance](/signals/health-and-performance) to interpret stored reporting windows and differences.
@@ -86,8 +86,8 @@ Meta acceptance does not guarantee attribution, an Event Match Quality score, or
 Use Plainrouter's destination test operations when you need a controlled Meta-delivery check:
 
 1. Identify the Plainrouter destination you connected. The API's `{destination}` parameter is a Plainrouter destination ID, not your Meta dataset ID.
-2. Use [Configure destination test mode](https://plainrouter.com/docs/api-reference/operations/configure-destination-test-mode) with `enabled: true` and the dataset's Meta Test Events code in `test_event_code`.
-3. Call [Send a controlled test purchase](https://plainrouter.com/docs/api-reference/operations/send-a-controlled-test-purchase). It creates an identity-free synthetic purchase for that destination while test mode is enabled. This operation contacts Meta.
+2. Use [Configure destination test mode](https://plainrouter.com/docs/api/destinations/test-mode) with `enabled: true` and the dataset's Meta Test Events code in `test_event_code`.
+3. Call [Send a controlled test purchase](https://plainrouter.com/docs/api/destinations/test-purchase). It creates an identity-free synthetic purchase for that destination while test mode is enabled. This operation contacts Meta.
 4. HTTP `200` means Meta accepted the controlled purchase; `502` means Meta did not accept it. Inspect the same dataset's Test Events view separately.
 5. Restore destination test mode to `enabled: false` when the check is finished, before resuming normal conversion delivery.
 
@@ -114,7 +114,7 @@ If the intended ad account or dataset is missing, choose **Reconnect Meta** and 
 
 ### Server delivery needs attention
 
-Start with the [worked event trace](/reference/conversion-api#read-a-failed-delivery-trace). `queued`, `sent`, and `retrying` are pending; let delivery complete before taking further action. For `failed:auth`, [reconnect the intended assets](#refresh-available-assets), then [replay the eligible delivery](/reference/conversion-api#how-do-i-replay-a-failed-delivery) using its numeric delivery ID.
+Start with the [worked event trace](/api/conversions#read-a-failed-delivery-trace). `queued`, `sent`, and `retrying` are pending; let delivery complete before taking further action. For `failed:auth`, [reconnect the intended assets](#refresh-available-assets), then [replay the eligible delivery](/api/conversions#how-do-i-replay-a-failed-delivery) using its numeric delivery ID.
 
 A consent-skipped event is not a transient provider error and is excluded from replay. Fix the [consent integration](/signals/track-events#set-consent) for future eligible events. Reposting an existing event ID only returns the original ingestion receipt; it does not restart destination delivery. Use the [status reference](/reference/statuses-and-terms#destination-delivery) for other failures.
 

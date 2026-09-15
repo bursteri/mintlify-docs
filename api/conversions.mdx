@@ -9,15 +9,15 @@ Send server-side conversion events to Plainrouter at `https://plainrouter.com/ap
 This is Plainrouter's API, with Plainrouter request fields and authentication. It is not a direct Meta Graph API endpoint. To choose between managed and direct Meta integrations, read the [Meta Conversions API overview](https://plainrouter.com/library/meta-conversions-api).
 
 For one fetchable comparison of REST, SDK, CLI, MCP, and management credentials,
-see [Authentication and clients](/auth).
+see [Authentication and clients](/api/authentication).
 
-New to the API? Start with the [API introduction](/api-reference/introduction) for the base URL, a synthetic first request, and endpoint navigation. This guide covers production conversion handling and recovery.
+New to the API? Start with the [API introduction](/api/introduction) for the base URL, a synthetic first request, and endpoint navigation. This guide covers production conversion handling and recovery.
 
 ## Before you begin
 
-You need an active Signals workspace, its [server-side secret](/auth#how-do-i-authenticate-the-rest-api), and a recorded consent decision for the conversion. To deliver the event to Meta, [connect the intended dataset](/signals/connect-meta) first.
+You need an active Signals workspace, its [server-side secret](/api/authentication#how-do-i-authenticate-the-rest-api), and a recorded consent decision for the conversion. To deliver the event to Meta, [connect the intended dataset](/signals/connect-meta) first.
 
-Start with the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check authentication. Use the [sandbox](/sandbox) for synthetic payload validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) to check Meta delivery. The conversion request below can create a real event and destination delivery.
+Start with the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check authentication. Use the [sandbox](/api/sandbox) for synthetic payload validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) to check Meta delivery. The conversion request below can create a real event and destination delivery.
 
 ## Choose an interface
 
@@ -28,7 +28,7 @@ Start with the [identity-free ingestion diagnostic](/signals/verify-ingestion) i
 | [Python SDK](/sdk/python) | You want generated synchronous and asynchronous operations in Python. |
 | [Ruby SDK](/sdk/ruby) | You want a compact Ruby client over the generated API. |
 | [Go SDK](/sdk/go) | You want a generated client for a Go service. |
-| [Plainrouter CLI](/cli/quickstart) | You want to test an operation or run an operational script from a terminal. |
+| [Plainrouter CLI](/sdk/cli/quickstart) | You want to test an operation or run an operational script from a terminal. |
 | OpenAPI contract | You want to inspect the complete schema or generate another compatible client. |
 
 The signed REST contract is published at version `0.5.0`. TypeScript SDK and npm CLI `0.5.1`, Go SDK `v0.5.2`, Python package `0.5.2`, and Ruby SDK `0.1.1` target that signed contract. The Python package also includes the PyPI CLI distribution. See [Client releases](#client-releases) for package links and the CLI's command boundary.
@@ -43,11 +43,11 @@ Accept: application/json
 Content-Type: application/json
 ```
 
-The [sandbox operations](/sandbox) have separate authentication rules.
+The [sandbox operations](/api/sandbox) have separate authentication rules.
 
 Keep this secret on your server or in your CLI's secure credential store. Never put it in browser code, source control, prompts, or logs.
 
-The Conversion API does not accept an MCP OAuth token or a [workspace token](/actions/workspace-tokens). Workspace execution tokens authorize scoped agent tools. OAuth management credentials are limited to management discovery and cannot authenticate MCP tool calls. Neither authenticates the Signals API.
+The Conversion API does not accept an MCP OAuth token or a [workspace token](/mcp/workspace-tokens). Workspace execution tokens authorize scoped agent tools. OAuth management credentials are limited to management discovery and cannot authenticate MCP tool calls. Neither authenticates the Signals API.
 
 ## Submit an event
 
@@ -82,7 +82,7 @@ curl --include https://plainrouter.com/api/v1/events \
 
 A new event returns HTTP `202` and a `Location` header for its event resource. A retry with the same event ID returns HTTP `200` with `duplicate: true`; it does not create another conversion. A duplicate response is not a replay of failed destination delivery.
 
-You can supply `Idempotency-Key` instead of a body `event_id`. If you supply both, their values must match. The [submit-event reference](https://plainrouter.com/docs/api-reference/event/submit-a-conversion-event) defines the request and responses.
+You can supply `Idempotency-Key` instead of a body `event_id`. If you supply both, their values must match. The [submit-event reference](https://plainrouter.com/docs/api/events/create) defines the request and responses.
 
 ```json
 {
@@ -122,7 +122,7 @@ The event was accepted; the warning does not mean the request failed. A `202` al
 
 Duplicate HTTP `200` acknowledgements keep their existing response shape and do not include this new array. Browser/publishable-key and sandbox acknowledgements are unchanged. An empty array is not proof of fresh consent: a parseable but stale capture time can still fail the existing identity freshness checks. The warning does not broaden consent, identity, or destination eligibility.
 
-For a server implementation that retains the original consent timestamp, use the [Plainrouter SDK purchase recipe](/guides/meta-capi/nodejs). The [published OpenAPI contract](https://plainrouter.com/openapi.json) defines the acknowledgement fields; older generated SDK models may not expose newly added fields.
+For a server implementation that retains the original consent timestamp, use the [Plainrouter SDK purchase recipe](/sdk/recipes/meta-conversions). The [published OpenAPI contract](https://plainrouter.com/openapi.json) defines the acknowledgement fields; older generated SDK models may not expose newly added fields.
 
 ## How do I confirm Meta accepted the event?
 
@@ -144,7 +144,7 @@ The response includes the event and its `deliveries`. For IDs containing charact
 | Delivery `accepted` | Meta accepted this delivery. | Verify browser/server pairing and reporting separately. |
 | Delivery `failed:*` or `skipped:*` | The event failed or was ineligible for delivery. | Read the delivery explanation before taking action. |
 
-Meta acceptance does not establish attribution or improved advertising performance. An empty delivery list does not establish Meta acceptance either. Check the [connected destination](/signals/connect-meta) and the event's eligibility. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for the complete meanings and [GET event](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace) for the response schema.
+Meta acceptance does not establish attribution or improved advertising performance. An empty delivery list does not establish Meta acceptance either. Check the [connected destination](/signals/connect-meta) and the event's eligibility. See [delivery statuses](/reference/statuses-and-terms#destination-delivery) for the complete meanings and [GET event](https://plainrouter.com/docs/api/events/get) for the response schema.
 
 ### Read a failed delivery trace
 
@@ -177,7 +177,7 @@ Use `POST /deliveries/replay` after correcting the destination problem. Replay s
 
 Before replay, inspect the event trace and confirm:
 
-- You are using the [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api) for the event and destination.
+- You are using the [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api) for the event and destination.
 - The destination is active, and the event is eligible for attributed advertising delivery.
 - The delivery is in a `failed:*` or `expired` state. Pending, accepted, and skipped deliveries are excluded.
 - The retained payload is available and the original event time remains within the configured replay window, which cannot exceed seven days. A recent event can still have an unavailable payload.
@@ -212,7 +212,7 @@ HTTP `202` returns counts, for example:
 
 These counts are not a per-ID rejection report. All-zero counts can mean the selected ID is outside the workspace or does not meet eligibility requirements. Inspect the trace and [delivery status](/reference/statuses-and-terms#destination-delivery) instead of repeatedly replaying it.
 
-For `failed:permanent`, read the explanation before replaying: sending the same invalid payload again will not correct it. Do not change an old purchase's timestamp or generate a new event ID to bypass duplicate detection or expiry. See the [replay operation reference](https://plainrouter.com/docs/api-reference/operations/replay-eligible-deliveries) for optional filters and the complete schema.
+For `failed:permanent`, read the explanation before replaying: sending the same invalid payload again will not correct it. Do not change an old purchase's timestamp or generate a new event ID to bypass duplicate detection or expiry. See the [replay operation reference](https://plainrouter.com/docs/api/deliveries/replay) for optional filters and the complete schema.
 
 ## Verify Signal ingestion
 
@@ -233,17 +233,17 @@ SDKs and CLI clients derive their method and command names from these semantic o
 
 | Operation ID | Method and path | Purpose |
 | --- | --- | --- |
-| [`createEvent`](https://plainrouter.com/docs/api-reference/event/submit-a-conversion-event) | `POST /events` | Submit an idempotent conversion event. |
-| [`verifySignalIngestion`](https://plainrouter.com/docs/api-reference/event/verify-server-side-signal-ingestion) | `POST /verification-events` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
-| [`getEvent`](https://plainrouter.com/docs/api-reference/event/get-an-event-and-delivery-trace) | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
-| [`listEvents`](https://plainrouter.com/docs/api-reference/operations/list-recent-events) | `GET /dashboard/events` | List recent events and delivery metrics. |
-| [`listEventsByCursor`](https://plainrouter.com/docs/api-reference/operations/list-recent-events-by-cursor) | `GET /dashboard/events/cursor` | Page through retained events with an opaque cursor. |
-| [`setDestinationTestMode`](https://plainrouter.com/docs/api-reference/operations/configure-destination-test-mode) | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |
-| [`sendTestPurchase`](https://plainrouter.com/docs/api-reference/operations/send-a-controlled-test-purchase) | `POST /destinations/{destination}/test-purchase` | Send a controlled test purchase. |
-| [`replayDeliveries`](https://plainrouter.com/docs/api-reference/operations/replay-eligible-deliveries) | `POST /deliveries/replay` | Replay eligible recent deliveries. |
-| [`getReconciliationReport`](https://plainrouter.com/docs/api-reference/operations/get-a-reconciliation-report) | `GET /reports/reconciliation` | Retrieve reconciliation results for a date. |
-| [`getEmqReport`](https://plainrouter.com/docs/api-reference/operations/get-event-match-quality-history) | `GET /reports/emq` | Retrieve recent Event Match Quality snapshots. |
-| [`deleteUserData`](https://plainrouter.com/docs/api-reference/operations/delete-user-data-by-verified-identifier) | `DELETE /user-data` | Delete data matching a hashed user identifier. |
+| [`createEvent`](https://plainrouter.com/docs/api/events/create) | `POST /events` | Submit an idempotent conversion event. |
+| [`verifySignalIngestion`](https://plainrouter.com/docs/api/events/verify-ingestion) | `POST /verification-events` | Write an identity-free ingestion diagnostic that does not complete onboarding. |
+| [`getEvent`](https://plainrouter.com/docs/api/events/get) | `GET /events/{event}` | Retrieve an event, lineage, and delivery trace. |
+| [`listEvents`](https://plainrouter.com/docs/api/events/list) | `GET /dashboard/events` | List recent events and delivery metrics. |
+| [`listEventsByCursor`](https://plainrouter.com/docs/api/events/list-by-cursor) | `GET /dashboard/events/cursor` | Page through retained events with an opaque cursor. |
+| [`setDestinationTestMode`](https://plainrouter.com/docs/api/destinations/test-mode) | `PATCH /destinations/{destination}/test-mode` | Enable or disable Meta Test Events mode. |
+| [`sendTestPurchase`](https://plainrouter.com/docs/api/destinations/test-purchase) | `POST /destinations/{destination}/test-purchase` | Send a controlled test purchase. |
+| [`replayDeliveries`](https://plainrouter.com/docs/api/deliveries/replay) | `POST /deliveries/replay` | Replay eligible recent deliveries. |
+| [`getReconciliationReport`](https://plainrouter.com/docs/api/reports/reconciliation) | `GET /reports/reconciliation` | Retrieve reconciliation results for a date. |
+| [`getEmqReport`](https://plainrouter.com/docs/api/reports/emq) | `GET /reports/emq` | Retrieve recent Event Match Quality snapshots. |
+| [`deleteUserData`](https://plainrouter.com/docs/api/privacy/delete-user-data) | `DELETE /user-data` | Delete data matching a hashed user identifier. |
 
 Resource IDs remain scoped to the authenticated workspace. A client cannot use its Signals secret to read another workspace's events or destinations.
 

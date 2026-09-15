@@ -1,6 +1,6 @@
 ---
 title: "Go SDK: send and verify conversions"
-sidebarTitle: "Go SDK"
+sidebarTitle: "Go"
 description: "Send consented purchases with the Plainrouter Go SDK, preserve original timestamps and event IDs on retries, and check ingestion and Meta delivery."
 ---
 
@@ -58,7 +58,7 @@ Load the secret from your environment or secret manager rather than writing it i
 
 Send a server-side purchase through Plainrouter to your [connected Meta destination](/signals/connect-meta). This recipe uses Plainrouter's SDK and credentials, not the direct Meta Graph API. A successful create response confirms ingestion; inspect destination delivery separately.
 
-Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
+Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/api/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
 
 ### Create and send a purchase
 
@@ -211,10 +211,10 @@ The generated configuration defaults to the Plainrouter Conversion API. Override
 
 Keep the Signals workspace secret in server-side credential storage. Never include it in prompts, URLs, logs, source control, or client-side code.
 
-For operation names and request fields, use the [Conversion API reference](/reference/conversion-api).
+For operation names and request fields, use the [Conversion API reference](/api/conversions).
 
 ## Implementation references
 
 - [Published Go package `v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go@v0.5.2)
 - [Generated create operation at `v0.5.2`](https://github.com/plainrouter/sdk-go/blob/v0.5.2/api_event.go)
-- [Plainrouter event request and delivery reference](/reference/conversion-api)
+- [Plainrouter event request and delivery reference](/api/conversions)

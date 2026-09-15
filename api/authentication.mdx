@@ -198,7 +198,7 @@ discovery.
 
 Dashboard settings and approval pages require a signed-in browser session. A valid workspace execution token or OAuth management credential cannot replace that session, even with an active grant or Admin tier.
 
-If an automation receives `401` on a dashboard URL, check the requested interface before rotating credentials. Use the documented MCP or API operation with its matching credential, or sign in to complete the interactive action. For grant management, follow [the dashboard revocation steps](/actions/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) or the separately authorized [`revoke_grant` MCP tool](/reference/mcp-tools#revoke_grant).
+If an automation receives `401` on a dashboard URL, check the requested interface before rotating credentials. Use the documented MCP or API operation with its matching credential, or sign in to complete the interactive action. For grant management, follow [the dashboard revocation steps](/mcp/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) or the separately authorized [`revoke_grant` MCP tool](/mcp/tools#revoke_grant).
 
 ## Which clients are available?
 
@@ -209,7 +209,7 @@ If an automation receives `401` on a dashboard URL, check the requested interfac
 | [Python setup](/sdk/python) | `plainrouter` | `0.5.2` | Signals workspace secret passed to `create_client` |
 | [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.1.1` | Signals workspace secret passed to `PlainRouter::Client.new` |
 | [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.5.2` | Signals workspace secret attached to the request context |
-| [CLI setup](/cli/quickstart) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
+| [CLI setup](/sdk/cli/quickstart) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
 | MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.3.2` | None |
 | MCP production | `https://plainrouter.com/mcp` | Server `0.3.2` | Workspace execution token for tool calls and account data |
 
@@ -229,8 +229,8 @@ command. Use REST, an SDK, or MCP for ingestion verification.
   in a Plainrouter client configuration.
 
 For complete request and response fields, use the [Conversion API
-reference](/reference/conversion-api). For token tiers and lifecycle, use
-[Workspace tokens](/actions/workspace-tokens). For available agent tools, use
-the [MCP tool reference](/reference/mcp-tools). For machine discovery, start
-with the [API resource index](/reference/api-resource-index) or the [RFC 9727
-API catalog](/reference/api-catalog).
+reference](/api/conversions). For token tiers and lifecycle, use
+[Workspace tokens](/mcp/workspace-tokens). For available agent tools, use
+the [MCP tool reference](/mcp/tools). For machine discovery, start
+with the [API resource index](/api/resources) or the [RFC 9727
+API catalog](/api/catalog).

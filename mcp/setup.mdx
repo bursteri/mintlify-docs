@@ -28,7 +28,7 @@ Plainrouter MCP uses owner-issued workspace execution tokens. Each token binds t
 
 If you are choosing between a Signals workspace secret, workspace execution token,
 or OAuth management credential, see [Authentication and
-clients](/auth).
+clients](/api/authentication).
 
 <Warning>
   OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Use a workspace token for every MCP tool call.
@@ -118,7 +118,7 @@ token. The three read-tool names and their argument shapes match production.
   </Step>
 </Steps>
 
-See [Workspace tokens](/actions/workspace-tokens) for tier selection, rotation, and revocation.
+See [Workspace tokens](/mcp/workspace-tokens) for tier selection, rotation, and revocation.
 
 ### Configure Claude Code for your Meta ad account
 
@@ -153,7 +153,7 @@ Meta ad account name and external ID, then stop. Do not propose changes.
 
 Check that the returned workspace and Meta ad account match the ones you selected when issuing the token. If they do, ask for `get_signal_health` to inspect conversion delivery and matching diagnostics. Missing Signals setup or measurement history is a separate setup issue; a successful account read does not establish healthy tracking.
 
-For the returned fields and their meaning, see the [MCP tool reference](/reference/mcp-tools).
+For the returned fields and their meaning, see the [MCP tool reference](/mcp/tools).
 
 ## Permissions
 
@@ -175,8 +175,8 @@ The agent cannot supply another account ID to widen access. Creative tools reche
 
 Once the account read succeeds, choose a task:
 
-- [Diagnose Signals](/reference/mcp-tools#get_signal_health) with a stored read. Use [ingestion verification](/reference/mcp-tools#verify_signal_ingestion) only when you explicitly want a diagnostic write; it does not verify a real arrival.
-- [Inspect stored reconciliation](/reference/mcp-tools#get_performance) and its evidence limits.
+- [Diagnose Signals](/mcp/tools#get_signal_health) with a stored read. Use [ingestion verification](/mcp/tools#verify_signal_ingestion) only when you explicitly want a diagnostic write; it does not verify a real arrival.
+- [Inspect stored reconciliation](/mcp/tools#get_performance) and its evidence limits.
 - [Create a paused creative variant](/actions/creative-workflow): read the account library, select the source ad and asset, submit a proposal, and review the approval link.
 
 Ask the agent to distinguish suggest-only, pending approval, blocked, awaiting verification, and Landed. The [Actions overview](/actions/overview) lists supported changes.

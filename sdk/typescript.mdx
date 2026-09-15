@@ -1,6 +1,6 @@
 ---
 title: "TypeScript SDK: authenticate, send and verify events"
-sidebarTitle: "TypeScript SDK"
+sidebarTitle: "TypeScript"
 description: "Install and use the generated @plainrouter/sdk client and Zod schemas to send authenticated Signals Conversion API requests safely."
 ---
 
@@ -112,9 +112,9 @@ The first successful call returns the accepted verification result. Repeating it
 
 ## Send a purchase and inspect its delivery
 
-Follow the [Node.js and TypeScript purchase recipe](/guides/meta-capi/nodejs) for a complete `createEvent` request, recorded consent checks, stable retry IDs, and a typed `getEvent` delivery check. It sends through Plainrouter; it is not a direct Meta Graph API tutorial.
+Follow the [Node.js and TypeScript purchase recipe](/sdk/recipes/meta-conversions) for a complete `createEvent` request, recorded consent checks, stable retry IDs, and a typed `getEvent` delivery check. It sends through Plainrouter; it is not a direct Meta Graph API tutorial.
 
-By default, operations return `data`, `error`, and `response`; an HTTP failure must be checked before using `data`. A transport failure may have no `response`; check it before reading the status. Code using `throwOnError: true` must also catch thrown failures. Stop on `401`, inspect field errors on `422`, and retry an uncertain purchase timeout only with its original persisted ID and payload. Avoid logging entire request or error objects. See the [API error table](/reference/conversion-api#handle-errors).
+By default, operations return `data`, `error`, and `response`; an HTTP failure must be checked before using `data`. A transport failure may have no `response`; check it before reading the status. Code using `throwOnError: true` must also catch thrown failures. Stop on `401`, inspect field errors on `422`, and retry an uncertain purchase timeout only with its original persisted ID and payload. Avoid logging entire request or error objects. See the [API error table](/api/conversions#handle-errors).
 
 ## Handle credentials safely
 
@@ -122,4 +122,4 @@ The SDK accepts only a Signals workspace secret for Conversion API calls. It doe
 
 Keep the secret in a server-side secret manager. Never include it in client-side JavaScript, prompts, URLs, logs, or source control.
 
-For request and response fields, use the [API reference](/reference/conversion-api).
+For request and response fields, use the [API reference](/api/conversions).
