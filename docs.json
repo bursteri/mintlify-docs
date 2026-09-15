@@ -10,9 +10,9 @@
   },
   "rounded": "sharp",
   "colors": {
-    "primary": "#EA561F",
-    "light": "#FCFCFA",
-    "dark": "#1D1B16"
+    "primary": "#171717",
+    "light": "#FAFAFA",
+    "dark": "#171717"
   },
   "favicon": "/favicon.svg",
   "appearance": {
