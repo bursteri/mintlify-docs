@@ -34,9 +34,11 @@
     "tabs": [
       {
         "tab": "Guides",
+        "icon": "book-open",
         "groups": [
           {
             "group": "Get started",
+            "icon": "rocket",
             "pages": [
               "index",
               "quickstart",
@@ -46,6 +48,7 @@
           },
           {
             "group": "Signals",
+            "icon": "radio",
             "pages": [
               "signals/overview",
               "signals/configure-dns",
@@ -59,6 +62,7 @@
           },
           {
             "group": "Actions",
+            "icon": "workflow",
             "pages": [
               "actions/overview",
               "actions/creative-workflow",
@@ -69,6 +73,7 @@
           },
           {
             "group": "Reference",
+            "icon": "library",
             "pages": [
               "auth",
               "reference/api-resource-index",
@@ -78,6 +83,7 @@
           },
           {
             "group": "Legacy Launcher",
+            "icon": "archive",
             "pages": [
               "launcher/connect-drive",
               "launcher/import-draft-batch"
@@ -87,9 +93,11 @@
       },
       {
         "tab": "MCP",
+        "icon": "plug",
         "groups": [
           {
             "group": "Connect",
+            "icon": "plug",
             "pages": [
               "actions/connect-agent",
               "actions/workspace-tokens"
@@ -97,6 +105,7 @@
           },
           {
             "group": "Reference",
+            "icon": "library",
             "pages": [
               "reference/mcp-tools"
             ]
@@ -105,15 +114,18 @@
       },
       {
         "tab": "SDK & CLI",
+        "icon": "terminal",
         "groups": [
           {
             "group": "Get started",
+            "icon": "rocket",
             "pages": [
               "sdk/overview"
             ]
           },
           {
             "group": "TypeScript SDK",
+            "icon": "code",
             "pages": [
               "sdk/typescript",
               "guides/meta-capi/nodejs"
@@ -121,24 +133,28 @@
           },
           {
             "group": "Python SDK",
+            "icon": "code",
             "pages": [
               "sdk/python"
             ]
           },
           {
             "group": "Ruby SDK",
+            "icon": "code",
             "pages": [
               "sdk/ruby"
             ]
           },
           {
             "group": "Go SDK",
+            "icon": "code",
             "pages": [
               "sdk/go"
             ]
           },
           {
             "group": "CLI",
+            "icon": "terminal",
             "pages": [
               "cli/quickstart",
               "cli/commands"
@@ -148,6 +164,7 @@
       },
       {
         "tab": "API reference",
+        "icon": "braces",
         "openapi": "https://plainrouter.com/openapi.json",
         "pages": [
           "reference/conversion-api",
@@ -171,9 +188,11 @@
       },
       {
         "tab": "Changelog",
+        "icon": "history",
         "groups": [
           {
             "group": "2026",
+            "icon": "calendar-days",
             "pages": [
               "changelog/2026-09",
               "changelog/2026-08"
