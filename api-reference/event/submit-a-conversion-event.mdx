@@ -54,7 +54,8 @@ Use a stable, non-personal `event_id` for the logical purchase. You can use `Ide
 ```json 202 — New event
 {
   "event_id": "order-123",
-  "duplicate": false
+  "duplicate": false,
+  "warnings": []
 }
 ```
 
@@ -65,6 +66,8 @@ Use a stable, non-personal `event_id` for the logical purchase. You can use `Ide
 }
 ```
 </ResponseExample>
+
+New-event acknowledgements include `warnings`. If you supply identity data without a valid consent capture time, read the [consent warning guidance](/reference/conversion-api#why-is-the-consent-capture-time-invalid) before treating the event as linked. Duplicate acknowledgements retain the response shape shown above.
 
 ## How do I verify the result?
 

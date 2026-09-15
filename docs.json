@@ -42,8 +42,7 @@
             "pages": [
               "index",
               "quickstart",
-              "billing/overview",
-              "sandbox"
+              "billing/overview"
             ]
           },
           {
@@ -75,7 +74,6 @@
             "group": "Reference",
             "icon": "library",
             "pages": [
-              "auth",
               "reference/api-resource-index",
               "reference/api-catalog",
               "reference/statuses-and-terms"
@@ -173,24 +171,75 @@
         "tab": "API reference",
         "icon": "braces",
         "openapi": "https://plainrouter.com/openapi.json",
-        "pages": [
-          "reference/conversion-api",
-          "GET /sandbox",
-          "GET /sandbox/keys",
-          "POST /sandbox/keys",
-          "POST /sandbox/events",
-          "POST /sandbox/keyed-events",
-          "api-reference/event/submit-a-conversion-event",
-          "POST /verification-events",
-          "GET /events/{event}",
-          "GET /dashboard/events",
-          "GET /dashboard/events/cursor",
-          "PATCH /destinations/{destination}/test-mode",
-          "POST /destinations/{destination}/test-purchase",
-          "POST /deliveries/replay",
-          "GET /reports/reconciliation",
-          "GET /reports/emq",
-          "DELETE /user-data"
+        "groups": [
+          {
+            "group": "Overview",
+            "icon": "book-open",
+            "pages": [
+              "api-reference/introduction",
+              "auth",
+              "sandbox",
+              "reference/conversion-api"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "icon": "braces",
+            "pages": [
+              {
+                "group": "Sandbox",
+                "icon": "flask-conical",
+                "pages": [
+                  "GET /sandbox",
+                  "GET /sandbox/keys",
+                  "POST /sandbox/keys",
+                  "POST /sandbox/events",
+                  "POST /sandbox/keyed-events"
+                ]
+              },
+              {
+                "group": "Events",
+                "icon": "send",
+                "pages": [
+                  "api-reference/event/submit-a-conversion-event",
+                  "POST /verification-events",
+                  "GET /events/{event}",
+                  "GET /dashboard/events",
+                  "GET /dashboard/events/cursor"
+                ]
+              },
+              {
+                "group": "Destination testing",
+                "icon": "test-tube-diagonal",
+                "pages": [
+                  "PATCH /destinations/{destination}/test-mode",
+                  "POST /destinations/{destination}/test-purchase"
+                ]
+              },
+              {
+                "group": "Delivery replay",
+                "icon": "rotate-cw",
+                "pages": [
+                  "POST /deliveries/replay"
+                ]
+              },
+              {
+                "group": "Reports",
+                "icon": "chart-no-axes-combined",
+                "pages": [
+                  "GET /reports/reconciliation",
+                  "GET /reports/emq"
+                ]
+              },
+              {
+                "group": "Privacy",
+                "icon": "shield",
+                "pages": [
+                  "DELETE /user-data"
+                ]
+              }
+            ]
+          }
         ]
       },
       {

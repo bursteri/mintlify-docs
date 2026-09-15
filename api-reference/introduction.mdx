@@ -1,0 +1,95 @@
+---
+title: "Plainrouter API"
+sidebarTitle: "Introduction"
+description: "Make your first synthetic API request, choose authentication, and find endpoints for conversions, delivery, reports, and data deletion."
+---
+
+Use the Plainrouter REST API to send consented conversion events, inspect delivery, run controlled destination tests, and read stored reports. Start with the synthetic sandbox before connecting a production workspace.
+
+<CardGroup cols={2}>
+  <Card title="Make your first request" icon="terminal" href="#make-your-first-request">
+    Send an identity-free test event without an account or API key.
+  </Card>
+  <Card title="Authenticate production requests" icon="key-round" href="/auth#how-do-i-authenticate-the-rest-api">
+    Use the Signals workspace secret for your server integration.
+  </Card>
+</CardGroup>
+
+## Connection details
+
+| Setting | Value |
+| --- | --- |
+| Base URL | `https://plainrouter.com/api/v1` |
+| Request and response format | JSON; each endpoint documents its schema |
+| Production authentication | `Authorization: Bearer YOUR_SIGNALS_WORKSPACE_SECRET` |
+| Synthetic sandbox | No credential for `/sandbox/events`; a short-lived sandbox key for `/sandbox/keyed-events` |
+| API schema | [Published OpenAPI contract](https://plainrouter.com/openapi.json) |
+| Official clients | [TypeScript, Python, Ruby, Go, and CLI](/sdk/overview) |
+
+This is Plainrouter's API, not Meta's Graph API. Workspace execution tokens used for [MCP](/mcp/overview) do not authenticate the Signals REST API.
+
+## Make your first request
+
+You need an HTTP client such as cURL. This request validates an invented event without writing a production conversion or contacting Meta. Use only synthetic values; omit personal data and customer identifiers.
+
+```bash
+curl --include https://plainrouter.com/api/v1/sandbox/events \
+  --request POST \
+  --header "Accept: application/json" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "event_id": "sandbox-order-123",
+    "event_name": "Purchase",
+    "action_source": "website",
+    "value_data": {
+      "value": "49.90",
+      "currency": "EUR"
+    }
+  }'
+```
+
+Expect HTTP `200`. The response includes these fields; this is an excerpt:
+
+```json
+{
+  "sandbox": true,
+  "accepted": true,
+  "status": "simulated",
+  "persisted": false,
+  "provider_delivery": false
+}
+```
+
+`accepted: true` confirms synthetic validation. It does not test your production credential, store an event, or verify Meta delivery. Continue with the [sandbox quickstart](/sandbox) to test bearer authentication, check allowed fields, or troubleshoot sandbox keys.
+
+## Choose an endpoint group
+
+| Group | Operations | Use it to |
+| --- | --- | --- |
+| Sandbox | Discover, issue a sandbox key, validate a synthetic event | Test request shape and client authentication. |
+| Events | Submit, verify ingestion, retrieve, or list events | Send conversions and inspect event and delivery state. |
+| Destination testing | Set test mode and send a controlled test purchase | Check the connected Meta destination. These operations can change state or contact Meta. |
+| Delivery replay | Replay selected eligible failed deliveries | Retry retained payloads after fixing the destination problem. |
+| Reports | Reconciliation and Event Match Quality | Read stored conversion comparisons and matching reports. |
+| Privacy | Delete user data | Request workspace-scoped deletion using the endpoint's documented identifiers. |
+
+Expand a group in the sidebar for its request fields, responses, and examples. Production operations use real workspace data; check each endpoint's side effects before sending a request.
+
+## Move to production
+
+1. [Set up Signals](/quickstart), then configure your server with its [Signals workspace secret](/auth#how-do-i-authenticate-the-rest-api). Keep credentials out of browser code, prompts, and source control.
+2. Use the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check the authenticated write path. It does not verify a real website arrival.
+3. For advertising delivery, [connect the intended Meta dataset](/signals/connect-meta). Send an actual conversion only with the recorded consent and original event data required by the [conversion guide](/reference/conversion-api#submit-an-event).
+4. Preserve the event ID on retries and [inspect the delivery trace](/reference/conversion-api#how-do-i-confirm-meta-accepted-the-event). HTTP `202` is ingestion acceptance; destination acceptance is a separate result.
+
+## Handle errors and retries
+
+| Result | Next step |
+| --- | --- |
+| `401` | Check the credential type, scope, and validity. Sandbox keys and production secrets are not interchangeable. |
+| `422` | Read the field errors and correct the payload before retrying. |
+| New production event: `202` | Read `warnings` and inspect delivery separately. |
+| Duplicate production event: `200` | Keep the original ID. The response does not replay failed delivery. |
+| Uncertain production write after a timeout | Retry the original event ID and payload, subject to continued consent eligibility. |
+
+See [conversion errors](/reference/conversion-api#handle-errors), [consent warnings](/reference/conversion-api#why-is-the-consent-capture-time-invalid), and [sandbox rate limits](/sandbox#stay-within-the-rate-limits) for the applicable details. Prefer an [official SDK](/sdk/overview) when you want typed operations in application code.
