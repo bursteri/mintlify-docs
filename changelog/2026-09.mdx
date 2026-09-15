@@ -1,45 +1,10 @@
 ---
 title: "September 2026"
-description: "Review Plainrouter product updates shipped in September 2026, including Signals onboarding, collector, SDK, and CLI releases."
+description: "Review Plainrouter product updates shipped in September 2026, including Signals onboarding, collector updates, and measurement improvements."
 rss: true
 ---
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
-
-<Update label="September 15, 2026">
-
-  ## Open the homepage from the documentation header
-
-  **Documentation** · Homepage now sits beside Dashboard in the header. The sidebar starts with documentation sections, with Homepage and Agent repository shortcuts removed. Footer links now include the website and the Plainrouter GitHub organization.
-
-  ## Find terminal workflows in the CLI tab
-
-  **Documentation** · CLI installation, authentication, and commands now have a dedicated tab. SDKs remain focused on application integrations. Existing CLI links redirect to the new pages. [Start with the CLI quickstart](/cli/get-started).
-
-  ## Keep old Markdown documentation links working
-
-  **Fixed** · Previous MCP, API, SDK, and CLI Markdown URLs now redirect permanently to their corresponding Markdown pages, preserving the format for agents and documentation readers. [Explore the reorganized documentation](/sdk/overview).
-
-  ## Follow consistent MCP, API, and SDK documentation paths
-
-  **Documentation** · MCP setup, workspace tokens, and tools now share `/docs/mcp/`. API guides and endpoint references share `/docs/api/`. SDK language guides and recipes share `/docs/sdk/`; CLI documentation has its own `/docs/cli/` section. Previous page URLs have redirects to their new locations. The SDK introduction now puts language selection, prerequisites, verification, and troubleshooting in one place. [Choose an SDK](/sdk/overview).
-
-  ## Start an API integration from one place
-
-  **Documentation** · API reference now opens with a synthetic first request, authentication guidance, and endpoint groups for sandbox, events, destination testing, replay, reports, and privacy. The submit-event example also includes the current `warnings` field. [Start with the API introduction](/api/introduction).
-
-  ## Find MCP setup and reference more easily
-
-  **Documentation** · The main docs tab is now **Documentation**. MCP opens with a dedicated introduction, followed by setup, workspace access, and tool reference. Existing setup links remain valid. [Explore Plainrouter MCP](/mcp/overview).
-
-  ## Read documentation with neutral accents
-
-  **Documentation** · Light mode now uses charcoal links and icons with gray navigation highlights in place of orange accents. Light and dark modes remain available.
-
-  ## Find documentation sections by icon
-
-  **Documentation** · Documentation tabs and sidebar section headings now include consistent outline icons. SDKs use a package, CLI a terminal square, API code brackets, and Changelog a list to make each section easier to recognize.
-</Update>
 
 <Update label="September 14, 2026">
 
@@ -59,17 +24,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   **Fixed** · The published account-context, ingestion-verification, and governed-proposal skills now distinguish workspace execution tokens from OAuth management credentials and Signals workspace secrets. The proposal skill uses the supported creative workflow and preserves human approval and verification requirements. [Choose the correct MCP credential](/api/authentication#how-do-i-authenticate-plainrouter-mcp) and [follow the creative walkthrough](/actions/creative-workflow).
 
-  ## Inspect workspace grants and verify revocation
-
-  **Documentation** · The workspace-token guide now covers **Workspace settings → Workspace grants**, exact operations, revocation confirmation, and the resulting audit receipt. Authentication troubleshooting explains why a bearer token cannot replace a dashboard session. [Review grant management](/mcp/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) and [dashboard authentication](/api/authentication#why-does-a-dashboard-url-reject-my-bearer-token).
-
-  ## Interpret Event Match Quality and Meta recovery evidence
-
-  **Documentation** · Signals troubleshooting now distinguishes a pending EMQ capture from a capture without scores, and separates **observed**, **not observed**, and **unknown** browser-pixel observations. It explains the UTC dates and inspection limits without treating server acceptance as proof of attribution or incremental conversions. [Read EMQ states](/signals/health-and-performance#why-is-event-match-quality-blank) and [Meta recovery evidence](/signals/health-and-performance#what-does-meta-recovery-evidence-show).
-
-  ## Check consent separately from installation
-
-  **Documentation** · The installation guide now explains that a consent-source message is separate from the **Verified** arrival status. It links to the grant, partial-consent, and withdrawal checks required to verify conversion behavior. [Check consent after installation](/signals/install-pixel#does-the-consent-message-verify-installation).
 </Update>
 
 <Update label="September 13, 2026">
@@ -192,11 +146,4 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## EUR pricing includes arrival allowances
 
   **Improved** · Published monthly pricing bands now explain the observed-spend basis, included arrivals, and overage rate. The Free band has a €0 base price below €300 in observed monthly ad spend and includes 2,000 arrivals. [Review pricing and billing](/billing/overview).
-</Update>
-
-<Update label="September 2, 2026">
-
-  ## SDK and CLI packages link to canonical documentation
-
-  **Improved** · TypeScript SDK [`@plainrouter/sdk@0.5.1`](https://www.npmjs.com/package/@plainrouter/sdk), npm CLI [`@plainrouter/cli@0.5.1`](https://www.npmjs.com/package/@plainrouter/cli), Python SDK and CLI [`plainrouter==0.5.2`](https://pypi.org/project/plainrouter/), and Ruby gem [`plainrouter-sdk 0.1.1`](https://rubygems.org/gems/plainrouter-sdk) now publish canonical `plainrouter.com/docs` links in their package metadata or README. The releases continue to target signed API contract `0.5.0`. [Choose an official client](/sdk/overview).
 </Update>
