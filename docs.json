@@ -116,8 +116,8 @@
         ]
       },
       {
-        "tab": "SDK & CLI",
-        "icon": "terminal",
+        "tab": "SDKs",
+        "icon": "code",
         "groups": [
           {
             "group": "Overview",
@@ -142,13 +142,25 @@
             "pages": [
               "sdk/recipes/meta-conversions"
             ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI",
+        "icon": "terminal",
+        "groups": [
+          {
+            "group": "Get started",
+            "icon": "rocket",
+            "pages": [
+              "cli/get-started"
+            ]
           },
           {
-            "group": "CLI",
-            "icon": "terminal",
+            "group": "Reference",
+            "icon": "library",
             "pages": [
-              "sdk/cli/quickstart",
-              "sdk/cli/commands"
+              "cli/command-reference"
             ]
           }
         ]
@@ -515,22 +527,22 @@
     },
     {
       "source": "/cli/quickstart",
-      "destination": "https://plainrouter.com/docs/sdk/cli/quickstart",
+      "destination": "https://plainrouter.com/docs/cli/get-started",
       "permanent": true
     },
     {
       "source": "/cli/quickstart.md",
-      "destination": "https://plainrouter.com/docs/sdk/cli/quickstart.md",
+      "destination": "https://plainrouter.com/docs/cli/get-started.md",
       "permanent": true
     },
     {
       "source": "/cli/commands",
-      "destination": "https://plainrouter.com/docs/sdk/cli/commands",
+      "destination": "https://plainrouter.com/docs/cli/command-reference",
       "permanent": true
     },
     {
       "source": "/cli/commands.md",
-      "destination": "https://plainrouter.com/docs/sdk/cli/commands.md",
+      "destination": "https://plainrouter.com/docs/cli/command-reference.md",
       "permanent": true
     },
     {
@@ -696,6 +708,26 @@
     {
       "source": "/reference/authentication.md",
       "destination": "https://plainrouter.com/docs/api/authentication.md",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/cli/quickstart",
+      "destination": "https://plainrouter.com/docs/cli/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/cli/quickstart.md",
+      "destination": "https://plainrouter.com/docs/cli/get-started.md",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/cli/commands",
+      "destination": "https://plainrouter.com/docs/cli/command-reference",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/cli/commands.md",
+      "destination": "https://plainrouter.com/docs/cli/command-reference.md",
       "permanent": true
     }
   ],

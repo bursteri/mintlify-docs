@@ -126,3 +126,14 @@ Future Markdown URL migrations must update this finite map alongside
 `docs.json` and deploy the separate Worker after testing. A Mintlify main push
 still does not deploy the Worker. Preserve the established routes, bindings,
 settings, catalog redirect and aggregate handler when updating its source.
+
+## Separate CLI tab follow-up
+
+CLI pages now use `/docs/cli/get-started` and `/docs/cli/command-reference`.
+Both historical `/docs/cli/quickstart` and `/docs/cli/commands` aliases and the
+intermediate `/docs/sdk/cli/` aliases target those final paths directly. Fresh
+final slugs avoid reversing permanent redirects cached by existing clients.
+The finite Worker map now covers 40 Markdown aliases. Deployment of this
+follow-up is recorded in the private content workspace under
+`seo/research/2026-09-15-docs-cli-tab/`; it requires the separate docs Worker
+release alongside the Mintlify publication.

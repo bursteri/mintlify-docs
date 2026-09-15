@@ -185,7 +185,7 @@ const mdxPages = new Set(
   mdxFiles.map((file) => relative(root, file).replace(/\.mdx$/, "")),
 );
 
-for (const [tabName, prefix] of [["MCP", "mcp/"], ["SDK & CLI", "sdk/"], ["API", "api/"], ["Changelog", "changelog/"]]) {
+for (const [tabName, prefix] of [["MCP", "mcp/"], ["SDKs", "sdk/"], ["CLI", "cli/"], ["API", "api/"], ["Changelog", "changelog/"]]) {
   const tab = tabs?.find((item) => item.tab === tabName);
   if (!tab || navigationPages(tab).some((page) => !page.startsWith(prefix))) {
     fail(`${tabName} navigation must use authored pages under ${prefix}`);

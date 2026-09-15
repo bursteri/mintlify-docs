@@ -1,10 +1,10 @@
 ---
-title: "Plainrouter SDKs and CLI"
+title: "Plainrouter SDKs"
 sidebarTitle: "Introduction"
-description: "Choose an official Plainrouter SDK, check runtime requirements, authenticate server-side requests, and verify conversions or use the CLI."
+description: "Choose an official Plainrouter SDK, check runtime requirements, authenticate server-side requests, and verify conversion ingestion and delivery."
 ---
 
-Use an official Plainrouter SDK to send consented conversions from your server and inspect their delivery. Use the CLI for terminal diagnostics and scripts. All clients call the Plainrouter Conversion API; they do not call Meta's Graph API directly.
+Use an official Plainrouter SDK to send consented conversions from your server and inspect their delivery. The SDKs call the Plainrouter Conversion API; they do not call Meta's Graph API directly.
 
 ## Choose your language
 
@@ -25,7 +25,7 @@ Each language guide covers installation, authentication, requests, and verificat
   </Card>
 </CardGroup>
 
-For a terminal workflow, start with the [CLI quickstart](/sdk/cli/quickstart), then use the [command reference](/sdk/cli/commands). To connect an AI agent to governed advertising workflows, use [MCP setup](/mcp/setup).
+For a terminal workflow, start with the [CLI quickstart](/cli/get-started), then use the [command reference](/cli/command-reference). To connect an AI agent to governed advertising workflows, use [MCP setup](/mcp/setup).
 
 ## Before you begin
 
@@ -56,7 +56,7 @@ All four SDKs target signed API contract `0.5.0` and cover event creation and re
 | Task | Documentation |
 | --- | --- |
 | Send purchases or leads from application code | Your language guide and the [event consent contract](/signals/track-events). |
-| Inspect events or stored reports in a terminal | [CLI commands](/sdk/cli/commands). |
+| Inspect events or stored reports in a terminal | [CLI commands](/cli/command-reference). |
 | Review request fields, responses, and API failures | [API reference](/api/introduction) and [conversion handling](/api/conversions). |
 | Install browser measurement | [Signals browser snippet](/signals/install-pixel). |
 | Read account context or propose advertising actions | [MCP introduction](/mcp/overview). |
@@ -73,4 +73,4 @@ The CLI exposes nine API commands. It has no ingestion-verification or cursor-ba
 | Event accepted but Meta delivery is pending | Read the event trace and check the [connected destination](/signals/connect-meta). Ingestion and delivery are separate results. |
 | Empty event list despite visible arrivals | Arrival totals are aggregate-only and do not appear as conversion events. Use [Signals reporting](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks). |
 
-The language guides describe each client's response and error handling. For terminal-specific failures, see [CLI troubleshooting](/sdk/cli/quickstart#what-if-the-first-command-fails).
+The language guides describe each client's response and error handling. For terminal-specific failures, see [CLI troubleshooting](/cli/get-started#what-if-the-first-command-fails).

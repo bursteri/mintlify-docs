@@ -21,8 +21,8 @@ const markdownRedirects = new Map([
   ["/docs/reference/api-resource-index.md", "/docs/api/resources.md"],
   ["/docs/reference/api-catalog.md", "/docs/api/catalog.md"],
   ["/docs/guides/meta-capi/nodejs.md", "/docs/sdk/recipes/meta-conversions.md"],
-  ["/docs/cli/quickstart.md", "/docs/sdk/cli/quickstart.md"],
-  ["/docs/cli/commands.md", "/docs/sdk/cli/commands.md"],
+  ["/docs/cli/quickstart.md", "/docs/cli/get-started.md"],
+  ["/docs/cli/commands.md", "/docs/cli/command-reference.md"],
   ["/docs/api-reference/sandbox/discover-the-zero-auth-sandbox.md", "/docs/api/sandbox/discover.md"],
   ["/docs/api-reference/sandbox/get-a-sandbox-api-key.md", "/docs/api/sandbox/get-key.md"],
   ["/docs/api-reference/sandbox/create-a-sandbox-api-key.md", "/docs/api/sandbox/create-key.md"],
@@ -40,6 +40,8 @@ const markdownRedirects = new Map([
   ["/docs/api-reference/operations/get-event-match-quality-history.md", "/docs/api/reports/emq.md"],
   ["/docs/api-reference/operations/delete-user-data-by-verified-identifier.md", "/docs/api/privacy/delete-user-data.md"],
   ["/docs/reference/authentication.md", "/docs/api/authentication.md"],
+  ["/docs/sdk/cli/quickstart.md", "/docs/cli/get-started.md"],
+  ["/docs/sdk/cli/commands.md", "/docs/cli/command-reference.md"],
 ]);
 
 export default {
