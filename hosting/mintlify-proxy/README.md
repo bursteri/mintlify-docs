@@ -98,7 +98,7 @@ References: [Mintlify Cloudflare proxy setup](https://www.mintlify.com/docs/depl
 Discovery references: [Cloudflare fetch cache modes](https://developers.cloudflare.com/workers/runtime-apis/fetch/),
 [Mintlify aggregate files and aliases](https://www.mintlify.com/docs/ai/llmstxt).
 
-## September 15 tab URL migration: pending Worker deployment
+## September 15 tab URL migration: deployed
 
 The Mintlify navigation now uses `/docs/mcp/`, `/docs/api/`, and `/docs/sdk/`.
 The source map in `worker.mjs` includes all 38 authored Markdown redirects:
@@ -108,11 +108,21 @@ an intermediate retired Node.js page. HTML redirects are configured in
 `docs.json`; this map preserves Markdown-to-Markdown 308 behavior where
 Mintlify's reserved handler otherwise returns a temporary HTML redirect.
 
-This map update is prepared and locally tested, but pushing Mintlify main
-**does not deploy it**. The exact dependency is a source-only update to the
-separate `mintlify-plainrouter` Worker. Before deployment, retrieve its current
-module and reconcile any changes since the recorded baseline. Retain routes,
-bindings, settings, and the existing catalog and aggregate behavior. Validate
-GET and HEAD for every `.md` rule against `docs.json`, then run the strict live
-checks. Until deployed, report legacy Markdown redirect failures separately
-from working new pages and HTML redirects; do not suppress them in CI.
+Deployed through Wrangler on 2026-09-15 as version
+`a00779ce-0f38-4484-b36f-f6c6ebf65f21` at 100% traffic, from source commit
+`e825659`. The inactive version and production each passed 80 GET/HEAD checks:
+all 38 Markdown redirects and both aggregate routes. The deployed module matched
+the tested bundle; settings, bindings and all three route mappings were unchanged.
+
+The strict live audit passed 202 of 203 checks with zero warnings. The remaining
+failure is the separately known stale `/docs/llms.txt` index, which omits the MCP
+introduction. All migrated Markdown aliases pass; `/docs/llms-full.txt` passed
+its current-page coverage check. Do not describe the complete discovery audit
+as green until the index catches up. Deployment evidence is recorded in the
+private content workspace under
+`seo/research/2026-09-15-docs-tab-paths-sdk/worker-deployment/`.
+
+Future Markdown URL migrations must update this finite map alongside
+`docs.json` and deploy the separate Worker after testing. A Mintlify main push
+still does not deploy the Worker. Preserve the established routes, bindings,
+settings, catalog redirect and aggregate handler when updating its source.
