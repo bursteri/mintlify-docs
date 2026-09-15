@@ -1,14 +1,21 @@
 ---
 title: "Meta Ads MCP: connect your agent with Plainrouter"
-sidebarTitle: "Connect your agent"
+sidebarTitle: "Setup"
 description: "Connect Claude Code to Plainrouter's Meta Ads MCP server, read signal health, and submit creative proposals for approval in one Meta ad account."
 ---
 
-Connect your AI agent to a Meta ad account through Plainrouter's Model Context Protocol (MCP) server. You can inspect conversion signal health, read the account's creative library, and submit supported creative changes for approval.
+Connect Claude Code to Plainrouter MCP, verify a synthetic response, then configure a workspace execution token for your own Meta ad account. A successful production setup returns the workspace and account you selected when issuing the token.
 
-This guide sets up the Plainrouter connection for Facebook and Instagram advertising. Start with synthetic data, then connect your own Meta ad account with a workspace execution token.
+For supported tasks, client requirements, and approval boundaries, start with the [MCP introduction](/mcp/overview).
 
-Still choosing a provider? Read the [Meta Ads MCP provider comparison](https://plainrouter.com/library/meta-ads-mcp-options). For creative generation, native campaign automation, and other workflows, use the broader [AI tools for Facebook ads comparison](https://plainrouter.com/library/ai-tools-facebook-ads). This guide covers Plainrouter's connection and supported account-bound tools.
+<CardGroup cols={2}>
+  <Card title="Try synthetic data" icon="flask-conical" href="#start-in-test-mode">
+    Check the client connection without a Plainrouter account or token.
+  </Card>
+  <Card title="Connect your account" icon="key-round" href="#connect-with-a-workspace-token">
+    Configure your workspace token and confirm the first account read.
+  </Card>
+</CardGroup>
 
 ## Choose your MCP endpoint
 
@@ -26,6 +33,18 @@ clients](/auth).
 <Warning>
   OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Use a workspace token for every MCP tool call.
 </Warning>
+
+## Before you begin
+
+For the sandbox, you only need a client with remote HTTP MCP support. For production, you also need:
+
+- A Plainrouter account with access to the intended workspace.
+- An active Meta ad account connection.
+- An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
+- A workspace owner who can issue the token.
+- A clear choice of the one advertising account the client should use.
+
+For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
 
 ## Start in test mode
 
@@ -81,18 +100,6 @@ token. The three read-tool names and their argument shapes match production.
   account-data reads remain account-bound and return HTTP `401` without a valid
   workspace execution token.
 </Note>
-
-## Before you begin
-
-You need:
-
-- A Plainrouter account with access to the intended workspace.
-- An active Meta ad account connection.
-- An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
-- A workspace owner who can issue the token.
-- A clear choice of the one advertising account the client should use.
-
-For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
 
 ## Connect with a workspace token
 
@@ -166,23 +173,13 @@ The agent cannot supply another account ID to widen access. Creative tools reche
 
 ## Recommended workflows
 
-For Signals analysis:
+Once the account read succeeds, choose a task:
 
-1. `get_account_state`
-2. `verify_signal_ingestion` when you want an identity-free write-path diagnostic
-3. `get_signal_health`
-4. `get_performance` when stored reconciliation is relevant
-5. `propose-actions` only after the evidence and human-supplied target are clear
+- [Diagnose Signals](/reference/mcp-tools#get_signal_health) with a stored read. Use [ingestion verification](/reference/mcp-tools#verify_signal_ingestion) only when you explicitly want a diagnostic write; it does not verify a real arrival.
+- [Inspect stored reconciliation](/reference/mcp-tools#get_performance) and its evidence limits.
+- [Create a paused creative variant](/actions/creative-workflow): read the account library, select the source ad and asset, submit a proposal, and review the approval link.
 
-For a creative variant:
-
-1. `get_account_state`
-2. `get-creative-library`
-3. `upload-asset` if the approved account does not already contain the intended image
-4. `duplicate-ad-with-creative` using an asset ID returned by a Plainrouter tool
-5. Direct the person to the returned `approval_queue_url`
-
-Ask the agent to state clearly whether a proposal is suggest-only, pending approval, blocked, awaiting verification, or Landed.
+Ask the agent to distinguish suggest-only, pending approval, blocked, awaiting verification, and Landed. The [Actions overview](/actions/overview) lists supported changes.
 
 ### Example: request a creative proposal
 

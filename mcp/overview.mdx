@@ -1,0 +1,78 @@
+---
+title: "Meta Ads MCP server"
+sidebarTitle: "Introduction"
+description: "Connect your AI assistant to a Meta ad account for Signals diagnostics, creative reads, and governed proposals."
+---
+
+Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to read one Meta ad account and request creative changes for human approval. Start with synthetic data or connect your workspace.
+
+<CardGroup cols={2}>
+  <Card title="Set up your connection" icon="plug" href="/actions/connect-agent">
+    Configure Claude Code, try the sandbox, and verify the bound Meta ad account.
+  </Card>
+  <Card title="Explore the tools" icon="wrench" href="/reference/mcp-tools">
+    Check tool inputs, outputs, permissions, and side effects.
+  </Card>
+</CardGroup>
+
+## What can I do with Plainrouter MCP?
+
+| Task | Start with | Result |
+| --- | --- | --- |
+| Confirm account access | `get_account_state` | The bound workspace, Meta ad account, connection, and available capabilities. |
+| Diagnose conversion signals | `get_signal_health` | Stored collection, delivery, matching, and reconciliation diagnostics. |
+| Inspect stored performance | `get_performance` | An account-scoped comparison of gateway and Meta conversions. |
+| Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
+| Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
+
+Budget changes, ad activation, and delivery-status execution are unavailable. **Suggest only** records proposals and approvals without executing them.
+
+## How do I get started?
+
+<Steps>
+  <Step title="Connect a client">
+    Use the sandbox without an account, or configure the production endpoint with a workspace execution token. Follow [Setup](/actions/connect-agent).
+  </Step>
+  <Step title="Verify the account">
+    Call `get_account_state`. In production, confirm the returned workspace and Meta ad account before requesting more data or a proposal.
+  </Step>
+  <Step title="Choose a workflow">
+    Start with a read. Use [Signals diagnostics](/reference/mcp-tools#get_signal_health), or follow the [creative proposal walkthrough](/actions/creative-workflow) when you are ready to request a change.
+  </Step>
+</Steps>
+
+## Connection details
+
+| Setting | Value |
+| --- | --- |
+| Production URL | `https://plainrouter.com/mcp` |
+| Sandbox URL | `https://plainrouter.com/mcp/sandbox` |
+| Transport | Remote HTTP |
+| Production credential | Workspace execution token sent as a bearer credential |
+| Sandbox credential | None; all four sandbox tools return synthetic data |
+| Account scope | One workspace and one Meta ad account per production token |
+
+### Which clients can connect?
+
+The [setup guide](/actions/connect-agent#configure-claude-code-for-your-meta-ad-account) includes Claude Code configuration. Other clients need remote HTTP MCP support and a way to send a fixed bearer credential. A client that requires OAuth sign-in for every remote server cannot use Plainrouter's production token flow as documented here.
+
+## Access and approval
+
+A workspace owner issues the token for the intended Meta ad account. Start with the **Read** tier for account and creative-library inspection; proposal-producing tools require **Write** or **Admin**. [Choose a token tier](/actions/workspace-tokens#access-tiers).
+
+<Note>
+  Plainrouter MCP uses workspace execution tokens. OAuth management credentials and Signals workspace secrets do not authenticate MCP tool calls.
+</Note>
+
+Reads, diagnostics, and proposals have different effects. `get_signal_health` reads stored measurements; `get-creative-library` contacts Meta. The optional `verify_signal_ingestion` diagnostic writes an identity-free event and does not prove a real website arrival. Creative proposal calls write to Plainrouter; they do not directly create the Meta ad.
+
+Policy checks, human approval, and provider verification govern supported creative execution. A proposal or approval is not **Landed**. Review the [tool reference](/reference/mcp-tools) for exact permissions and the [proposal review guide](/actions/review-proposals) for execution states.
+
+## Continue with your task
+
+- [Try the sandbox](/actions/connect-agent#start-in-test-mode) without accessing production data.
+- [Connect your Meta ad account](/actions/connect-agent#connect-with-a-workspace-token) and verify the first read.
+- [Create a paused creative variant](/actions/creative-workflow) with an explicit approval step.
+- [Troubleshoot a connection](/actions/connect-agent#troubleshoot) or [rotate and revoke access](/actions/workspace-tokens#rotate-or-revoke-a-token).
+
+Still evaluating providers? Read the [Meta Ads MCP comparison](https://plainrouter.com/library/meta-ads-mcp-options). For creative generation and other advertising workflows, see [AI tools for Facebook ads](https://plainrouter.com/library/ai-tools-facebook-ads).

@@ -33,7 +33,7 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "icon": "book-open",
         "groups": [
           {
@@ -96,10 +96,17 @@
         "icon": "plug",
         "groups": [
           {
-            "group": "Connect",
+            "group": "Overview",
             "icon": "plug",
             "pages": [
-              "actions/connect-agent",
+              "mcp/overview",
+              "actions/connect-agent"
+            ]
+          },
+          {
+            "group": "Access",
+            "icon": "key-round",
+            "pages": [
               "actions/workspace-tokens"
             ]
           },
