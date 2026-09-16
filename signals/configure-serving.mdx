@@ -33,7 +33,9 @@ Path A sends collection traffic through your Plainrouter-managed subdomain. Path
 
 <Steps>
   <Step title="Open the serving setup">
-    Complete [DNS validation](/signals/configure-dns), install the generated snippet, and wait for the first qualifying arrival. Then open **Signals**.
+    Open **Signals → Install** and expand **Advanced: same-origin proxy**. Before the first arrival, the same installation instructions are also available directly on **Dashboard** and **Signals**. You do not need to wait for traffic to access forwarding setup.
+
+    When Path B is already selected, **Advanced: same-origin proxy** opens automatically so the forwarding instructions are visible. With the default managed-hostname path, expand it when you want to configure forwarding.
   </Step>
   <Step title="Let Plainrouter check your hosting stack">
     Plainrouter checks bounded DNS and response-header evidence in the background. While the check is running, the page shows **Pending** and refreshes the stored result automatically.

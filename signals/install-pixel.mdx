@@ -26,6 +26,8 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
     Open **Signals → Install**. For managed-hostname setup, confirm your [collection-hostname label](/signals/configure-dns#choose-your-collection-hostname) and add the CNAME. When the hostname is active, find **2. Add the browser snippet**.
 
     Click **Copy snippet**. Use the complete snippet exactly as Plainrouter provides it. Its key and script URL are unique to your workspace.
+
+    Before the first arrival, **Dashboard** and **Signals** also display the installation instructions. Once your hostname is provisioned, you can copy its CNAME and snippet directly from those screens.
   </Step>
   <Step title="Add it to every page">
     Paste the snippet immediately before the closing `</head>` tag in your site-wide layout.
@@ -101,6 +103,10 @@ For Path B, allow the website's same-origin script and requests in the applicabl
 You may need to allow `https://connect.facebook.net` in `script-src` after you [connect Meta](/signals/connect-meta). The Meta library loads only after advertising consent is granted.
 
 ## Troubleshoot
+
+### Why do Dashboard and Signals still show installation instructions?
+
+The workspace has not recorded its first arrival. Check that your deployed page loads `v4.js` and sends an accepted arrival request, then allow the screen to refresh. Copying the snippet, confirming installation, or sending an API verification event does not replace a real browser arrival. Follow the [installation checks](#verify-the-installation) to distinguish an edge receipt from stored collection.
 
 ### The script does not load
 

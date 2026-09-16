@@ -103,7 +103,9 @@ Your initial Plainrouter setup is complete when:
 
 You can now return to the [dashboard](https://plainrouter.com/dashboard) and continue working from the workspace you created.
 
-The dashboard's customizable charts are labeled **Dashboard preview · Sample data**. Use **Signals** to confirm actual collection, and [billing setup](/billing/overview) to interpret a checkout notice.
+Before the workspace's first arrival, **Dashboard** and **Signals** show installation instructions directly. For a provisioned managed hostname, copy the CNAME and browser snippet there; you do not need arrival data to access them. The screens refresh while waiting for collection. Open **Signals → Install** for hostname selection and the full verification controls.
+
+After the first arrival, use **Signals** for actual collection and reporting. The Dashboard no longer shows sample charts. See [billing setup](/billing/overview) to interpret a checkout notice.
 
 ## Why is setup still waiting?
 
@@ -113,7 +115,7 @@ The dashboard's customizable charts are labeled **Dashboard preview · Sample da
 | Domain is active, but no arrival appears | Confirm the deployed page loads `v4.js` and sends an accepted `POST /v1/arrival`. Follow the [browser network checks](/signals/install-pixel#verify-the-installation). |
 | The verification API returns `202`, but setup stays open | That response verifies the server write path. It does not replace a real arrival. See [which check proves what](/signals/verify-ingestion#which-check-do-i-need). |
 | Arrivals appear, but Meta has no conversions | Arrivals never create Meta deliveries. Configure consent, send a conversion event, and [verify the Meta destination](/signals/connect-meta#how-do-i-verify-meta-delivery). |
-| Dashboard charts look populated before collection | **Dashboard preview · Sample data** is illustrative. Use **Signals** for actual collection evidence. |
+| Dashboard or Signals shows installation instructions instead of reports | The workspace has not recorded its first arrival. Follow the displayed setup, deploy the snippet, and visit the website. A copied snippet or an ingestion diagnostic does not prove browser collection. |
 
 ## Continue from here
 
