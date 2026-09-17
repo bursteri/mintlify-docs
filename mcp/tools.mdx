@@ -8,6 +8,8 @@ Plainrouter MCP server version `0.3.2` exposes ten tools with the default config
 
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
+The server version is separate from the MCP protocol revision. For custom clients, see the [stateless discovery and request-header requirements](/mcp/setup#which-mcp-protocol-should-my-client-use). MCP App support is advertised under `capabilities.extensions["io.modelcontextprotocol/ui"]` in the [server card](https://plainrouter.com/.well-known/mcp/server-card.json).
+
 | Tool | Type | Purpose |
 | --- | --- | --- |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |

@@ -90,7 +90,7 @@ A successful account response includes the following fields. This is an excerpt 
 
 Both calls should return without a tool error. This proves the test connection works; it does not verify your production account or event collection.
 
-When the client can initialize, list tools, and call a sandbox tool, change its
+When the client can discover or initialize the server, list tools, and call a sandbox tool, change its
 server URL to `https://plainrouter.com/mcp` and configure a workspace execution
 token. The three read-tool names and their argument shapes match production.
 
@@ -100,6 +100,47 @@ token. The three read-tool names and their argument shapes match production.
   account-data reads remain account-bound and return HTTP `401` without a valid
   workspace execution token.
 </Note>
+
+## Which MCP protocol should my client use?
+
+Plainrouter supports `2026-07-28` through `server/discover`. Existing clients using `initialize` can negotiate `2025-11-25` or `2025-06-18`. Let your MCP client handle the protocol; the Claude Code configuration below does not need manual protocol fields.
+
+For a custom HTTP client, start with this credential-free sandbox discovery request:
+
+```bash
+curl https://plainrouter.com/mcp/sandbox \
+  --header 'Content-Type: application/json' \
+  --header 'Accept: application/json, text/event-stream' \
+  --header 'MCP-Protocol-Version: 2026-07-28' \
+  --header 'Mcp-Method: server/discover' \
+  --data '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "server/discover",
+    "params": {
+      "_meta": {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {}
+      }
+    }
+  }'
+```
+
+Check that `result.supportedVersions` includes `2026-07-28` and `result._meta["io.modelcontextprotocol/serverInfo"].name` is `Plainrouter Sandbox`. Discovery confirms protocol compatibility; it does not read your account or verify a tool call.
+
+For subsequent `2026-07-28` requests:
+
+| Field or header | Requirement |
+| --- | --- |
+| `params._meta` | Include both protocol version and client capabilities on each request. |
+| `MCP-Protocol-Version` | Match the protocol version in `_meta`. |
+| `Mcp-Method` | Match the JSON-RPC `method`, such as `tools/list` or `tools/call`. |
+| `Mcp-Name` | For `tools/call`, match `params.name`. For `resources/read`, match `params.uri`. |
+| `Authorization` | Include the workspace bearer token on every production tool call or account-data read. |
+
+Requests are stateless: do not wait for or require an `Mcp-Session-Id` response header. Legacy clients without protocol metadata in `_meta` remain on the compatibility path; do not mix the two request formats. Sending either protocol metadata key selects the modern validation path.
+
+The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) lists the current protocol, tools, and resources. The [transport upgrade reference](https://github.com/laravel/mcp/blob/cfa4f38f82873eeb6848527883545f98f871e229/UPGRADE.md) explains modern headers and legacy compatibility.
 
 ## Connect with a workspace token
 
@@ -201,6 +242,16 @@ Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revok
 Plainrouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 
 ## Troubleshoot
+
+### A custom client gets HTTP `400` or a protocol error
+
+For JSON-RPC error `-32020`, compare `MCP-Protocol-Version`, `Mcp-Method`, and, where required, `Mcp-Name` with the request body. A missing required header or mismatched value fails before the tool runs. Ensure your reverse proxy preserves these headers.
+
+For `-32022`, check the protocol version against discovery and use a supported version. Follow the [complete modern request format](#which-mcp-protocol-should-my-client-use); changing only the version header is not enough. An authentication `401` is a separate credential failure.
+
+### The client waits for a session ID
+
+Plainrouter processes requests independently and does not return `Mcp-Session-Id`. Update a client or custom transport that requires that header. Keep sending the workspace bearer credential on each production tool request; a successful discovery response does not authorize later calls.
 
 ### Claude Code cannot load the token variable
 

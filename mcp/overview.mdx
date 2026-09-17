@@ -47,7 +47,8 @@ Budget changes, ad activation, and delivery-status execution are unavailable. **
 | --- | --- |
 | Production URL | `https://plainrouter.com/mcp` |
 | Sandbox URL | `https://plainrouter.com/mcp/sandbox` |
-| Transport | Remote HTTP |
+| Transport | Streamable HTTP; each request is processed independently |
+| Protocol | `2026-07-28` discovery; legacy `initialize` clients remain supported |
 | Production credential | Workspace execution token sent as a bearer credential |
 | Sandbox credential | None; all four sandbox tools return synthetic data |
 | Account scope | One workspace and one Meta ad account per production token |
@@ -55,6 +56,8 @@ Budget changes, ad activation, and delivery-status execution are unavailable. **
 ### Which clients can connect?
 
 The [setup guide](/mcp/setup#configure-claude-code-for-your-meta-ad-account) includes Claude Code configuration. Other clients need remote HTTP MCP support and a way to send a fixed bearer credential. A client that requires OAuth sign-in for every remote server cannot use Plainrouter's production token flow as documented here.
+
+Custom clients should follow the [protocol and header requirements](/mcp/setup#which-mcp-protocol-should-my-client-use). Plainrouter does not issue an `Mcp-Session-Id`; authenticate each production tool request with the workspace token.
 
 ## Access and approval
 
