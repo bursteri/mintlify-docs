@@ -89,6 +89,18 @@ curl --request POST \
 
 An HTTP `200` response has `accepted: true`, `status: "simulated"`, `persisted: false`, and `provider_delivery: false`.
 
+## Try the sandbox from n8n
+
+Use the [n8n sandbox starter](https://plainrouter.com/n8n-plainrouter-sandbox.json) to check an HTTP workflow without an account or credentials. You need an n8n instance that can import a workflow JSON file.
+
+1. Download and import the starter. It contains a manual trigger and one HTTP Request node, starts inactive, and contains only a fictional purchase.
+2. Run it manually. In the HTTP node output, confirm `statusCode` is `200` and `body` contains the simulated-response fields shown above.
+3. Keep real customer data out of the workflow. Repeating its stable event ID checks request construction; the sandbox discards requests and cannot prove production deduplication or Meta delivery.
+
+If the request fails, inspect the HTTP status and response body before retrying. Use the [field restrictions](#use-identity-free-synthetic-fields) below to diagnose HTTP `422`.
+
+For production, follow the [automation setup and consent checks](https://plainrouter.com/library/meta-capi-without-gtm#adapt-an-automation-workflow-for-a-real-website-event). Changing only the URL is insufficient: production needs the correct Signals credential, real consent and visitor context, stable event identity, and a separate destination-delivery check. This starter uses Plainrouter's HTTP API; it is not a native n8n connector or a direct Meta API workflow.
+
 ## Use identity-free synthetic fields
 
 The public sandbox accepts these documented fields:

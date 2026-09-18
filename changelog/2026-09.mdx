@@ -10,7 +10,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Connect MCP clients with stateless discovery
 
-  **Improved** · Plainrouter MCP supports protocol `2026-07-28` with `server/discover` and per-request protocol metadata. Legacy `initialize` clients remain supported. Custom HTTP clients must send matching MCP headers and no longer receive a session ID. Workspace-token and approval requirements remain unchanged. [Check client compatibility](/mcp/setup#which-mcp-protocol-should-my-client-use).
+  **Improved** · Plainrouter MCP server `0.4.0` supports protocol `2026-07-28` with `server/discover` and per-request protocol metadata. Legacy `initialize` clients remain supported. Custom HTTP clients using the modern protocol must send matching MCP headers. The server no longer issues a session ID. Workspace-token and approval requirements remain unchanged. [Check client compatibility](/mcp/setup#which-mcp-protocol-should-my-client-use).
 </Update>
 
 <Update label="September 16, 2026">
