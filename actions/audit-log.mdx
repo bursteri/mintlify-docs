@@ -1,37 +1,45 @@
 ---
-title: "Audit log"
-description: "Trace workspace security, Drive ownership, governed execution, verification, and restoration events through the Plainrouter audit history."
+title: "Audit action history and export events"
+sidebarTitle: "Audit log"
+description: "Filter Plainrouter action history by actor and outcome, download workspace audit events as JSON, and trace decisions, verification, and recovery."
 ---
 
-Open **Audit log** from the Plainrouter sidebar to review chronological security and Actions history for the current workspace.
+Open **Audit** from the Plainrouter sidebar to read past action records for the current workspace. Use **Actor** and **Outcome** to narrow the on-screen list, or **Download JSON** to inspect the underlying workspace audit events.
 
-## What an audit event contains
+You need a signed-in browser session with access to the workspace. Select the intended workspace before investigating a proposal or exporting its history.
 
-Each event records:
+## Filter action history
 
-- Event type and plain-language summary.
-- Actor type and actor name.
-- Related batch and action, when applicable.
-- Structured event payload and creation time.
-- Event hash, previous hash, and hash version.
+Each row summarizes an action and its outcome. Select an **Actor** or **Outcome** to narrow the list, and scroll to load older records. The list is an action summary, not a row for every security or lifecycle event.
 
-Events are append-only and predecessor-linked within the current database snapshot.
+If the list is empty, clear the filters and confirm the workspace. Token, grant, and policy events may exist in the export even when there are no matching action rows.
+
+## Download workspace audit events
+
+Choose **Download JSON**. The response contains a `data` array of workspace audit events ordered by `sequence`. This export includes the workspace's event history; the on-screen Actor and Outcome filters do **not** restrict it.
+
+Each exported event includes:
+
+- `event_type`, `summary`, actor type, ID, and name.
+- `workspace_id`, and related `action_batch_id` and `proposed_action_id` when applicable.
+- Structured `payload` and `created_at`.
+- `sequence`, `event_hash`, `previous_hash`, and `hash_version`.
+
+Search the export by batch or action ID to follow a proposal across multiple events. Treat the file as workspace data: it can contain actor identities and action details. Token lifecycle events contain metadata, not plaintext credentials.
 
 ## Integrity versions
 
-The top of the audit page reports separate integrity segments:
+The JSON export retains the hash and predecessor fields. The current Audit page does not display an integrity verdict or recomputation panel; downloading the file is not itself a verification of the chain.
 
 | Segment | Meaning |
 | --- | --- |
-| Historical v1 | Preserves predecessor continuity, but the stored hash cannot be recomputed completely from durable row fields. It is labeled `v1_non_recomputable`. |
-| Checkpoint | Bridges the preserved v1 tail into the v2 segment. The page reports whether it is present and valid. |
-| v2 | Uses a durable canonical representation. Plainrouter recomputes every stored v2 row and reports whether the current database snapshot matches. |
+| Historical v1 | Preserves predecessor continuity, but its hash cannot be recomputed completely from durable row fields. |
+| Checkpoint | Bridges the preserved v1 tail into the v2 segment. |
+| v2 | Uses a durable canonical representation so stored row hashes can be recomputed. |
 
 <Warning>
-  The hash chain has no external tail anchor. Successful v2 recomputation detects changed stored rows within the current snapshot, but it cannot independently prove that no tail events were deleted outside that snapshot.
+  The hash chain has no external tail anchor. Even successful recomputation of a snapshot cannot independently prove that no tail events were deleted outside that snapshot.
 </Warning>
-
-Expand **Integrity details** on an event to see its version, hash, and predecessor hash.
 
 ## Events to follow
 
@@ -55,7 +63,7 @@ Measurement-only events explicitly say **NOT LANDED**. Do not count them as prod
 
 <Steps>
   <Step title="Confirm the principal and scope">
-    Find `batch.proposed`. Confirm the agent, account, evidence provenance, target-selection boundary, and execution-mode snapshot.
+    In the JSON export, find `batch.proposed`. Confirm the agent, account, evidence provenance, target-selection boundary, and execution-mode snapshot.
   </Step>
   <Step title="Trace both policy decisions">
     Read the proposal-time result and, for executable work, the execution-time result recorded before the provider call.
@@ -70,10 +78,10 @@ Measurement-only events explicitly say **NOT LANDED**. Do not count them as prod
     For failed work, find the compensation and provider-read proof. Escalate any `rollback_incomplete` event.
   </Step>
   <Step title="Revoke access if necessary">
-    Revoke the Plainrouter agent connection or workspace token. Revocation disables its principal and associated credential.
+    Revoke the Plainrouter agent connection or workspace token. Confirm the intended credential or grant is revoked. Revocation does not undo earlier provider actions.
   </Step>
 </Steps>
 
 ## Related workflow
 
-Use [proposal history](/actions/review-proposals) for the human decision and [action policy](/actions/policies-and-safety) to interpret blocks. If access must end, [revoke the workspace token](/mcp/workspace-tokens). Drive ownership events apply only to [legacy Launcher](/launcher/connect-drive) where enabled.
+Use [Inbox](/actions/review-proposals) for the human decision and [action policy](/actions/policies-and-safety) to interpret blocks. If access must end, [revoke the workspace token](/mcp/workspace-tokens). Drive ownership events apply only to [legacy Launcher](/launcher/connect-drive) where enabled.

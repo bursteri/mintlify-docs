@@ -243,19 +243,19 @@ Stripe verified revenue records paid Checkout Sessions in Plainrouter. This is a
 
 ### What do I need before connecting Stripe?
 
-You need an active Signals workspace, access to its **Workspace Settings**, and permission to configure webhook endpoints for the Stripe account that receives your customers' payments. Your application must already create Checkout Sessions and handle order fulfillment. This connection is separate from [paying for Plainrouter](/billing/overview).
+You need an active Signals workspace, workspace-owner access to **Connections**, and permission to configure webhook endpoints for the Stripe account that receives your customers' payments. Your application must already create Checkout Sessions and handle order fulfillment. This connection is separate from [paying for Plainrouter](/billing/overview).
 
 The supported settlement flow uses Checkout Session events. It does not establish support for every Stripe payment flow or recurring invoice event. Stripe's [fulfillment guide](https://docs.stripe.com/checkout/fulfillment) explains delayed payments and why returning to a success URL does not prove payment.
 
 ### Configure the webhook
 
-1. Open **Workspace Settings** → **Revenue sources** → **Stripe verified revenue**.
-2. Copy the workspace's webhook callback URL and add it as an endpoint in the intended Stripe account.
+1. Open **Connections → Revenue sources → Stripe**.
+2. Copy the workspace's **Webhook endpoint** and add it as an endpoint in the intended Stripe account.
 3. Subscribe to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.async_payment_failed`. Add `refund.created` and `charge.refunded` if you track refunds.
 4. Copy that endpoint's signing secret into **Endpoint signing secret** in Plainrouter and choose **Save secret**. This is the webhook signing secret, not your Stripe API key.
-5. Confirm **Webhook configured**. That label confirms configuration; verify a settled payment separately below.
+5. Confirm the Stripe card shows `connected`. That status confirms a signing secret is configured; verify a settled payment separately below.
 
-Plainrouter clears the secret field after saving. Use **Rotate secret** when replacing the endpoint's signing secret.
+Plainrouter clears the secret field after saving. Use **Rotate secret** when replacing the endpoint's signing secret. **Remove secret** stops webhook authentication until you save a replacement; it does not remove the endpoint from Stripe.
 
 ### Associate a Checkout Session with your order
 

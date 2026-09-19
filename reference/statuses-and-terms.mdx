@@ -145,6 +145,8 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
   </Accordion>
   <Accordion title="Landed">
     A production action batch in which every action has a durable provider receipt and an exact matching verification read. Approval or a provider write alone is not Landed.
+
+    The **Inbox** display group named **Landed** also includes `approved_without_execution` recommendations. Check the action status and receipt; that group alone does not prove provider execution. See [Inbox groups](/actions/review-proposals#read-the-inbox-groups).
   </Accordion>
   <Accordion title="Executed pending verification">
     A committed provider action that has not yet reached exact verification. Plainrouter may continue scheduled receipt-addressed reads, but the action remains Not Landed.

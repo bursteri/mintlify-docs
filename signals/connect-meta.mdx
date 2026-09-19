@@ -4,7 +4,7 @@ sidebarTitle: "Connect Meta"
 description: "Connect a Meta dataset to Plainrouter Signals, verify browser and server conversion delivery, and troubleshoot missing or duplicate events."
 ---
 
-Connect your Meta dataset to Plainrouter to deliver consented Signals events through the managed browser Pixel and Meta Conversions API. First authorize the relevant Meta assets, then select the dataset and verify delivery. **Destination active** confirms the connection; it does not prove that a conversion has reached Meta.
+Connect your Meta dataset to Plainrouter to deliver consented Signals events through the managed browser Pixel and Meta Conversions API. First authorize the relevant Meta assets, then select the dataset and verify delivery. A saved dataset under **Meta delivery** confirms the destination configuration; it does not prove that a conversion has reached Meta.
 
 This guide covers Plainrouter's managed integration. For integration choices, start with the [Meta Conversions API overview](https://plainrouter.com/library/meta-conversions-api). If you are writing directly to Meta instead, use [Meta's direct-integration training](https://www.facebookblueprint.com/student/path/219714-set-up-implement-verify-conversions-api).
 
@@ -22,15 +22,17 @@ An identity-free arrival does not require a Meta connection and never triggers M
 
 ## Connect Meta for reporting
 
-The **Connect Meta** action in the Signals overview starts account reporting setup. Complete Meta authorization, choose the business portfolio and active **Ad account**, and select **Confirm account**. The overview then reads stored platform activity for that account.
+Open **Connections → Ad accounts → Meta** and choose **Connect Meta**. The Signals overview also links to Connections. Complete Meta authorization, then under **Choose the Meta account to bind**, choose the **Business portfolio** and active **Ad account** and select **Confirm account**. Signals uses the selected account for its stored platform activity.
 
 This reporting connection is separate from selecting a conversion destination. Connecting an ad account alone does not prove that a Pixel is configured or that conversions are being delivered.
+
+Connections also has separate **Google Ads**, **Stripe**, and **Site snippet** sections. Google Ads reads account spend; its presence does not enable a Google conversion destination. Stripe records [verified Checkout revenue](/signals/track-events#verify-stripe-checkout-settlement). The site snippet section links to installation.
 
 ## Connect the destination
 
 <Steps>
   <Step title="Open Meta setup">
-    Choose **Connect or manage Meta** on **Install**, or open [Meta destination setup](https://plainrouter.com/signals/meta) for the selected workspace. Website setup opens Install first; this Meta flow is optional for arrival collection.
+    Open [Connections](https://plainrouter.com/connections) for the selected workspace and find **Meta delivery** in the Meta card. Website setup opens Install first; connecting Meta remains optional for arrival collection.
   </Step>
   <Step title="Authorize Meta">
     Complete Meta's authorization flow and grant access to the intended Meta ad account and dataset.
@@ -38,10 +40,10 @@ This reporting connection is separate from selecting a conversion destination. C
     Meta access tokens stay on the server. Do not add a Meta token or Signals workspace secret to your browser snippet.
   </Step>
   <Step title="Choose a dataset">
-    Search the **Pixel** picker by dataset name or ID, select the dataset that should receive this Signal's events, then choose **Connect Meta dataset**. The picker gathers accessible datasets from active authorized ad accounts and keeps each dataset associated with its account. Check the selected ID against Meta Events Manager.
+    Search the **Meta dataset** picker by dataset name or ID, select the dataset that should receive this Signal's events, then choose **Connect Meta dataset**. The picker gathers accessible datasets from active authorized ad accounts and keeps each dataset associated with its account. Check the selected ID against Meta Events Manager.
   </Step>
   <Step title="Confirm the destination">
-    After saving the destination, Plainrouter returns to the Signals overview. Use **Install** to finish collection-domain setup if needed, then continue with the delivery checks below.
+    After saving, Plainrouter returns to Connections. Confirm the account and dataset ID under **Meta delivery**. Use **Install** to finish collection-domain setup if needed, then continue with the delivery checks below.
   </Step>
 </Steps>
 
@@ -51,7 +53,7 @@ This reporting connection is separate from selecting a conversion destination. C
 
 ### Can I finish Signals setup without Meta?
 
-Yes. Choose **Continue without Meta** to return to Signals if authorization is unavailable, no usable ad account or Page appears, or the dataset list is empty. Continue installation from **Install** and return to Meta setup later. For a missing asset, use **Reconnect Meta** and grant access to the intended assets before retrying.
+Yes. Return to **Signals → Install** at any time, including when authorization is unavailable or the dataset list is empty. Finish installation and return to Connections later. For a missing asset, use **Reconnect Meta** and grant access to the intended assets before retrying.
 
 Continuing without Meta does not connect a destination or make conversions eligible for delivery. Verify the [arrival](/signals/install-pixel#verify-the-installation) and [Meta delivery](#how-do-i-verify-meta-delivery) independently.
 

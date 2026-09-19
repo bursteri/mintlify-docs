@@ -1,102 +1,78 @@
 ---
-title: "Review action proposals"
-description: "Evaluate proposal evidence, policy checks, execution consequences, and verification state before approving or rejecting a governed Action."
+title: "Review action proposals in Inbox"
+sidebarTitle: "Review proposals"
+description: "Review Plainrouter action proposals, interpret Inbox groups, approve or reject a batch, and distinguish suggest-only approval from verified Meta execution."
 ---
 
-Open **Approval queue** from the Plainrouter sidebar to review agent proposals for the current workspace. For a complete example from library selection to a decision, follow [Create a paused Meta ad variant](/actions/creative-workflow#example-propose-a-paused-creative-variant).
+Open **Inbox** from the Plainrouter sidebar to review agent proposals for the current workspace. Select an action to read its reasoning, target, policy result, and status. **Approve** and **Reject** decide the containing batch, including its other actions.
 
-## Read the queue summary
+## Before you decide
 
-The page shows the current policy mode and four counts:
+Sign in with a browser session and workspace access. Approval requires the workspace's human approval permission; a workspace token cannot make this decision for you. Have the complete proposal available, including its account scope, parameters, evidence, and frozen `execution_mode_snapshot`.
 
-| Count | Meaning |
+The Inbox header shows the workspace's **current** policy mode. Do not substitute it for an older proposal's mode snapshot. A policy change does not turn a suggest-only proposal into executable work. For a complete example, follow [Create a paused Meta ad variant](/actions/creative-workflow#example-propose-a-paused-creative-variant).
+
+## Read the Inbox groups
+
+Counts represent actions, grouped into batches:
+
+| Group | What appears here |
 | --- | --- |
-| **Waiting** | Batches awaiting a human decision. |
-| **Awaiting verification** | Provider writes that are still **Not Landed** while durable receipt-addressed verification continues. |
-| **Landed** | Batches whose executed actions all have verified provider receipts. Suggest-only approvals and measurement-only runs are excluded. |
-| **Blocked** | Batches stopped by proposal-time or execution-time policy. |
-
-Use **Pending** for decisions that need you. Use **History** for approved, rejected, blocked, executing, awaiting-verification, failed, completed, and rolled-back outcomes.
-
-## Review a proposal card
-
-### Proposer and account
-
-The header identifies the agent, Meta ad account, proposal time, and current batch status. The card and approval control reflect the frozen execution-mode snapshot. Confirm the account is the one you intended to authorize.
-
-### Why now
-
-The rationale should describe the evidence, proposed response, and expected outcome. It must not present a human-supplied target or aggregate Signals data as current provider state.
-
-### Evidence provenance
-
-Each cited source shows its scope, exact fields, observation time, and measurement window where applicable.
-
-For creative actions:
-
-- `get-creative-library` provenance proves selected-asset identity, approved-account ownership, readiness, and status.
-- `staged-asset-manifest` provenance proves the upload uses frozen bytes with a specific SHA-256 digest and detected content type.
-- Creative performance is excluded from the durable action-bound citation.
-
-### Dynamic policy checks
-
-Provider-backed fields may be **Available**, **Partially available**, or **Unavailable**. Each missing field is marked as blocking or disclosed but non-blocking.
-
-Executable work fails closed when a provider-required or active-policy-required field is unknown. In **Suggest only**, unavailable state may still be presented for human review because approval cannot execute it.
-
-### Action and consequence
-
-Confirm every target and parameter. For a creative duplication proposal, `target_entity.id` is the source ad; the new Meta ad ID appears in the execution receipt only after a provider write. The approval control states the consequence:
-
-| Button | Result |
-| --- | --- |
-| **Approve recommendation** | Records **Approved without execution**. No Meta write occurs. |
-| **Approve and execute** | Authorizes the executable snapshot and queues a fresh policy check before provider execution. |
-| **Approve one-run measurement** | Starts a closed diagnostic run. It is explicitly **Not Landed** and requires verified compensation. |
-
-On mobile, the swipe control also states whether approval executes.
-
-## Approve executable creative work
-
-<Steps>
-  <Step title="Confirm the approved account">
-    Verify the account name and platform-native target IDs.
-  </Step>
-  <Step title="Confirm evidence and policy">
-    Read each citation, any unavailable fields, protected-entity checks, and the proposal-time mode snapshot.
-  </Step>
-  <Step title="Confirm permanent pause">
-    For an ad copy, verify the proposal uses `status: paused`. This release cannot activate the copy.
-  </Step>
-  <Step title="Approve">
-    Click **Approve and execute**, or use the mobile approval control. Approval is authoritative once and does not bypass the execution-time policy check.
-  </Step>
-  <Step title="Follow verification">
-    Open **History**. A successful immediate verification becomes **Completed** and increases **Landed**. An `IN_PROCESS` copy becomes **Executed pending verification** and shows its receipt, latest state, next scheduled read, cutoff, and safety deadline.
-  </Step>
-</Steps>
+| **Needs your decision** | Pending actions awaiting a human decision. |
+| **Awaiting verification** | Executing, executed-pending-verification, compensating, or measuring actions. These states do not establish a verified production outcome. |
+| **Landed** | Verified actions with a verified execution receipt, **and** suggest-only recommendations recorded as **Approved without execution**. |
+| **Drifted or failed** | Rejected, blocked, failed, uncertain, or rolled-back actions, plus actions without the required verified receipt. Read the exact status and reason. |
 
 <Warning>
-  Do not interpret **Approved**, **Executing**, or **Executed pending verification** as Landed. Landed requires exact provider verification for every action in the batch.
+  The **Landed** group alone is not proof of a provider change. **Approved without execution** means no Meta write occurred. For production execution acceptance, every action in the batch needs a durable receipt and exact provider verification.
 </Warning>
 
-## Reject a proposal
+## Review the selected action
 
-Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason is stored in the audit event.
+### Proposer, target, and reasoning
+
+Read **Actor**, **Objects**, and **Agent reasoning**. Compare the complete proposal with the intended Meta ad account and platform-native target IDs. For creative duplication, `target_entity.id` identifies the source ad; the new ad ID exists only in the execution receipt after a provider write.
+
+Confirm the person intended each source ad and asset selection. If the detail pane does not provide enough information to verify the account, mode, evidence, or parameters, check the original proposal before approving. Review every action in the containing batch.
+
+### Evidence and policy checks
+
+Read **Policy check**, including the decision, reasons, and any unavailable dynamic fields. Executable work fails closed when a required provider or policy field is unknown. Suggest-only recommendations can disclose unavailable state because approval cannot execute them.
+
+The proposal's evidence must support its claims:
+
+- `get-creative-library` provenance establishes selected-asset identity, approved-account ownership, readiness, and status.
+- `staged-asset-manifest` provenance identifies the frozen bytes, SHA-256 digest, and detected content type for an upload.
+- Creative performance is excluded from the durable action-bound citation. Human-supplied targets and aggregate Signals data are not current provider state.
+
+## Approve a batch
+
+The button is labeled **Approve**. Read the proposal's frozen mode and supported action before clicking; the button label does not describe the execution consequence.
+
+| Proposal scope | Result of approval |
+| --- | --- |
+| **Suggest only** | Records **Approved without execution**. No Meta write occurs. |
+| Supported executable creative proposal | Authorizes the batch and queues a fresh policy check before execution. It does not guarantee a successful provider write. |
+| Closed one-run measurement | Starts a diagnostic run that remains **Not Landed** and requires verified compensation. It is not general production execution. |
+
+For an ad copy, confirm `status: paused`. The supported creative workflow cannot activate the copy. Approval is authoritative once and does not bypass [execution-time policy](/actions/policies-and-safety#two-policy-gates).
+
+### How do I verify the outcome?
+
+Follow the action's status in Inbox, then use [Audit and its JSON export](/actions/audit-log) to trace the batch decision, receipt evidence, provider observations, and terminal verification.
+
+**Approved**, **Executing**, and **Executed pending verification** do not mean Landed. A paused copy that Meta reports as `IN_PROCESS` still needs scheduled receipt-addressed verification. Inspect the exported events for progress or failure; do not create another copy to bypass a pending result. Escalate a `rollback_incomplete` result rather than treating it as restored.
+
+## Reject a batch
+
+Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason is stored in the audit event. Like approval, rejection applies to the containing batch.
 
 Approval and rejection are idempotent terminal decisions for a pending batch. A second decision does not reopen it.
 
-## Review checklist
+## Troubleshoot a missing decision or unexpected status
 
-- Is this the correct Meta ad account?
-- Did a person intend each source ad and asset selection?
-- Are evidence claims limited to the recorded fields and scope?
-- Does the selected mode make this approval non-executing or executable?
-- Is every missing critical field handled as a block?
-- Is a copied ad permanently `paused`?
-- If work is awaiting verification, do you understand it is Not Landed?
-- Does any rollback-incomplete state require operator attention?
-
-## Related workflow
-
-If a proposal is blocked, inspect the stated [policy constraint](/actions/policies-and-safety) before resubmitting. For pending verification or recovery, follow its batch in the [audit log](/actions/audit-log). To build a supported proposal, start with the [creative workflow](/actions/creative-workflow).
+- **The proposal is missing:** confirm the selected workspace and proposal or batch ID. Links returned in `approval_queue_url` open Inbox; the response field keeps its existing name.
+- **No decision control is available:** check whether the batch is still pending. A completed decision is not reopened from Inbox.
+- **The decision is forbidden:** sign in with an authorized human account in the correct workspace. A bearer token is not a substitute for this browser session.
+- **An action is blocked:** read its exact reason and the [policy constraints](/actions/policies-and-safety) before resubmitting.
+- **A suggest-only approval appears under Landed:** verify `approved_without_execution`. No provider object or execution receipt should be inferred from the group label.

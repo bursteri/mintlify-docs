@@ -6,6 +6,21 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 18, 2026">
+
+  ## Manage API secrets and MCP tokens separately
+
+  **Improved** · **Settings → API secret** manages the Signals secret used by REST, SDKs, and the CLI. **Tokens** manages account-bound MCP credentials, including issuance, rotation, revocation, and a **Show revoked** option. [Manage the API secret](/api/authentication#where-do-i-manage-the-signals-api-secret) or [issue a workspace token](/mcp/workspace-tokens).
+
+  ## Manage provider connections in one place
+
+  **Improved** · **Connections** brings together Meta reporting and dataset setup, Google Ads spend reads, Stripe revenue webhook configuration, and site installation links. Provider configuration and verified event delivery remain separate checks. [Connect Meta](/signals/connect-meta) or [configure Stripe revenue](/signals/track-events#verify-stripe-checkout-settlement).
+
+  ## Review Actions in Inbox and export audit history
+
+  **Improved** · **Inbox** groups actions by decision and verification state. **Audit** adds Actor and Outcome filters plus **Download JSON** for the workspace's audit events. Suggest-only approvals appear in Inbox's **Landed** group as **Approved without execution**; they do not create a provider change. [Review proposals](/actions/review-proposals) or [trace audit events](/actions/audit-log).
+</Update>
+
 <Update label="September 17, 2026">
 
   ## Connect MCP clients with stateless discovery

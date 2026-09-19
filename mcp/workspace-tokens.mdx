@@ -28,7 +28,7 @@ Management credentials are rejected by default on agent-authenticated routes. Th
     Switch to the workspace that owns the Meta ad account you want the client to use.
   </Step>
   <Step title="Open the token page">
-    Open **API** in the Plainrouter dashboard.
+    Open **Tokens** in the Plainrouter dashboard and choose **Issue token**.
   </Step>
   <Step title="Choose the scope">
     Enter a descriptive name. Select one active advertising account, an access tier, and a 30, 90, or 365 day expiry.
@@ -79,7 +79,7 @@ Token-management responses include `grant_id`. An authorized administrator can u
 
 ### Inspect and revoke a grant in the dashboard
 
-Sign in as the workspace owner and open **Workspace settings → Workspace grants**. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. The **API** token list also shows each token's grant tier and status.
+Sign in as the workspace owner and open **Workspace settings → Workspace grants**. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. The **Tokens** page shows token status and access tier; inspect the linked grant in **Workspace grants**.
 
 1. Identify the intended principal and bound token before making a change.
 2. For a live grant, click **Revoke**, then confirm **Revoke grant**.
@@ -91,7 +91,7 @@ If no grants appear, confirm the workspace and whether a credential has been iss
 
 ## Rotate or revoke a token
 
-Open **API** in the dashboard to review active and revoked tokens.
+Open **Tokens** in the dashboard to review token names, accounts, tiers, expiry, and last use. Enable **Show revoked** to include revoked records.
 
 - Click **Rotate** to issue a replacement with the same workspace, account, and tier. Choose a new expiry and copy the replacement immediately. The previous token stops authenticating as soon as rotation succeeds.
 - Click **Revoke** to stop a token immediately. Plainrouter retains the revoked record as durable security history.

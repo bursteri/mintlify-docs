@@ -46,6 +46,22 @@ curl "https://plainrouter.com/api/v1/dashboard/events" \
 `PLAINROUTER_TOKEN` must contain the Signals workspace secret. A missing or
 invalid secret returns HTTP `401`.
 
+## Where do I manage the Signals API secret?
+
+Sign in as the workspace owner, select the intended workspace, and open **Settings → API secret**. Complete Signals setup first if the page redirects you to setup. This secret authenticates REST, SDK, and CLI calls; [MCP tokens](/mcp/workspace-tokens) have their own **Tokens** page.
+
+### Rotate without interrupting your integration
+
+1. Choose **Rotate** and copy the replacement immediately into your server-side secret manager. The replacement is shown once.
+2. Update each integration and verify a read request, such as the event-list request above, with the replacement. Your current secret continues working while **Replacement pending** is displayed.
+3. Choose **Confirm** after all integrations use the replacement. Confirmation retires the previous secret.
+
+### Revoke a lost or exposed secret
+
+Choose **Revoke** and confirm the warning. The current secret and any pending replacement stop working immediately, and Plainrouter issues a new secret. Copy it once, update your integrations, and verify authentication again. Expect old credentials to return `401`.
+
+If you lose a pending replacement, revoke to issue a new secret; the page cannot reveal it again. Keep secrets out of browser code. The [Signals snippet](/signals/install-pixel) uses a publishable key instead.
+
 ## How do I authenticate the TypeScript SDK?
 
 Install `@plainrouter/sdk@0.5.1`, then configure the generated client explicitly:
@@ -164,7 +180,7 @@ Configure an MCP-compatible client with these exact connection values:
 | Server URL | `https://plainrouter.com/mcp` |
 | Authorization | `Bearer <workspace-execution-token>` |
 
-A workspace owner issues the token from **API** in the dashboard for one workspace,
+A workspace owner issues the token from **Tokens** in the dashboard for one workspace,
 one active Meta ad account, one Read, Write, or Admin tier, and a 30, 90, or 365
 day expiry.
 

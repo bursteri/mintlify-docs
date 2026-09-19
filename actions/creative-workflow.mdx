@@ -21,8 +21,8 @@ Check the workspace's [action policy](/actions/policies-and-safety). **Suggest o
 | Confirm access | `get_account_state` | Intended workspace, Meta ad account, and required permissions. |
 | Read assets | `get-creative-library` | Account-owned asset IDs and pagination; this makes live Meta reads. |
 | Propose the copy | `duplicate-ad-with-creative` | A Plainrouter proposal with its policy result and frozen mode. |
-| Decide | **Approval queue** | A human approves the stated consequence or rejects the proposal. |
-| Verify | **History** and [Audit log](/actions/audit-log) | For executed work, receipt and exact verification of the new paused ad. |
+| Decide | **Inbox** | A human approves the stated consequence or rejects the proposal. |
+| Verify | **Inbox** and [Audit](/actions/audit-log) | For executed work, receipt and exact verification of the new paused ad. |
 
 The anonymous [MCP sandbox](/mcp/setup#start-in-test-mode) has no creative tools. Use the authenticated production connection for this workflow. Reading the library contacts Meta; submitting the proposal writes to Plainrouter and performs account-bound provider reads. It does not itself create the copied Meta ad.
 
@@ -129,17 +129,17 @@ If the client reports a protocol error or a tool result with `isError: true`, do
 
 ### 4. Follow the human decision and final outcome
 
-Open the returned `approval_queue_url` and [review the proposal](/actions/review-proposals). The approval button states what the person is authorizing:
+Open the returned `approval_queue_url`; this compatibility field now leads to **Inbox**. [Review the proposal](/actions/review-proposals) and its `execution_mode_snapshot` before using the generic **Approve** button. The decision applies to the containing batch, not just the selected action.
 
 | Outcome | What it proves | Next step |
 | --- | --- | --- |
-| **Approve recommendation** → **Approved without execution** | The person accepted a suggest-only recommendation. No Meta copy was created. | Finish this recommendation; do not look for a new ad ID. |
-| **Approve and execute** → **Approved** or **Executing** | Execution was authorized and still must pass current policy. | Follow **History**; approval alone is not Landed. |
+| **Approved without execution** | The person accepted a suggest-only recommendation. No Meta copy was created. | Finish this recommendation; do not look for a new ad ID. |
+| **Approved** or **Executing** | Execution was authorized and still must pass current policy. | Follow **Inbox** and [Audit](/actions/audit-log); approval alone is not Landed. |
 | **Blocked** | Proposal-time or execution-time policy stopped the work. | Read the reason and [policy constraints](/actions/policies-and-safety#two-policy-gates). |
 | **Executed pending verification** | A provider write has a receipt, but verification is incomplete. | Inspect the recorded next read and deadline; the copy is Not Landed. |
 | **Completed** and **Landed** for this executed creative batch | The resulting ad passed exact receipt-addressed verification. | Inspect the receipt's new ad ID, account, creative and paused state. |
 
-For the suggest-only example above, **Approve recommendation** is the successful end of the walkthrough. Changing policy later does not promote that existing proposal into executable work. Any new executable proposal remains a separate human decision under the current [policy mode](/actions/policies-and-safety#execution-mode).
+For the suggest-only example above, **Approve** records **Approved without execution** and completes the walkthrough. Inbox places this status in its **Landed** group, but no Meta copy was created. Changing policy later does not promote that existing proposal into executable work. Any new executable proposal remains a separate human decision under the current [policy mode](/actions/policies-and-safety#execution-mode).
 
 For executed copies, verify both `status=PAUSED` and `effective_status=PAUSED` on the exact receipt-addressed ad. A verified paused copy is not an active campaign, a delivery result, or evidence of improved advertising performance. See [Paused-copy invariant](#paused-copy-invariant) for pending verification and compensation.
 
@@ -194,7 +194,7 @@ If Meta reports `IN_PROCESS`, the batch moves to **Executed pending verification
 
 Both proposal-producing creative tools are idempotent. Reuse the same idempotency key when retrying the same intent. Do not generate a new key merely because an MCP request timed out.
 
-After a timeout, check the returned or existing proposal in **Approval queue** before attempting another action. Provider reconciliation uses the durable execution key and receipt to avoid silently creating duplicate objects.
+After a timeout, check the returned or existing proposal in **Inbox** before attempting another action. Provider reconciliation uses the durable execution key and receipt to avoid silently creating duplicate objects.
 
 ## Common failures
 
@@ -207,4 +207,4 @@ After a timeout, check the returned or existing proposal in **Approval queue** b
 | Approved, but no new Meta ad | Check `execution_mode_snapshot`. A suggest-only approval records a recommendation without execution. |
 | Request timed out | Check the existing proposal in the queue and retry only the same intent with the saved key. |
 | Proposal blocked | Read its policy reasons and current [policy constraints](/actions/policies-and-safety); approval does not bypass them. |
-| Ad remains Not Landed | Follow the receipt and scheduled verification in [proposal history](/actions/review-proposals). Do not activate or duplicate it to bypass verification. |
+| Ad remains Not Landed | Follow the status in [Inbox](/actions/review-proposals) and receipt events in [Audit](/actions/audit-log). Do not activate or duplicate it to bypass verification. |
