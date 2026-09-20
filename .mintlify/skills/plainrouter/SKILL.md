@@ -62,10 +62,13 @@ resources, not as substitutes for the explanatory documentation pages.
 | OAuth management credential | Read-only account discovery through `GET /api/v1/agent/context` | MCP tool calls |
 
 Never request or expose a credential in a prompt, log, URL, screenshot, or
-repository. A workspace owner creates Read or Write keys in
+repository. A workspace owner or member creates role-capped Read or Write keys in
 **Settings → Workspace keys**. To replace one, create and verify the new key,
 then **Delete** the old key. Signals credentials are managed separately in
-**Workspace settings → Server secret**.
+**Workspace settings → Server secret**. Management keys list accessible workspaces
+and manage only the issuer's workspace keys through the four documented
+[management API operations](https://plainrouter.com/docs/api/authentication#how-do-i-use-the-management-api).
+Revoking a Management key does not revoke workspace keys it issued.
 
 ## Preserve these invariants
 

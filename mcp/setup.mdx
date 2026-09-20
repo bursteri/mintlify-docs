@@ -24,7 +24,7 @@ For supported tasks, client requirements, and approval boundaries, start with th
 | `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
 | `https://plainrouter.com/mcp` | Read one approved account and submit governed proposals. | Workspace execution token for tool calls and account data |
 
-Plainrouter MCP uses owner-issued workspace execution tokens. New workspace keys authorize one workspace and a Read or Write tier. Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
+Plainrouter MCP uses workspace execution tokens issued by a current owner or member. New workspace keys authorize one workspace and a Read or Write tier. Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
 
 If you are choosing between a Signals workspace secret, workspace execution token,
 or OAuth management credential, see [Authentication and
@@ -41,7 +41,7 @@ For the sandbox, you only need a client with remote HTTP MCP support. For produc
 - A Plainrouter account with access to the intended workspace.
 - An active Meta ad account connection.
 - An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
-- A workspace owner who can issue the token.
+- Current team membership with permission for the key tier you need. [Check key permissions](/mcp/workspace-tokens#issue-a-token).
 - A clear choice of the one advertising account the client should use.
 
 For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
@@ -238,7 +238,7 @@ Follow the [creative workflow](/actions/creative-workflow) and [proposal review 
 
 ## Authorization lifetime and revocation
 
-Workspace tokens expire after 30, 90, or 365 days. From **Settings → Workspace keys**, the owner can create a replacement and **Delete** the old key to revoke it. The current UI has no token Rotate button.
+Workspace tokens expire after 30, 90, or 365 days. From **Settings → Workspace keys**, the issuing member can create a replacement within their current role and **Delete** the old key to revoke it. The current UI has no token Rotate button.
 
 Plainrouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 

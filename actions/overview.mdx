@@ -13,7 +13,7 @@ Actions is Plainrouter's governed workflow for AI-proposed advertising changes. 
 
 <Steps>
   <Step title="A person authorizes the workspace">
-    A workspace owner creates a Read or Write workspace key. Account-scoped tools select an eligible active account owned by that workspace; older bound keys keep their account restriction. Confirm the selected Meta ad account before proposing a change.
+    A workspace owner or member creates a Read or Write workspace key within their current role. Account-scoped tools select an eligible active account owned by that workspace; older bound keys keep their account restriction. Confirm the selected Meta ad account before proposing a change.
   </Step>
   <Step title="The agent reads evidence">
     The agent can read Signals context and the approved account's creative library. Creative proposals cite an account-bound asset record or frozen staged-asset manifest.
@@ -41,8 +41,8 @@ Actions is Plainrouter's governed workflow for AI-proposed advertising changes. 
 | --- | --- | --- |
 | Upload asset | Image or video staged-asset shape. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
 | Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified permanently `PAUSED`. |
-| Adjust budget | Typed recommendation with a new daily budget. | Disabled in this release. |
-| Set status | Typed recommendation with `active` or `paused`. | Disabled in this release. No activation path is exposed. |
+| `adjust_budget` | Typed recommendation with a new daily budget. | This legacy MCP action does not execute. |
+| `set_status` | Typed recommendation with `active` or `paused`. | This legacy MCP action does not execute, including activation. |
 
 Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/actions/creative-workflow) for the supported creative workflow. The convenience tools create proposals; they do not perform a Meta write inside the MCP request.
 

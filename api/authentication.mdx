@@ -1,7 +1,7 @@
 ---
 title: "Plainrouter authentication: server secrets and workspace keys"
 sidebarTitle: "Authentication"
-description: "Choose the correct Plainrouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
+description: "Choose the correct Plainrouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management API requests."
 ---
 
 Plainrouter uses a per-workspace Signals secret for the Signals Conversion API, a
@@ -19,7 +19,7 @@ Conversion API and all use the same Signals workspace secret.
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signals workspace secret | One workspace and its Signals resources |
 | Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
 | Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | One workspace, Read or Write tier, and an eligible account selected per account-scoped call |
-| Manage accessible workspaces and issue workspace keys | Management API | Management key | Limited by its owner's current access and role; not an MCP credential |
+| List accessible workspaces and manage your workspace keys | [Management API](#how-do-i-use-the-management-api) | Management key | Limited by its owner's current access and role; not an MCP credential |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
 
@@ -180,8 +180,8 @@ Configure an MCP-compatible client with these exact connection values:
 | Server URL | `https://plainrouter.com/mcp` |
 | Authorization | `Bearer <workspace-execution-token>` |
 
-A workspace owner creates a key in **Settings → Workspace keys** for one workspace,
-a Read or Write tier, and a 30, 90, or 365 day expiry.
+A workspace owner or member creates a key in **Settings → Workspace keys** for one workspace,
+a Read or Write tier within their current role, and a 30, 90, or 365 day expiry.
 
 Call `get_account_state` first. Confirm the returned workspace and Meta ad
 account before calling another tool. Use `account_id` when the workspace has multiple eligible active accounts. Older
@@ -197,7 +197,84 @@ account-bound keys cannot override their binding. See [account selection](/mcp/w
 
 Open **Settings → Management keys**, enter a name, select a 30, 90, or 365 day expiry, and choose **Create key**. Copy it once into developer-side secret storage. Use **Delete** to remove an obsolete key. The table shows creation, last use, expiry, status, and **Created by**; a team owner can manage team members' keys where permitted.
 
-Management keys authenticate management operations under the owner's current access. Give agents a workspace key for MCP instead. A Management key is not the OAuth management credential described below and cannot authenticate the agent-context route, Signals Conversion API, or human approval pages.
+Management keys authenticate the four management operations below under the key owner's current membership and role. Give agents a workspace key for MCP instead. A Management key is not the OAuth management credential described below and cannot authenticate the agent-context route, Signals Conversion API, or human approval pages.
+
+## How do I use the management API?
+
+Use a Management key to list accessible workspaces and create, list, or revoke **your own** workspace keys. These operations do not create workspaces or change ads. The `/tokens` paths retain their API name even though the dashboard calls the credentials workspace keys.
+
+Before starting, [create a Management key](#where-do-i-create-a-management-key), load it into `PLAINROUTER_MANAGEMENT_KEY` through your secret manager, and confirm your current membership in the workspace's team. Do not use a workspace key or browser session as the management API credential.
+
+Use the base URL `https://plainrouter.com/api/v1` for these paths:
+
+| Method | Path | Result |
+| --- | --- | --- |
+| `GET` | `/management/workspaces` | `200` with `workspaces`: workspace IDs, names, and team IDs/names for your current memberships and owned teams. |
+| `GET` | `/workspaces/{workspace}/tokens` | `200` with `access_tokens`: your keys in that workspace, including revoked records, without plaintext secrets. |
+| `POST` | `/workspaces/{workspace}/tokens` | `201` with the new plaintext `token` and `access_token` metadata. |
+| `DELETE` | `/workspaces/{workspace}/tokens/{token}` | `204` with no body after revoking your key and its grant. |
+
+### 1. Find the workspace
+
+```bash
+curl --fail-with-body https://plainrouter.com/api/v1/management/workspaces \
+  --header "Authorization: Bearer $PLAINROUTER_MANAGEMENT_KEY" \
+  --header 'Accept: application/json'
+```
+
+Choose the returned workspace's integer `id`. It is different from the advertising-account ID used in MCP calls. The examples below use workspace ID `42`; replace it with your selected ID.
+
+### 2. Create a workspace key
+
+```bash
+curl --fail-with-body https://plainrouter.com/api/v1/workspaces/42/tokens \
+  --header "Authorization: Bearer $PLAINROUTER_MANAGEMENT_KEY" \
+  --header 'Accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --data '{"name":"Account reporting","tier":"read","expires_in_days":90}'
+```
+
+| Field | Accepted value |
+| --- | --- |
+| `name` | Required string, up to 255 characters. |
+| `tier` | `read` or `write`. Write requires current update permission; the workspace owner can issue either tier. |
+| `expires_in_days` | `30`, `90`, or `365`. |
+
+The new key is scoped to the workspace and has no fixed ad-account binding. Do not send an account ID when issuing it; follow [account selection](/mcp/workspace-tokens#how-does-account-selection-work) when using it.
+
+The response contains a secret. Capture `token` directly into protected client configuration or secret storage and retain `access_token.id` for lifecycle operations. Plaintext is returned only on creation; the response uses `Cache-Control: no-store, private`. Keep it out of terminal recordings and request/response logs. A repeated POST creates another key; do not treat issuance as an idempotent retry.
+
+Verify the new workspace key with [`get_account_state`](/mcp/tools#get_account_state), supplying `account_id` when required. Confirm the returned workspace and Meta ad account before any proposal. Use the new workspace key for that MCP call, not the Management key.
+
+### 3. List or revoke your workspace keys
+
+```bash
+curl --fail-with-body https://plainrouter.com/api/v1/workspaces/42/tokens \
+  --header "Authorization: Bearer $PLAINROUTER_MANAGEMENT_KEY" \
+  --header 'Accept: application/json'
+```
+
+Each `access_tokens` item includes `id`, `name`, `tier`, `abilities`, `last_used_at`, `expires_at`, `revoked_at`, and the historical `rotated_from_token_id`. Listing does not expose another member's keys or recover a secret. Use the token record's integer `id`, not its plaintext value or grant ID, to revoke it:
+
+```bash
+curl --fail-with-body --request DELETE \
+  https://plainrouter.com/api/v1/workspaces/42/tokens/123 \
+  --header "Authorization: Bearer $PLAINROUTER_MANAGEMENT_KEY" \
+  --header 'Accept: application/json'
+```
+
+Replace `123` with your key's record ID. A successful response has no body. List again to verify `revoked_at` is populated. To replace a key, create and verify its replacement before revoking the old one; there is no rotation endpoint.
+
+Deleting or expiring a Management key does **not** revoke workspace keys it previously issued. Revoke each workspace key separately when access should end. Removing the issuer's membership or reducing their role also changes what their credentials can authorize.
+
+### Why does a management request fail?
+
+| Result | Check |
+| --- | --- |
+| `401` | Use a live Management key created from the current settings page. Workspace keys, OAuth credentials, expired/revoked keys, and older unmarked personal tokens do not qualify. |
+| `403` | Recheck current team membership and whether your role permits the requested tier. Membership is checked on each request. |
+| `404` | Check the workspace ID and token ID. Another member's token is not available through your management credential. |
+| `422` | Check name, tier, expiry, and that a key being revoked belongs to the selected workspace. |
 
 ## How do I use an OAuth management credential?
 
