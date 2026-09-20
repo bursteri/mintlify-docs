@@ -222,7 +222,7 @@ for (const page of mdxPages) {
 }
 
 const requiredAgentPages = new Map([
-  ["api/authentication", "title: \"Plainrouter authentication: API secrets and MCP tokens\""],
+  ["api/authentication", "title: \"Plainrouter authentication: server secrets and workspace keys\""],
   [
     "api/resources",
     "https://plainrouter.com/api/llms.txt",

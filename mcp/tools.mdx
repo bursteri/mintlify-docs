@@ -4,7 +4,7 @@ sidebarTitle: "MCP tool reference"
 description: "Reference for Plainrouter MCP tools, workspace grants, conditional Launcher availability, and four synthetic test-mode tools."
 ---
 
-Plainrouter MCP server version `0.4.0` exposes ten tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use the advertising account selected during workspace-token issuance.
+Plainrouter MCP server version `0.4.0` exposes ten tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
@@ -58,8 +58,7 @@ production proposal, creative, approval, Launcher, or spend-affecting tools.
 
 The production endpoint is `https://plainrouter.com/mcp`. Its handshake, tool
 and resource catalogs, and static `ui://` MCP App shells are publicly
-discoverable. Every tool call and account-data read requires an account-bound
-workspace execution token.
+discoverable. Every tool call and account-data read requires a workspace key authorized for the selected account.
 
 ## Busy-workspace errors
 
@@ -69,7 +68,7 @@ A concurrent operation can return `workspace_lock_timeout` through MCP. Affected
 
 Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`. Every Launcher tool requires the `ad-account.read` baseline.
 
-Clients authenticate with an owner-issued [workspace execution token](/mcp/workspace-tokens). A **Read** token derives the read scopes. **Write** and **Admin** tokens also derive the proposal scopes. OAuth management credentials cannot authenticate to the MCP server.
+Clients authenticate with an owner-issued [workspace execution token](/mcp/workspace-tokens). A **Read** token derives the read scopes. **Write** keys also derive the proposal scopes. New keys offer Read and Write; older Admin-tier keys retain their existing role and grant checks. Management keys and OAuth management credentials cannot authenticate to the MCP server.
 
 `launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, `launcher.execute_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview and the closed execution entry require `actions.propose`.
 
@@ -86,11 +85,11 @@ Scoped responses identify:
 }
 ```
 
-`destination_id` and `dataset_id` are `null` until the authorized account has a matching destination. The caller cannot provide a different account ID.
+`destination_id` and `dataset_id` are `null` until the authorized account has a matching destination. For tools exposing `account_id`, supply the internal Plainrouter account ID when the workspace has multiple eligible active accounts. With one eligible active account it can be omitted. Selection stays inside the workspace; older bound keys reject a different ID. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 ## `get_account_state`
 
-Call this first in every account-specific workflow. It returns:
+Call this first in every account-specific workflow, using `account_id` when needed. Confirm the returned scope before further calls. It returns:
 
 - Agent ID, name, and granted permissions.
 - Shared scope.
@@ -407,6 +406,7 @@ It requires an owner-issued [workspace token](/mcp/workspace-tokens) with the **
 
 | Field | Required | Rules |
 | --- | --- | --- |
+| `account_id` | Conditional | Internal Plainrouter account ID; required when the workspace has multiple eligible active accounts. |
 | `source_adset_id` | Yes | Numeric Meta ad set ID used as the duplication or destination template. |
 | `source_ad_id` | Yes | Numeric Meta ad ID used as the creative template. |
 | `mode` | Yes | `duplicate_adset`, `duplicate_adset_per_media`, or `add_to_adset`. |
@@ -416,7 +416,7 @@ It requires an owner-issued [workspace token](/mcp/workspace-tokens) with the **
 
 Overrides use contract version `v: 1` and can contain up to five `primary_texts`, `headlines`, and `descriptions`, plus `website_url` and `display_link`.
 
-Workspace and account IDs are never accepted as input. Plainrouter derives them from the execution token. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
+The workspace comes from the key. Optional `account_id` selects an eligible account in that workspace; it does not widen the key's reach. A Drive link that is unknown, stale, failed, removed, or belongs to another workspace is rejected without widening the token scope.
 
 ### Output
 
@@ -434,7 +434,7 @@ The current MCP entry point returns an advisory gate with `not_evaluated`. Treat
 
 ## Launcher batch status and preview
 
-These tools are available only when legacy Launcher is enabled. They accept one `batch_id`: the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter. Plainrouter resolves it only inside the workspace and ad account bound to the token. A caller cannot inspect another account by guessing an ID.
+These tools are available only when legacy Launcher is enabled. They accept `batch_id`, the 26-character ULID returned by `launcher.draft_batch` or the file-import adapter, and `account_id` when needed. Plainrouter resolves the batch only inside the key's workspace and selected authorized account. A caller cannot inspect another account by guessing an ID.
 
 ### `launcher.batch_status`
 
@@ -464,4 +464,4 @@ It does not evaluate the gate, advance the batch, create an Actions proposal or 
 
 ### Refusals
 
-All three tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `batch_not_found`, or `internal_error`. Preview can also return `batch_not_operable` or `gate_receipt_raced`. Execute returns `not_executable_in_phase_b1` after successful authorization and batch resolution.
+All three tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `account_required`, `batch_not_found`, or `internal_error`. `account_required` means account selection could not be resolved; check `account_id`, ownership, active connection, and any older key binding. Preview can also return `batch_not_operable` or `gate_receipt_raced`. Execute returns `not_executable_in_phase_b1` after successful authorization and batch resolution.

@@ -33,13 +33,15 @@ after the customer-visible implementation is merged and shipped.
 
 - Use **workspace** for the PlainRouter tenant boundary. Do not substitute
   project, organization, or account.
-- Use **Meta ad account** for the advertising account bound to a workspace
-  execution token. Do not shorten it to workspace account.
+- Use **Meta ad account** for the advertising account selected under a workspace
+  key or bound to an older execution token. Do not shorten it to workspace account.
 - A **Signals workspace secret** authenticates the Signals Conversion API for
   one workspace. Published `0.5.x` clients retain names such as
   `signalTrackerSecret` and "tracker token" as compatibility labels.
 - A **workspace execution token** authenticates PlainRouter MCP and authorized
-  workspace routes for one workspace and one Meta ad account.
+  workspace routes for one workspace. New Read/Write workspace keys select
+  eligible active accounts owned by that workspace; older account-bound keys
+  retain their binding. Use `account_id` where the tool requires selection.
 - An **OAuth management credential** may read the account-discovery context
   route. It cannot authenticate MCP tool calls.
 - Keep **Signal**, **destination**, **Actions**, **Launcher**, **Suggest only**,

@@ -86,7 +86,7 @@ Signals collects first-party conversion events from your website through a colle
   </Step>
 </Steps>
 
-For server-side API, SDK, or CLI access, the workspace owner manages the Signals secret under **Settings → API secret**. Follow [API secret rotation](/api/authentication#where-do-i-manage-the-signals-api-secret) to install and verify a replacement before confirming it. The secret is shown once. The browser snippet uses the publishable key and must never contain this secret.
+For server-side API, SDK, or CLI access, the workspace owner manages the Signals secret under **Settings → Workspace → Server secret**. Follow [API secret rotation](/api/authentication#where-do-i-manage-the-signals-api-secret) to install and verify a replacement before confirming it. The secret is shown once. The browser snippet uses the publishable key and must never contain this secret.
 
 Managed-hostname setup can also recognize qualifying verified server revenue. The identity-free `POST /api/v1/verification-events` operation remains available as a server-side diagnostic, but it does not count as real arrival or revenue evidence and does not complete onboarding. See [Test Signal ingestion](/signals/verify-ingestion).
 

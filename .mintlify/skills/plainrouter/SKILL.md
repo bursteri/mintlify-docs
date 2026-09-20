@@ -1,11 +1,11 @@
 ---
 name: plainrouter
-description: Test PlainRouter MCP without credentials, connect account-bound production clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
+description: Test PlainRouter MCP without credentials, connect workspace-scoped production clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
 license: Proprietary
 compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-09-01"
+  documentation_revision: "2026-09-20"
 ---
 
 # Use PlainRouter safely
@@ -17,8 +17,9 @@ governed advertising proposal, or prepare a Launcher draft.
 PlainRouter MCP test mode is available at
 `https://plainrouter.com/mcp/sandbox`; production is available at
 `https://plainrouter.com/mcp`. Every production workflow must begin with
-`get_account_state` so the person and agent can confirm the token-bound
-workspace and Meta ad account.
+`get_account_state` so the person and agent can confirm the key-scoped
+workspace and selected Meta ad account. Supply `account_id` when multiple
+eligible active accounts exist; use the internal Plainrouter ID, not Meta's external ID.
 
 ## Prove an integration without credentials
 
@@ -31,7 +32,7 @@ Do not send personal data, customer identifiers, click identifiers, or
 production payloads. Test mode reads no tenant data, persists nothing, contacts
 no advertising provider, and exposes no proposal, write, approval, Launcher,
 or spend-affecting tool. When the client works, move it to the production URL
-and configure an account-bound workspace execution token.
+and configure a workspace key from **Settings → Workspace keys**.
 
 Read [Connect an AI agent](https://plainrouter.com/docs/mcp/setup)
 and the [MCP tool reference](https://plainrouter.com/docs/mcp/tools)
@@ -56,17 +57,22 @@ resources, not as substitutes for the explanatory documentation pages.
 | Credential | Use it for | Do not use it for |
 | --- | --- | --- |
 | Signals workspace secret | Signals Conversion API calls for one workspace | MCP or interactive workspace management |
-| Workspace execution token | MCP and authorized workspace routes for one bound workspace and Meta ad account | Signals Conversion API or interactive browser sessions |
+| Workspace key (workspace execution token) | MCP and authorized workspace routes for one workspace and an eligible selected account | Signals Conversion API or interactive browser sessions |
+| Management key | Developer management operations under its owner's access | MCP, Signals Conversion API, or human approvals |
 | OAuth management credential | Read-only account discovery through `GET /api/v1/agent/context` | MCP tool calls |
 
 Never request or expose a credential in a prompt, log, URL, screenshot, or
-repository. A workspace owner can rotate or revoke a workspace execution token
-from **Account** → **API**.
+repository. A workspace owner creates Read or Write keys in
+**Settings → Workspace keys**. To replace one, create and verify the new key,
+then **Delete** the old key. Signals credentials are managed separately in
+**Workspace settings → Server secret**.
 
 ## Preserve these invariants
 
-- The execution token determines the workspace and Meta ad account. Never ask
-  for or supply an account override.
+- The key fixes the workspace. For tools exposing `account_id`, select only an
+  active account owned by that workspace with an active connection. Omission
+  selects the sole eligible account; multiple accounts require an explicit ID.
+  An older account-bound key cannot override its binding.
 - A proposal-producing tool writes a governed PlainRouter proposal, not a
   direct Meta change.
 - Write or Admin access does not bypass policy, approval, provider
@@ -114,7 +120,7 @@ for setup and interpretation.
    plain-language rationale, `target_source: "human_supplied"`, and a stable
    idempotency key.
 5. Report the returned policy decision, approval requirement, status, and
-   approval queue URL. Describe the result as suggest-only, pending approval,
+   `inbox_url` (with `approval_queue_url` as its compatibility alias). Describe the result as suggest-only, pending approval,
    blocked, awaiting verification, Landed, or Not Landed as applicable.
 
 Read [Actions overview](https://plainrouter.com/docs/actions/overview),
@@ -131,7 +137,7 @@ before representing execution consequences.
    stable idempotency key. This stages a private asset and creates a proposal.
 4. Call `duplicate-ad-with-creative` with a human-selected source ad and an
    asset ID returned by PlainRouter. The normalized status remains `paused`.
-5. Send the person to the returned approval queue. Do not claim that the MCP
+5. Send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox. Do not claim that the MCP
    request changed Meta.
 
 Read
@@ -142,7 +148,7 @@ for upload, verification, retry, and compensation behavior.
 
 1. Confirm that Google Drive ownership is verified and the required assets have
    completed read-only inventory sync.
-2. Call `launcher.draft_batch` with a Write or Admin token, human-selected
+2. Call `launcher.draft_batch` with a Write key, human-selected
    source IDs, one supported mode, and already-synced Drive links.
 3. Treat rejected items and `not_evaluated` advisory gates as draft output, not
    execution authorization.

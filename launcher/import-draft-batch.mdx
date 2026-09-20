@@ -20,7 +20,7 @@ You need:
 
 - A verified Launcher Drive connection whose inventory has already synced.
 - A Write or Admin [workspace execution token](/mcp/workspace-tokens).
-- Numeric source Meta ad set and ad IDs from the account bound to that token.
+- Numeric source Meta ad set and ad IDs from the selected authorized account in that workspace.
 
 OAuth management credentials and Read-tier workspace tokens cannot import files.
 
@@ -70,12 +70,15 @@ curl https://plainrouter.com/mcp/launcher/import \
   --request POST \
   --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_TOKEN" \
   --form "file=@launcher.csv" \
+  --form "account_id=91" \
   --form "source_adset_id=123456789" \
   --form "source_ad_id=987654321" \
   --form "mode=duplicate_adset" \
   --form "folder_to_adset=false" \
   --form "grouping_enabled=true"
 ```
+
+`account_id` is the internal Plainrouter advertising-account ID, not the Meta external ID. Supply it when the workspace has multiple eligible active accounts; it can be omitted for the sole eligible account. Older account-bound keys still reject a different account.
 
 Supported modes are:
 

@@ -71,7 +71,7 @@ Approval and rejection are idempotent terminal decisions for a pending batch. A 
 
 ## Troubleshoot a missing decision or unexpected status
 
-- **The proposal is missing:** confirm the selected workspace and proposal or batch ID. Links returned in `approval_queue_url` open Inbox; the response field keeps its existing name.
+- **The proposal is missing:** confirm the selected workspace and proposal or batch ID. Use the returned `inbox_url`; `approval_queue_url` remains a compatibility alias for the same Inbox link.
 - **No decision control is available:** check whether the batch is still pending. A completed decision is not reopened from Inbox.
 - **The decision is forbidden:** sign in with an authorized human account in the correct workspace. A bearer token is not a substitute for this browser session.
 - **An action is blocked:** read its exact reason and the [policy constraints](/actions/policies-and-safety) before resubmitting.

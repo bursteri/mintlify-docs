@@ -12,8 +12,8 @@ Actions is Plainrouter's governed workflow for AI-proposed advertising changes. 
 ## The governed loop
 
 <Steps>
-  <Step title="A person authorizes one account">
-    A workspace owner issues an execution token for the exact Meta ad account and tier the agent may use. The agent cannot replace that account ID in a tool call.
+  <Step title="A person authorizes the workspace">
+    A workspace owner creates a Read or Write workspace key. Account-scoped tools select an eligible active account owned by that workspace; older bound keys keep their account restriction. Confirm the selected Meta ad account before proposing a change.
   </Step>
   <Step title="The agent reads evidence">
     The agent can read Signals context and the approved account's creative library. Creative proposals cite an account-bound asset record or frozen staged-asset manifest.

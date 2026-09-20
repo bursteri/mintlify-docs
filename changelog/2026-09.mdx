@@ -6,6 +6,25 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 19, 2026">
+
+  ## Separate developer keys, agent keys, and server secrets
+
+  **Changed** · **Settings → Management keys** and **Settings → Workspace keys** replace the previous token surfaces. New workspace keys offer Read or Write access and can select eligible active accounts owned by their workspace; older account-bound keys keep their restriction. The Signals secret now lives under **Workspace settings → Server secret**. [Create a workspace key](/mcp/workspace-tokens) or [choose the right credential](/api/authentication).
+
+  ## Open proposals with an explicit Inbox link
+
+  **Improved** · Action proposal responses now include `inbox_url`. The existing `approval_queue_url` remains an alias, so existing clients can continue to open the same human-review workflow. [Follow a creative proposal](/actions/creative-workflow#4-follow-the-human-decision-and-final-outcome).
+
+  ## Check creative images before preparing an ad
+
+  **New** · The free [Meta Ad Image Checker](https://plainrouter.com/tools/meta-ad-checker) inspects JPEG/PNG dimensions and file size, previews a center crop, and exports custom review margins. Processing stays in the browser. Its checks are design aids, not Meta approval or official safe-zone verification. [Use the creative workflow](/actions/creative-workflow#image-upload-rules).
+
+  ## Resize the desktop app sidebar
+
+  **Improved** · Drag the sidebar edge to resize, collapse, or expand it. Plainrouter remembers the preferred width in the browser.
+</Update>
+
 <Update label="September 18, 2026">
 
   ## Manage API secrets and MCP tokens separately

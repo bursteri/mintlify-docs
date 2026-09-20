@@ -1,12 +1,12 @@
 ---
-title: "Plainrouter authentication: API secrets and MCP tokens"
+title: "Plainrouter authentication: server secrets and workspace keys"
 sidebarTitle: "Authentication"
 description: "Choose the correct Plainrouter credential and authenticate REST, TypeScript, Python, Ruby, Go, CLI, MCP, or management-discovery requests."
 ---
 
-Plainrouter uses a per-workspace Signals secret for the Signals Conversion API, an
-account-bound workspace execution token for production MCP tool calls, and a
-narrowly scoped OAuth management credential for account discovery. Public MCP
+Plainrouter uses a per-workspace Signals secret for the Signals Conversion API, a
+workspace key for production MCP tool calls, a management key for developer
+management operations, and a separate OAuth management credential for account discovery. Public MCP
 discovery and the synthetic MCP sandbox require no credential.
 
 REST, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same
@@ -18,13 +18,14 @@ Conversion API and all use the same Signals workspace secret.
 | --- | --- | --- | --- |
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Signals workspace secret | One workspace and its Signals resources |
 | Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
-| Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace execution token | One workspace, one Meta ad account, and one Read, Write, or Admin tier |
+| Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | One workspace, Read or Write tier, and an eligible account selected per account-scoped call |
+| Manage accessible workspaces and issue workspace keys | Management API | Management key | Limited by its owner's current access and role; not an MCP credential |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
 
 These credentials are not interchangeable. The Conversion API rejects workspace
 execution tokens and OAuth management credentials. MCP rejects Signals workspace
-secrets and OAuth management credentials.
+secrets, Management keys, and OAuth management credentials. The Signals workspace secret is labeled **Server secret** in workspace settings.
 
 <Warning>
   Never paste any Plainrouter credential into an agent prompt. Inject credentials
@@ -48,12 +49,12 @@ invalid secret returns HTTP `401`.
 
 ## Where do I manage the Signals API secret?
 
-Sign in as the workspace owner, select the intended workspace, and open **Settings → API secret**. Complete Signals setup first if the page redirects you to setup. This secret authenticates REST, SDK, and CLI calls; [MCP tokens](/mcp/workspace-tokens) have their own **Tokens** page.
+Sign in as the workspace owner, select the intended workspace, and open **Settings → Workspace → Server secret** after Signals is configured. This secret authenticates REST, SDK, and CLI calls; [workspace keys](/mcp/workspace-tokens) have their own **Settings → Workspace keys** page.
 
 ### Rotate without interrupting your integration
 
 1. Choose **Rotate** and copy the replacement immediately into your server-side secret manager. The replacement is shown once.
-2. Update each integration and verify a read request, such as the event-list request above, with the replacement. Your current secret continues working while **Replacement pending** is displayed.
+2. Update each integration and verify a read request, such as the event-list request above, with the replacement. Your current secret continues working while a replacement is pending.
 3. Choose **Confirm** after all integrations use the replacement. Confirmation retires the previous secret.
 
 ### Revoke a lost or exposed secret
@@ -167,8 +168,7 @@ contacts no advertising provider.
 
 The production endpoint also permits anonymous protocol discovery, tool and
 resource listing, and reads of static `ui://` app shells. Every production tool
-call and every account-data read still requires an account-bound workspace
-execution token.
+call and every account-data read still requires a workspace key authorized for the selected account.
 
 ## How do I authenticate Plainrouter MCP?
 
@@ -180,19 +180,24 @@ Configure an MCP-compatible client with these exact connection values:
 | Server URL | `https://plainrouter.com/mcp` |
 | Authorization | `Bearer <workspace-execution-token>` |
 
-A workspace owner issues the token from **Tokens** in the dashboard for one workspace,
-one active Meta ad account, one Read, Write, or Admin tier, and a 30, 90, or 365
-day expiry.
+A workspace owner creates a key in **Settings → Workspace keys** for one workspace,
+a Read or Write tier, and a 30, 90, or 365 day expiry.
 
 Call `get_account_state` first. Confirm the returned workspace and Meta ad
-account before calling another tool. Tool arguments cannot override the account
-stored with the token.
+account before calling another tool. Use `account_id` when the workspace has multiple eligible active accounts. Older
+account-bound keys cannot override their binding. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 <Warning>
   A Write or Admin token can submit governed proposals, but it does not bypass
   policy, human approval, provider verification, or account restrictions. A
   proposal-producing MCP request is not a direct Meta write.
 </Warning>
+
+## Where do I create a Management key?
+
+Open **Settings → Management keys**, enter a name, select a 30, 90, or 365 day expiry, and choose **Create key**. Copy it once into developer-side secret storage. Use **Delete** to remove an obsolete key. The table shows creation, last use, expiry, status, and **Created by**; a team owner can manage team members' keys where permitted.
+
+Management keys authenticate management operations under the owner's current access. Give agents a workspace key for MCP instead. A Management key is not the OAuth management credential described below and cannot authenticate the agent-context route, Signals Conversion API, or human approval pages.
 
 ## How do I use an OAuth management credential?
 
@@ -226,8 +231,8 @@ If an automation receives `401` on a dashboard URL, check the requested interfac
 | [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.1.1` | Signals workspace secret passed to `PlainRouter::Client.new` |
 | [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.5.2` | Signals workspace secret attached to the request context |
 | [CLI setup](/cli/get-started) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
-| MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.3.2` | None |
-| MCP production | `https://plainrouter.com/mcp` | Server `0.3.2` | Workspace execution token for tool calls and account data |
+| MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.4.0` | None |
+| MCP production | `https://plainrouter.com/mcp` | Server `0.4.0` | Workspace execution token for tool calls and account data |
 
 The REST contract and all four SDKs expose the signed Conversion API operations. The
 PyPI and npm CLI distributions expose nine commands and do not include an ingestion-verification

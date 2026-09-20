@@ -24,7 +24,7 @@ For supported tasks, client requirements, and approval boundaries, start with th
 | `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
 | `https://plainrouter.com/mcp` | Read one approved account and submit governed proposals. | Workspace execution token for tool calls and account data |
 
-Plainrouter MCP uses owner-issued workspace execution tokens. Each token binds the client to one workspace, one Meta ad account, and an explicit access tier.
+Plainrouter MCP uses owner-issued workspace execution tokens. New workspace keys authorize one workspace and a Read or Write tier. Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
 
 If you are choosing between a Signals workspace secret, workspace execution token,
 or OAuth management credential, see [Authentication and
@@ -146,7 +146,7 @@ The [published server card](https://plainrouter.com/.well-known/mcp/server-card.
 
 <Steps>
   <Step title="Issue the token">
-    In Plainrouter, switch to the intended workspace and open **Tokens** in the dashboard. Choose the exact ad account, a Read, Write, or Admin tier, and an expiry.
+    In Plainrouter, switch to the intended workspace and open **Settings → Workspace keys**. Enter a name, choose Read or Write and an expiry, then select **Create key**.
   </Step>
   <Step title="Copy it once">
     Copy the complete token immediately after issuance. Plainrouter cannot display it again.
@@ -154,12 +154,12 @@ The [published server card](https://plainrouter.com/.well-known/mcp/server-card.
   <Step title="Add the Plainrouter MCP server">
     In your MCP client, add `https://plainrouter.com/mcp` as a remote HTTP server and configure the token as its bearer credential.
   </Step>
-  <Step title="Confirm the bound account">
-    Call `get_account_state` first. Confirm the returned workspace and account before continuing.
+  <Step title="Confirm the selected account">
+    Call `get_account_state` first. Supply `account_id` when multiple eligible accounts exist. Confirm the returned workspace and account before continuing.
   </Step>
 </Steps>
 
-See [Workspace tokens](/mcp/workspace-tokens) for tier selection, rotation, and revocation.
+See [Workspace tokens](/mcp/workspace-tokens) for tier selection, account selection, replacement, and revocation.
 
 ### Configure Claude Code for your Meta ad account
 
@@ -181,7 +181,7 @@ Add this server entry to your project's `.mcp.json`, preserving any existing ser
 
 Supply `PLAINROUTER_WORKSPACE_TOKEN` in the terminal environment through your local secret manager before starting Claude Code. Keep the variable reference in the file; do not replace it with the token or paste the token into an agent prompt. Open `/mcp` and allow the project connection when prompted.
 
-Start with a **Read** token for account and library inspection. Use **Write** or **Admin** only when you need proposal-producing tools.
+Start with a **Read** token for account and library inspection. Use **Write** only when you need proposal-producing tools.
 
 ### Confirm a read-only production connection
 
@@ -189,10 +189,11 @@ Ask the agent:
 
 ```text
 Use plainrouter to call get_account_state. Show the workspace name and
-Meta ad account name and external ID, then stop. Do not propose changes.
+Meta ad account name and external ID, then stop. If account_id is required,
+ask me to select the intended Plainrouter account ID. Do not propose changes.
 ```
 
-Check that the returned workspace and Meta ad account match the ones you selected when issuing the token. If they do, ask for `get_signal_health` to inspect conversion delivery and matching diagnostics. Missing Signals setup or measurement history is a separate setup issue; a successful account read does not establish healthy tracking.
+Check that the returned workspace and Meta ad account match the intended task. For a workspace with multiple active accounts, pass the same selected `account_id` to each account-scoped call; use Plainrouter's internal account ID, not the Meta external ID. If they do, ask for `get_signal_health` to inspect conversion delivery and matching diagnostics. Missing Signals setup or measurement history is a separate setup issue; a successful account read does not establish healthy tracking.
 
 For the returned fields and their meaning, see the [MCP tool reference](/mcp/tools).
 
@@ -206,7 +207,7 @@ For the returned fields and their meaning, see the [MCP tool reference](/mcp/too
 | `creative.read` | Read the approved Meta account's creative library. |
 | `creative.write` | Stage creative assets and propose creative changes. It does not bypass `actions.propose`. |
 
-The agent cannot supply another account ID to widen access. Creative tools recheck that provider objects belong to the approved account.
+The agent can select only accounts authorized by the workspace key; an account ID cannot widen that scope. Creative tools recheck that provider objects belong to the approved account.
 
 <Warning>
   Creative write permission is not direct mutation authority. `upload-asset` and `duplicate-ad-with-creative` return a governed proposal. A later policy decision or human approval determines whether execution is queued.
@@ -237,7 +238,7 @@ Follow the [creative workflow](/actions/creative-workflow) and [proposal review 
 
 ## Authorization lifetime and revocation
 
-Workspace tokens expire after 30, 90, or 365 days. The owner can rotate or revoke them immediately from **Tokens** in the dashboard.
+Workspace tokens expire after 30, 90, or 365 days. From **Settings → Workspace keys**, the owner can create a replacement and **Delete** the old key to revoke it. The current UI has no token Rotate button.
 
 Plainrouter also caps a token by the issuing person's current workspace role on every request. If that person's role no longer covers the token tier, the token stops authenticating at that tier. Issue a new token instead of trying to reuse a credential whose authority changed.
 
@@ -265,7 +266,7 @@ If the client is sending an OAuth access token, the rejection is expected. Repla
 
 ### A creative tool reports a missing permission
 
-Issue a token with the required tier. Use Read for library access and Write or Admin for proposal-producing creative tools and Launcher draft batches.
+Issue a token with the required tier. Use Read for library access and Write for proposal-producing creative tools and Launcher draft batches where enabled.
 
 ### Plainrouter asks you to reconnect Meta
 
@@ -273,7 +274,7 @@ The selected account may lack an active Meta connection or the required `ads_rea
 
 ### The wrong account appears
 
-Revoke the token and issue another one for the correct advertising account. Tool calls do not accept an account override.
+Check `account_id` and the key's workspace. New workspace keys can select an active account owned by that workspace; an older account-bound key rejects a different account. Follow [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 ### Signals tools show setup required
 

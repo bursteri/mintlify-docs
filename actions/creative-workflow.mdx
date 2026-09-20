@@ -10,7 +10,7 @@ This walkthrough uses an image already in the connected account's library. It co
 
 ## Before you begin
 
-You need a [connected agent](/mcp/setup), an owner-issued **Write** or **Admin** [workspace token](/mcp/workspace-tokens) for the intended Meta account, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.
+You need a [connected agent](/mcp/setup), a **Write** [workspace key](/mcp/workspace-tokens) for the intended workspace, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.
 
 Check the workspace's [action policy](/actions/policies-and-safety). **Suggest only** records recommendations without a provider write. Supported executable creative proposals still require human approval. These tools cannot activate a copied ad or execute budget and delivery-status changes.
 
@@ -32,12 +32,13 @@ The request examples below contain arguments for the named MCP tools, not Signal
 
 ### 1. Confirm the account and read its images
 
-Call `get_account_state` without arguments. Confirm the returned workspace and Meta ad account, then check `authorization.permissions` for `creative.read`, `creative.write`, and `actions.propose`. Stop if the account or permissions do not match the intended task; [issue the appropriate workspace token](/mcp/workspace-tokens) before proceeding.
+Call `get_account_state` with `account_id` when the workspace has multiple eligible active accounts; otherwise the sole eligible account can be selected automatically. Confirm the returned workspace and Meta ad account, then check `authorization.permissions` for `creative.read`, `creative.write`, and `actions.propose`. Stop if the account or permissions do not match the intended task; [issue the appropriate workspace token](/mcp/workspace-tokens) before proceeding.
 
-Call `get-creative-library` with:
+For this example, `91` is the internal Plainrouter account ID verified in the first read, not the Meta external account ID. Keep the same `account_id` across the workflow. Call `get-creative-library` with:
 
 ```json
 {
+  "account_id": 91,
   "asset_type": "image",
   "limit": 10
 }
@@ -71,6 +72,7 @@ Call `duplicate-ad-with-creative` with the source ad selected by the person and 
 
 ```json
 {
+  "account_id": 91,
   "source_ad": "120012345678901",
   "asset_id": "image:0123456789abcdef0123456789abcdef",
   "rationale": "Create the requested product-detail image variant for human review while keeping the copy paused.",
@@ -122,14 +124,14 @@ Check these fields in the complete response:
 | `id` and `scope` | Save the proposal ID and confirm the account and workspace. |
 | `execution_mode_snapshot` | Determine whether approval records a recommendation or can authorize execution. |
 | `status`, `policy_decision`, and `policy_reasons` | Read any block before requesting another proposal. |
-| `approval_required` and `approval_queue_url` | Follow the returned queue link when a human decision is required. |
+| `approval_required` and `inbox_url` | Follow the returned queue link when a human decision is required. |
 | `actions` | Confirm the source ad, chosen asset, and `params.status: "paused"`. |
 
 If the client reports a protocol error or a tool result with `isError: true`, do not interpret transport success as proposal creation. Read the error and inspect the queue before retrying an uncertain result. The [MCP error model](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling) distinguishes protocol failures from tool execution failures.
 
 ### 4. Follow the human decision and final outcome
 
-Open the returned `approval_queue_url`; this compatibility field now leads to **Inbox**. [Review the proposal](/actions/review-proposals) and its `execution_mode_snapshot` before using the generic **Approve** button. The decision applies to the containing batch, not just the selected action.
+Open the returned `inbox_url` for **Inbox**. The older `approval_queue_url` field remains an alias to the same link. [Review the proposal](/actions/review-proposals) and its `execution_mode_snapshot` before using the generic **Approve** button. The decision applies to the containing batch, not just the selected action.
 
 | Outcome | What it proves | Next step |
 | --- | --- | --- |
@@ -170,10 +172,13 @@ When requesting `asset_type: "all"`, pagination is returned separately for image
 
 ## Image upload rules
 
+Before staging an image, use the free [Meta Ad Image Checker](https://plainrouter.com/tools/meta-ad-checker) to inspect JPEG/PNG dimensions and a center-crop preview locally in your browser. Its 20 MiB processing limit is separate from the upload limit below; passing the checker does not prove Meta acceptance. [Meta image specifications](https://plainrouter.com/library/meta-ad-specs) explains placement review.
+
 If the image is not already in Meta, `upload-asset` privately stages its bytes and creates a separate `upload_asset` proposal. It does not immediately produce an uploaded Meta image. In **Suggest only**, approval ends as a recommendation without an upload. For an executable upload, wait for approval and verified provider completion, then call `get-creative-library` again to select the returned `image:<hash>`.
 
 Do not use the staged manifest ID as the asset ID for duplication. The `upload-asset` convenience tool accepts:
 
+- `account_id` when needed to select the same authorized account
 - `asset_type: "image"`
 - A bare `.jpg`, `.jpeg`, or `.png` filename, up to 100 characters, that matches the detected content type; no directory path
 - Raw base64 bytes without a data URI prefix
