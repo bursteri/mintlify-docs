@@ -59,6 +59,12 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   You can close the setup screen after deployment. Reopen **Signals** later to check the workspace's Signals status.
 </Note>
 
+## Can an AI assistant read my installation instructions?
+
+Yes. With a production [Read workspace key](/mcp/workspace-tokens), call [`get_install_instructions`](/mcp/tools#get_install_instructions) with no arguments. Confirm the returned workspace, then use its existing CNAME and snippet. The call is read-only and reports stored `first_arrival` state; it does not provision DNS or install code.
+
+This tool supports managed hostnames only. A null snippet means the hostname is not ready; finish setup in Install. For same-origin forwarding, use [Configure serving](/signals/configure-serving).
+
 ## Verify the installation
 
 To test browser collection, open your browser's developer tools and reload the page:

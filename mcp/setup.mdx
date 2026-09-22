@@ -4,7 +4,7 @@ sidebarTitle: "Setup"
 description: "Connect Claude Code to Plainrouter's Meta Ads MCP server, read signal health, and submit creative proposals for approval in one Meta ad account."
 ---
 
-Connect Claude Code to Plainrouter MCP, verify a synthetic response, then configure a workspace execution token for your own Meta ad account. A successful production setup returns the workspace and account you selected when issuing the token.
+Connect Claude Code to Plainrouter MCP, verify a synthetic response, then configure a workspace execution token for your own Meta ad account. A successful account-scoped read returns the intended workspace and selected account. For installation before connecting Meta, use the workspace-only read below.
 
 For supported tasks, client requirements, and approval boundaries, start with the [MCP introduction](/mcp/overview).
 
@@ -22,7 +22,7 @@ For supported tasks, client requirements, and approval boundaries, start with th
 | Endpoint | Use | Credential |
 | --- | --- | --- |
 | `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
-| `https://plainrouter.com/mcp` | Read one approved account and submit governed proposals. | Workspace execution token for tool calls and account data |
+| `https://plainrouter.com/mcp` | Inspect workspace Signals, read an approved account, and submit governed proposals. | Workspace execution token for tool calls and account data |
 
 Plainrouter MCP uses workspace execution tokens issued by a current owner or member. New workspace keys authorize one workspace and a Read or Write tier. Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
 
@@ -39,10 +39,10 @@ clients](/api/authentication).
 For the sandbox, you only need a client with remote HTTP MCP support. For production, you also need:
 
 - A Plainrouter account with access to the intended workspace.
-- An active Meta ad account connection.
+- An active Meta ad account connection for account-scoped reads and creative workflows. Workspace installation reads do not require one.
 - An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
 - Current team membership with permission for the key tier you need. [Check key permissions](/mcp/workspace-tokens#issue-a-token).
-- A clear choice of the one advertising account the client should use.
+- A clear choice of the advertising account for account-scoped workflows.
 
 For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
 
@@ -97,7 +97,7 @@ token. The three read-tool names and their argument shapes match production.
 <Note>
   The production endpoint exposes its protocol handshake, tool and resource
   catalogs, and static `ui://` app shells without a credential. Tool calls and
-  account-data reads remain account-bound and return HTTP `401` without a valid
+  account-data reads remain workspace-authorized and return HTTP `401` without a valid
   workspace execution token.
 </Note>
 
@@ -155,7 +155,7 @@ The [published server card](https://plainrouter.com/.well-known/mcp/server-card.
     In your MCP client, add `https://plainrouter.com/mcp` as a remote HTTP server and configure the token as its bearer credential.
   </Step>
   <Step title="Confirm the selected account">
-    Call `get_account_state` first. Supply `account_id` when multiple eligible accounts exist. Confirm the returned workspace and account before continuing.
+    For account-scoped work, call `get_account_state` first and supply `account_id` when multiple eligible accounts exist. Confirm the returned workspace and account. For installation without Meta, use the workspace read below.
   </Step>
 </Steps>
 
@@ -196,6 +196,20 @@ ask me to select the intended Plainrouter account ID. Do not propose changes.
 Check that the returned workspace and Meta ad account match the intended task. For a workspace with multiple active accounts, pass the same selected `account_id` to each account-scoped call; use Plainrouter's internal account ID, not the Meta external ID. If they do, ask for `get_signal_health` to inspect conversion delivery and matching diagnostics. Missing Signals setup or measurement history is a separate setup issue; a successful account read does not establish healthy tracking.
 
 For the returned fields and their meaning, see the [MCP tool reference](/mcp/tools).
+
+### Inspect installation before connecting Meta
+
+With a production Read key configured, ask the agent:
+
+```text
+Call get_install_instructions with no arguments. Confirm the workspace,
+show its managed-hostname setup status and first-arrival state, then stop.
+Do not change DNS or install anything.
+```
+
+The tool returns existing managed-hostname material. A null snippet means setup is not ready; same-origin forwarding is unsupported by this tool. After deploying the generated snippet yourself, repeat the read to check `first_arrival`. This is separate from the synthetic ingestion diagnostic.
+
+For reporting, call `get_arrivals_comparison` with `{"days": 7}`. Check its workspace, period, status, and unavailable values before comparing arrivals and clicks. Neither of these tools requires `account_id`, and neither is included in the sandbox. See the [installation and arrivals tool reference](/mcp/tools#get_install_instructions).
 
 ## Permissions
 

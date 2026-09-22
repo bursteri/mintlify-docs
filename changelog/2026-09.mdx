@@ -6,7 +6,30 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 22, 2026">
+
+  ## Download action decision receipts
+
+  **New** · Audit rows with a stored receipt offer **Download decision receipt**. The JSON records the action decision, terminal status, available provider evidence, verification result, document digest, and audit-chain reference. A receipt can record failure as well as success. [Inspect a decision receipt](/actions/audit-log#download-an-action-decision-receipt).
+</Update>
+
+<Update label="September 21, 2026">
+
+  ## Arrival counting is free on every plan
+
+  **Changed** · Arrivals are no longer billed or capped, and arrival allowances and overage charges have been removed. Your price follows your observed ad-spend band. Free includes 30 days of history; paid plans include 12 months. [Review pricing and billing](/billing/overview).
+
+  ## Connect ad platforms with the right team permissions
+
+  **Improved** · Team members can finish an initial or incomplete ad-platform connection. Replacing a healthy connection and disconnecting it remain admin/owner actions. Connections now shows each platform's controls according to those permissions; workspace-owner settings for Meta delivery and Stripe remain separate. [Check connection permissions](/signals/connect-meta#who-can-connect-or-change-an-ad-account).
+</Update>
+
 <Update label="September 20, 2026">
+
+  ## Read Signals installation and arrivals through MCP
+
+  **New** · `get_install_instructions` returns managed-hostname installation material and stored first-arrival state. `get_arrivals_comparison` returns the workspace's stored arrivals and platform-click comparison for 7, 30, or 90 days. Both are read-only production tools available with authorized Read keys, without ad-account selection. [Use the Signals tools](/mcp/tools#get_install_instructions).
+
 
   ## Manage workspace keys through the API
 
@@ -200,5 +223,5 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## EUR pricing includes arrival allowances
 
-  **Improved** · Published monthly pricing bands now explain the observed-spend basis, included arrivals, and overage rate. The Free band has a €0 base price below €300 in observed monthly ad spend and includes 2,000 arrivals. [Review pricing and billing](/billing/overview).
+  **Improved** · This release introduced observed-spend pricing bands with arrival allowances and overage charges. **Superseded September 21:** arrival counting is now free on every plan, without arrival caps or overage charges. [Review current pricing and billing](/billing/overview).
 </Update>

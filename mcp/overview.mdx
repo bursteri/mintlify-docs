@@ -1,10 +1,10 @@
 ---
 title: "Meta Ads MCP server"
 sidebarTitle: "Introduction"
-description: "Connect your AI assistant to a Meta ad account for Signals diagnostics, creative reads, and governed proposals."
+description: "Connect your AI assistant for Signals installation, arrival comparisons, Meta account diagnostics, creative reads, and governed proposals."
 ---
 
-Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to read one Meta ad account and request creative changes for human approval. Start with synthetic data or connect your workspace.
+Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to inspect workspace Signals setup, compare arrivals, read an authorized Meta ad account, and request creative changes for human approval. Start with synthetic data or connect your workspace.
 
 <CardGroup cols={2}>
   <Card title="Set up your connection" icon="plug" href="/mcp/setup">
@@ -19,13 +19,15 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 
 | Task | Start with | Result |
 | --- | --- | --- |
+| Inspect Signals setup | `get_install_instructions` | Managed-hostname DNS and snippet material, plus stored first-arrival state. |
+| Compare arrivals and clicks | `get_arrivals_comparison` | Stored workspace counts for a 7, 30, or 90 day window. |
 | Confirm account access | `get_account_state` | The authorized workspace, selected Meta ad account, connection, and available capabilities. |
 | Diagnose conversion signals | `get_signal_health` | Stored collection, delivery, matching, and reconciliation diagnostics. |
 | Inspect stored performance | `get_performance` | An account-scoped comparison of gateway and Meta conversions. |
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
 
-Budget changes, ad activation, and delivery-status execution are unavailable. **Suggest only** records proposals and approvals without executing them.
+The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. **Suggest only** records proposals and approvals without executing them.
 
 ## How do I get started?
 
@@ -34,7 +36,7 @@ Budget changes, ad activation, and delivery-status execution are unavailable. **
     Use the sandbox without an account, or configure the production endpoint with a workspace execution token. Follow [Setup](/mcp/setup).
   </Step>
   <Step title="Verify the account">
-    Call `get_account_state`. In production, confirm the returned workspace and Meta ad account before requesting more data or a proposal.
+    For account-specific work, call `get_account_state` and confirm the returned workspace and Meta ad account. For workspace installation, call `get_install_instructions` and confirm its workspace; no Meta account is required.
   </Step>
   <Step title="Choose a workflow">
     Start with a read. Use [Signals diagnostics](/mcp/tools#get_signal_health), or follow the [creative proposal walkthrough](/actions/creative-workflow) when you are ready to request a change.

@@ -1,19 +1,19 @@
 ---
 title: "Pricing and billing setup"
-description: "Understand Plainrouter's EUR pricing, arrival allowance, and dashboard checkout flow, then complete billing for your team."
+description: "Understand Plainrouter's EUR pricing, spend bands, free arrival counting, and dashboard checkout flow, then complete billing for your team."
 ---
 
-Plainrouter uses flat monthly EUR pricing bands based on the previous calendar month's observed platform ad spend, billed in arrears. Each band includes an arrival allowance. See the [pricing page](https://plainrouter.com/pricing) for the complete table.
+Plainrouter uses flat monthly EUR pricing bands based on the previous calendar month's observed platform ad spend, billed in arrears. Arrival counting is free on every plan: arrivals are not billed or capped, and there are no arrival overage charges. See the [pricing page](https://plainrouter.com/pricing) for the complete table.
 
 ## What does the Free band include?
 
-The Free band has a €0 base price for observed monthly ad spend below €300 and includes 2,000 arrivals. The published overage rate is €1 per additional block of 5,000 arrivals, with a partial block counted as a full block. A €0 base price does not mean unlimited arrivals.
+The Free band costs €0 for observed monthly ad spend below €300. Arrival counting is free, with 30 days of history on Free and 12 months on paid plans. See the [current pricing table](https://plainrouter.com/pricing) for each spend band.
 
 Your pricing table is pinned when your first paying invoice is reserved and stays pinned. Creating an account alone does not pin the pricing table.
 
 ## What counts toward usage?
 
-Billing counts observed arrivals regardless of consent basis and excludes traffic classified as invalid. Conversion events do not count toward the arrival allowance.
+Your price follows your observed ad-spend band. Arrivals, launches, and API or MCP calls do not add usage charges. This billing rule does not remove authentication, rate limits, or feature-availability requirements.
 
 Observed platform ad spend is spend reported by connected ad-platform accounts. Missing spend or currency evidence is unavailable rather than assumed to be zero. One ad account's observed spend is attributed to at most one workspace; connecting it to multiple destinations does not multiply that spend.
 
@@ -44,7 +44,5 @@ Renaming the team also updates its existing Stripe customer details after the na
 - A blank company or team name must be corrected before continuing.
 - A workspace with no reserved paid line does not receive this checkout action. Free, Contact, and manually handled billing lines are outside this self-serve paid-band flow.
 - If the team already has an active subscription, wait for the workspace synchronization shown in the dashboard instead of creating another subscription.
-
-The dashboard's charts are labeled **Dashboard preview · Sample data**. Those charts are not billing evidence; use the separate billing notice for checkout status and **Signals** for real website activity.
 
 To measure purchases paid by your own customers, configure [Stripe verified revenue](/signals/track-events#verify-stripe-checkout-settlement) separately.

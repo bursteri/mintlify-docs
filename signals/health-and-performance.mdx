@@ -10,6 +10,10 @@ Once reporting is available, use **Last 7 days**, **Last 30 days**, or **Last 90
 
 Opening this page or choosing **Export** reads stored data. It does not trigger a live Meta Marketing API request.
 
+## Can I read the arrival comparison through MCP?
+
+Use [`get_arrivals_comparison`](/mcp/tools#get_arrivals_comparison) with a production Read workspace key. Pass `days` as `7`, `30`, or `90`; omission defaults to `7`. This reads the workspace's stored comparison without selecting an ad account or triggering a live provider read. Check the returned workspace, period, status, and data availability, and keep **Today so far** separate from completed days.
+
 ## What do you need to check?
 
 | Question | Where to look |

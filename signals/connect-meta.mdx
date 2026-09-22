@@ -28,6 +28,20 @@ This reporting connection is separate from selecting a conversion destination. C
 
 Connections also has separate **Google Ads**, **Stripe**, and **Site snippet** sections. Google Ads reads account spend; its presence does not enable a Google conversion destination. Stripe records [verified Checkout revenue](/signals/track-events#verify-stripe-checkout-settlement). The site snippet section links to installation.
 
+### Who can connect or change an ad account?
+
+Connection permissions depend on the team's current connection for that platform:
+
+| Task | Plainrouter access |
+| --- | --- |
+| Connect initially, or reconnect when no healthy bound connection exists | Current team member, admin, or owner. |
+| Replace a healthy connection or select a different bound account | Team admin or owner. |
+| Disconnect the platform | Team admin or owner. |
+
+A healthy Meta binding has an active connection, stored credentials, and a selected ad account. The check covers the team's Meta connections, so switching workspaces does not let a member replace an existing healthy binding. Google Ads uses the same role boundary for its spend connection.
+
+These permissions apply to ad-platform connections. **Meta delivery**, Stripe configuration, and site setup retain their separate workspace-owner controls.
+
 ## Connect the destination
 
 <Steps>
@@ -100,6 +114,10 @@ The [identity-free ingestion diagnostic](/signals/verify-ingestion) is a differe
 If the intended ad account or dataset is missing, choose **Reconnect Meta** and complete authorization again with access to those assets. Then select the intended dataset and recheck the connection details.
 
 ## Troubleshoot
+
+### Connect, Reconnect, or Disconnect is missing
+
+Confirm your current team and role. Members can complete an initial or incomplete connection, but a healthy binding requires an admin or owner to reconnect or change it. Disconnect is also restricted to an admin or owner. Authorization is checked again when OAuth returns; if another member completes a healthy connection while you are authorizing, ask an admin or owner to continue.
 
 ### No datasets appear
 

@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-09-20"
+  documentation_revision: "2026-09-23"
 ---
 
 # Use PlainRouter safely
@@ -16,7 +16,7 @@ governed advertising proposal, or prepare a Launcher draft.
 
 PlainRouter MCP test mode is available at
 `https://plainrouter.com/mcp/sandbox`; production is available at
-`https://plainrouter.com/mcp`. Every production workflow must begin with
+`https://plainrouter.com/mcp`. Every account-specific production workflow must begin with
 `get_account_state` so the person and agent can confirm the key-scoped
 workspace and selected Meta ad account. Supply `account_id` when multiple
 eligible active accounts exist; use the internal Plainrouter ID, not Meta's external ID.
@@ -92,6 +92,20 @@ Revoking a Management key does not revoke workspace keys it issued.
 - `launcher.execute_batch` is deliberately closed during Phase B-1. It returns
   `not_executable_in_phase_b1` and performs no mutation.
 - Reuse the same idempotency key when retrying the same intent after a timeout.
+
+## Inspect installation and arrivals without selecting an account
+
+1. With a production Read workspace key and an active operation grant, call
+   `get_install_instructions` with no arguments and confirm the workspace.
+2. Return its managed-hostname CNAME, snippet, and `first_arrival` state as supplied.
+   Do not invent missing material or mutate DNS. A null snippet needs dashboard
+   setup; same-origin forwarding is unsupported by this tool.
+3. Call `get_arrivals_comparison` with `days` of 7, 30, or 90 (default 7) when
+   the person needs the stored arrivals/platform-click comparison.
+4. Preserve unavailable values and completed-day versus today boundaries.
+   Neither tool accepts `account_id` or supplies Actions proposal evidence.
+
+Read the [tool contracts](https://plainrouter.com/docs/mcp/tools#get_install_instructions).
 
 ## Inspect Signals safely
 

@@ -1,10 +1,10 @@
 ---
 title: "Plainrouter Meta Ads MCP tools: inputs and limits"
 sidebarTitle: "MCP tool reference"
-description: "Reference for Plainrouter MCP tools, workspace grants, conditional Launcher availability, and four synthetic test-mode tools."
+description: "Reference for Plainrouter MCP tools, Signals installation and arrivals reads, workspace grants, creative proposals, and synthetic test-mode tools."
 ---
 
-Plainrouter MCP server version `0.4.0` exposes ten tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
+Plainrouter MCP server version `0.4.0` exposes twelve tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
@@ -12,6 +12,8 @@ The server version is separate from the MCP protocol revision. For custom client
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
+| `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
+| `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored platform-claimed clicks. |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
 | `get_performance` | Read-only, idempotent | Read the admissible 1–90 day stored gateway-versus-Meta comparison for proposal evidence. |
@@ -58,7 +60,7 @@ production proposal, creative, approval, Launcher, or spend-affecting tools.
 
 The production endpoint is `https://plainrouter.com/mcp`. Its handshake, tool
 and resource catalogs, and static `ui://` MCP App shells are publicly
-discoverable. Every tool call and account-data read requires a workspace key authorized for the selected account.
+discoverable. Every tool call requires an authorized workspace key. Account-scoped reads additionally require access to the selected account. The two workspace-scoped installation and arrivals tools do not accept `account_id`.
 
 ## Busy-workspace errors
 
@@ -74,7 +76,7 @@ Clients authenticate with a role-capped [workspace execution token](/mcp/workspa
 
 Every production call also checks an active, unexpired grant for the same workspace and the requested operation. Revoked grants cannot authorize a call. The `revoke_grant` tool applies its separate revocation-authority check described below.
 
-Scoped responses identify:
+Account-scoped Signals responses identify:
 
 ```json
 {
@@ -86,6 +88,49 @@ Scoped responses identify:
 ```
 
 `destination_id` and `dataset_id` are `null` until the authorized account has a matching destination. For tools exposing `account_id`, supply the internal Plainrouter account ID when the workspace has multiple eligible active accounts. With one eligible active account it can be omitted. Selection stays inside the workspace; older bound keys reject a different ID. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
+
+## `get_install_instructions`
+
+Read the authorized workspace's managed-hostname installation material without provisioning a hostname, changing DNS, or sending a test event. This production-only tool accepts an empty arguments object:
+
+```json
+{}
+```
+
+Use a Read or Write workspace key with an active grant for `get_install_instructions`. No Meta ad account selection is needed. The result contains:
+
+| Field | Meaning |
+| --- | --- |
+| `workspace` | Workspace `id` and `name`; confirm these before installing. |
+| `publishable_key` | Browser key for this workspace, not its server secret. |
+| `hostname`, `hostname_status` | Stored managed hostname and its status; either can be `null` before setup. |
+| `cname` | DNS record with `type`, `name`, `target`, and `value` (an alias of `target`), or `null` when unavailable. |
+| `snippet` | Generated browser snippet, or `null` until the managed hostname is active and held by the edge. |
+| `first_arrival` | Whether Plainrouter has stored the workspace's first qualifying arrival. |
+
+Copy the returned DNS record and snippet exactly. If material is missing, finish [managed-hostname setup](/signals/configure-dns) in the dashboard; do not invent a hostname or construct a snippet from incomplete fields. After installation, check the [browser requests](/signals/install-pixel#verify-the-installation) and read `first_arrival` again. A true value records arrival collection, not consented conversion delivery or Meta acceptance.
+
+Same-origin forwarding (Path B) returns an error. Use the [same-origin setup page](/signals/configure-serving) instead; this tool never returns forwarding material or server secrets. A missing or inactive workspace authorization also fails.
+
+## `get_arrivals_comparison`
+
+Read the same stored workspace comparison used by Dashboard and Signals: counted arrivals beside platform-claimed clicks. This production-only tool performs no provider write or live Meta read.
+
+| Field | Type | Required | Rules |
+| --- | --- | --- | --- |
+| `days` | Integer | No | `7`, `30`, or `90`. Default is `7`. |
+
+```json
+{
+  "days": 30
+}
+```
+
+Use a Read or Write workspace key with an active grant for `get_arrivals_comparison`. The tool resolves the workspace from the key and does not accept `account_id`. Confirm `workspace_id` and the returned `period` before interpreting the result.
+
+The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Retention and completed-day boundaries determine the actual period. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
+
+If setup or platform data is unavailable, read the returned status and message before calculating a difference. Arrival/click differences do not establish lost conversions, attribution, or a cause. This tool is not an accepted `propose-actions` evidence source; use [`get_performance`](#get_performance) for eligible stored reconciliation evidence.
 
 ## `get_account_state`
 

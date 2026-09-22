@@ -1,7 +1,7 @@
 ---
-title: "Audit action history and export events"
+title: "Audit action history and download decision receipts"
 sidebarTitle: "Audit log"
-description: "Filter Plainrouter action history by actor and outcome, download workspace audit events as JSON, and trace decisions, verification, and recovery."
+description: "Filter Plainrouter action history by actor and outcome, download decision receipts and workspace audit JSON, and trace decisions, verification, and recovery."
 ---
 
 Open **Audit** from the Plainrouter sidebar to read past action records for the current workspace. Use **Actor** and **Outcome** to narrow the on-screen list, or **Download JSON** to inspect the underlying workspace audit events.
@@ -26,6 +26,28 @@ Each exported event includes:
 - `sequence`, `event_hash`, `previous_hash`, and `hash_version`.
 
 Search the export by batch or action ID to follow a proposal across multiple events. Treat the file as workspace data: it can contain actor identities and action details. Token lifecycle events contain metadata, not plaintext credentials.
+
+## Download an action decision receipt
+
+For an action with a stored decision receipt, its Audit row shows **Download decision receipt**. Select it while signed in to the same workspace. This downloads the persisted decision record for that action; **Download JSON** remains the separate workspace event export.
+
+The receipt response contains three top-level fields:
+
+| Field | Meaning |
+| --- | --- |
+| `document` | The recorded action, target, proposer and approval context, available policy/evidence snapshots, provider receipt details, terminal status, and verification result. |
+| `document_sha256` | SHA-256 digest of the canonical document representation, not the downloaded file's whitespace or formatting. |
+| `chain_entry` | The receipt event's audit `sequence` and `hash`. |
+
+Read the terminal status and verification result before drawing a conclusion. A receipt can record failure or compensation; its existence alone does not establish **Landed**. Provider request IDs and other evidence can be unavailable and are recorded accordingly.
+
+The document is stored when issued, rather than rebuilt from current action settings at download time. Its hash and chain reference support audit inspection; they are not an external signature or independent proof of completeness.
+
+### Why is the receipt missing or forbidden?
+
+- **No download button:** that action has no stored decision receipt. Pending actions and older records may not have one; inspect the workspace event export instead.
+- **Access denied:** use a signed-in browser session with access to the action's workspace. An MCP workspace key or Signals secret cannot substitute for the browser session.
+- **Receipt not found:** confirm the workspace and action. A receipt from another workspace or a missing receipt cannot be downloaded through this action's link.
 
 ## Integrity versions
 
@@ -54,6 +76,7 @@ The JSON export retains the hash and predecessor fields. The current Audit page 
 | Provider evidence | `action.provider_read_started`, `action.provider_read_observed`, `action.provider_read_classified` | A receipt-addressed read was authorized, captured, and mechanically classified. |
 | Verification | `action.verified`, `execution.verified` | The exact provider object matched; all actions are Landed only after the batch-level verified event. |
 | Async verification | `action.verification_handed_off`, `action.async_verification_*` | A committed ad copy remains Not Landed while scheduled verification continues. |
+| Decision receipt | `action.decision_receipt_issued` | A terminal action decision document was stored and linked to the audit chain. Read its status; a receipt is not automatically a successful outcome. |
 | Outcome | `outcome.checked`, `outcome.anomaly_detected` | A later provider outcome was recorded and classified. |
 | Restoration | `action.rolled_back`, `batch.rolled_back`, `batch.rollback_incomplete` | Compensation restored provider state, or incomplete recovery needs attention. |
 

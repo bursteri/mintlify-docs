@@ -61,6 +61,8 @@ For an ad copy, confirm `status: paused`. The supported creative workflow cannot
 
 Follow the action's status in Inbox, then use [Audit and its JSON export](/actions/audit-log) to trace the batch decision, receipt evidence, provider observations, and terminal verification.
 
+When an action has a stored decision receipt, use **Audit → Download decision receipt** to inspect its terminal status and verification result. See [receipt fields and access](/actions/audit-log#download-an-action-decision-receipt).
+
 **Approved**, **Executing**, and **Executed pending verification** do not mean Landed. A paused copy that Meta reports as `IN_PROCESS` still needs scheduled receipt-addressed verification. Inspect the exported events for progress or failure; do not create another copy to bypass a pending result. Escalate a `rollback_incomplete` result rather than treating it as restored.
 
 ## Reject a batch
