@@ -4,7 +4,7 @@ sidebarTitle: "MCP tool reference"
 description: "Reference for Plainrouter MCP tools, Signals installation and arrivals reads, workspace grants, creative proposals, and synthetic test-mode tools."
 ---
 
-Plainrouter MCP server version `0.4.0` exposes twelve tools with the default configuration. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
+Plainrouter MCP server version `0.4.0` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
@@ -62,6 +62,30 @@ The production endpoint is `https://plainrouter.com/mcp`. Its handshake, tool
 and resource catalogs, and static `ui://` MCP App shells are publicly
 discoverable. Every tool call requires an authorized workspace key. Account-scoped reads additionally require access to the selected account. The two workspace-scoped installation and arrivals tools do not accept `account_id`.
 
+## Built-in Signals prompts
+
+The production server publishes three reusable prompts. They have no arguments and return static instructions for the client to follow; retrieving a prompt does not run its tool, inspect your workspace data, install code, or change an ad.
+
+| Prompt name | Display title | Intended workflow |
+| --- | --- | --- |
+| `install_the_count` | Install the count on my site | Call `get_install_instructions`, show the returned DNS record and snippet exactly, and report first-arrival state. If no arrival has been seen, check DNS, then the snippet. |
+| `claimed_vs_counted` | Compare claimed clicks with counted arrivals | Call `get_arrivals_comparison` with `days: 7`; present counts and the numeric difference without turning them into rates or shares. If empty, say so and stop. |
+| `signal_health` | Is my count healthy | Call `get_signal_health` and explain the reported diagnostics without adding an estimate. |
+
+Choose a prompt from your MCP client's prompt selector, where supported. Custom clients use `prompts/list` to discover names and `prompts/get` to retrieve a message. For example, the `params` object for `prompts/get` is:
+
+```json
+{
+  "name": "install_the_count"
+}
+```
+
+Use the normal [protocol headers and request metadata](/mcp/setup#which-mcp-protocol-should-my-client-use). Prompt listing is public; production `prompts/get` requires a valid workspace key. The response contains one user-role text message. The sandbox has no registered prompts.
+
+After loading a prompt, the tool call still needs its own active grant and permissions. `install_the_count` inherits the managed-hostname-only limitation; it cannot supply same-origin forwarding material. `signal_health` needs the eligible account selection required by `get_signal_health`. The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) lists the prompt names and titles.
+
+If prompts are missing from your client, confirm the production URL and refresh discovery. A client without a prompt selector can still run the referenced tools directly. If a tool requires approval, report that requirement and stop for the human decision.
+
 ## Busy-workspace errors
 
 A concurrent operation can return `workspace_lock_timeout` through MCP. Affected JSON HTTP routes return HTTP `503` with `Retry-After: 1`; the browser shows **The workspace is busy. Retry the operation shortly.** Wait before retrying and retain the original idempotency key for the same operation.
@@ -74,7 +98,7 @@ Clients authenticate with a role-capped [workspace execution token](/mcp/workspa
 
 `launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, `launcher.execute_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview and the closed execution entry require `actions.propose`.
 
-Every production call also checks an active, unexpired grant for the same workspace and the requested operation. Revoked grants cannot authorize a call. The `revoke_grant` tool applies its separate revocation-authority check described below.
+Every production tool call also checks an active, unexpired grant for the same workspace and the requested operation. Revoked grants cannot authorize a call. The `revoke_grant` tool applies its separate revocation-authority check described below.
 
 Account-scoped Signals responses identify:
 
@@ -140,10 +164,30 @@ Call this first in every account-specific workflow, using `account_id` when need
 - Shared scope.
 - Advertising account ID, platform-native ID, name, platform, currency, timezone, and status.
 - Workspace ID and name.
-- Platform connection status and expiry.
+- Raw platform connection `status`, derived `health`, and expiry.
 - Signal ID, status, collection domain, and connected destination.
 - Available capability flags.
 - Response generation time.
+
+### How should I interpret connection health?
+
+`connection.health` uses the same provider-status calculation as **Connections** for the key's authorized workspace. It is separate from the stored `connection.status` and from Signals collection health. For example, this illustrative excerpt shows an active record that needs attention:
+
+```json
+{
+  "connection": {
+    "status": "active",
+    "health": "attention_needed",
+    "expires_at": null
+  }
+}
+```
+
+The health values are `not_connected`, `revoked`, `attention_needed`, and `connected`. Use the [provider connection status reference](/reference/statuses-and-terms#provider-connection-health) to choose the next step. An active record alone does not establish healthy credentials or a successful latest read. Conversely, `connected` does not prove fresh platform data or conversion delivery. The tool reads stored state; it does not make a live provider check.
+
+The synthetic sandbox account returns `connection.health: "connected"`; that value describes its fixture, not your workspace.
+
+### What do the capability flags mean?
 
 Current capability flags are intentionally explicit:
 

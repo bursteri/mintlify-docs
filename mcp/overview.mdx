@@ -29,6 +29,8 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 
 The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. **Suggest only** records proposals and approvals without executing them.
 
+For repeatable Signals tasks, the server also supplies three [built-in prompts](/mcp/tools#built-in-signals-prompts): installation, claimed-versus-counted comparison, and signal health. They return instructions; the client still needs authorization to run the referenced tools.
+
 ## How do I get started?
 
 <Steps>

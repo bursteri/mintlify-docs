@@ -105,6 +105,12 @@ Measurement-only events explicitly say **NOT LANDED**. Do not count them as prod
   </Step>
 </Steps>
 
+## What happens to history after account deletion?
+
+Deleting an eligible login account does not erase retained Actions evidence. Approval, audit, batch, and receipt records remain; where they reference the person, Plainrouter retains a disabled user record labeled **Deleted user**. Historical snapshots are preserved rather than rewritten, so an older export can still contain the actor details captured at the time.
+
+The deleted identity cannot sign in or continue using its credentials. Registering again with the same email creates a new identity and does not restore the old access. Account deletion can still be refused when the person owns a team whose workspaces hold retained Actions records. Do not treat deleting a login as a way to delete workspace evidence or undo provider changes.
+
 ## Related workflow
 
 Use [Inbox](/actions/review-proposals) for the human decision and [action policy](/actions/policies-and-safety) to interpret blocks. If access must end, [revoke the workspace token](/mcp/workspace-tokens). Drive ownership events apply only to [legacy Launcher](/launcher/connect-drive) where enabled.

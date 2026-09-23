@@ -6,6 +6,19 @@ description: "Diagnose Meta delivery statuses and interpret Signals health, Acti
 
 Use the exact status from an event trace or workflow record to choose the next step. Ingestion receipt, Meta acceptance, and verified Actions execution describe different outcomes.
 
+## Provider connection health
+
+`get_account_state` returns `connection.health` using the same workspace-specific status as **Connections**. The existing `connection.status` is the raw stored connection state; do not substitute it for health.
+
+| Value | Meaning | Next step |
+| --- | --- | --- |
+| `not_connected` | No usable bound connection is configured for this workspace, or the stored connection is inactive. | Open Connections and check the selected platform account. |
+| `revoked` | The connection is marked revoked or provider-token revocation completed. | Reconnect the intended platform account if access should resume. |
+| `attention_needed` | Reconnection is required, credentials are missing, the latest stored read failed, or revocation is unfinished. | Inspect Connections and its last-read state; resolve the reported issue before relying on platform data. |
+| `connected` | The active connection has stored credentials and a bound account, without a failed latest read or pending revocation. | Check data freshness and destination delivery separately. |
+
+These values describe stored connection evidence. `connected` can occur before any successful platform read; it does not certify credentials with a new provider request. For Meta, use [connection setup and permissions](/signals/connect-meta) and [delivery checks](/signals/connect-meta#how-do-i-verify-meta-delivery). Provider health is also separate from the Signals diagnostic below.
+
 ## Signal health
 
 These labels come from the account-scoped `get_signal_health` diagnostic. The Signals overview presents collection status and arrival metrics separately.

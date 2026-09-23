@@ -7,7 +7,7 @@ description: "Choose the correct Plainrouter credential and authenticate REST, T
 Plainrouter uses a per-workspace Signals secret for the Signals Conversion API, a
 workspace key for production MCP tool calls, a management key for developer
 management operations, and a separate OAuth management credential for account discovery. Public MCP
-discovery and the synthetic MCP sandbox require no credential.
+discovery and the synthetic MCP sandbox require no credential. Retrieving a production prompt requires a workspace key.
 
 REST, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same
 Conversion API and all use the same Signals workspace secret.
@@ -57,11 +57,19 @@ Sign in as the workspace owner, select the intended workspace, and open **Settin
 2. Update each integration and verify a read request, such as the event-list request above, with the replacement. Your current secret continues working while a replacement is pending.
 3. Choose **Confirm** after all integrations use the replacement. Confirmation retires the previous secret.
 
+### Discard a pending replacement
+
+If you lose the replacement before finishing rotation, choose **Discard**, then confirm **Discard pending replacement**. This cancels only the pending secret; your current secret keeps working. **Cancel** or Escape closes the dialog without discarding anything.
+
+Anything already using the pending replacement will stop authenticating after you discard it. Restore those integrations to the current secret before discarding, or prepare to update them during a new rotation. Then choose **Rotate** again, save the new replacement, verify it, and **Confirm** when ready. The page cannot reveal a lost secret again.
+
+After discarding, **Replacement pending** disappears and **Rotate** becomes available. Verify a read with the current secret if you need to confirm integration access. Discard does not change the publishable browser key or the current server secret.
+
 ### Revoke a lost or exposed secret
 
 Choose **Revoke** and confirm the warning. The current secret and any pending replacement stop working immediately, and Plainrouter issues a new secret. Copy it once, update your integrations, and verify authentication again. Expect old credentials to return `401`.
 
-If you lose a pending replacement, revoke to issue a new secret; the page cannot reveal it again. Keep secrets out of browser code. The [Signals snippet](/signals/install-pixel) uses a publishable key instead.
+Use **Discard** when only the pending replacement should be canceled. Use **Revoke** when the current secret must stop working, including when it is exposed. Keep secrets out of browser code. The [Signals snippet](/signals/install-pixel) uses a publishable key instead.
 
 ## How do I authenticate the TypeScript SDK?
 
@@ -167,8 +175,7 @@ It exposes `get_account_state`, `get_signal_health`, `get_performance`, and
 contacts no advertising provider.
 
 The production endpoint also permits anonymous protocol discovery, tool and
-resource listing, and reads of static `ui://` app shells. Every production tool
-call and every account-data read still requires a workspace key authorized for the selected account.
+resource and prompt listing, and reads of static `ui://` app shells. Retrieving a prompt with `prompts/get` and calling a production tool require a valid workspace key. Account-scoped reads also require access to the selected account.
 
 ## How do I authenticate Plainrouter MCP?
 
@@ -183,8 +190,8 @@ Configure an MCP-compatible client with these exact connection values:
 A workspace owner or member creates a key in **Settings → Workspace keys** for one workspace,
 a Read or Write tier within their current role, and a 30, 90, or 365 day expiry.
 
-Call `get_account_state` first. Confirm the returned workspace and Meta ad
-account before calling another tool. Use `account_id` when the workspace has multiple eligible active accounts. Older
+For account-scoped work, call `get_account_state` first. Confirm the returned workspace and Meta ad
+account before continuing. For installation before connecting Meta, use [`get_install_instructions`](/mcp/tools#get_install_instructions) and confirm its workspace. Use `account_id` when the workspace has multiple eligible active accounts. Older
 account-bound keys cannot override their binding. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 <Warning>
@@ -295,6 +302,8 @@ discovery.
 ## Why does a dashboard URL reject my bearer token?
 
 Dashboard settings and approval pages require a signed-in browser session. A valid workspace execution token or OAuth management credential cannot replace that session, even with an active grant or Admin tier.
+
+A bearer header causes `401` on these session routes even when a valid browser session cookie is also present. Remove the `Authorization: Bearer ...` header from browser-session requests; check any proxy or client that adds it automatically. Signing in again does not make a bearer header valid on a session route.
 
 If an automation receives `401` on a dashboard URL, check the requested interface before rotating credentials. Use the documented MCP or API operation with its matching credential, or sign in to complete the interactive action. For grant management, follow [the dashboard revocation steps](/mcp/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) or the separately authorized [`revoke_grant` MCP tool](/mcp/tools#revoke_grant).
 

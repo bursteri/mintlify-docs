@@ -106,10 +106,16 @@ Revoking a Management key does not revoke workspace keys it issued.
    Neither tool accepts `account_id` or supplies Actions proposal evidence.
 
 Read the [tool contracts](https://plainrouter.com/docs/mcp/tools#get_install_instructions).
+The production prompts `install_the_count`, `claimed_vs_counted`, and
+`signal_health` provide static instructions without arguments. Prompt retrieval
+requires a workspace key; it does not run the referenced tool. Preserve tool
+scope and approval requirements after loading a prompt.
 
 ## Inspect Signals safely
 
-1. Call `get_account_state` and confirm the workspace and Meta ad account.
+1. Call `get_account_state` and confirm the workspace and Meta ad account. Read
+   `connection.health` for the workspace provider status; raw `status: active`
+   does not prove healthy credentials, fresh data, or conversion delivery.
 2. If Signal activation is waiting for its server-side check and the token has
    `signals.verify`, call `verify_signal_ingestion` once. The identity-free
    verification event is idempotent and is not delivered to Meta.

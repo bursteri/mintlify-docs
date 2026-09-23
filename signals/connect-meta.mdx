@@ -42,6 +42,12 @@ A healthy Meta binding has an active connection, stored credentials, and a selec
 
 These permissions apply to ad-platform connections. **Meta delivery**, Stripe configuration, and site setup retain their separate workspace-owner controls.
 
+### What does the connection status mean?
+
+The platform card shows `not_connected`, `revoked`, `attention_needed`, or `connected`. Agents receive the same workspace-specific status in [`get_account_state.connection.health`](/mcp/tools#how-should-i-interpret-connection-health). The raw `connection.status: "active"` alone is not a health verdict.
+
+For `attention_needed`, inspect the stored read and connection details, then reconnect when required using the [appropriate team role](#who-can-connect-or-change-an-ad-account). A `connected` status does not prove a recent read or conversion delivery. See the [status table](/reference/statuses-and-terms#provider-connection-health) for each value, and verify Meta delivery separately below.
+
 ## Connect the destination
 
 <Steps>

@@ -195,6 +195,8 @@ ask me to select the intended Plainrouter account ID. Do not propose changes.
 
 Check that the returned workspace and Meta ad account match the intended task. For a workspace with multiple active accounts, pass the same selected `account_id` to each account-scoped call; use Plainrouter's internal account ID, not the Meta external ID. If they do, ask for `get_signal_health` to inspect conversion delivery and matching diagnostics. Missing Signals setup or measurement history is a separate setup issue; a successful account read does not establish healthy tracking.
 
+Check `connection.health` as well as the selected account. It matches the provider status shown in Connections for this workspace; raw `connection.status: "active"` can still accompany `attention_needed`. Follow the [health status reference](/reference/statuses-and-terms#provider-connection-health).
+
 For the returned fields and their meaning, see the [MCP tool reference](/mcp/tools).
 
 ### Inspect installation before connecting Meta
@@ -210,6 +212,12 @@ Do not change DNS or install anything.
 The tool returns existing managed-hostname material. A null snippet means setup is not ready; same-origin forwarding is unsupported by this tool. After deploying the generated snippet yourself, repeat the read to check `first_arrival`. This is separate from the synthetic ingestion diagnostic.
 
 For reporting, call `get_arrivals_comparison` with `{"days": 7}`. Check its workspace, period, status, and unavailable values before comparing arrivals and clicks. Neither of these tools requires `account_id`, and neither is included in the sandbox. See the [installation and arrivals tool reference](/mcp/tools#get_install_instructions).
+
+### Use a built-in Signals prompt
+
+On the production connection, open your client's prompt selector and choose **Install the count on my site**, **Compare claimed clicks with counted arrivals**, or **Is my count healthy**. The [prompt reference](/mcp/tools#built-in-signals-prompts) lists their names, intended tool calls, and limits.
+
+Listing prompts needs no credential, but retrieving one requires your workspace key. Loading a prompt returns instructions; it does not run a tool or complete setup. Let the client call the referenced tool with the same workspace authorization and check the actual result. If your client has no prompt selector, use the direct tool examples above. The sandbox does not provide these prompts.
 
 ## Permissions
 

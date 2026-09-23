@@ -6,7 +6,23 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 23, 2026">
+
+  ## Read provider connection health through MCP
+
+  **New** · `get_account_state` now includes `connection.health`, using the same workspace-specific provider status as Connections. It distinguishes `not_connected`, `revoked`, `attention_needed`, and `connected` while preserving the existing raw connection status. [Interpret connection health](/mcp/tools#how-should-i-interpret-connection-health).
+</Update>
+
 <Update label="September 22, 2026">
+
+  ## Preserve action history when deleting a login
+
+  **Fixed** · Past Actions decisions no longer prevent an otherwise eligible account deletion solely because they reference the user. Plainrouter disables the deleted identity while preserving retained evidence. Accounts that own teams with retained Actions records can still be refused deletion. [Understand retained history](/actions/audit-log#what-happens-to-history-after-account-deletion).
+
+  ## Keep bearer headers off dashboard requests
+
+  **Changed** · Session-only dashboard routes reject requests carrying a bearer credential even when a valid browser session is also present. API and MCP credentials keep their separate interfaces. [Resolve a dashboard authentication error](/api/authentication#why-does-a-dashboard-url-reject-my-bearer-token).
+
 
   ## Download action decision receipts
 
@@ -14,6 +30,15 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 </Update>
 
 <Update label="September 21, 2026">
+
+  ## Cancel a pending server-secret rotation
+
+  **New** · **Server secret → Discard** cancels a pending replacement while keeping the current secret valid. Integrations already using the replacement must switch away from it. **Revoke** remains the option that invalidates the current secret too. [Manage a pending replacement](/api/authentication#discard-a-pending-replacement).
+
+  ## Start Signals tasks from MCP prompts
+
+  **New** · Production MCP clients can discover `install_the_count`, `claimed_vs_counted`, and `signal_health`. These argument-free prompts return instructions for the existing Signals tools; they do not execute tools or bypass workspace permissions. [Use a built-in prompt](/mcp/setup#use-a-built-in-signals-prompt).
+
 
   ## Arrival counting is free on every plan
 
