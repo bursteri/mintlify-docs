@@ -10,23 +10,14 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Read provider connection health through MCP
 
-  **New** · `get_account_state` now includes `connection.health`, using the same workspace-specific provider status as Connections. It distinguishes `not_connected`, `revoked`, `attention_needed`, and `connected` while preserving the existing raw connection status. [Interpret connection health](/mcp/tools#how-should-i-interpret-connection-health).
+  **New** · Agents can use `get_account_state` to see whether the selected workspace’s provider connection is connected, revoked, or needs attention. The new `connection.health` field matches the status in **Connections**. [Interpret connection health](/mcp/tools#how-should-i-interpret-connection-health).
 </Update>
 
 <Update label="September 22, 2026">
 
-  ## Preserve action history when deleting a login
-
-  **Fixed** · Past Actions decisions no longer prevent an otherwise eligible account deletion solely because they reference the user. Plainrouter disables the deleted identity while preserving retained evidence. Accounts that own teams with retained Actions records can still be refused deletion. [Understand retained history](/actions/audit-log#what-happens-to-history-after-account-deletion).
-
-  ## Keep bearer headers off dashboard requests
-
-  **Changed** · Session-only dashboard routes reject requests carrying a bearer credential even when a valid browser session is also present. API and MCP credentials keep their separate interfaces. [Resolve a dashboard authentication error](/api/authentication#why-does-a-dashboard-url-reject-my-bearer-token).
-
-
   ## Download action decision receipts
 
-  **New** · Audit rows with a stored receipt offer **Download decision receipt**. The JSON records the action decision, terminal status, available provider evidence, verification result, document digest, and audit-chain reference. A receipt can record failure as well as success. [Inspect a decision receipt](/actions/audit-log#download-an-action-decision-receipt).
+  **New** · Choose **Download decision receipt** from an eligible Audit row to save the action’s decision, outcome, and available verification evidence as JSON. Receipts cover failed actions as well as successful ones. [Inspect a decision receipt](/actions/audit-log#download-an-action-decision-receipt).
 </Update>
 
 <Update label="September 21, 2026">
@@ -37,28 +28,26 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Start Signals tasks from MCP prompts
 
-  **New** · Production MCP clients can discover `install_the_count`, `claimed_vs_counted`, and `signal_health`. These argument-free prompts return instructions for the existing Signals tools; they do not execute tools or bypass workspace permissions. [Use a built-in prompt](/mcp/setup#use-a-built-in-signals-prompt).
-
+  **New** · Choose a built-in prompt to install Signals, compare claimed clicks with counted arrivals, or check signal health. Prompts guide your MCP client through the existing tools; they do not run tools automatically. [Use a built-in prompt](/mcp/setup#use-a-built-in-signals-prompt).
 
   ## Arrival counting is free on every plan
 
   **Changed** · Arrivals are no longer billed or capped, and arrival allowances and overage charges have been removed. Your price follows your observed ad-spend band. Free includes 30 days of history; paid plans include 12 months. [Review pricing and billing](/billing/overview).
 
-  ## Connect ad platforms with the right team permissions
+  ## Team members can complete initial ad-platform connections
 
-  **Improved** · Team members can finish an initial or incomplete ad-platform connection. Replacing a healthy connection and disconnecting it remain admin/owner actions. Connections now shows each platform's controls according to those permissions; workspace-owner settings for Meta delivery and Stripe remain separate. [Check connection permissions](/signals/connect-meta#who-can-connect-or-change-an-ad-account).
+  **Improved** · Team members can finish an initial or incomplete ad-platform connection. Replacing a healthy connection or disconnecting it still requires a team admin or owner. [Check connection permissions](/signals/connect-meta#who-can-connect-or-change-an-ad-account).
 </Update>
 
 <Update label="September 20, 2026">
 
   ## Read Signals installation and arrivals through MCP
 
-  **New** · `get_install_instructions` returns managed-hostname installation material and stored first-arrival state. `get_arrivals_comparison` returns the workspace's stored arrivals and platform-click comparison for 7, 30, or 90 days. Both are read-only production tools available with authorized Read keys, without ad-account selection. [Use the Signals tools](/mcp/tools#get_install_instructions).
-
+  **New** · Your assistant can retrieve managed-hostname installation instructions and compare arrivals with platform clicks over 7, 30, or 90 days. Both tools work with an authorized Read key without selecting an ad account. [Use the Signals tools](/mcp/tools#get_install_instructions).
 
   ## Manage workspace keys through the API
 
-  **New** · Developers can use a Management key to list accessible workspaces and create, list, or revoke their own workspace keys. Current team members can also manage their keys in Settings, with Read or Write issuance limited by their current role. Management keys remain separate from MCP execution credentials; deleting one does not revoke the workspace keys it issued. [Use the management API](/api/authentication#how-do-i-use-the-management-api).
+  **New** · Use a Management key to list accessible workspaces and create, list, or revoke your workspace keys. Team members can also manage their own keys in Settings, within their current role’s permissions. [Use the management API](/api/authentication#how-do-i-use-the-management-api).
 </Update>
 
 <Update label="September 19, 2026">
@@ -82,10 +71,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="September 18, 2026">
 
-  ## Manage API secrets and MCP tokens separately
-
-  **Improved** · **Settings → API secret** manages the Signals secret used by REST, SDKs, and the CLI. **Tokens** manages account-bound MCP credentials, including issuance, rotation, revocation, and a **Show revoked** option. [Manage the API secret](/api/authentication#where-do-i-manage-the-signals-api-secret) or [issue a workspace token](/mcp/workspace-tokens).
-
   ## Manage provider connections in one place
 
   **Improved** · **Connections** brings together Meta reporting and dataset setup, Google Ads spend reads, Stripe revenue webhook configuration, and site installation links. Provider configuration and verified event delivery remain separate checks. [Connect Meta](/signals/connect-meta) or [configure Stripe revenue](/signals/track-events#verify-stripe-checkout-settlement).
@@ -106,7 +91,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Install Signals directly from Dashboard and Signals
 
-  **Improved** · Before the first arrival, Dashboard and Signals display installation instructions directly, including the CNAME and snippet for a provisioned managed hostname. Sample dashboard charts have been removed. Same-origin forwarding details open automatically when Path B is selected. [Install Signals and verify collection](/signals/install-pixel).
+  **Improved** · Before your first arrival, Dashboard and Signals show the installation instructions directly. Managed-hostname setup displays your CNAME and snippet, while same-origin setup opens the forwarding details. Sample dashboard charts have been removed. [Install Signals and verify collection](/signals/install-pixel).
 </Update>
 
 <Update label="September 14, 2026">
@@ -122,11 +107,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Server-event acknowledgements flag invalid consent timestamps
 
   **New** · New secret-authenticated event acknowledgements include `warnings`. The `consent_captured_at_invalid` warning identifies a missing or invalid capture time when visitor or user identity is supplied. Event acceptance and duplicate responses retain their existing semantics. [Handle the warning](/api/conversions#why-is-the-consent-capture-time-invalid).
-
-  ## Published agent skills use workspace execution tokens
-
-  **Fixed** · The published account-context, ingestion-verification, and governed-proposal skills now distinguish workspace execution tokens from OAuth management credentials and Signals workspace secrets. The proposal skill uses the supported creative workflow and preserves human approval and verification requirements. [Choose the correct MCP credential](/api/authentication#how-do-i-authenticate-plainrouter-mcp) and [follow the creative walkthrough](/actions/creative-workflow).
-
 </Update>
 
 <Update label="September 13, 2026">
@@ -147,7 +127,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Recover a removed collection hostname
 
-  **Fixed** · Signals now identifies a managed hostname removed at Cloudflare and offers **Re-provision hostname**. Re-provisioning preserves the removed record as history. [Recover the hostname](/signals/configure-dns#cloudflare-removed-the-collection-hostname).
+  **Fixed** · If Cloudflare removes your managed collection hostname, Signals now shows **Re-provision hostname** so you can restore it. [Recover the hostname](/signals/configure-dns#cloudflare-removed-the-collection-hostname).
 
   ## Workspace grants can be revoked through MCP
 
@@ -167,7 +147,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Team names stay aligned with Stripe
 
-  **Fixed** · Renaming a team in settings or during billing checkout now updates its existing Stripe customer after the name is saved. A temporary Stripe failure leaves the saved name intact. [Review billing setup](/billing/overview).
+  **Fixed** · Changing your team name in settings or during checkout now updates the name on your existing Stripe customer. [Review billing setup](/billing/overview).
 </Update>
 
 <Update label="September 9, 2026">
@@ -187,10 +167,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   **Improved** · Invitations continue through login or registration and require an explicit **Join** action with the invited email. Links last seven days; owners can resend or cancel pending invitations. [Join an invited team](/quickstart#join-an-invited-team).
 
-  ## Retention instruction records are retired
-
-  **Changed** · The former retention-instruction history and export have been removed. Workspace identity-retention policy continues to apply. [Review current retention behavior](/signals/overview#identity-retention).
-
   ## Arrivals are counted on page load
 
   **Improved** · The v4 snippet sends one identity-free arrival per document load before consent evaluation, on both managed-hostname and same-origin installations. Consent changes and in-app navigation do not add arrivals. Conversion events, visitor identity, and Meta delivery remain consent-gated. [Verify the arrival request](/signals/install-pixel#verify-the-installation).
@@ -198,10 +174,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Ad-account onboarding is optional
 
   **Improved** · Continue to Signals setup without connecting an ad account, or skip to the dashboard and return later. Signals setup starts with the website address, keeping it separate from the collection-domain DNS instructions. [Follow the quickstart](/quickstart).
-
-  ## Dashboard charts are clearly marked as a preview
-
-  **Improved** · The dashboard offers customizable charts labeled as sample data. Workspace, team, and profile names save on blur, and appearance settings include System mode. Use Signals for actual website measurements.
 </Update>
 
 <Update label="September 7, 2026">
@@ -234,10 +206,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Signals setup removes the retention questionnaire
 
   **Improved** · New Signals setup uses the 90-day identity-retention default without asking you to fill out a legal-profile or retention questionnaire. Server-side retention policy continues to apply. [Review identity retention](/signals/overview#identity-retention).
-
-  ## Pricing is pinned at the first paying invoice
-
-  **Improved** · Plainrouter pins the pricing table when the first paying invoice is reserved, rather than when an account is created. [Understand the pricing basis](/billing/overview).
 </Update>
 
 <Update label="September 3, 2026">

@@ -103,6 +103,12 @@ after the customer-visible implementation is merged and shipped.
   semantics across pages.
 - Add a changelog entry only for a verified customer-visible release. Keep the
   Changelog tab last in `docs.json`.
+- A release does not automatically warrant a changelog entry. Include a useful
+  new capability, meaningful user-visible fix, or change to setup, pricing, or
+  API compatibility. Lead with what the user can do or needs to change; link to
+  reference docs for technical details. Exclude internal storage, transactions,
+  monitoring, routine bookkeeping, disabled demos, and documentation maintenance.
+  Do not create an entry merely to account for every PR in a release batch.
 - Keep all public content in `docs.json` navigation unless there is a deliberate
   reason to hide it. Do not set `seo.indexing` to `all` merely to compensate for
   missing navigation.

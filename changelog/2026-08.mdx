@@ -14,30 +14,26 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## New accounts start directly in Signals setup
 
-  **Improved** · Email and supported social registrations now create the default workspace and open the canonical Signals setup flow immediately. Empty workspaces, Actions pages, and workspace settings also point to one honest next action instead of presenting dead-end tables. [Follow the self-serve quickstart](/quickstart).
+  **Improved** · Registration now creates your default workspace and takes you straight to Signals setup. Empty workspaces also link to the next setup step. [Follow the self-serve quickstart](/quickstart).
 
-  ## Google Ads connection reaches Workspace Settings
+  ## Connect Google Ads from workspace settings
 
-  **New** · When the Google Ads integration is configured, workspace owners can connect, reconnect, or disconnect Google Ads from **Workspace Settings**. Plainrouter stores the encrypted refresh credential and shows the customer IDs the connection can access. This connection does not turn Meta-only Actions into Google Ads execution.
+  **New** · Where the Google Ads integration is configured, workspace owners can connect, reconnect, or disconnect it from **Workspace Settings** and see the accessible customer IDs. Google Ads connection does not enable Google Ads Actions.
 
-  ## The dashboard shows completed-month workspace usage
+  ## See last month’s workspace usage
 
-  **New** · The workspace dashboard now shows arrivals and locally stored observed platform spend for the previous completed UTC month. Rendering the panel makes no live advertising-provider request, and incomplete spend or currency evidence appears as unavailable instead of an invented total.
+  **New** · The dashboard shows arrivals and observed platform spend for the previous completed UTC month. Incomplete spend or currency data appears as unavailable.
 
   ## Passive measurement stores less commerce detail
 
-  **Privacy** · Passive severed-measurement rows now round event and consent-capture times down to the UTC hour and omit product identifiers, quantities, and item counts. Amount, currency, and a workspace-keyed order reference remain available for aggregate measurement; passive rows still contain no visitor identity, URL, source, IP address, or user agent and never enter destination delivery. [Review passive activity handling](/signals/health-and-performance#events-received).
+  **Privacy** · Passive measurement now rounds timestamps to the hour and omits product identifiers, quantities, and item counts. These records remain free of visitor identity and are not sent to advertising destinations. [Review passive activity handling](/signals/health-and-performance#events-received).
 </Update>
 
 <Update label="August 29, 2026">
 
-  ## Signals becomes workspace-native
+  ## Conversion API responses identify the workspace
 
-  **Improved** · Signals configuration and tenancy now belong directly to the workspace. Conversion API responses use numeric `workspace_id` as the canonical identifier and retain `signal_tracker_id` as a deprecated decimal-string alias. Published `0.5.x` SDKs can continue reading that compatibility alias until regenerated clients add the canonical field. [Read the identifier transition](/api/conversions#read-workspace-identifiers).
-
-  ## Retention instructions become visible and auditable
-
-  **Privacy** · Plainrouter now records the current visitor-identity retention instruction with its effective time, controller identity, selected duration, selecting user, and supporting context. Existing workspaces without an instruction are reported as deliberately undocumented rather than receiving a fabricated historical record. [Review identity retention](/signals/overview#identity-retention).
+  **Changed** · Conversion API responses now include numeric `workspace_id`. The deprecated `signal_tracker_id` alias remains available for existing clients, including published `0.5.x` SDKs. [Read the identifier transition](/api/conversions#read-workspace-identifiers).
 </Update>
 
 <Update label="August 28, 2026">
@@ -46,9 +42,9 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   **Privacy** · The dashboard's channel subset now includes only attributed global arrivals and fully consented strict-EU arrivals. Portfolio, legitimate-interest revenue, and severed-measurement rows stay out of the channel split, while the separate total remains privacy-bounded. When a strict-EU passive total is below five, both the dashboard and CSV show `Suppressed (<5)` instead of the ledger count. [Interpret channels and totals](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
 
-  ## Signals identity lookup becomes workspace-keyed
+  ## Send user-data deletion identifiers in the request body
 
-  **Security** · Plainrouter now separates its private per-workspace identity lookup from the platform-format digests returned by `user_data_hashed`. User-data deletion accepts a verified raw identifier or legacy SHA-256 digest only in the JSON body and rejects identifiers placed in a URL query string. [Review deletion and identity fields](/api/conversions#delete-retained-user-data).
+  **Changed** · User-data deletion accepts a verified raw identifier or legacy SHA-256 digest in the JSON body. Identifiers in URL query strings are rejected. [Review deletion and identity fields](/api/conversions#delete-retained-user-data).
 
   ## Visitor identity retention is bounded to 30 or 90 days
 
@@ -60,10 +56,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Ruby SDK and PyPI CLI expand the official clients
 
   **New** · Ruby gem [`plainrouter-sdk 0.1.0`](https://rubygems.org/gems/plainrouter-sdk) brings the signed Conversion API contract to Ruby 3.2 and newer. Python package [`plainrouter==0.5.1`](https://pypi.org/project/plainrouter/) now also includes the `plainrouter` command: install it with `pipx install plainrouter==0.5.1` or run `python -m plainrouter` from an active environment. [Install the Ruby SDK](/sdk/ruby) or [choose a CLI distribution](/cli/get-started).
-
-  ## MCP hosts can render an approval-card preview
-
-  **Preview** · The production MCP catalog now includes `show_spend_cap_approval`, a read-only MCP App presentation with fixed demonstration values and disabled controls. It performs no account read, approval, provider call, or spend change. [Review the preview boundary](/mcp/tools#show_spend_cap_approval).
 </Update>
 
 <Update label="August 26, 2026">
@@ -83,9 +75,9 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="August 25, 2026">
 
-  ## Signal collection gets a fail-closed edge release
+  ## Browser identity requires full advertising consent
 
-  **Security** · The `v4.1.4` edge release accepts browser identity only after all three advertising permissions are granted under basis `consent`, rejects alternative caller-supplied identity bases, and keeps severed collection disabled when its private gate is missing or malformed. Same-origin forwarding probes now attest only the active secret and return a retryable error when tracker key storage is unavailable. [Review Signals consent behavior](/signals/track-events#set-consent).
+  **Privacy** · The `v4.1.4` collector accepts browser identity only when all three advertising permissions are granted under the consent basis. [Review Signals consent behavior](/signals/track-events#set-consent).
 </Update>
 
 <Update label="August 24, 2026">
@@ -94,16 +86,16 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   **New** · The Signals dashboard now compares privacy-bounded observed arrivals with stored account-level platform clicks over the same fully retained daily period. It shows the difference and claimed-click proportion, includes a CSV export, and never makes a live Marketing API request while rendering or exporting. [Interpret the comparison](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
 
-  ## Launcher batches gain MCP status and preflight preview
+  ## Check Launcher draft status and readiness through MCP
 
-  **New** · Agents can read bounded batch, item, partition, and linked-proposal status, then run the authoritative Launcher preflight gate without provider work. The discoverable execution entry remains deliberately closed and non-mutating during Phase B-1. [Use the Launcher MCP workflow](/mcp/tools#launcher-batch-status-and-preview).
+  **New** · Agents can inspect Launcher draft progress and run a readiness check without changing ads. The execution entry remains unavailable. [Use the Launcher MCP workflow](/mcp/tools#launcher-batch-status-and-preview).
 </Update>
 
 <Update label="August 23, 2026">
 
-  ## Signal arrival verification is more durable
+  ## Signals keeps completed installation verification
 
-  **Improved** · A verified managed-hostname arrival stays latched after recent activity ages out. During same-origin secret rotation, Plainrouter now acknowledges the new forwarding secret only after a successfully ingested authenticated arrival, so malformed or failed requests cannot end the overlap. [Review serving verification](/signals/configure-serving#generate-your-setup).
+  **Improved** · A verified managed-hostname installation stays verified when recent traffic ages out. During same-origin secret rotation, the old secret remains valid until an arrival successfully authenticates with the replacement. [Review serving verification](/signals/configure-serving#generate-your-setup).
 
   ## Strict-EU passive totals honor small-cell privacy
 
@@ -112,9 +104,9 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="August 22, 2026">
 
-  ## Passive Signal rows omit URLs and sources
+  ## Passive measurement omits page URLs and traffic sources
 
-  **Privacy** · Passive severed rows now store neither a page URL nor a platform or channel source, and their rollups keep the source dimension empty. These arrivals remain identity-free, aggregate-only, and ineligible for Meta delivery. [Review passive activity handling](/signals/health-and-performance#events-received).
+  **Privacy** · Passive measurement no longer stores page URLs or platform and channel sources. These arrivals remain identity-free aggregate data and are not sent to Meta. [Review passive activity handling](/signals/health-and-performance#events-received).
 </Update>
 
 <Update label="August 21, 2026">
@@ -133,10 +125,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## New Signal installs use the v3 browser contract
 
   **Fixed** · Plainrouter now generates `/s/v3.js` installation URLs across onboarding, hostname responses, and the dashboard fallback snippet. The v3 browser API accepts structured consent snapshots and fails closed when required advertising permissions are missing, unknown, denied, malformed, or withdrawn. Its `v3.0.1` patch also preserves previously consented visitor state while a returning page waits for the consent platform to restore its decision; no measurement resumes before that decision arrives. [Install the current pixel](/signals/install-pixel).
-
-  ## Action verification commits atomically
-
-  **Improved** · Receipt state, verification results, terminal action state, and audit events now settle in one transaction. Persistence retries reuse durable classified evidence without repeating provider writes or reads, while verified creation evidence suppresses unsafe exhaustion compensation. [Review verification and Landed](/actions/overview#verification-and-landed).
 </Update>
 
 <Update label="August 19, 2026">
@@ -152,10 +140,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## MCP execution credentials fail closed
 
   **Security** · OAuth management credentials are now rejected by default on MCP and agent-authenticated routes. The read-only agent-context route is the sole discovery exception; MCP tools require an account-bound workspace execution token whose tier is capped by the issuer's current workspace role. [Connect an agent](/mcp/setup).
-
-  ## Actions and operational monitoring are more deterministic
-
-  **Improved** · Plainrouter now fixes proposal, provider-read, verification-slot, and cancellation processing to explicit domain order. WAL archive monitoring also distinguishes idle databases from stalled archiving and no longer prevents later scheduled work from running after an alert.
 </Update>
 
 <Update label="August 18, 2026">
@@ -175,10 +159,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Stripe revenue waits for settlement
 
   **Improved** · Stripe Checkout creates a purchase only after an exact `payment_status` of `paid`. Failed, unpaid, free, missing, and malformed states stay out of the ledger, rollups, and Meta delivery. [Review Stripe event behavior](/signals/track-events#verify-stripe-checkout-settlement).
-
-  ## Creative media execution is more durable
-
-  **Improved** · Launcher now validates staged media before provider upload, records durable lifecycle state, and defers safely when the shared Meta request budget is exhausted. Policy, approval, receipt, and provider-verification gates remain in place.
 </Update>
 
 <Update label="August 17, 2026">
@@ -186,14 +166,6 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
   ## Drive ownership is verified before sync
 
   **New** · Launcher verifies a connected Drive folder by workspace-domain ownership or a generated challenge file before inventory sync can run. Public folders always require the challenge path. [Connect a Drive folder](/launcher/connect-drive).
-
-  ## The redesigned Signals ledger reached production
-
-  **Improved** · Plainrouter shipped partitioned event storage, exact rollup coverage, bounded retention paths, replay protection, and privacy erasure that preserves the accounting spine while removing subject data.
-
-  ## Drive sync gained durable operation receipts
-
-  **Improved** · Drive dispatch, retries, reconciliation, and final outcomes now share a durable receipt model, making sync work replay-safe and auditable without ambiguous legacy fallback behavior.
 </Update>
 
 <Update label="August 16, 2026">
@@ -202,7 +174,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   **New** · Workspace owners can issue, rotate, and revoke Read, Write, or Admin bearer tokens bound to one workspace and Meta ad account. Plainrouter shows the credential once and audits its lifecycle without storing the plaintext value. [Set up a workspace token](/mcp/workspace-tokens).
 
-  ## Policy changes joined the audit chain
+  ## Track action-policy changes in Audit
 
-  **Improved** · Workspace action-policy changes are now recorded atomically in the recomputable audit chain alongside proposals, approvals, executions, and token lifecycle events. [Learn about the audit log](/actions/audit-log).
+  **Improved** · Workspace action-policy changes now appear in the audit history alongside proposals, approvals, executions, and token changes. [Learn about the audit log](/actions/audit-log).
 </Update>
