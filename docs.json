@@ -195,6 +195,13 @@
                 ]
               },
               {
+                "group": "Actions",
+                "icon": "workflow",
+                "pages": [
+                  "api/actions"
+                ]
+              },
+              {
                 "group": "Events",
                 "icon": "send",
                 "pages": [

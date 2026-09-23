@@ -24,6 +24,7 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 | Confirm account access | `get_account_state` | The authorized workspace, selected Meta ad account, connection, and available capabilities. |
 | Diagnose conversion signals | `get_signal_health` | Stored collection, delivery, matching, and reconciliation diagnostics. |
 | Inspect stored performance | `get_performance` | An account-scoped comparison of gateway and Meta conversions. |
+| Track an action proposal | `list_actions`, `get_action_batch`, `get_action`, `get_action_decision_receipt`, `get_action_policy` | Stored outcomes, receipts, and current policy; requires a Write key even though these are reads. |
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
 
@@ -35,7 +36,7 @@ For repeatable Signals tasks, the server also supplies three [built-in prompts](
 
 <Steps>
   <Step title="Connect a client">
-    Use the sandbox without an account, or configure the production endpoint with a workspace execution token. Follow [Setup](/mcp/setup).
+    Use the sandbox without an account, or configure the production endpoint with a Workspace key. Follow [Setup](/mcp/setup).
   </Step>
   <Step title="Verify the account">
     For account-specific work, call `get_account_state` and confirm the returned workspace and Meta ad account. For workspace installation, call `get_install_instructions` and confirm its workspace; no Meta account is required.
@@ -53,7 +54,7 @@ For repeatable Signals tasks, the server also supplies three [built-in prompts](
 | Sandbox URL | `https://plainrouter.com/mcp/sandbox` |
 | Transport | Streamable HTTP; each request is processed independently |
 | Protocol | `2026-07-28` discovery; legacy `initialize` clients remain supported |
-| Production credential | Workspace execution token sent as a bearer credential |
+| Production credential | Workspace key sent as a bearer credential |
 | Sandbox credential | None; all four sandbox tools return synthetic data |
 | Account scope | One workspace per key; eligible account selected per account-scoped call. Older bound keys retain their account restriction. |
 
@@ -65,10 +66,10 @@ Custom clients should follow the [protocol and header requirements](/mcp/setup#w
 
 ## Access and approval
 
-A workspace owner or member creates a key within their current role under **Settings → Workspace keys**. Start with the **Read** tier for account and creative-library inspection; proposal-producing tools require **Write**. [Choose a token tier](/mcp/workspace-tokens#access-tiers).
+A workspace owner or member creates a key within their current role under **Settings → Workspace keys**. Start with the **Read** tier for account and creative-library inspection; proposal-producing tools and the [Actions read tools](/mcp/tools#read-actions-and-policy) require **Write**. [Choose a token tier](/mcp/workspace-tokens#access-tiers).
 
 <Note>
-  Plainrouter MCP uses workspace execution tokens. OAuth management credentials and Signals workspace secrets do not authenticate MCP tool calls.
+  Plainrouter MCP uses Workspace keys. OAuth management credentials and Server secrets do not authenticate MCP tool calls.
 </Note>
 
 Reads, diagnostics, and proposals have different effects. `get_signal_health` reads stored measurements; `get-creative-library` contacts Meta. The optional `verify_signal_ingestion` diagnostic writes an identity-free event and does not prove a real website arrival. Creative proposal calls write to Plainrouter; they do not directly create the Meta ad.

@@ -10,6 +10,12 @@ Once reporting is available, use **Last 7 days**, **Last 30 days**, or **Last 90
 
 Opening this page or choosing **Export** reads stored data. It does not trigger a live Meta Marketing API request.
 
+## Why is the available history shorter than my selected range?
+
+Plan history is a maximum read window: 30 days for Free and 12 months for paid plans. A shorter workspace event-retention window or unavailable source data can reduce detailed history further. Compare the returned dates and freshness indicators rather than assuming the whole requested period is present. [Billing and history](/billing/overview#how-does-history-affect-reports) explains the distinction.
+
+The Dashboard's **All time** arrival aggregate can include older counts outside detailed history. A shorter read window does not itself delete those aggregate totals, and it is separate from identity-data retention and deletion.
+
 ## Can I read the arrival comparison through MCP?
 
 Use [`get_arrivals_comparison`](/mcp/tools#get_arrivals_comparison) with a production Read workspace key. Pass `days` as `7`, `30`, or `90`; omission defaults to `7`. This reads the workspace's stored comparison without selecting an ad account or triggering a live provider read. Check the returned workspace, period, status, and data availability, and keep **Today so far** separate from completed days.

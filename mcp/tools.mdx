@@ -1,7 +1,7 @@
 ---
 title: "Plainrouter Meta Ads MCP tools: inputs and limits"
 sidebarTitle: "MCP tool reference"
-description: "Reference for Plainrouter MCP tools, Signals installation and arrivals reads, workspace grants, creative proposals, and synthetic test-mode tools."
+description: "Use Plainrouter MCP tools for Signals reads, Actions status and receipts, governed proposals, workspace grants, and synthetic testing."
 ---
 
 Plainrouter MCP server version `0.4.0` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
@@ -18,6 +18,11 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
 | `get_performance` | Read-only, idempotent | Read the admissible 1–90 day stored gateway-versus-Meta comparison for proposal evidence. |
 | `verify_signal_ingestion` | Idempotent verification write | Write one identity-free verification event and confirm ledger receipt. |
+| `list_actions` | Read-only, idempotent | List account-scoped actions with status filtering and pagination. |
+| `get_action_batch` | Read-only, idempotent | Read one batch and its actions. |
+| `get_action` | Read-only, idempotent | Read one action and its stored policy result. |
+| `get_action_decision_receipt` | Read-only, idempotent | Retrieve a stored decision receipt and chain reference. |
+| `get_action_policy` | Read-only, idempotent | Read current policy or effective defaults without creating it. |
 | `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed recommendation to policy and approval. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
@@ -334,14 +339,61 @@ does not read an account, submit an approval, call another tool, persist data,
 contact Meta, or change spend. Use it only to verify that an MCP host can render
 Plainrouter's app presentation.
 
+## Read Actions and policy
+
+Use these five production tools to follow a proposal without visiting the dashboard. They read stored Plainrouter records, make no provider calls, and do not change ads, action decisions, or policy. They are absent from the synthetic sandbox.
+
+All five require `ad-account.read` and an active workspace grant covering `propose-actions`. Use a **Write Workspace key**; normal Read keys do not have that grant. Older Admin keys remain subject to the same grant and current-role checks. Read-only behavior does not mean the Read tier is sufficient here.
+
+Every tool accepts an optional positive integer `account_id`, required when the workspace has multiple eligible active accounts. First confirm the workspace and account with `get_account_state`. Batch and action IDs are Plainrouter ULIDs returned by proposal or read responses, not Meta object IDs.
+
+### `list_actions`
+
+Accepts `account_id`, optional `status` from the [action-status list](/reference/statuses-and-terms#action-statuses), and `page` (positive integer, default `1`). For example:
+
+```json
+{
+  "account_id": 91,
+  "status": "pending",
+  "page": 1
+}
+```
+
+Returns `data` and pagination `meta` containing `current_page`, `last_page`, `per_page`, and `total`. Pages contain at most 25 actions, ordered by action ID descending. Do not use batch-only statuses such as `completed` as an action filter.
+
+### `get_action_batch`
+
+Requires `batch_id`, plus `account_id` when needed. Returns `data` with the batch ID, workspace and platform-account IDs, status, policy decision/reasons, rationale, idempotency key, and `actions` array.
+
+### `get_action`
+
+Requires `action_id`, plus `account_id` when needed. Returns one action under `data`. It includes `id`, `batch_id`, `workspace_id`, `type`, flat `target_entity_type`/`target_entity_id`/`target_entity_name` fields, `params`, `rationale`, `status`, `policy_decision`, and `policy_reasons`. These are also the action fields returned by the list and batch tools.
+
+### `get_action_decision_receipt`
+
+Requires `action_id`, plus `account_id` when needed. Returns `document`, `document_sha256`, and `chain_entry` (`sequence` and `hash`) at the top level. There is no `data` wrapper. Read the [receipt's outcome and integrity limits](/actions/audit-log#download-an-action-decision-receipt); its existence alone does not prove success.
+
+### `get_action_policy`
+
+Accepts only the optional account selector. Returns the current workspace policy under `data`; see the [policy response fields](/api/actions#read-the-current-policy). If no policy is saved, the result contains effective defaults and `id: null`, without creating a record. Do not substitute current policy for an earlier proposal's frozen mode or evidence.
+
+### Verify the result and handle failures
+
+Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. Human approval still happens in [Inbox](/actions/review-proposals).
+
+If a read is refused, check the key's current role and `propose-actions` grant, then account selection. A missing or out-of-scope action, batch, or decision receipt returns a `not_found` tool error; a receipt may not exist yet. Correct invalid status, page, or ID arguments before retrying. An empty list can reflect a filter or the selected account.
+
+Use the [Actions HTTP API](/api/actions) for the same scoped reads from a server integration. These tools do not provide a workspace audit export, policy editor, or approval/rejection operation.
+
 ## `propose-actions`
 
-This tool validates the action shapes, captures fresh evidence provenance, evaluates policy, and creates one batch.
+This tool validates the action shapes, captures fresh evidence provenance, evaluates policy, and creates one batch. The [Actions API](/api/actions#submit-a-governed-proposal) accepts the same proposal body. The [public server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared schema; accepted types do not by themselves establish execution availability.
 
 ### Top-level input
 
 | Field | Rules |
 | --- | --- |
+| `account_id` | Positive internal account ID; required when multiple eligible active accounts exist. |
 | `actions` | 1–25 typed action objects. |
 | `rationale` | Required plain-language batch rationale, up to 4,000 characters. |
 | `idempotency_key` | Required stable retry key, up to 64 characters. |
@@ -398,7 +450,7 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
     Requires `asset_id` and `status: "paused"`. An optional `name_suffix` can identify the duplicate.
   </Accordion>
   <Accordion title="upload_asset">
-    Requires `staged_asset_id`, `asset_type` (`image` or `video`), `filename`, and a lowercase 64-character `content_sha256`. Optional fields include detected `mime_type` and positive `size_bytes`.
+    Requires `staged_asset_id`, `asset_type: "image"`, `filename`, and a lowercase 64-character `content_sha256`. Optional fields include detected `mime_type` and positive `size_bytes`.
   </Accordion>
 </AccordionGroup>
 

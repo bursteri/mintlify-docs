@@ -8,12 +8,20 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
 <Update label="September 23, 2026">
 
+  ## Track Actions through HTTP or MCP
+
+  **New** · Submit governed proposals through the Actions API, then read actions, batches, current policy, and decision receipts from your integration. Five matching MCP tools let agents follow the stored outcome. These reads require a Write Workspace key; approval remains in Inbox. [Use the Actions API](/api/actions).
+
   ## Read provider connection health through MCP
 
   **New** · Agents can use `get_account_state` to see whether the selected workspace’s provider connection is connected, revoked, or needs attention. The new `connection.health` field matches the status in **Connections**. [Interpret connection health](/mcp/tools#how-should-i-interpret-connection-health).
 </Update>
 
 <Update label="September 22, 2026">
+
+  ## See real arrival totals on Dashboard
+
+  **Improved** · After the first arrival, Dashboard shows **Today so far**, **Last 7 days**, and **All time** counts. Workspaces without setup material now show a setup message instead of an empty reporting view. [Complete Signals setup](/quickstart).
 
   ## Download action decision receipts
 

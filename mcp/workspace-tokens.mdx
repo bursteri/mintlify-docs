@@ -4,7 +4,7 @@ sidebarTitle: "Workspace keys"
 description: "Create Read or Write MCP workspace keys, select an authorized ad account, replace keys, and inspect or revoke workspace grants in Plainrouter."
 ---
 
-A **workspace key** authenticates Plainrouter MCP clients within one workspace. New keys created in **Settings → Workspace keys** are not pinned to one ad account. Account-scoped calls select an active account owned by that workspace. Older account-bound keys retain their original restriction.
+A **workspace key** authenticates Plainrouter MCP clients and the [Actions API](/api/actions) within one workspace. New keys created in **Settings → Workspace keys** are not pinned to one ad account. Account-scoped calls select an active account owned by that workspace. Older account-bound keys retain their original restriction.
 
 The interface calls these credentials workspace keys; API fields and older integrations may still call them workspace execution tokens. They are separate from the Signals **Server secret** and **Management keys**. See [Authentication](/api/authentication#which-credential-should-i-use).
 
@@ -50,7 +50,9 @@ An eligible account for an unbound key must be owned by the key's workspace, act
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
 | **Read** | `workspace:read` | Account, Signals and creative reads; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
-| **Write** | `workspace:read`, `workspace:write` | Read access plus governed action and creative proposals; legacy Launcher drafting and preview where enabled. |
+| **Write** | `workspace:read`, `workspace:write` | Read access plus Actions status, policy, and receipt reads, and governed action and creative proposals; legacy Launcher drafting and preview where enabled. |
+
+The five [Actions read tools](/mcp/tools#read-actions-and-policy) and corresponding HTTP endpoints require an active grant covering `propose-actions`. A normal Read key does not have this grant, despite those operations being read-only.
 
 New keys expose Read and Write, not Admin. Older Admin-tier credentials may still appear in compatibility responses; their tier does not bypass policy, human approval, provider verification, or account restrictions. A workspace key is not a management key or browser session.
 

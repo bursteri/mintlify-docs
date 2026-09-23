@@ -35,10 +35,10 @@ after the customer-visible implementation is merged and shipped.
   project, organization, or account.
 - Use **Meta ad account** for the advertising account selected under a workspace
   key or bound to an older execution token. Do not shorten it to workspace account.
-- A **Signals workspace secret** authenticates the Signals Conversion API for
+- A **Server secret** (formerly Signals workspace secret) authenticates the Signals Conversion API for
   one workspace. Published `0.5.x` clients retain names such as
   `signalTrackerSecret` and "tracker token" as compatibility labels.
-- A **workspace execution token** authenticates PlainRouter MCP and authorized
+- A **Workspace key** (formerly workspace execution token) authenticates PlainRouter MCP and authorized
   workspace routes for one workspace. New Read/Write workspace keys select
   eligible active accounts owned by that workspace; older account-bound keys
   retain their binding. Use `account_id` where the tool requires selection.

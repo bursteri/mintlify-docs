@@ -65,6 +65,8 @@ When an action has a stored decision receipt, use **Audit → Download decision 
 
 **Approved**, **Executing**, and **Executed pending verification** do not mean Landed. A paused copy that Meta reports as `IN_PROCESS` still needs scheduled receipt-addressed verification. Inspect the exported events for progress or failure; do not create another copy to bypass a pending result. Escalate a `rollback_incomplete` result rather than treating it as restored.
 
+Agents and server integrations can follow the same stored action outcomes through the [MCP Actions reads](/mcp/tools#read-actions-and-policy) or [Actions API](/api/actions). These interfaces do not approve or reject the batch; the human decision remains in Inbox.
+
 ## Reject a batch
 
 Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason is stored in the audit event. Like approval, rejection applies to the containing batch.

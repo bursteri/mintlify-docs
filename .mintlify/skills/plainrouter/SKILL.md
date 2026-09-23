@@ -56,8 +56,8 @@ resources, not as substitutes for the explanatory documentation pages.
 
 | Credential | Use it for | Do not use it for |
 | --- | --- | --- |
-| Signals workspace secret | Signals Conversion API calls for one workspace | MCP or interactive workspace management |
-| Workspace key (workspace execution token) | MCP and authorized workspace routes for one workspace and an eligible selected account | Signals Conversion API or interactive browser sessions |
+| Server secret | Signals Conversion API calls for one workspace | MCP or interactive workspace management |
+| Workspace key | MCP and authorized workspace routes for one workspace and an eligible selected account | Signals Conversion API or interactive browser sessions |
 | Management key | Developer management operations under its owner's access | MCP, Signals Conversion API, or human approvals |
 | OAuth management credential | Read-only account discovery through `GET /api/v1/agent/context` | MCP tool calls |
 
@@ -150,6 +150,18 @@ Read [Actions overview](https://plainrouter.com/docs/actions/overview),
 [policy and safety](https://plainrouter.com/docs/actions/policies-and-safety),
 and [proposal review](https://plainrouter.com/docs/actions/review-proposals)
 before representing execution consequences.
+
+## Follow an action without making a decision
+
+Use `list_actions`, `get_action_batch`, `get_action`,
+`get_action_decision_receipt`, and `get_action_policy` to inspect stored records.
+These reads require a Write Workspace key and an active `propose-actions` grant;
+a normal Read key is insufficient. Confirm account selection first. They make no
+provider calls and cannot approve, reject, or edit policy. Preserve unavailable
+receipts and distinguish current policy from a proposal's frozen mode.
+
+Read the [Actions API](https://plainrouter.com/docs/api/actions) for equivalent
+HTTP routes, pagination, response fields, and failure handling.
 
 ## Propose a creative variant
 

@@ -1,0 +1,123 @@
+---
+title: "Actions API: proposals, status, policy, and receipts"
+sidebarTitle: "Actions"
+description: "Authenticate with a Workspace key, submit governed action proposals, and read account-scoped actions, batches, policy, and decision receipts over HTTP."
+---
+
+Use the Actions API to submit a governed proposal and follow its stored outcome from your application. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
+
+## Before you start
+
+- Create a **Write Workspace key** for the intended workspace, with an active grant covering `propose-actions`. This grant is required for Actions reads too; a normal Read key is insufficient. Older Admin keys still need the applicable grant and current role.
+- Connect an active Meta ad account owned by that workspace. Confirm its scope with [`get_account_state`](/mcp/tools#get_account_state).
+- Obtain the workspace's integer ID and Plainrouter's internal integer `account_id`. The latter is different from Meta's external account ID. The examples use workspace `42` and account `91`; replace both.
+- Load the key into `PLAINROUTER_WORKSPACE_KEY` through your secret manager. A Signals Server secret, Management key, OAuth management credential, or browser session cannot replace it.
+
+Use this base URL for all paths below:
+
+```text
+https://plainrouter.com/api/v1/agent/workspaces/{workspace}
+```
+
+Send `Authorization: Bearer <workspace-key>` and `Accept: application/json`. For POST requests, also send `Content-Type: application/json`.
+
+### Select the account
+
+Supply `account_id` as a query parameter on GET requests and in the JSON body on POST. You may omit it when there is only one eligible active account. Multiple eligible accounts require an explicit selection. An older account-bound key accepts only its bound account. The workspace in the URL must match the key's workspace. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
+
+## Endpoints
+
+| Method | Path relative to the base URL | Result |
+| --- | --- | --- |
+| `GET` | `/actions` | Paginated actions for the selected account. |
+| `GET` | `/action-batches/{actionBatch}` | One batch and its actions. |
+| `GET` | `/actions/{action}` | One action. |
+| `GET` | `/actions/{action}/decision-receipt` | Its stored decision receipt and audit-chain reference. |
+| `GET` | `/actions/policy` | Current workspace policy, including effective defaults. |
+| `POST` | `/actions` | Submit a proposal through the policy and approval workflow. |
+
+`{actionBatch}` and `{action}` are the ULIDs returned by Plainrouter, not Meta object IDs. All successful reads return HTTP `200`.
+
+## List and inspect actions
+
+```bash
+curl --fail-with-body --get \
+  https://plainrouter.com/api/v1/agent/workspaces/42/actions \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_KEY" \
+  --header 'Accept: application/json' \
+  --data-urlencode 'account_id=91' \
+  --data-urlencode 'status=pending' \
+  --data-urlencode 'page=1'
+```
+
+| Query parameter | Rules |
+| --- | --- |
+| `account_id` | Positive integer, required when account selection is ambiguous. |
+| `status` | Optional exact [action status](/reference/statuses-and-terms#action-statuses), such as `pending`, `verified`, or `execution_uncertain`. Batch-only values such as `completed` are invalid. |
+| `page` | Positive integer; defaults to `1`. Pages contain at most 25 actions, ordered by action ID descending. |
+
+The response has a `data` array and `meta.current_page`, `meta.last_page`, `meta.per_page`, and `meta.total`. Continue through the returned pages; there is no configurable `per_page` parameter.
+
+Each action contains `id`, `batch_id`, `workspace_id`, `type`, `target_entity_type`, `target_entity_id`, `target_entity_name`, `params`, `rationale`, `status`, `policy_decision`, and `policy_reasons`. Read responses use these flat target fields; proposal input uses a nested `target_entity` object.
+
+To inspect a returned action, request `/actions/{action}?account_id=91`. The response contains one action under `data`. To inspect its batch, request `/action-batches/{actionBatch}?account_id=91`; `data` contains the batch's `id`, workspace and platform-account IDs, status, policy result and reasons, rationale, idempotency key, and `actions` array. Confirm the scope and read both batch and action statuses.
+
+## Read the current policy
+
+```bash
+curl --fail-with-body --get \
+  https://plainrouter.com/api/v1/agent/workspaces/42/actions/policy \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_KEY" \
+  --header 'Accept: application/json' \
+  --data-urlencode 'account_id=91'
+```
+
+The `data` object includes `id`, `workspace_id`, `execution_mode`, `max_spend_delta_percent`, `hard_account_daily_cap_minor`, `protected_entities`, `quiet_hours_start`, `quiet_hours_end`, `protect_learning_phase`, `outcome_check_after_hours`, and `anomaly_threshold_percent`.
+
+If no policy has been saved, the read returns effective defaults with `id: null`; it does not create a policy. This is the **current** policy, not the frozen mode or policy evidence from an earlier proposal. Review [policy and safety](/actions/policies-and-safety) before interpreting execution permissions.
+
+## Retrieve a decision receipt
+
+Request `/actions/{action}/decision-receipt?account_id=91` with the same headers. The response contains these top-level fields, without a `data` wrapper:
+
+| Field | Meaning |
+| --- | --- |
+| `document` | Stored decision document, including the terminal outcome and available verification evidence. |
+| `document_sha256` | Digest of the canonical document, not the downloaded JSON file's formatting. |
+| `chain_entry.sequence` | Sequence of the receipt's audit event. |
+| `chain_entry.hash` | Hash of that audit event. |
+
+A receipt may not exist yet, and a receipt can describe failure. Check its terminal status and verification evidence before reporting success. This endpoint exposes one scoped receipt, not the complete workspace audit export. See [receipt interpretation and integrity limits](/actions/audit-log#download-an-action-decision-receipt).
+
+## Submit a governed proposal
+
+POST uses the same [proposal input](/mcp/tools#propose-actions) as MCP: `actions` (1–25 objects), `rationale`, `idempotency_key`, `evidence` (1–3 declarations), `target_source: "human_supplied"`, and `account_id` when required. Each action needs its typed parameters, selected target, and rationale. An array of action-name strings is not a valid proposal.
+
+Prepare `proposal.json` using the [documented action shapes and evidence rules](/mcp/tools#action-object). For creative work, follow the [paused-variant walkthrough](/actions/creative-workflow). Do not invent target IDs, asset IDs, or evidence. Submission also requires `actions.propose`; upload and creative-duplication proposals require `creative.write`.
+
+```bash
+curl --fail-with-body \
+  https://plainrouter.com/api/v1/agent/workspaces/42/actions \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_KEY" \
+  --header 'Accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --data-binary @proposal.json
+```
+
+A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. The response includes batch and action IDs, scope, policy reasons, approval requirements, status, and `inbox_url`; `approval_queue_url` remains a compatibility alias.
+
+Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or bypass human review. **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
+
+The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
+
+## Troubleshoot a request
+
+| Result | What to check |
+| --- | --- |
+| `401` | Key type, expiry/revocation, active principal and connection, and the issuer's current role. The issuer losing permission can invalidate a previously working key. |
+| `403` | The active grant must cover `propose-actions`, including for reads. A normal Read key does not qualify. Check any additional proposal permission. |
+| `404` | Workspace/account scope and returned action or batch ID. A decision receipt may not exist yet. Out-of-scope records are not exposed. |
+| `422` | Account selection, status/page values, and proposal field errors. Correct the request before retrying. |
+| Empty `data` | Clear the status filter and confirm the selected account. An empty page does not prove the workspace has no action history. |
+
+The equivalent [five MCP read tools](/mcp/tools#read-actions-and-policy) use the same scoped records and output shapes. MCP tool errors follow the MCP protocol rather than this HTTP status table.

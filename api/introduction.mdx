@@ -1,17 +1,17 @@
 ---
 title: "Plainrouter API"
 sidebarTitle: "Introduction"
-description: "Make your first synthetic API request, choose authentication, and find endpoints for conversions, delivery, reports, and data deletion."
+description: "Make your first synthetic API request, choose authentication, and find endpoints for conversions, Actions, delivery, and reports."
 ---
 
-Use the Plainrouter REST API to send consented conversion events, inspect delivery, run controlled destination tests, and read stored reports. Start with the synthetic sandbox before connecting a production workspace.
+Use the Plainrouter REST API to send consented conversion events, inspect delivery, read stored reports, and submit or track governed action proposals. Start with the synthetic sandbox before connecting a production workspace.
 
 <CardGroup cols={2}>
   <Card title="Make your first request" icon="terminal" href="#make-your-first-request">
     Send an identity-free test event without an account or API key.
   </Card>
-  <Card title="Authenticate production requests" icon="key-round" href="/api/authentication#how-do-i-authenticate-the-rest-api">
-    Use the Signals workspace secret for your server integration.
+  <Card title="Authenticate production requests" icon="key-round" href="/api/authentication#which-credential-should-i-use">
+    Choose a Server secret, Workspace key, or Management key for the interface.
   </Card>
 </CardGroup>
 
@@ -21,12 +21,14 @@ Use the Plainrouter REST API to send consented conversion events, inspect delive
 | --- | --- |
 | Base URL | `https://plainrouter.com/api/v1` |
 | Request and response format | JSON; each endpoint documents its schema |
-| Production authentication | `Authorization: Bearer YOUR_SIGNALS_WORKSPACE_SECRET` |
+| Signals authentication | Bearer Server secret for the workspace |
+| Actions authentication | Bearer Write Workspace key; see [Actions API](/api/actions) |
+| Management authentication | Bearer Management key; see [management operations](/api/authentication#how-do-i-use-the-management-api) |
 | Synthetic sandbox | No credential for `/sandbox/events`; a short-lived sandbox key for `/sandbox/keyed-events` |
 | API schema | [Published OpenAPI contract](https://plainrouter.com/openapi.json) |
 | Official clients | [TypeScript, Python, Ruby, Go, and CLI](/sdk/overview) |
 
-This is Plainrouter's API, not Meta's Graph API. Workspace execution tokens used for [MCP](/mcp/overview) do not authenticate the Signals REST API.
+This is Plainrouter's API, not Meta's Graph API. Workspace keys used for [MCP](/mcp/overview) do not authenticate the Signals REST API.
 
 ## Make your first request
 
@@ -68,6 +70,7 @@ Expect HTTP `200`. The response includes these fields; this is an excerpt:
 | --- | --- | --- |
 | Sandbox | Discover, issue a sandbox key, validate a synthetic event | Test request shape and client authentication. |
 | Events | Submit, verify ingestion, retrieve, or list events | Send conversions and inspect event and delivery state. |
+| [Actions](/api/actions) | Propose; read actions, batches, policy, and decision receipts | Follow a governed change through human review and its stored outcome. |
 | Destination testing | Set test mode and send a controlled test purchase | Check the connected Meta destination. These operations can change state or contact Meta. |
 | Delivery replay | Replay selected eligible failed deliveries | Retry retained payloads after fixing the destination problem. |
 | Reports | Reconciliation and Event Match Quality | Read stored conversion comparisons and matching reports. |
@@ -77,7 +80,7 @@ Expand a group in the sidebar for its request fields, responses, and examples. P
 
 ## Move to production
 
-1. [Set up Signals](/quickstart), then configure your server with its [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api). Keep credentials out of browser code, prompts, and source control.
+1. [Set up Signals](/quickstart), then configure your server with its [Server secret](/api/authentication#how-do-i-authenticate-the-rest-api). Keep credentials out of browser code, prompts, and source control.
 2. Use the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check the authenticated write path. It does not verify a real website arrival.
 3. For advertising delivery, [connect the intended Meta dataset](/signals/connect-meta). Send an actual conversion only with the recorded consent and original event data required by the [conversion guide](/api/conversions#submit-an-event).
 4. Preserve the event ID on retries and [inspect the delivery trace](/api/conversions#how-do-i-confirm-meta-accepted-the-event). HTTP `202` is ingestion acceptance; destination acceptance is a separate result.

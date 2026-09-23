@@ -135,6 +135,8 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
 | `rolled_back` | The provider change was restored and the restoration was verified. |
 | `blocked` | Policy or an execution boundary stopped the action before execution. |
 
+A receipt marked `irreversible` does not establish restoration. A batch with `rollback_incomplete` needs investigation even if other actions were restored. Read the exact action and receipt outcomes before retrying or claiming that a provider change was undone.
+
 ## Core terms
 
 <AccordionGroup>
