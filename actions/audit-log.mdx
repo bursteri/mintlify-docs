@@ -80,10 +80,27 @@ The JSON export retains the hash and predecessor fields. The current Audit page 
 | Verification | `action.verified`, `execution.verified` | The exact provider object matched; all actions are Landed only after the batch-level verified event. |
 | Async verification | `action.verification_handed_off`, `action.async_verification_*` | A committed ad copy remains Not Landed while scheduled verification continues. |
 | Decision receipt | `action.decision_receipt_issued` | A terminal action decision document was stored and linked to the audit chain. Read its status; a receipt is not automatically a successful outcome. |
-| Outcome | `outcome.checked`, `outcome.anomaly_detected` | A later provider outcome was recorded and classified. |
+| Outcome | `outcome.checked`, `outcome.anomaly_detected`, `outcome.check_exhausted` | A later outcome was classified, or bounded follow-up checks exhausted their retries. |
 | Restoration | `action.rolled_back`, `batch.rolled_back`, `batch.rollback_incomplete` | Compensation restored provider state, or incomplete recovery needs attention. |
 
 Measurement-only events explicitly say **NOT LANDED**. Do not count them as production execution acceptance.
+
+## Interpret unavailable outcomes and recovery
+
+An execution verification and a later performance outcome answer different questions. `outcome.check_exhausted` reports an unavailable outcome with reason `outcome_check_exhausted`; the execution receipt’s `outcome_status` is `unavailable`. It does not undo an already verified action, change its completed batch to failure, or establish a performance improvement.
+
+Recovery events can include `payload.compensation_recovery_disposition`. Read the exact value alongside the action, receipt, and provider proof:
+
+| Value | Interpretation |
+| --- | --- |
+| `no_compensation` | No compensation occurred. Do not infer restoration. |
+| `restored` | Recovery reports restoration; inspect the receipt-addressed verification evidence. |
+| `unrestored` | The provider change has not been restored. |
+| `contradictory` | Observed state contradicts the expected recovery result. |
+| `irreversible` | The change cannot be undone through this recovery path. |
+| `uncertain` | Recovery could not establish the result. Provider observation and proof may be absent. |
+
+Older events may omit this field. Missing evidence means unknown, not restored. Investigate `rollback_incomplete` rather than repeating a provider write to try to clear the status.
 
 ## Investigate unexpected execution
 

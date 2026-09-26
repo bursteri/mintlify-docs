@@ -65,7 +65,7 @@ Every issued key has this shape:
 Plainrouter never persists a sandbox key.
 
 <Warning>
-  A sandbox key is not a Signals workspace secret or a workspace execution token. It authenticates only the synthetic sandbox, has no workspace or Meta ad-account binding, and grants no production access.
+  A **Sandbox key** is not a Signals **Server secret** or a **Workspace key**. It authenticates only the synthetic sandbox, has no workspace or Meta ad-account binding, and grants no production access.
 </Warning>
 
 ## Validate without a credential
@@ -168,8 +168,8 @@ Key issuance and keyed validation use independent budgets. Validation traffic ca
 
 ## Move to production
 
-Registration is self-serve. Review the current EUR spend bands and free arrival counting in [Pricing and billing](/billing/overview). A current workspace owner or team member can issue role-capped [workspace execution tokens](/mcp/workspace-tokens) from the dashboard.
+Registration is self-serve. Review the current EUR spend bands and free arrival counting in [Pricing and billing](/billing/overview). A current workspace owner or team member can issue role-capped [Workspace keys](/mcp/workspace-tokens) from the dashboard.
 
-Keep the production credential types separate. A Signals workspace secret authenticates the Signals Conversion API for one workspace. A workspace execution token authenticates MCP and authorized workspace routes for one workspace and an eligible selected advertising account. Older account-bound keys retain their binding. Neither credential is a sandbox key.
+Keep the production credential types separate. A Server secret authenticates the Signals Conversion API for one workspace. A Workspace key authenticates MCP and authorized workspace routes for one workspace and an eligible selected advertising account. Older account-bound keys retain their binding. Neither credential is a sandbox key.
 
 [Follow the Quickstart](/quickstart) to create a workspace, configure a Signal, and verify the production ingestion path.

@@ -23,6 +23,7 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_action` | Read-only, idempotent | Read one action and its stored policy result. |
 | `get_action_decision_receipt` | Read-only, idempotent | Retrieve a stored decision receipt and chain reference. |
 | `get_action_policy` | Read-only, idempotent | Read current policy or effective defaults without creating it. |
+| `dry_run_actions` | Policy preview; may read provider state | Evaluate a proposed batch without saving or executing it. Requires Write access. |
 | `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed recommendation to policy and approval. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
@@ -97,7 +98,7 @@ A concurrent operation can return `workspace_lock_timeout` through MCP. Affected
 
 ## Shared authorization and scope
 
-Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` requires `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`. Every Launcher tool requires the `ad-account.read` baseline.
+Signals read tools require an active principal with `ad-account.read`. `verify_signal_ingestion` requires `signals.verify`. `propose-actions` and `dry_run_actions` require `actions.propose`. Creative-library reads require `creative.read`. Creative proposal tools require both `creative.write` and `actions.propose`. Every Launcher tool requires the `ad-account.read` baseline.
 
 Clients authenticate with a role-capped [workspace execution token](/mcp/workspace-tokens). A **Read** token derives the read scopes. **Write** keys also derive the proposal scopes. New keys offer Read and Write; older Admin-tier keys retain their existing role and grant checks. Management keys and OAuth management credentials cannot authenticate to the MCP server.
 
@@ -385,6 +386,18 @@ If a read is refused, check the key's current role and `propose-actions` grant, 
 
 Use the [Actions HTTP API](/api/actions) for the same scoped reads from a server integration. These tools do not provide a workspace audit export, policy editor, or approval/rejection operation.
 
+## `dry_run_actions`
+
+Preview a proposed batch's policy decisions and execution diffs without creating the proposal or changing Meta. This tool can read real provider state; it is not the synthetic MCP sandbox.
+
+Use a **Write Workspace key**, an active `propose-actions` grant, `actions.propose`, and the same complete [input](#propose-actions) as `propose-actions`. Creative upload and duplication also require `creative.write`. The required rationale, retry key, human-selected targets, and evidence rules still apply.
+
+The response contains `dry_run.actions`. Each evaluated item includes its policy decision, reasons, and `diff.before`/`diff.proposed`. `approval_required` and `would_auto_execute` reflect the combined batch decision. An item with `status: "dry_run_unavailable"` has a reason instead of a policy prediction or diff. Inspect every item before reporting the preview result.
+
+A preview creates no batch, action, decision receipt, or proposal audit event and queues no execution. Repeating it evaluates current state again; it does not reserve an idempotency key. Submit separately with `propose-actions` when authorized, then direct the person to Inbox. Policy and execution checks still apply.
+
+See the [dry-run response reference and HTTP example](/api/actions#preview-a-proposal-without-submitting-it). A schema-accepted type or passing preview does not establish that its execution workflow is available.
+
 ## `propose-actions`
 
 This tool validates the action shapes, captures fresh evidence provenance, evaluates policy, and creates one batch. The [Actions API](/api/actions#submit-a-governed-proposal) accepts the same proposal body. The [public server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared schema; accepted types do not by themselves establish execution availability.
@@ -453,6 +466,25 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
     Requires `staged_asset_id`, `asset_type: "image"`, `filename`, and a lowercase 64-character `content_sha256`. Optional fields include detected `mime_type` and positive `size_bytes`.
   </Accordion>
 </AccordionGroup>
+
+### Validation and retry keys
+
+These rules apply to both `propose-actions` and `dry_run_actions`:
+
+- Send `actions` and `evidence` as JSON arrays, not objects keyed by index or name. NUL characters (`U+0000`) are rejected in request keys and values.
+- Each action can supply its own `idempotency_key`. Otherwise its effective key is the batch key plus `:` and its zero-based action index. Effective action keys must be unique within the batch, including collisions between explicit and derived keys.
+- Keep the original batch key and payload when retrying the same submission after a timeout. A preview does not reserve that key or return a stored submission.
+
+| Action shape | Validation rule |
+| --- | --- |
+| `pause`, `resume` | `target_entity.id` must be a non-empty string of digits. Send empty `params: {}`. |
+| `increase_budget`, `decrease_budget` | Use a digits-only target ID string. `params` contains only `new_daily_budget_minor`, a positive JSON integer, not a quoted number, decimal, or boolean. |
+| `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. Optional `size_bytes` must be a positive JSON integer. |
+| `duplicate_ad_with_creative` | `asset_id` is a non-empty digits-only string; `status` is `paused`. |
+
+The canonical management names above describe accepted input validation, not a promise of general execution availability. Use the [supported creative workflow](/actions/creative-workflow); the legacy `adjust_budget` and `set_status` recommendations remain separate types.
+
+HTTP field errors return `422`; MCP exposes a tool validation error. Read the field path and message. `action_request_invalid` identifies list, NUL, or duplicate-key problems; `action_target_id_invalid` identifies the guarded target-ID rule; `action_params_invalid` identifies invalid typed parameters. Correct the payload rather than retrying it unchanged.
 
 ### Evidence restrictions
 

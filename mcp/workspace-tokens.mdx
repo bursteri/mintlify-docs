@@ -13,7 +13,7 @@ The interface calls these credentials workspace keys; API fields and older integ
 Sign in as the workspace owner or a current team member and select the workspace your agent should use. Members can issue Read keys; Write keys also require update permission. The page lists and revokes only your own keys. A key can be created before connecting an ad account. The workspace-scoped [installation and arrivals tools](/mcp/tools#get_install_instructions) work without account selection; account reads need an eligible account and active provider connection.
 
 1. Open **Settings → Workspace keys**.
-2. Enter a **Name**, choose the **Read** or **Write** tier, and select a 30, 90, or 365 day expiry.
+2. Enter a **Name** and check **Tier**: **Write** is preselected. Choose **Read** explicitly for supported reporting or diagnostic tools; Actions previews, proposals, and Actions record reads require **Write**. Select a 30, 90, or 365 day expiry.
 3. Choose **Create key**, then **Copy** the revealed key. It is shown once.
 4. Configure your MCP client with `https://plainrouter.com/mcp` and the key as its bearer credential. The reveal dialog includes Claude Desktop and Claude Code configuration examples.
 5. Call `get_account_state` and confirm the returned workspace and intended account before further work.
@@ -50,7 +50,7 @@ An eligible account for an unbound key must be owned by the key's workspace, act
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
 | **Read** | `workspace:read` | Account, Signals and creative reads; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
-| **Write** | `workspace:read`, `workspace:write` | Read access plus Actions status, policy, and receipt reads, and governed action and creative proposals; legacy Launcher drafting and preview where enabled. |
+| **Write** | `workspace:read`, `workspace:write` | Read access plus Actions status, policy, and receipt reads, and governed action previews, action proposals, and creative proposals; legacy Launcher drafting and preview where enabled. |
 
 The five [Actions read tools](/mcp/tools#read-actions-and-policy) and corresponding HTTP endpoints require an active grant covering `propose-actions`. A normal Read key does not have this grant, despite those operations being read-only.
 
@@ -96,7 +96,7 @@ Supply `account_id` when the workspace has multiple eligible active accounts. Ve
 
 ### A tool reports insufficient permission
 
-Use Read for reads and Write for proposal-producing tools. Create a replacement with the needed tier; do not try to elevate an existing key. Missing feature enablement or provider permissions is separate from its tier.
+Use Read for supported Signals, account, or creative reads. Actions record reads, dry runs, and proposal-producing tools require Write and the applicable grant. Create a replacement with the needed tier; do not try to elevate an existing key. Missing feature enablement or provider permissions is separate from its tier.
 
 ### You cannot open Workspace keys
 

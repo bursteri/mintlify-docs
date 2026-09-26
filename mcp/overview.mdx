@@ -24,6 +24,7 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 | Confirm account access | `get_account_state` | The authorized workspace, selected Meta ad account, connection, and available capabilities. |
 | Diagnose conversion signals | `get_signal_health` | Stored collection, delivery, matching, and reconciliation diagnostics. |
 | Inspect stored performance | `get_performance` | An account-scoped comparison of gateway and Meta conversions. |
+| Preview a proposal | [`dry_run_actions`](/mcp/tools#dry_run_actions) | Current policy decisions and proposed diffs without creating a batch or writing to Meta; requires a Write key. |
 | Track an action proposal | `list_actions`, `get_action_batch`, `get_action`, `get_action_decision_receipt`, `get_action_policy` | Stored outcomes, receipts, and current policy; requires a Write key even though these are reads. |
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |

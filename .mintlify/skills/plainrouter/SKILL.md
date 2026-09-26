@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-09-23"
+  documentation_revision: "2026-09-26"
 ---
 
 # Use PlainRouter safely
@@ -139,10 +139,15 @@ for setup and interpretation.
    campaign, ad set, ad, or asset.
 3. Capture fresh admissible evidence. Use measurable `get_performance` data for
    spend- or delivery-affecting proposals.
-4. Call `propose-actions` with 1–25 typed actions, 1–3 evidence declarations, a
+4. To preview first, call `dry_run_actions` with the complete proposal and a
+   Write key with the `propose-actions` grant and required scopes. It can read
+   real provider state but creates no proposal or provider change. Inspect each
+   item: `dry_run_unavailable` is not a passing policy decision. A preview does
+   not reserve a retry key or approve execution.
+5. When authorized to submit, call `propose-actions` with 1–25 typed actions, 1–3 evidence declarations, a
    plain-language rationale, `target_source: "human_supplied"`, and a stable
    idempotency key.
-5. Report the returned policy decision, approval requirement, status, and
+6. Report the returned policy decision, approval requirement, status, and
    `inbox_url` (with `approval_queue_url` as its compatibility alias). Describe the result as suggest-only, pending approval,
    blocked, awaiting verification, Landed, or Not Landed as applicable.
 

@@ -1,10 +1,10 @@
 ---
-title: "Actions API: proposals, status, policy, and receipts"
+title: "Actions API: preview proposals and track outcomes"
 sidebarTitle: "Actions"
-description: "Authenticate with a Workspace key, submit governed action proposals, and read account-scoped actions, batches, policy, and decision receipts over HTTP."
+description: "Preview a proposal without creating a batch, submit it for review, and read action status, policy, and decision receipts with a Write Workspace key."
 ---
 
-Use the Actions API to submit a governed proposal and follow its stored outcome from your application. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
+Use the Actions API to preview a proposal, submit it for review, and follow its stored outcome from your application. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
 
 ## Before you start
 
@@ -34,6 +34,7 @@ Supply `account_id` as a query parameter on GET requests and in the JSON body on
 | `GET` | `/actions/{action}` | One action. |
 | `GET` | `/actions/{action}/decision-receipt` | Its stored decision receipt and audit-chain reference. |
 | `GET` | `/actions/policy` | Current workspace policy, including effective defaults. |
+| `POST` | `/actions/dry-run` | Preview policy decisions and diffs without creating a proposal. May read provider state. |
 | `POST` | `/actions` | Submit a proposal through the policy and approval workflow. |
 
 `{actionBatch}` and `{action}` are the ULIDs returned by Plainrouter, not Meta object IDs. All successful reads return HTTP `200`.
@@ -89,6 +90,37 @@ Request `/actions/{action}/decision-receipt?account_id=91` with the same headers
 
 A receipt may not exist yet, and a receipt can describe failure. Check its terminal status and verification evidence before reporting success. This endpoint exposes one scoped receipt, not the complete workspace audit export. See [receipt interpretation and integrity limits](/actions/audit-log#download-an-action-decision-receipt).
 
+## Preview a proposal without submitting it
+
+Use `POST /actions/dry-run` to inspect policy decisions and proposed diffs before creating a batch. Use the same complete [proposal body](/mcp/tools#propose-actions) and permissions as submission: a Write Workspace key, an active `propose-actions` grant, and `actions.propose`. Upload and creative-duplication previews also require `creative.write`.
+
+Prepare `proposal.json` using the [typed action shapes and evidence rules](/mcp/tools#action-object). Include `rationale`, `idempotency_key`, and valid evidence even though the preview does not save a proposal. Targets must be human-selected; evidence fields must exist in the fresh server-side capture.
+
+```bash
+curl --fail-with-body \
+  https://plainrouter.com/api/v1/agent/workspaces/42/actions/dry-run \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_KEY" \
+  --header 'Accept: application/json' \
+  --header 'Content-Type: application/json' \
+  --data-binary @proposal.json
+```
+
+A successful request returns HTTP `200` with a `dry_run.actions` array. Inspect **every** item's `status`:
+
+| Field | How to interpret it |
+| --- | --- |
+| `type`, `target_entity` | The normalized action type and selected target. |
+| `status: "evaluated"` | Policy evaluation produced the fields below. It does not establish execution availability or success. |
+| `policy_decision`, `policy_reasons` | This action's policy result and reasons. |
+| `approval_required`, `would_auto_execute` | The combined batch policy result, repeated on each evaluated action. These are predictions, not approval or execution. |
+| `diff.before` | State available to policy evaluation. An empty object or array does not mean a known zero or absent provider object. |
+| `diff.proposed` | The normalized proposed action, not a request sent to Meta. |
+| `status: "dry_run_unavailable"`, `reason` | Evaluation needs a persisted Action row. No policy prediction or diff is supplied; HTTP `200` alone does not mean every action was evaluated. |
+
+The preview can read real account and provider state. It does not create a batch, action, decision receipt, or proposal audit event, queue execution, or write to Meta. It uses the current policy or unsaved defaults when no policy exists.
+
+Repeating a preview evaluates current state again; the required idempotency key does not reserve a proposal or freeze the result. If you choose to submit, use the proposal endpoint below with the intended body. Submission reevaluates the proposal and creates its review record. A dry run cannot enable a closed action workflow or bypass human approval.
+
 ## Submit a governed proposal
 
 POST uses the same [proposal input](/mcp/tools#propose-actions) as MCP: `actions` (1–25 objects), `rationale`, `idempotency_key`, `evidence` (1–3 declarations), `target_source: "human_supplied"`, and `account_id` when required. Each action needs its typed parameters, selected target, and rationale. An array of action-name strings is not a valid proposal.
@@ -117,7 +149,8 @@ The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card
 | `401` | Key type, expiry/revocation, active principal and connection, and the issuer's current role. The issuer losing permission can invalidate a previously working key. |
 | `403` | The active grant must cover `propose-actions`, including for reads. A normal Read key does not qualify. Check any additional proposal permission. |
 | `404` | Workspace/account scope and returned action or batch ID. A decision receipt may not exist yet. Out-of-scope records are not exposed. |
-| `422` | Account selection, status/page values, and proposal field errors. Correct the request before retrying. |
+| `422` | Account selection, status/page values, and [proposal field errors](/mcp/tools#validation-and-retry-keys). Correct the named field before retrying. |
+| `200` with `dry_run_unavailable` | The preview could not evaluate an action without a persisted row. Do not treat it as a passing policy result. |
 | Empty `data` | Clear the status filter and confirm the selected account. An empty page does not prove the workspace has no action history. |
 
 The equivalent [five MCP read tools](/mcp/tools#read-actions-and-policy) use the same scoped records and output shapes. MCP tool errors follow the MCP protocol rather than this HTTP status table.
