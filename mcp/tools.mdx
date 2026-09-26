@@ -479,8 +479,8 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 | --- | --- |
 | `pause`, `resume` | `target_entity.id` must be a non-empty string of digits. Send empty `params: {}`. |
 | `increase_budget`, `decrease_budget` | Use a digits-only target ID string. `params` contains only `new_daily_budget_minor`, a positive JSON integer, not a quoted number, decimal, or boolean. |
-| `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. Optional `size_bytes` must be a positive JSON integer. |
-| `duplicate_ad_with_creative` | `asset_id` is a non-empty digits-only string; `status` is `paused`. |
+| `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. For optional `size_bytes`, use a positive integer byte count. |
+| `duplicate_ad_with_creative` | Use the exact `image:…` or `video:…` asset ID returned by the creative library, not a bare numeric provider ID; `status` is `paused`. |
 
 The canonical management names above describe accepted input validation, not a promise of general execution availability. Use the [supported creative workflow](/actions/creative-workflow); the legacy `adjust_budget` and `set_status` recommendations remain separate types.
 
