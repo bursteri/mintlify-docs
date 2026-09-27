@@ -14,13 +14,19 @@ Opening this page or choosing **Export** reads stored data. It does not trigger 
 
 Check **Workspace settings → Read window** for the effective number of days. **Identity retention** is shown separately. Choose a shorter range and check the actual report dates; the label does not guarantee N complete days of source data.
 
-Plan history is a maximum read window: 30 days for Free and 12 months for paid plans. A shorter workspace event-retention window or unavailable source data can reduce detailed history further. Compare the returned dates and freshness indicators rather than assuming the whole requested period is present. [Billing and history](/billing/overview#how-does-history-affect-reports) explains the distinction.
+Plan history allows 30 days on Free and 12 calendar months on paid plans. An explicit shorter workspace retention setting can reduce that window. A newly created workspace has no shorter event-read setting; the separate default for visitor identity retention does not impose a fixed 90-day event-read limit. Available source data can still be incomplete. [Billing and history](/billing/overview#how-does-history-affect-reports) explains the distinction.
 
-The Dashboard's **All time** arrival aggregate can include older counts outside detailed history. A shorter read window does not itself delete those aggregate totals, and it is separate from identity-data retention and deletion.
+Dashboard's third arrival total uses its displayed reporting-window label, such as **Last 30 days** or **Last 12 months**. It is not an unlimited lifetime count. Event history, visitor identity, payloads, and delivery records have separate read or retention limits; an older event may no longer have its original payload or delivery details.
+
+### Which reporting windows can I select?
+
+Signals offers **Last 7 days**, **Last 30 days**, **Last 90 days**, and **Last 12 months** only when the window fits the workspace's plan and any explicit shorter setting. The month option means 12 calendar months, not a fixed 365-day request. Completed days and **Today so far** remain separate.
+
+Requests beyond the available window are refused rather than silently shortened. A stale Signals page link returns to the default window with a refusal message; CSV and MCP callers receive an error. Choose an offered window and retry. This window policy does not extend [`get_performance`](/mcp/tools#get_performance), whose reconciliation range remains 1–90 days.
 
 ## Can I read the arrival comparison through MCP?
 
-Use [`get_arrivals_comparison`](/mcp/tools#get_arrivals_comparison) with a production Read workspace key. Pass `days` as `7`, `30`, or `90`; omission defaults to `7`. This reads the workspace's stored comparison without selecting an ad account or triggering a live provider read. Check the returned workspace, period, status, and data availability, and keep **Today so far** separate from completed days.
+Use [`get_arrivals_comparison`](/mcp/tools#get_arrivals_comparison) with a production Read workspace key. Pass `days` as `7`, `30`, or `90`, or use `months: 12` instead when the workspace allows it. With neither input, the default is `7` days. This reads the workspace's stored comparison without selecting an ad account or triggering a live provider read. Check the returned workspace, period, status, and data availability, and keep **Today so far** separate from completed days.
 
 ## What do you need to check?
 

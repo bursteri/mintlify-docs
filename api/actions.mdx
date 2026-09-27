@@ -59,9 +59,26 @@ curl --fail-with-body --get \
 
 The response has a `data` array and `meta.current_page`, `meta.last_page`, `meta.per_page`, and `meta.total`. Continue through the returned pages; there is no configurable `per_page` parameter.
 
-Each action contains `id`, `batch_id`, `workspace_id`, `type`, `target_entity_type`, `target_entity_id`, `target_entity_name`, `params`, `rationale`, `status`, `policy_decision`, and `policy_reasons`. Read responses use these flat target fields; proposal input uses a nested `target_entity` object.
+Each action contains `id`, `batch_id`, `workspace_id`, `type`, `target_entity_type`, `target_entity_id`, `target_entity_name`, `params`, `rationale`, `status`, `policy_decision`, and `policy_reasons`. Read responses use these flat target fields; proposal input uses a nested `target_entity` object. Each returned action also includes `batch_status` and a current `disposition` object.
 
 To inspect a returned action, request `/actions/{action}?account_id=91`. The response contains one action under `data`. To inspect its batch, request `/action-batches/{actionBatch}?account_id=91`; `data` contains the batch's `id`, workspace and platform-account IDs, status, policy result and reasons, rationale, idempotency key, and `actions` array. Confirm the scope and read both batch and action statuses.
+
+## Interpret current disposition and recovery
+
+List, single-action, and batch reads include each action's `disposition` alongside its historical `status` and `batch_status`. Use it to distinguish current receipt evidence from the original workflow result.
+
+| Disposition field | Meaning |
+| --- | --- |
+| `receipt_status` | Current execution-receipt state, or `null` when no receipt exists. |
+| `outcome_status` | Later measurement status: `measurable`, `not_measurable`, `unavailable`, or `null`. It is separate from execution verification. |
+| `outcome_reason_code`, `outcome_checked_at` | Available outcome reason and check time. Unknown or unrecorded values are `null`. |
+| `compensation_reason_code` | Recorded reason from the relevant compensation event, when available. |
+| `recovery_disposition` | `no_compensation`, `restored`, `unrestored`, `contradictory`, `irreversible`, `uncertain`, or `null`. See [recovery interpretation](/actions/audit-log#interpret-unavailable-outcomes-and-recovery). |
+| `late_restored` | `true` when the receipt is currently compensated and a late-restoration event exists. It does not rewrite the action or batch's earlier result. |
+
+A batch also returns `batch_status` and nullable `restoration_summary`. `all_receipts_compensated_late` means every existing execution receipt in that batch is compensated and at least one has late-restoration evidence. It does not mean every proposed action executed, and it does not turn the batch into a successful original execution.
+
+Keep nullable values as unknown. A historical `rollback_incomplete` can remain alongside later restoration evidence; read both rather than replacing one with the other.
 
 ## Read the current policy
 
@@ -87,8 +104,9 @@ Request `/actions/{action}/decision-receipt?account_id=91` with the same headers
 | `document_sha256` | Digest of the canonical document, not the downloaded JSON file's formatting. |
 | `chain_entry.sequence` | Sequence of the receipt's audit event. |
 | `chain_entry.hash` | Hash of that audit event. |
+| `disposition` | Current receipt and recovery projection, outside the stored decision document and its digest. |
 
-A receipt may not exist yet, and a receipt can describe failure. Check its terminal status and verification evidence before reporting success. This endpoint exposes one scoped receipt, not the complete workspace audit export. See [receipt interpretation and integrity limits](/actions/audit-log#download-an-action-decision-receipt).
+The stored `document`, digest, and chain reference remain immutable. The separate `disposition` can reflect later recovery; do not include it when checking `document_sha256`. A receipt may not exist yet, and a receipt can describe failure. Check its terminal status and verification evidence before reporting success. This endpoint exposes one scoped receipt, not the complete workspace audit export. See [receipt interpretation and integrity limits](/actions/audit-log#download-an-action-decision-receipt).
 
 ## Preview a proposal without submitting it
 

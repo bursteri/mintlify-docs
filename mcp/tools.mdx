@@ -149,6 +149,7 @@ Read the same stored workspace comparison used by Dashboard and Signals: counted
 | Field | Type | Required | Rules |
 | --- | --- | --- | --- |
 | `days` | Integer | No | `7`, `30`, or `90`. Default is `7`. |
+| `months` | Integer | No | `12` for 12 calendar months, in place of `days`. Requires enough history under the plan and any shorter workspace setting. |
 
 ```json
 {
@@ -158,7 +159,7 @@ Read the same stored workspace comparison used by Dashboard and Signals: counted
 
 Use a Read or Write workspace key with an active grant for `get_arrivals_comparison`. The tool resolves the workspace from the key and does not accept `account_id`. Confirm `workspace_id` and the returned `period` before interpreting the result.
 
-The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Retention and completed-day boundaries determine the actual period. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
+The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
 
 If setup or platform data is unavailable, read the returned status and message before calculating a difference. Arrival/click differences do not establish lost conversions, attribution, or a cause. This tool is not an accepted `propose-actions` evidence source; use [`get_performance`](#get_performance) for eligible stored reconciliation evidence.
 
@@ -215,6 +216,7 @@ Use this diagnostic for collection, delivery, and stored account health. Both pr
 | Field | Type | Required | Rules |
 | --- | --- | --- | --- |
 | `days` | Integer | No | `7`, `30`, or `90`. Default is `7`. |
+| `months` | Integer | No | `12` for 12 calendar months, in place of `days`. Requires enough history under the plan and any shorter workspace setting. |
 
 ```json
 {
@@ -229,10 +231,10 @@ The result includes the shared scope, status, label, summary, Signal and destina
 - `activity.receiving` and `activity.last_event_at`: collection activity and freshness.
 - `delivery`: non-test delivery counts and acceptance rate for the last 24 hours, independently of the requested arrival window.
 - `match_quality`: the latest stored Meta score, measurement time, and history when available.
-- `performance`: stored reconciliation for the requested window.
+- `performance`: stored reconciliation diagnostics. The standalone `get_performance` input remains 1–90 days; the arrival `months` option does not extend that contract.
 - `diagnostics`, `data_sources`, and `generated_at`: explanations, provenance, and response freshness.
 
-Arrival windows use completed days in the account timezone and are clipped to retention. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Arrival totals remain complete when a strict-EU component is withheld: `partial` marks that component, not a reduced total. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
+Arrival windows use completed days in the account timezone. Requests outside the plan or explicit shorter workspace setting are refused rather than clipped. Use `{"months": 12}` for the 12-calendar-month window, when available. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Arrival totals remain complete when a strict-EU component is withheld: `partial` marks that component, not a reduced total. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
 
 This call reads stored measurements. It does not trigger a live Meta Marketing API read.
 
@@ -372,11 +374,17 @@ Requires `action_id`, plus `account_id` when needed. Returns one action under `d
 
 ### `get_action_decision_receipt`
 
-Requires `action_id`, plus `account_id` when needed. Returns `document`, `document_sha256`, and `chain_entry` (`sequence` and `hash`) at the top level. There is no `data` wrapper. Read the [receipt's outcome and integrity limits](/actions/audit-log#download-an-action-decision-receipt); its existence alone does not prove success.
+Requires `action_id`, plus `account_id` when needed. Returns `document`, `document_sha256`, `chain_entry` (`sequence` and `hash`), and current `disposition` at the top level. There is no `data` wrapper. Read the [receipt's outcome and integrity limits](/actions/audit-log#download-an-action-decision-receipt); its existence alone does not prove success.
 
 ### `get_action_policy`
 
 Accepts only the optional account selector. Returns the current workspace policy under `data`; see the [policy response fields](/api/actions#read-the-current-policy). If no policy is saved, the result contains effective defaults and `id: null`, without creating a record. Do not substitute current policy for an earlier proposal's frozen mode or evidence.
+
+### Current disposition in Actions reads
+
+`list_actions`, `get_action`, and each action returned by `get_action_batch` include `batch_status` and `disposition`. The latter separates receipt status, later outcome, compensation reason, recovery disposition, and late restoration from the historical action status. A batch can also return `restoration_summary`.
+
+`get_action_decision_receipt` returns current `disposition` beside the immutable `document`, `document_sha256`, and `chain_entry`. The projection is outside the document hash. Preserve nulls and do not turn late restoration into a successful original execution. Use the [shared field reference](/api/actions#interpret-current-disposition-and-recovery).
 
 ### Verify the result and handle failures
 
@@ -485,6 +493,17 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 The canonical management names above describe accepted input validation, not a promise of general execution availability. Use the [supported creative workflow](/actions/creative-workflow); the legacy `adjust_budget` and `set_status` recommendations remain separate types.
 
 HTTP field errors return `422`; MCP exposes a tool validation error. Read the field path and message. `action_request_invalid` identifies list, NUL, or duplicate-key problems; `action_target_id_invalid` identifies the guarded target-ID rule; `action_params_invalid` identifies invalid typed parameters. Correct the payload rather than retrying it unchanged.
+
+### Missing staged assets or source ads
+
+A proposal or dry run can return a field validation error when the state it references is unavailable:
+
+| Code | What to do |
+| --- | --- |
+| `action_staged_asset_unavailable` | The staged upload or its manifest is unavailable. Stage the intended file again through the [creative workflow](/actions/creative-workflow) and use its new reference. |
+| `action_target_unavailable` | Meta did not return the source ad in the approved account. Recheck the human-selected source and account; do not substitute an arbitrary ad. |
+
+Read the reported `actions.N` field so you correct the affected action in a multi-action batch. These state refusals do not create a batch or perform a provider write. HTTP exposes `422`; MCP exposes a tool validation error. Temporary provider failures are not evidence that an ad is missing. Check the actual error before replacing references or retrying.
 
 ### Evidence restrictions
 

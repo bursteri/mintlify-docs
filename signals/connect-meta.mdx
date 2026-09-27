@@ -1,7 +1,7 @@
 ---
 title: "Set up Meta Pixel and Conversions API with Plainrouter"
 sidebarTitle: "Connect Meta"
-description: "Connect a Meta dataset to Plainrouter Signals, verify browser and server conversion delivery, and troubleshoot missing or duplicate events."
+description: "Authorize Meta, choose your ad account and Page, inspect granted access, connect a dataset, and verify consented Pixel and Conversions API delivery."
 ---
 
 Connect your Meta dataset to Plainrouter to deliver consented Signals events through the managed browser Pixel and Meta Conversions API. First authorize the relevant Meta assets, then select the dataset and verify delivery. A saved dataset under **Meta delivery** confirms the destination configuration; it does not prove that a conversion has reached Meta.
@@ -16,13 +16,20 @@ You need:
 - Workspace-owner access in Plainrouter.
 - Access to the required Meta Business assets, Meta ad account, and dataset, with permission to grant Plainrouter access.
 - The [current Signals snippet](/signals/install-pixel) and a [consent integration](/signals/track-events#set-consent) for browser conversions.
-- For backend conversions or API tests, a server-held [Signals workspace secret](/api/authentication#how-do-i-authenticate-the-rest-api).
+- For backend conversions or API tests, a server-held [Server secret](/api/authentication#how-do-i-authenticate-the-rest-api).
 
 An identity-free arrival does not require a Meta connection and never triggers Meta delivery. Advertising conversion events require the supported consent grant.
 
 ## Connect Meta for reporting
 
-Open **Connections → Ad accounts → Meta** and choose **Connect Meta**. The Signals overview also links to Connections. Complete Meta authorization, then under **Choose the Meta account to bind**, choose the **Business portfolio** and active **Ad account** and select **Confirm account**. Signals uses the selected account for its stored platform activity.
+Open **Connections → Ad accounts → Meta** and choose **Connect Meta**. This is the shared authorization entry for reporting and supported ad changes. The Signals overview also links to Connections.
+
+1. Complete Meta authorization for the intended assets.
+2. Under **Choose the Meta account to bind**, select **Business** and **Ad account**.
+3. Select the intended **Page** when required. If the field says **Page optional**, you can choose **Continue without a Page**. Select only an asset offered by Meta for this connection.
+4. Confirm the selection, then inspect the card's **Grant**, account, and read status.
+
+Signals reporting requires this workspace's account binding, an active Meta connection, and a recorded `ads_read` grant. A Page-selected connection can still supply reporting reads. A missing Page or dataset does not by itself disable an otherwise eligible read; a missing recorded read permission does. Connecting another workspace does not make its account available for execution under this workspace's key.
 
 This reporting connection is separate from selecting a conversion destination. Connecting an ad account alone does not prove that a Pixel is configured or that conversions are being delivered.
 
@@ -48,6 +55,19 @@ The platform card shows `not_connected`, `revoked`, `attention_needed`, or `conn
 
 For `attention_needed`, inspect the stored read and connection details, then reconnect when required using the [appropriate team role](#who-can-connect-or-change-an-ad-account). A `connected` status does not prove a recent read or conversion delivery. See the [status table](/reference/statuses-and-terms#provider-connection-health) for each value, and verify Meta delivery separately below.
 
+### How do I interpret the Meta grant?
+
+The card uses the permissions Meta actually granted, not just those requested:
+
+| Grant label | Next step |
+| --- | --- |
+| **Full access** | Continue with the intended dataset or governed Actions setup. This is not proof of delivery or permission to bypass policy and approval. |
+| **Read-only** | Eligible reporting can continue; **Ad changes are unavailable**. Use **Reconnect Meta** with the appropriate team role if you need the missing permissions. |
+| **Grant could not be verified** | Plainrouter could not verify the grant. Do not assume requested scopes were granted; reconnect and check the card again. Ad changes remain unavailable. |
+| **Access incomplete** | Review the granted scopes and reconnect with access to the required assets. |
+
+Reconnecting requests missing delivery permissions again. It does not guarantee that Meta will grant them or that an executable Actions workflow is enabled. Connection health, granted access, dataset configuration, and event delivery are separate checks.
+
 ## Connect the destination
 
 <Steps>
@@ -55,7 +75,7 @@ For `attention_needed`, inspect the stored read and connection details, then rec
     Open [Connections](https://plainrouter.com/connections) for the selected workspace and find **Meta delivery** in the Meta card. Website setup opens Install first; connecting Meta remains optional for arrival collection.
   </Step>
   <Step title="Authorize Meta">
-    Complete Meta's authorization flow and grant access to the intended Meta ad account and dataset.
+    If Meta is not connected, complete the [shared authorization and asset selection](#connect-meta-for-reporting) first. Then grant access to the intended dataset when requested.
 
     Meta access tokens stay on the server. Do not add a Meta token or Signals workspace secret to your browser snippet.
   </Step>
@@ -124,6 +144,10 @@ If the intended ad account or dataset is missing, choose **Reconnect Meta** and 
 ### Connect, Reconnect, or Disconnect is missing
 
 Confirm your current team and role. Members can complete an initial or incomplete connection, but a healthy binding requires an admin or owner to reconnect or change it. Disconnect is also restricted to an admin or owner. Authorization is checked again when OAuth returns; if another member completes a healthy connection while you are authorizing, ask an admin or owner to continue.
+
+### The connection is Read-only or its grant is unverified
+
+Use the [grant table](#how-do-i-interpret-the-meta-grant) to decide whether to reconnect. Do not repeat a proposal expecting it to supply missing Meta permissions. Reporting can continue only with an active connection, the workspace's account binding, and a recorded `ads_read` grant. A reporting read never verifies conversion delivery.
 
 ### No datasets appear
 

@@ -62,7 +62,9 @@ Server-side `POST /events` requests must include a `consent_basis` of `consent` 
 
 ## Identity retention
 
-New Signals setup uses 90-day visitor identity retention without a retention questionnaire. The authenticated admin API retains the supported 30- and 90-day settings, subject to server-side policy. Identity retention applies to the workspace's retained visitor identity state; it does not widen the fixed retention limits of every ledger table.
+New Signals setup uses the default 90-day visitor identity retention without a retention questionnaire. Customer event reads separately follow the plan window unless an explicit shorter workspace setting applies. New workspaces leave that shorter setting unset; this does not extend the default lifetime of visitor identity.
+
+The authenticated admin API supports an explicit 30- or 90-day setting, or `null` to clear it, subject to server-side policy. Clearing the shorter setting returns event reads to the plan window; it does not disable identity deletion. Check **Workspace settings → Identity retention** and **Read window** separately. See [reporting windows](/signals/health-and-performance#which-reporting-windows-can-i-select).
 
 Retention changes must pass the server-side retention policy. MCP does not expose a retention setter. The former retention-instruction history and export are no longer available; the retention policy still applies.
 

@@ -31,17 +31,18 @@ Search the export by batch or action ID to follow a proposal across multiple eve
 
 For an action with a stored decision receipt, its Audit row shows **Download decision receipt**. Select it while signed in to the same workspace. This downloads the persisted decision record for that action; **Download JSON** remains the separate workspace event export.
 
-The receipt response contains three top-level fields:
+The receipt response contains four top-level fields:
 
 | Field | Meaning |
 | --- | --- |
 | `document` | The recorded action, target, proposer and approval context, available policy/evidence snapshots, provider receipt details, terminal status, and verification result. |
 | `document_sha256` | SHA-256 digest of the canonical document representation, not the downloaded file's whitespace or formatting. |
 | `chain_entry` | The receipt event's audit `sequence` and `hash`. |
+| `disposition` | Current receipt, outcome, and recovery state; separate from the stored document and its hash. |
 
 Read the terminal status and verification result before drawing a conclusion. A receipt can record failure or compensation; its existence alone does not establish **Landed**. Provider request IDs and other evidence can be unavailable and are recorded accordingly.
 
-The document is stored when issued, rather than rebuilt from current action settings at download time. Its hash and chain reference support audit inspection; they are not an external signature or independent proof of completeness.
+The document is stored when issued, rather than rebuilt from current action settings at download time. Later restoration can appear in the separate `disposition` without rewriting the document, its digest, or chain reference. Read the [disposition fields](/api/actions#interpret-current-disposition-and-recovery) and preserve the historical outcome. Its hash and chain reference support audit inspection; they are not an external signature or independent proof of completeness.
 
 ### Why is the receipt missing or forbidden?
 

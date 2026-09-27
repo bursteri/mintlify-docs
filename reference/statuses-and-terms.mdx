@@ -137,6 +137,10 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
 
 A receipt marked `irreversible` does not establish restoration. A batch with `rollback_incomplete` needs investigation even if other actions were restored. Read the exact action and receipt outcomes before retrying or claiming that a provider change was undone.
 
+### Can a failed batch later show restoration?
+
+Yes. Current receipt evidence can show late restoration while the historical action or batch status stays unchanged. Inspect `disposition` and the batch's `restoration_summary` through the [Actions reads](/api/actions#interpret-current-disposition-and-recovery), or **Current disposition** in Inbox. A compensated receipt is evidence of recovery, not a successful original execution.
+
 ## Core terms
 
 <AccordionGroup>

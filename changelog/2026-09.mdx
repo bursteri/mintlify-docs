@@ -6,6 +6,25 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 27, 2026">
+
+  ## Connect Meta and see the access it granted
+
+  **Improved** · The shared Meta connection flow lets you choose your Business, ad account, and Page, with Page optional where supported. The card distinguishes full, read-only, and unverified grants so you can tell whether reconnecting is needed. Page-selected connections can still supply eligible Signals reporting. [Connect Meta](/signals/connect-meta).
+
+  ## Read a full year of available Signals history
+
+  **New** · Eligible workspaces can select **Last 12 months** in Signals or use `months: 12` in the arrivals and health MCP tools. Windows outside the plan or a shorter workspace setting are refused explicitly. Event reads follow the same plan allowance; payloads and delivery evidence retain separate limits. [Choose a reporting window](/signals/health-and-performance#which-reporting-windows-can-i-select).
+
+  ## See current recovery alongside the original action result
+
+  **Improved** · Inbox, Actions API/MCP reads, and decision-receipt downloads now expose current receipt and recovery disposition. Later restoration stays separate from the historical action result and immutable decision document. [Interpret current disposition](/api/actions#interpret-current-disposition-and-recovery).
+
+  ## Keep pre-disconnection spend in the billing picture
+
+  **Changed** · Disconnecting an ad account does not remove its already observed spend from the applicable month's billing calculation. Reconnecting the same external account does not double-count it. [Review disconnected-account billing](/billing/overview#does-disconnecting-an-ad-account-remove-its-observed-spend).
+</Update>
+
 <Update label="September 26, 2026">
 
   ## Preview action proposals before submitting

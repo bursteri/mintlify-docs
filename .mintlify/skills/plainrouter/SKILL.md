@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
   product: PlainRouter
-  documentation_revision: "2026-09-26"
+  documentation_revision: "2026-09-27"
 ---
 
 # Use PlainRouter safely
@@ -100,8 +100,10 @@ Revoking a Management key does not revoke workspace keys it issued.
 2. Return its managed-hostname CNAME, snippet, and `first_arrival` state as supplied.
    Do not invent missing material or mutate DNS. A null snippet needs dashboard
    setup; same-origin forwarding is unsupported by this tool.
-3. Call `get_arrivals_comparison` with `days` of 7, 30, or 90 (default 7) when
-   the person needs the stored arrivals/platform-click comparison.
+3. Call `get_arrivals_comparison` with `days` of 7, 30, or 90 (default 7), or
+   `months: 12` instead of days for a 12-calendar-month window. Use only a window
+   allowed by the plan and explicit shorter workspace setting; an oversized
+   request is refused rather than clipped.
 4. Preserve unavailable values and completed-day versus today boundaries.
    Neither tool accepts `account_id` or supplies Actions proposal evidence.
 
@@ -163,7 +165,10 @@ Use `list_actions`, `get_action_batch`, `get_action`,
 These reads require a Write Workspace key and an active `propose-actions` grant;
 a normal Read key is insufficient. Confirm account selection first. They make no
 provider calls and cannot approve, reject, or edit policy. Preserve unavailable
-receipts and distinguish current policy from a proposal's frozen mode.
+receipts and distinguish current policy from a proposal's frozen mode. Read
+`disposition` for current receipt/recovery evidence; it is outside the immutable
+decision-document hash. Late restoration does not rewrite historical action or
+batch status or make the original execution successful.
 
 Read the [Actions API](https://plainrouter.com/docs/api/actions) for equivalent
 HTTP routes, pagination, response fields, and failure handling.

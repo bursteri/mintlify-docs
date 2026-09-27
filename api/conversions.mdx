@@ -171,6 +171,14 @@ The following is an illustrative excerpt from `GET /events/order-123`; other res
 
 Here, ingestion succeeded but Meta authentication failed. [Reconnect the intended Meta assets](/signals/connect-meta#refresh-available-assets), then consider replay of this delivery. Repeating `POST /events` with `order-123` only returns the existing event; it does not repair or replay the delivery.
 
+## How far back can I read events and deliveries?
+
+Event lists, cursor pages, event details, and lineage use the workspace's plan window: 30 days on Free or 12 calendar months on paid plans, reduced by an explicit shorter workspace setting. A missing event can be outside that read window; it does not prove the original ingestion failed.
+
+Event records can outlast their original payloads and delivery records. The event read window does not extend replay eligibility or promise that every historical delivery trace remains available.
+
+The event-list responses label their delivery aggregate with `metrics.acceptance_rate_window`, such as `90_days`, rather than `all_time`. Read this label: the aggregate is distinct from the paginated events and also respects the event-read boundary. A missing acceptance rate is not zero. See [reporting windows](/signals/health-and-performance#which-reporting-windows-can-i-select).
+
 ## How do I replay a failed delivery?
 
 Use `POST /deliveries/replay` after correcting the destination problem. Replay sends the existing retained payload again; it does not edit the purchase or create a new event.
