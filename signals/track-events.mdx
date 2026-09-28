@@ -259,7 +259,7 @@ Plainrouter clears the secret field after saving. Use **Rotate secret** when rep
 
 ### Associate a Checkout Session with your order
 
-Set `client_reference_id` to your application's non-personal order ID when creating the Session on your server. Plainrouter uses it as the purchase's order ID; without it, the Checkout Session ID is the fallback. Keep order IDs within 128 characters so they remain readable.
+Set `metadata.order_id` to your application's non-personal order ID when creating the Session on your server. Use the same order ID as your browser purchase if both sources report that order. Plainrouter trims this value and uses it as the purchase's order ID; without it, the Checkout Session ID is the fallback. `client_reference_id` does not select Plainrouter's order ID. Keep order IDs within 128 characters so they remain readable.
 
 This request calls Stripe directly, not the Plainrouter SDK. It creates a hosted, one-time Checkout Session. Set the variables from trusted server configuration and an existing order: select the Stripe Price on your server and persist one idempotency key for that checkout attempt. Reuse the key only when retrying the same request. Keep the Stripe secret key server-side.
 
@@ -270,7 +270,7 @@ curl https://api.stripe.com/v1/checkout/sessions \
   --data-urlencode "mode=payment" \
   --data-urlencode "line_items[0][price]=$STRIPE_PRICE_ID" \
   --data-urlencode "line_items[0][quantity]=1" \
-  --data-urlencode "client_reference_id=$ORDER_ID" \
+  --data-urlencode "metadata[order_id]=$ORDER_ID" \
   --data-urlencode "success_url=https://shop.example/checkout/success" \
   --data-urlencode "cancel_url=https://shop.example/cart"
 ```
@@ -302,7 +302,7 @@ An illustrative paid-webhook response is:
 
 Use the returned `event_id` to find the retained record through [GET event](/api/conversions#how-do-i-confirm-meta-accepted-the-event). For this revenue flow, the check is the purchase record and value, not a Meta `accepted` delivery. A `404` can mean the wrong workspace or that the record is outside read retention.
 
-Duplicate paid notifications for the same Session reuse one purchase record and return `duplicate: true`. The first recorded purchase uses its settlement-confirming webhook's time. Supported refund notifications record an idempotent negative revenue adjustment; purchase lineage is attached only when Plainrouter can find the matching order. Do not assume Stripe copies Session metadata onto refund objects; see [Stripe metadata propagation](https://docs.stripe.com/metadata).
+Duplicate paid notifications for the same Session reuse one purchase record and return `duplicate: true`. The first recorded purchase uses its settlement-confirming webhook's time. An older duplicate can return `duplicate: true` without an `event_id`; do not create another purchase to force a receipt or recover expired payload data. Supported refund notifications record an idempotent negative revenue adjustment. Plainrouter first tries the saved PaymentIntent-to-purchase link in this workspace, then available order metadata and charge references. Purchase lineage is attached only when a matching purchase exists; an unmatched refund does not establish a browser or advertising attribution link. Do not assume Stripe copies Session metadata onto refund objects; see [Stripe metadata propagation](https://docs.stripe.com/metadata).
 
 ### Why is the Stripe purchase missing?
 

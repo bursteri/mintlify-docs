@@ -6,7 +6,7 @@ description: "Understand how agents propose, approve, execute, verify, and audit
 Actions is Plainrouter's governed workflow for AI-proposed advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy.
 
 <Info>
-  New workspaces start in **Suggest only**. Executable modes can run supported creative actions, but only after policy allows them. New ad copies are always created and verified as `PAUSED`; Plainrouter exposes no activation action in this release.
+  New workspaces start in **Suggest only**. Supported Meta changes require human approval and a fresh policy check before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target after approval; creating a copy never activates it.
 </Info>
 
 ## The governed loop
@@ -24,8 +24,8 @@ Actions is Plainrouter's governed workflow for AI-proposed advertising changes. 
   <Step title="Plainrouter applies policy">
     Policy evaluates the proposal against protected entities, quiet hours, provider state, and the selected execution mode. Unknown execution-critical state blocks execution.
   </Step>
-  <Step title="A person or policy approves">
-    Creative proposals require a person at proposal time. In **Suggest only**, approval records agreement without execution. Executable modes queue the approved batch for a fresh policy check.
+  <Step title="A person approves">
+    Every executable Meta proposal requires a person at proposal time. Policy can block a change or require approval; it does not execute a change alone. In **Suggest only**, approval records agreement without execution. Executable modes queue the approved batch for a fresh policy check.
   </Step>
   <Step title="Plainrouter executes and verifies">
     The execution worker rechecks current policy before any provider write. It records a durable receipt, reads the exact provider object back, and marks the action verified only when the receipt-addressed state matches.
@@ -44,7 +44,9 @@ Use [`dry_run_actions`](/mcp/tools#dry_run_actions) or the [HTTP dry-run endpoin
 | Action | Proposal support | Execution support |
 | --- | --- | --- |
 | Upload asset | Image or video staged-asset shape. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
-| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified permanently `PAUSED`. |
+| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified `PAUSED`; any later resume is a separate approved action. |
+| `pause`, `resume` | Human-selected campaign, ad set, or ad, with empty `params`. | Supported after human approval, current policy checks, and execution authorization. |
+| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer currency minor units. | Supported after human approval and provider-state checks. Lifetime-budget changes are not supported. |
 | `adjust_budget` | Typed recommendation with a new daily budget. | This legacy MCP action does not execute. |
 | `set_status` | Typed recommendation with `active` or `paused`. | This legacy MCP action does not execute, including activation. |
 
@@ -55,10 +57,12 @@ Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/
 | Mode | Passing proposal |
 | --- | --- |
 | **Suggest only** | Waits for a person. Approval ends as **Approved without execution**. |
-| **Auto within limits** | Supported creative proposals still require a person. Approval queues governed execution. |
-| **Full auto** | Uses the same hard safeguards. Supported creative proposals still require a person in this release. |
+| **Auto within limits** | Every supported Meta proposal still requires a person. Approval queues governed execution. |
+| **Full auto** | Uses the same hard safeguards. Every supported Meta proposal still requires a person in this release. |
 
 The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
+
+An execution kill switch can stop further Meta writes, including an approved batch. It does not undo a change that already landed. Inspect [Inbox and receipts](/actions/review-proposals) before retrying a refused or interrupted operation.
 
 ## Verification and Landed
 

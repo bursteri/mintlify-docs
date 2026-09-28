@@ -36,6 +36,14 @@ For tools that accept `account_id`, use Plainrouter's positive integer advertisi
 }
 ```
 
+### Signals reads use the destination binding
+
+`get_account_state`, `get_signal_health`, and `get_performance` use the Meta account bound to this workspace's Signals destination. Omit `account_id` to resolve that binding; if supplied, it must identify the same account. Another active team account cannot substitute for it. Reporting through this binding does not authorize Actions against an account owned by another workspace.
+
+If the tool reports `no_signals_destination`, [connect the intended destination](/signals/connect-meta). For `account_not_bound`, check the workspace and bound Meta account rather than trying each account ID. Older bound keys still cannot override their binding.
+
+### Actions and creative tools select an eligible account
+
 | Key and workspace state | Selection rule |
 | --- | --- |
 | New workspace key; one eligible active account | Account-scoped tools can select it when `account_id` is omitted. Confirm the returned account. |
@@ -92,7 +100,7 @@ Check the complete bearer credential, expiry, revocation, grant state, and issue
 
 ### The tool asks for an account or rejects the selected account
 
-Supply `account_id` when the workspace has multiple eligible active accounts. Verify the account is owned by this workspace and its connection is active. Do not use Meta's external ID in this field. An older bound key cannot select another account; create a new workspace key when that restriction no longer fits the intended work.
+For Signals reads, check the workspace's Meta destination binding and use that account. For Actions and creative tools, supply `account_id` when multiple eligible active accounts exist; verify workspace ownership and an active connection. Do not use Meta's external ID in this field. An older bound key cannot select another account; create a new workspace key when that restriction no longer fits the intended work.
 
 ### A tool reports insufficient permission
 

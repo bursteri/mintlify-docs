@@ -16,18 +16,18 @@ Policy changes that allow execution are saved atomically with their audit event.
 | Mode | Behavior in this release |
 | --- | --- |
 | **Suggest only** | Every passing proposal waits for a person. Approval records the recommendation without execution. |
-| **Auto within limits** | Supported creative proposals require human approval, then queue execution under all hard stops. |
-| **Full auto** | Uses the same hard safeguards. Supported creative proposals still require human approval at proposal time. |
+| **Auto within limits** | Supported Meta proposals require human approval, then queue execution under all hard stops. |
+| **Full auto** | Uses the same hard safeguards. Supported Meta proposals still require human approval at proposal time. |
 
 New workspaces default to **Suggest only**. The selected mode is copied into each proposal as an immutable snapshot.
 
 <Warning>
-  Executable modes currently support only JPEG/PNG image upload and `duplicate_ad_with_creative`. Budget changes, delivery-status changes, video upload execution, and ad activation remain disabled.
+  Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` actions, JPEG/PNG uploads, and paused ad copies require human approval before execution. The legacy `set_status` and `adjust_budget` types remain recommendations only. Video upload execution remains disabled.
 </Warning>
 
 ## Two policy gates
 
-Executable creative work passes policy twice:
+Executable Meta work passes policy twice:
 
 1. Proposal-time policy decides whether to block or request human approval.
 2. After approval, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
@@ -44,7 +44,7 @@ The maximum percentage change allowed per budget action, measured from the targe
 
 The maximum projected combined daily budget for the account. Leave it blank for no configured cap.
 
-Budget actions remain non-executable in this release. Their current account and target state is reported honestly as unavailable rather than inferred from aggregate Signals data.
+Canonical daily-budget actions re-read the target and account state from Meta. Missing execution-critical state blocks execution; aggregate Signals data cannot supply a missing budget or target-level metric.
 
 ## Protected delivery
 
@@ -89,7 +89,7 @@ Aggregate Signals reconciliation is never substituted for target-level provider 
 Plainrouter does not treat a successful provider response as proof that an action Landed. It persists an execution receipt and re-reads the exact object.
 
 - Image upload verification matches the receipt asset, frozen content hash, and provider readiness.
-- Ad-copy verification matches the receipt ad, approved account, selected creative, and permanent `PAUSED` state.
+- Ad-copy verification matches the receipt ad, approved account, selected creative, and `PAUSED` state at creation.
 - An `IN_PROCESS` copy can enter durable asynchronous verification for up to 48 hours.
 - Hard mismatches, provider rejection, verification expiry, or later anomaly trigger compensation.
 - Compensation is itself verified: an uploaded image must be absent after deletion, and a copied ad must be `ARCHIVED` after rollback.
@@ -100,17 +100,19 @@ If commit state is unknown, Plainrouter reconciles before retrying. It does not 
 
 | Check or action | Current result |
 | --- | --- |
-| Human approval for executable creative proposals | Enforced. |
+| Human approval for every executable Meta proposal | Enforced. |
 | Proposal-time and execution-time policy | Enforced. |
 | Protected entity and quiet hours | Enforced. |
 | Provider account, source, asset readiness, and applicable learning state | Re-read and fail-closed. |
 | Image upload and paused ad duplication | Executable with receipts, verification, outcome reads, and compensation. |
-| Duplicate-ad activation | Not exposed. |
+| Canonical pause, resume, and daily-budget changes | Executable only after human approval and current authorization and policy checks. |
+| Activation during ad duplication | Never; a later resume requires a separate approved proposal. |
+| Execution kill switch | Stops further Meta writes without undoing earlier changes. |
 | Legacy MCP `adjust_budget` and `set_status` execution | Disabled. |
 | Video upload execution | Disabled. |
 | Unknown provider commit | Reconciled before any retry or compensation. |
 
-This boundary preserves suggest-only recommendations while allowing a narrow, receipt-addressed creative execution path.
+Approval is not proof of execution. Confirm the receipt and verification result for the specific target in Inbox and Audit.
 
 ## Related workflow
 

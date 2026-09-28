@@ -29,7 +29,7 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
 
-The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. **Suggest only** records proposals and approvals without executing them.
+Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals can execute only after human approval and current policy checks. The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. **Suggest only** records proposals and approvals without executing them.
 
 For repeatable Signals tasks, the server also supplies three [built-in prompts](/mcp/tools#built-in-signals-prompts): installation, claimed-versus-counted comparison, and signal health. They return instructions; the client still needs authorization to run the referenced tools.
 
@@ -57,7 +57,7 @@ For repeatable Signals tasks, the server also supplies three [built-in prompts](
 | Protocol | `2026-07-28` discovery; legacy `initialize` clients remain supported |
 | Production credential | Workspace key sent as a bearer credential |
 | Sandbox credential | None; all four sandbox tools return synthetic data |
-| Account scope | One workspace per key; eligible account selected per account-scoped call. Older bound keys retain their account restriction. |
+| Account scope | One workspace per key; Signals reads use its Meta destination binding, while Actions and creative tools select an eligible owned account. Older bound keys retain their account restriction. |
 
 ### Which clients can connect?
 

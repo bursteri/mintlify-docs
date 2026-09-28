@@ -57,7 +57,7 @@ For `attention_needed`, inspect the stored read and connection details, then rec
 
 ### How do I interpret the Meta grant?
 
-The card uses the permissions Meta actually granted, not just those requested:
+Confirm **Meta profile**, **Selected Page** when present, and **Scopes granted** on the connection card. The card uses the permissions Meta actually granted, not just those requested:
 
 | Grant label | Next step |
 | --- | --- |
@@ -66,7 +66,7 @@ The card uses the permissions Meta actually granted, not just those requested:
 | **Grant could not be verified** | Plainrouter could not verify the grant. Do not assume requested scopes were granted; reconnect and check the card again. Ad changes remain unavailable. |
 | **Access incomplete** | Review the granted scopes and reconnect with access to the required assets. |
 
-Reconnecting requests missing delivery permissions again. It does not guarantee that Meta will grant them or that an executable Actions workflow is enabled. Connection health, granted access, dataset configuration, and event delivery are separate checks.
+Reconnecting requests missing delivery permissions again. If delivery reports `meta_connection_needs_reconnect`, reconnect the existing Meta connection with an authorized team role, then inspect connection health and the affected delivery trace before considering replay. A dataset ID alone cannot repair expired authorization. It does not guarantee that Meta will grant them or that an executable Actions workflow is enabled. Connection health, granted access, dataset configuration, and event delivery are separate checks.
 
 ## Connect the destination
 
@@ -83,7 +83,7 @@ Reconnecting requests missing delivery permissions again. It does not guarantee 
     Search the **Meta dataset** picker by dataset name or ID, select the dataset that should receive this Signal's events, then choose **Connect Meta dataset**. The picker gathers accessible datasets from active authorized ad accounts and keeps each dataset associated with its account. Check the selected ID against Meta Events Manager.
   </Step>
   <Step title="Confirm the destination">
-    After saving, Plainrouter returns to Connections. Confirm the account and dataset ID under **Meta delivery**. Use **Install** to finish collection-domain setup if needed, then continue with the delivery checks below.
+    After saving, Plainrouter returns to Connections. Confirm the account and dataset ID under **Meta delivery**. Each workspace has one Meta destination; reconnecting or changing its dataset updates that destination rather than adding a second delivery target. Use **Install** to finish collection-domain setup if needed, then continue with the delivery checks below.
   </Step>
 </Steps>
 

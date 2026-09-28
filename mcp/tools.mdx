@@ -13,7 +13,7 @@ The server version is separate from the MCP protocol revision. For custom client
 | Tool | Type | Purpose |
 | --- | --- | --- |
 | `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
-| `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored platform-claimed clicks. |
+| `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored Meta outbound clicks and inspect the separate Purchase comparison. |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
 | `get_performance` | Read-only, idempotent | Read the admissible 1–90 day stored gateway-versus-Meta comparison for proposal evidence. |
@@ -27,7 +27,7 @@ The server version is separate from the MCP protocol revision. For custom client
 | `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed recommendation to policy and approval. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
-| `duplicate-ad-with-creative` | Idempotent proposal write | Propose a permanently paused copy of a source Meta ad with a selected asset. |
+| `duplicate-ad-with-creative` | Idempotent proposal write | Propose a copy created and verified paused of a source Meta ad with a selected asset. |
 | `revoke_grant` | Idempotent authorization write | Revoke an authorized grant in the caller's workspace. |
 | `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
 
@@ -75,7 +75,7 @@ The production server publishes three reusable prompts. They have no arguments a
 | Prompt name | Display title | Intended workflow |
 | --- | --- | --- |
 | `install_the_count` | Install the count on my site | Call `get_install_instructions`, show the returned DNS record and snippet exactly, and report first-arrival state. If no arrival has been seen, check DNS, then the snippet. |
-| `claimed_vs_counted` | Compare claimed clicks with counted arrivals | Call `get_arrivals_comparison` with `days: 7`; present counts and the numeric difference without turning them into rates or shares. If empty, say so and stop. |
+| `claimed_vs_counted` | Compare Meta outbound clicks with counted arrivals | Call `get_arrivals_comparison` with `days: 7`; present counts, the numeric difference, and the returned historical-click caveat without turning them into rates or shares. If empty, say so and stop. |
 | `signal_health` | Is my count healthy | Call `get_signal_health` and explain the reported diagnostics without adding an estimate. |
 
 Choose a prompt from your MCP client's prompt selector, where supported. Custom clients use `prompts/list` to discover names and `prompts/get` to retrieve a message. For example, the `params` object for `prompts/get` is:
@@ -117,7 +117,7 @@ Account-scoped Signals responses identify:
 }
 ```
 
-`destination_id` and `dataset_id` are `null` until the authorized account has a matching destination. For tools exposing `account_id`, supply the internal Plainrouter account ID when the workspace has multiple eligible active accounts. With one eligible active account it can be omitted. Selection stays inside the workspace; older bound keys reject a different ID. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
+`get_account_state`, `get_signal_health`, and `get_performance` resolve this workspace's bound Meta destination when `account_id` is omitted. Supplying an ID selects only that same bound account, not another account in the team. A missing destination returns `no_signals_destination`; a different available account returns `account_not_bound`. Older account-bound keys retain their restriction. Actions and creative tools use their separate eligible-account selection rules. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 ## `get_install_instructions`
 
@@ -144,7 +144,7 @@ Same-origin forwarding (Path B) returns an error. Use the [same-origin setup pag
 
 ## `get_arrivals_comparison`
 
-Read the same stored workspace comparison used by Dashboard and Signals: counted arrivals beside platform-claimed clicks. This production-only tool performs no provider write or live Meta read.
+Read the same stored workspace comparison used by Dashboard and Signals: counted arrivals beside Meta outbound clicks. This production-only tool performs no provider write or live Meta read.
 
 | Field | Type | Required | Rules |
 | --- | --- | --- | --- |
@@ -161,11 +161,13 @@ Use a Read or Write workspace key with an active grant for `get_arrivals_compari
 
 The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
 
+The response also includes `claimed_clicks_label`, `claimed_clicks_outbound_since`, and `claimed_clicks_caveat`. Keep the caveat with historical data: older days can still contain link clicks or all clicks. The separate `purchases` block includes Meta-attributed and accepted server-side Purchase counts, its completed account-local window, attribution details, and daily read timestamps. See [Purchase comparison limits](/signals/health-and-performance#how-do-i-compare-meta-reported-purchases); it has no purchase gap or status.
+
 If setup or platform data is unavailable, read the returned status and message before calculating a difference. Arrival/click differences do not establish lost conversions, attribution, or a cause. This tool is not an accepted `propose-actions` evidence source; use [`get_performance`](#get_performance) for eligible stored reconciliation evidence.
 
 ## `get_account_state`
 
-Call this first in every account-specific workflow, using `account_id` when needed. Confirm the returned scope before further calls. It returns:
+Call this first to confirm the workspace's Signals-bound Meta account. Omit `account_id` to resolve its destination binding, or supply that bound internal account ID. Confirm the returned scope before further calls. It returns:
 
 - Agent ID, name, and granted permissions.
 - Shared scope.
@@ -268,7 +270,9 @@ The response includes:
 - Requested period with `days`, `since`, and `until`.
 - Measurability state.
 - Gateway-verified accepted count.
-- Meta-reported count.
+- Existing reconciliation `meta_reported` count, separate from the Purchase comparison.
+- `purchases`: Meta-attributed and accepted server-side Purchase counts with their own completed account-local window and attribution details. A missing Meta count remains `null`.
+- `platform_claimed_clicks`: Meta outbound clicks, with `claimed_clicks_caveat` for historical rows.
 - Observed gap.
 - Alignment percentage.
 - Number of alert days.
@@ -461,10 +465,16 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 ### Action parameters
 
 <AccordionGroup>
-  <Accordion title="adjust_budget">
+  <Accordion title="pause and resume">
+    Use a human-selected campaign, ad set, or ad and empty `params: {}`. These canonical actions can execute after approval and current policy checks.
+  </Accordion>
+  <Accordion title="increase_budget and decrease_budget">
+    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's minor unit. These change daily budgets only after approval and current policy checks.
+  </Accordion>
+  <Accordion title="adjust_budget (legacy recommendation)">
     Requires `new_daily_budget_minor`, a positive integer in the account currency's minor unit. For example, `4900` means 49.00 for a two-decimal currency.
   </Accordion>
-  <Accordion title="set_status">
+  <Accordion title="set_status (legacy recommendation)">
     Requires `status` equal to `active` or `paused`.
   </Accordion>
   <Accordion title="duplicate_ad_with_creative">
@@ -490,7 +500,7 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 | `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. For optional `size_bytes`, use a positive integer byte count. |
 | `duplicate_ad_with_creative` | Use the exact `image:…` or `video:…` asset ID returned by the creative library, not a bare numeric provider ID; `status` is `paused`. |
 
-The canonical management names above describe accepted input validation, not a promise of general execution availability. Use the [supported creative workflow](/actions/creative-workflow); the legacy `adjust_budget` and `set_status` recommendations remain separate types.
+Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval and current policy and execution authorization; **Suggest only** never executes them. A kill switch can stop further writes without undoing prior changes. The legacy `adjust_budget` and `set_status` recommendations remain non-executable. See [supported Actions](/actions/overview#supported-action-types) and the [creative workflow](/actions/creative-workflow).
 
 HTTP field errors return `422`; MCP exposes a tool validation error. Read the field path and message. `action_request_invalid` identifies list, NUL, or duplicate-key problems; `action_target_id_invalid` identifies the guarded target-ID rule; `action_params_invalid` identifies invalid typed parameters. Correct the payload rather than retrying it unchanged.
 

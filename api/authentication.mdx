@@ -192,7 +192,7 @@ A workspace owner or member creates a key in **Settings → Workspace keys** for
 a Read or Write tier within their current role, and a 30, 90, or 365 day expiry.
 
 For account-scoped work, call `get_account_state` first. Confirm the returned workspace and Meta ad
-account before continuing. For installation before connecting Meta, use [`get_install_instructions`](/mcp/tools#get_install_instructions) and confirm its workspace. Use `account_id` when the workspace has multiple eligible active accounts. Older
+account before continuing. For installation before connecting Meta, use [`get_install_instructions`](/mcp/tools#get_install_instructions) and confirm its workspace. Signals reads use the workspace's bound Meta destination; Actions and creative calls require `account_id` when eligible-account selection is ambiguous. Older
 account-bound keys cannot override their binding. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 <Warning>

@@ -1,7 +1,7 @@
 ---
-title: "Signals arrivals, Meta clicks and delivery troubleshooting"
+title: "Signals arrivals, Meta purchases and delivery troubleshooting"
 sidebarTitle: "Health and troubleshooting"
-description: "Troubleshoot Signals arrivals, Meta reporting, Event Match Quality, browser observations, and accepted conversion deliveries."
+description: "Compare arrivals with Meta outbound clicks, interpret attributed Purchase counts, and troubleshoot reporting, match quality, and accepted deliveries."
 ---
 
 Open **Signals** to check collection status and compare arrivals with stored platform activity. Before the workspace's first arrival, this screen shows installation instructions instead of reports. Follow the [first-arrival checks](/signals/install-pixel#verify-the-installation) if you have already deployed the snippet.
@@ -22,7 +22,7 @@ Dashboard's third arrival total uses its displayed reporting-window label, such 
 
 Signals offers **Last 7 days**, **Last 30 days**, **Last 90 days**, and **Last 12 months** only when the window fits the workspace's plan and any explicit shorter setting. The month option means 12 calendar months, not a fixed 365-day request. Completed days and **Today so far** remain separate.
 
-Requests beyond the available window are refused rather than silently shortened. A stale Signals page link returns to the default window with a refusal message; CSV and MCP callers receive an error. Choose an offered window and retry. This window policy does not extend [`get_performance`](/mcp/tools#get_performance), whose reconciliation range remains 1–90 days.
+Requests beyond the available window are refused rather than silently shortened. A stale Signals page link returns to the default window with a refusal message; CSV and MCP callers receive an error. Choose an offered window and retry. A refusal saying **this workspace plan keeps** points to the plan allowance; **this workspace is set to keep** points to a shorter workspace setting. Check the named limit before changing the request. This window policy does not extend [`get_performance`](/mcp/tools#get_performance), whose reconciliation range remains 1–90 days.
 
 ## Can I read the arrival comparison through MCP?
 
@@ -63,10 +63,12 @@ The **Arrivals and platform activity** panel compares observed arrivals with acc
 | --- | --- |
 | **Last N days** | Complete arrival total for the retained completed-day window. |
 | **Today so far** | Arrivals since the start of the current local day, separate from the completed window. |
-| **Platform-claimed clicks** | Account-level clicks captured from Meta for the same period. |
+| **Meta outbound clicks** | Stored account-level outbound clicks from Meta for the same period, subject to the historical-data caveat below. |
 | **Impressions** | Stored Meta impressions for the connected account. |
 | **Platform spend** | Stored account spend in the displayed account currency. |
-| **Difference** | Total arrivals minus platform-claimed clicks. |
+| **Difference** | Total arrivals minus the stored Meta click count. |
+
+`claimed_clicks` and `platform_claimed_clicks` retain their API field names but now mean **Meta outbound clicks**. The response includes `claimed_clicks_caveat` and `claimed_clicks_outbound_since`. Days before June 29, 2026, or days not re-read by the daily sync since September 27, 2026, may still contain Meta link clicks or all clicks. Keep the returned caveat with historical comparisons; do not treat this as a uniform historical series.
 
 These platform metrics describe the ad account, which may advertise more than this website. They do not match individual clicks to individual arrivals or establish attribution, incrementality, or return on ad spend.
 
@@ -92,13 +94,28 @@ Choose **Export** to download the stored comparison as CSV with its reporting pe
 
 **Verified revenue** shows eligible settled revenue grouped by currency. Connect [Stripe verified revenue](/signals/track-events#verify-stripe-checkout-settlement) from **Connections → Revenue sources → Stripe**. Revenue, arrivals, and platform spend are different measurements; do not combine currencies or infer attribution from their proximity on the page.
 
+## How do I compare Meta-reported purchases?
+
+The Signals panel and the `purchases` block in [`get_arrivals_comparison`](/mcp/tools#get_arrivals_comparison) and [`get_performance`](/mcp/tools#get_performance) put two counts side by side:
+
+| Count | What it measures |
+| --- | --- |
+| **Meta-reported purchases** | Meta's attributed `offsite_conversion.fb_pixel_purchase` count under the account attribution setting. |
+| **PlainRouter accepted server-side Purchases** | Non-test Meta-accepted deliveries for observed, joined, attributed `Purchase` events at this workspace's destination. |
+
+Connect the intended [Meta destination](/signals/connect-meta) and check the account timezone, attribution details, and returned `window_start_date` and `window_end_date`. The purchase window uses completed account-local days anchored to the latest stored purchase read; it can end earlier than the arrival window. It is not the UTC-day [Meta recovery panel](#what-does-meta-recovery-evidence-show).
+
+A dash or `null` Meta total means evidence is unavailable or incomplete, not zero. Inspect `daily[].read_at` and the daily values to distinguish missing reads from reported zero. Missing account timezone makes this comparison unavailable. Opening Signals or requesting an MCP read does not refresh Meta data.
+
+The comparison supplies no purchase gap, alignment score, or health verdict. The two counts have different measurement rules; their difference does not establish missed purchases, attribution accuracy, or incremental revenue. Stripe verified revenue remains a separate measurement. The existing reconciliation `meta_reported` field is not renamed or replaced by `purchases.meta_reported_purchases`.
+
 ## Why numbers differ
 
 Plainrouter arrivals, ad clicks, pageviews, sessions and visitors count different things. A difference between them does not, by itself, measure lost visitors or failed conversion delivery.
 
 ### Meta clicks
 
-Compare against the connected Meta ad account's `clicks` metric, not outbound clicks or landing-page views. Plainrouter arrivals can include traffic from other sources, and the ad account may advertise other websites. The totals do not pair individual clicks with individual arrivals.
+Compare against the connected Meta ad account's **outbound clicks**, not all clicks, link clicks, or landing-page views. Plainrouter arrivals can include traffic from other sources, and the ad account may advertise other websites. The totals do not pair individual clicks with individual arrivals.
 
 Match the account, complete dates and timezone shown in the comparison. Check the stored data's availability before treating a missing value as zero. Keep this arrival comparison separate from [Verified gap](/signals/health-and-performance#verified-gap), which compares conversion counts.
 

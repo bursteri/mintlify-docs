@@ -6,6 +6,25 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 28, 2026">
+
+  ## Review Meta pauses, resumes, and daily-budget changes
+
+  **Improved** · Canonical pause, resume, and daily-budget proposals can run after a person approves the batch and current policy checks pass. Suggest-only approval still makes no Meta change. Creating an ad copy keeps it paused; a later resume needs a separate approval. [Review supported Actions](/actions/overview#supported-action-types).
+
+  ## Compare purchases with their attribution context
+
+  **New** · Signals and MCP now show Meta-reported Purchase counts beside accepted server-side Purchases, with the completed account-local dates and available attribution details. Missing Meta data stays unavailable; the comparison does not assign a purchase gap or health verdict. [Interpret the Purchase comparison](/signals/health-and-performance#how-do-i-compare-meta-reported-purchases).
+
+  ## Compare arrivals with Meta outbound clicks
+
+  **Improved** · The Meta click comparison now uses outbound clicks. Historical rows that have not been refreshed can still contain link clicks or all clicks; the report includes a caveat so mixed history remains visible. [Read the comparison](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks).
+
+  ## Match Stripe Checkout purchases to your order IDs
+
+  **Fixed** · Set `metadata.order_id` on a Checkout Session to match the order ID your site sends. Plainrouter no longer uses `client_reference_id` as that order key and can link supported refunds through the saved PaymentIntent-to-purchase relationship. [Update Stripe setup](/signals/track-events#associate-a-checkout-session-with-your-order).
+</Update>
+
 <Update label="September 27, 2026">
 
   ## Connect Meta and see the access it granted

@@ -107,6 +107,7 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
 | `approved_without_execution` | Human-approved suggest-only recommendation. Terminal and not executed. |
 | `rejected` | Human-rejected recommendation. Terminal. |
 | `blocked` | Stopped by policy or a safety condition. Terminal. |
+| `halted` | The Meta execution kill switch stopped the batch. Earlier verified changes can remain; inspect each action and receipt. Terminal and cannot be approved again. |
 | `approved` | Human-approved for an execution-enabled path and queued for a fresh policy check. |
 | `auto_approved` | Automatically approved by an execution-enabled policy mode. |
 | `executing` | An execution-enabled batch is in progress. |
