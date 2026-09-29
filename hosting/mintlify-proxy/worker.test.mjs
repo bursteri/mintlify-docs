@@ -23,7 +23,7 @@ for (const method of ["GET", "HEAD"]) {
 
 for (const path of [
   "/docs", "/docs/quickstart", "/docs/quickstart.md", "/docs.md",
-  "/docs/llms.txt", "/docs/sitemap.xml",
+  "/docs/sitemap.xml",
   "/docs/.well-known/mcp/server-card.json", "/docs/.well-known/agent-card.json",
   "/docs/.well-known/agent-skills/index.json", "/mintlify-assets/main.css",
   "/_mintlify/api/example", alias + ".md", alias + "/extra", alias + "/",
@@ -63,7 +63,7 @@ for (const path of ["/", "/login", "/docs-other", "/.well-known/api-catalog", "/
   });
 }
 
-for (const path of [alias, "/_mintlify/api/example", "/docs/guides/meta-capi/python.md", "/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
+for (const path of [alias, "/_mintlify/api/example", "/docs/guides/meta-capi/python.md", "/docs/llms.txt", "/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
   test(`POST ${path} still forwards its method and body`, async (t) => {
     const upstream = new Response("upstream response", { status: 202 });
     t.mock.method(globalThis, "fetch", async (request) => {
@@ -103,7 +103,7 @@ for (const rule of markdownRules) {
   });
 }
 
-for (const path of ["/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
+for (const path of ["/docs/llms.txt", "/docs/llms-full.txt", "/docs/.well-known/llms-full.txt"]) {
   for (const method of ["GET", "HEAD"]) {
     test(`${method} ${path} bypasses upstream cache and disables downstream storage`, async (t) => {
       const upstream = new Response(method === "GET" ? "# Current documentation" : null, {
