@@ -198,7 +198,68 @@
                 "group": "Actions",
                 "icon": "workflow",
                 "pages": [
-                  "api/actions"
+                  "api/actions",
+                  {
+                    "group": "Submit and preview",
+                    "openapi": {
+                      "source": "https://plainrouter.com/openapi.json",
+                      "directory": "api/actions/proposals"
+                    },
+                    "pages": [
+                      "POST /agent/workspaces/{workspace}/actions",
+                      "POST /agent/workspaces/{workspace}/actions/dry-run"
+                    ]
+                  },
+                  {
+                    "group": "List actions",
+                    "openapi": {
+                      "source": "https://plainrouter.com/openapi.json",
+                      "directory": "api/actions/list"
+                    },
+                    "pages": [
+                      "GET /agent/workspaces/{workspace}/actions"
+                    ]
+                  },
+                  {
+                    "group": "Read a batch",
+                    "openapi": {
+                      "source": "https://plainrouter.com/openapi.json",
+                      "directory": "api/actions/batch"
+                    },
+                    "pages": [
+                      "GET /agent/workspaces/{workspace}/action-batches/{actionBatch}"
+                    ]
+                  },
+                  {
+                    "group": "Read an action",
+                    "openapi": {
+                      "source": "https://plainrouter.com/openapi.json",
+                      "directory": "api/actions/action"
+                    },
+                    "pages": [
+                      "GET /agent/workspaces/{workspace}/actions/{action}"
+                    ]
+                  },
+                  {
+                    "group": "Decision receipt",
+                    "openapi": {
+                      "source": "https://plainrouter.com/openapi.json",
+                      "directory": "api/actions/receipt"
+                    },
+                    "pages": [
+                      "GET /agent/workspaces/{workspace}/actions/{action}/decision-receipt"
+                    ]
+                  },
+                  {
+                    "group": "Current policy",
+                    "openapi": {
+                      "source": "https://plainrouter.com/openapi.json",
+                      "directory": "api/actions/policy"
+                    },
+                    "pages": [
+                      "GET /agent/workspaces/{workspace}/actions/policy"
+                    ]
+                  }
                 ]
               },
               {
