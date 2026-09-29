@@ -198,8 +198,19 @@
               {
                 "group": "Actions",
                 "icon": "workflow",
+                "openapi": {
+                  "source": "https://plainrouter.com/openapi.json",
+                  "directory": "api/actions"
+                },
                 "pages": [
-                  "api/actions"
+                  "api/actions",
+                  "POST /agent/workspaces/{workspace}/actions",
+                  "POST /agent/workspaces/{workspace}/actions/dry-run",
+                  "GET /agent/workspaces/{workspace}/actions",
+                  "GET /agent/workspaces/{workspace}/action-batches/{actionBatch}",
+                  "GET /agent/workspaces/{workspace}/actions/{action}",
+                  "GET /agent/workspaces/{workspace}/actions/{action}/decision-receipt",
+                  "GET /agent/workspaces/{workspace}/actions/policy"
                 ]
               },
               {

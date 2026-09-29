@@ -43,6 +43,28 @@ function navigationPages(value, pages = []) {
   return pages;
 }
 
+function generatedEndpointDirectories(value, directories = []) {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      generatedEndpointDirectories(item, directories);
+    }
+  } else if (value && typeof value === "object") {
+    if (
+      typeof value.openapi === "object" &&
+      typeof value.openapi.directory === "string" &&
+      value.pages?.some((page) => typeof page === "string" && /^[A-Z]+ \//.test(page))
+    ) {
+      directories.push(value.openapi.directory.replace(/^\/|\/$/g, ""));
+    }
+
+    for (const nested of Object.values(value)) {
+      generatedEndpointDirectories(nested, directories);
+    }
+  }
+
+  return directories;
+}
+
 function frontmatter(source) {
   const match = source.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
   if (!match) return null;
@@ -180,6 +202,7 @@ if (!Array.isArray(tabs) || tabs.at(-1)?.tab !== "Changelog") {
 }
 
 const configuredPages = new Set(navigationPages(config.navigation));
+const generatedDirectories = generatedEndpointDirectories(config.navigation);
 const mdxFiles = walk(root);
 const mdxPages = new Set(
   mdxFiles.map((file) => relative(root, file).replace(/\.mdx$/, "")),
@@ -326,12 +349,15 @@ for (const file of mdxFiles) {
     const [path, anchor] = link[1].slice(1).split("#", 2);
     const targetPage = path || page;
 
-    if (!mdxPages.has(targetPage)) {
+    if (
+      !mdxPages.has(targetPage) &&
+      !generatedDirectories.some((directory) => targetPage.startsWith(`${directory}/`))
+    ) {
       fail(`${page}.mdx links to missing internal page: ${link[1]}`);
       continue;
     }
 
-    if (anchor && !anchorsByPage.get(targetPage)?.has(anchor)) {
+    if (anchor && mdxPages.has(targetPage) && !anchorsByPage.get(targetPage)?.has(anchor)) {
       fail(`${page}.mdx links to missing heading anchor: ${link[1]}`);
     }
   }
