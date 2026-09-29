@@ -14,6 +14,9 @@ The server version is separate from the MCP protocol revision. For custom client
 | --- | --- | --- |
 | `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
 | `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored Meta outbound clicks and inspect the separate Purchase comparison. |
+| `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
+| `get_inventory_metrics` | Read-only, idempotent | Read retained daily metrics and optional change history. |
+| `submit_feedback` | Feedback write | Save a bug report or capability request; no account mutation or reply in MCP. |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
 | `get_performance` | Read-only, idempotent | Read the admissible 1–90 day stored gateway-versus-Meta comparison for proposal evidence. |
@@ -45,8 +48,34 @@ The server version is separate from the MCP protocol revision. For custom client
 </Note>
 
 <Warning>
-  Proposal-producing tools do not write to Meta during the MCP request. In **Suggest only**, approval ends without execution. In an executable mode, supported creative work can run only after the policy and approval pipeline authorizes it.
+  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, policy-allowed changes wait for human approval. In **Full**, they queue automatically. Both modes keep execution checks; a submitted proposal is not proof of a Meta change.
 </Warning>
+
+## `get_account_inventory` and `get_inventory_metrics`
+
+Read retained Meta campaign, ad-set and ad data without a live Meta request or refresh. Both tools require an active workspace grant, current issuer authority and an explicit internal Plainrouter `account_id`. Read and Write tiers include these tools when their grant covers the operation. Existing account bindings still apply.
+
+Follow [Read Meta account inventory](/actions/account-inventory) for filters, cursor pagination, date windows, freshness and recovery flags. This retained inventory is separate from `get-creative-library`, which reads live creative assets from Meta. Inventory history is not a new proposal-evidence source.
+
+## `submit_feedback`
+
+Save a bug report or missing-capability request from your authenticated MCP client. This tool writes a feedback record in Plainrouter; it makes no advertising-account change and sends no reply in MCP. Read and Write grants can include it. Check the tool in [published discovery](https://plainrouter.com/.well-known/mcp/server-card.json) and your active grant before calling it.
+
+| Field | Required | Rules |
+| --- | --- | --- |
+| `kind` | Yes | `bug`, `missing_capability`, or `other`. |
+| `message` | Yes | 1–4,000 characters describing the intended task and what happened. |
+
+Example tool arguments:
+
+```json
+{
+  "kind": "missing_capability",
+  "message": "I wanted to filter retained inventory by campaign name, but the available filters only accept IDs."
+}
+```
+
+Success returns `id` and `status: "received"`. Save the ID; received means the report was stored, not that someone has read it or that a fix or response is guaranteed. This tool has no idempotency key: repeating a successful call creates another report. Do not include credentials or unnecessary customer data. For validation errors, correct `kind` or message length; for missing authorization, check the workspace key and grant.
 
 ## Test mode and production boundaries
 
@@ -55,6 +84,9 @@ account or credential. It exposes four tools:
 
 | Tool | Purpose |
 | --- | --- |
+| `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
+| `get_inventory_metrics` | Read-only, idempotent | Read retained daily metrics and optional change history. |
+| `submit_feedback` | Feedback write | Save a bug report or capability request; no account mutation or reply in MCP. |
 | `get_account_state` | Return an invented account, workspace, connection, and Signal destination. |
 | `get_signal_health` | Return synthetic event flow, delivery, and match-quality diagnostics. |
 | `get_performance` | Return synthetic reconciliation evidence for a requested 1–90 day window. |
@@ -500,7 +532,7 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 | `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. For optional `size_bytes`, use a positive integer byte count. |
 | `duplicate_ad_with_creative` | Use the exact `image:…` or `video:…` asset ID returned by the creative library, not a bare numeric provider ID; `status` is `paused`. |
 
-Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval and current policy and execution authorization; **Suggest only** never executes them. A kill switch can stop further writes without undoing prior changes. The legacy `adjust_budget` and `set_status` recommendations remain non-executable. See [supported Actions](/actions/overview#supported-action-types) and the [creative workflow](/actions/creative-workflow).
+Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask; Full queues policy-allowed changes automatically. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes. The legacy `adjust_budget` and `set_status` recommendations remain non-executable. See [supported Actions](/actions/overview#supported-action-types) and the [creative workflow](/actions/creative-workflow).
 
 HTTP field errors return `422`; MCP exposes a tool validation error. Read the field path and message. `action_request_invalid` identifies list, NUL, or duplicate-key problems; `action_target_id_invalid` identifies the guarded target-ID rule; `action_params_invalid` identifies invalid typed parameters. Correct the payload rather than retrying it unchanged.
 
@@ -521,7 +553,9 @@ Plainrouter rejects evidence paths that claim campaign, ad set, ad, target, CPA,
 
 `get_signal_health` is diagnostic and cannot support a batch containing `adjust_budget`, `set_status`, or `duplicate_ad_with_creative`. This rule applies to the entire batch: adding an `upload_asset` action does not make a mixed spend-affecting proposal eligible. An upload-only `upload_asset` batch is the current non-spend exception and may retain signal-health context.
 
-Use `get_performance` when a spend-affecting proposal needs stored reconciliation-derived performance evidence.
+Use `get_performance` when a spend-affecting proposal needs stored reconciliation-derived performance evidence. Quantitative citations need at least one ledger-class numeric leaf. Platform-reported or platform-derived values can accompany it as context but cannot satisfy that requirement alone. Descriptive-only citations do not claim measurability. An unclassified leaf is refused, including inside a cited container; narrow the citation to supported fields.
+
+The reconciliation measurability flag applies to its reconciliation fields, not every ledger field. Retained inventory metrics and creative history do not become admissible proposal evidence just because they are visible.
 
 It also rejects:
 
@@ -596,7 +630,7 @@ This tool creates one canonical `duplicate_ad_with_creative` proposal. It requir
 
 Plainrouter re-reads the source ad and selected asset under the approved account before creating the proposal. The normalized action always contains `status: "paused"`.
 
-If approved in an executable mode, the worker rechecks policy, creates the copy as `PAUSED`, persists the provider ad ID in a durable receipt, and verifies the exact receipt-addressed object. `IN_PROCESS` can enter scheduled verification for up to 48 hours. The batch is not Landed until every receipt is exactly verified.
+After Ask approval or an allowed Full proposal, the worker rechecks policy, creates the copy as `PAUSED`, persists the provider ad ID in a durable receipt, and verifies the exact receipt-addressed object. `IN_PROCESS` can enter scheduled verification for up to 48 hours. The batch is not Landed until every receipt is exactly verified.
 
 ## `launcher.draft_batch`
 

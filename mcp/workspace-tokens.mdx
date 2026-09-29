@@ -53,18 +53,22 @@ If the tool reports `no_signals_destination`, [connect the intended destination]
 
 An eligible account for an unbound key must be owned by the key's workspace, active, and have an active provider connection. A destination binding to another workspace's account does not grant access. The key cannot switch workspaces or use an ownerless team account.
 
+### Retained inventory uses an explicit account
+
+`get_account_inventory` and `get_inventory_metrics` always require the internal Plainrouter `account_id`. They read retained data for an account available to the workspace, which can include disconnected accounts. Inspect `staleness` and connection status before using the result. Older account-bound keys still cannot select another account. See [account inventory](/actions/account-inventory).
+
 ## Access tiers
 
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
-| **Read** | `workspace:read` | Account, Signals and creative reads; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
+| **Read** | `workspace:read` | Account, Signals, inventory and creative reads; feedback submission; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
 | **Write** | `workspace:read`, `workspace:write` | Read access plus Actions status, policy, and receipt reads, and governed action previews, action proposals, and creative proposals; legacy Launcher drafting and preview where enabled. |
 
 The five [Actions read tools](/mcp/tools#read-actions-and-policy) and corresponding HTTP endpoints require an active grant covering `propose-actions`. A normal Read key does not have this grant, despite those operations being read-only.
 
-New keys expose Read and Write, not Admin. Older Admin-tier credentials may still appear in compatibility responses; their tier does not bypass policy, human approval, provider verification, or account restrictions. A workspace key is not a management key or browser session.
+New keys expose Read and Write, not Admin. Older Admin-tier credentials may still appear in compatibility responses; their tier does not bypass policy, the selected approval mode, provider verification, or account restrictions. A workspace key is not a management key or browser session.
 
-Plainrouter rechecks the issuer's current workspace role and the linked grant on requests. An expired or revoked grant cannot authorize operations even when the key's own expiry has not passed. Feature enablement remains separate from key permissions: a key does not enable [legacy Launcher](/launcher/connect-drive).
+Plainrouter rechecks the issuer's current workspace role and the linked grant on requests. An expired or revoked grant cannot authorize operations even when the key's own expiry has not passed. If the issuer loses the required role, requests are refused even when the key has not expired. Disconnecting a bound connection revokes its associated agent credentials; reconnecting does not restore a revoked credential. Issue replacement access after reconnection when needed. Feature enablement remains separate from key permissions: a key does not enable [legacy Launcher](/launcher/connect-drive).
 
 ## Workspace grants
 

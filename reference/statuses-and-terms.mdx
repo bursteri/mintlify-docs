@@ -160,8 +160,11 @@ Yes. Current receipt evidence can show late restoration while the historical act
   <Accordion title="Human-supplied target">
     A platform entity selected by a person. It establishes selection only and does not prove current target state.
   </Accordion>
-  <Accordion title="Suggest only">
-    The default Actions mode in which every passing proposal requires human review and approval terminates without execution.
+  <Accordion title="Ask and Full">
+    Ask is the default: policy-allowed changes wait for human approval. Full queues allowed changes automatically. Both modes block rule violations and require current execution checks.
+  </Accordion>
+  <Accordion title="Suggest only (historical)">
+    An older batch snapshot whose approval terminates without execution. It is no longer a selectable workspace policy mode.
   </Accordion>
   <Accordion title="Landed">
     A production action batch in which every action has a durable provider receipt and an exact matching verification read. Approval or a provider write alone is not Landed.

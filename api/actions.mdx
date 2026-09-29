@@ -137,7 +137,7 @@ A successful request returns HTTP `200` with a `dry_run.actions` array. Inspect 
 
 The preview can read real account and provider state. It does not create a batch, action, decision receipt, or proposal audit event, queue execution, or write to Meta. It uses the current policy or unsaved defaults when no policy exists.
 
-Repeating a preview evaluates current state again; the required idempotency key does not reserve a proposal or freeze the result. If you choose to submit, use the proposal endpoint below with the intended body. Submission reevaluates the proposal and creates its review record. A dry run cannot enable a closed action workflow or bypass human approval.
+Repeating a preview evaluates current state again; the required idempotency key does not reserve a proposal or freeze the result. If you choose to submit, use the proposal endpoint below with the intended body. Submission reevaluates the proposal and creates its review record. A dry run cannot enable a closed action workflow or override the workspace approval mode.
 
 ## Submit a governed proposal
 
@@ -156,7 +156,7 @@ curl --fail-with-body \
 
 A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. The response includes batch and action IDs, scope, policy reasons, approval requirements, status, and `inbox_url`; `approval_queue_url` remains a compatibility alias.
 
-Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or bypass human review. **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
+Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue them automatically. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
 
 The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
 
