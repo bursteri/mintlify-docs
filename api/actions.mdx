@@ -1,10 +1,10 @@
 ---
 title: "Actions API: preview proposals and track outcomes"
 sidebarTitle: "Actions"
-description: "Preview a proposal without creating a batch, submit it for review, and read action status, policy, and decision receipts with a Write Workspace key."
+description: "Preview and submit governed proposals, then read action status, policy, and decision receipts with a Write Workspace key."
 ---
 
-Use the Actions API to preview a proposal, submit it for review, and follow its stored outcome from your application. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
+Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. **Ask** waits for human approval; **Full** can queue policy-allowed changes automatically. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
 
 ## Before you start
 
@@ -100,7 +100,7 @@ A successful request returns HTTP `200`. Use the [dry-run response reference](/a
 
 The preview can read real account and provider state. It does not create a batch, action, decision receipt, or proposal audit event, queue execution, or write to Meta. It uses the current policy or unsaved defaults when no policy exists.
 
-Repeating a preview evaluates current state again; the required idempotency key does not reserve a proposal or freeze the result. If you choose to submit, use the proposal endpoint below with the intended body. Submission reevaluates the proposal and creates its review record. A dry run cannot enable a closed action workflow or bypass human approval.
+Repeating a preview evaluates current state again; the required idempotency key does not reserve a proposal or freeze the result. If you choose to submit, use the proposal endpoint below with the intended body. Submission reevaluates the proposal and creates its review record. A dry run cannot enable a closed action workflow or override the workspace approval mode.
 
 ## Submit a governed proposal
 
@@ -119,7 +119,7 @@ curl --fail-with-body \
 
 A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
 
-Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or bypass human review. **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
+Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue them automatically. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
 
 The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
 

@@ -6,7 +6,7 @@ description: "Understand how agents propose, approve, execute, verify, and audit
 Actions is Plainrouter's governed workflow for AI-proposed advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy.
 
 <Info>
-  New workspaces start in **Suggest only**. Supported Meta changes require human approval and a fresh policy check before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target after approval; creating a copy never activates it.
+  New workspaces start in **Ask**, where policy-allowed changes wait for human approval. In **Full**, allowed changes queue automatically. Both modes recheck policy before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target under the selected policy mode; creating a copy never activates it.
 </Info>
 
 ## The governed loop
@@ -16,7 +16,7 @@ Actions is Plainrouter's governed workflow for AI-proposed advertising changes. 
     A workspace owner or member creates a Read or Write workspace key within their current role. Account-scoped tools select an eligible active account owned by that workspace; older bound keys keep their account restriction. Confirm the selected Meta ad account before proposing a change.
   </Step>
   <Step title="The agent reads evidence">
-    The agent can read Signals context and the approved account's creative library. Creative proposals cite an account-bound asset record or frozen staged-asset manifest.
+    The agent can read Signals context, [retained account inventory](/actions/account-inventory), and the approved account's creative library. Creative proposals cite an account-bound asset record or frozen staged-asset manifest.
   </Step>
   <Step title="The agent submits a proposal">
     Each batch includes typed actions, a plain-language rationale, exact evidence fields, a stable idempotency key, and a human-supplied target.
@@ -24,8 +24,8 @@ Actions is Plainrouter's governed workflow for AI-proposed advertising changes. 
   <Step title="Plainrouter applies policy">
     Policy evaluates the proposal against protected entities, quiet hours, provider state, and the selected execution mode. Unknown execution-critical state blocks execution.
   </Step>
-  <Step title="A person approves">
-    Every executable Meta proposal requires a person at proposal time. Policy can block a change or require approval; it does not execute a change alone. In **Suggest only**, approval records agreement without execution. Executable modes queue the approved batch for a fresh policy check.
+  <Step title="The selected mode controls approval">
+    Ask waits for a person to approve each policy-allowed change. Full queues allowed changes automatically. Rule violations remain blocked and cannot be approved. Historical suggest-only approvals record agreement without execution.
   </Step>
   <Step title="Plainrouter executes and verifies">
     The execution worker rechecks current policy before any provider write. It records a durable receipt, reads the exact provider object back, and marks the action verified only when the receipt-addressed state matches.
@@ -44,9 +44,9 @@ Use [`dry_run_actions`](/mcp/tools#dry_run_actions) or the [HTTP dry-run endpoin
 | Action | Proposal support | Execution support |
 | --- | --- | --- |
 | Upload asset | Image or video staged-asset shape. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
-| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified `PAUSED`; any later resume is a separate approved action. |
-| `pause`, `resume` | Human-selected campaign, ad set, or ad, with empty `params`. | Supported after human approval, current policy checks, and execution authorization. |
-| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer currency minor units. | Supported after human approval and provider-state checks. Lifetime-budget changes are not supported. |
+| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified `PAUSED`; any later resume is a separate action governed by Ask or Full. |
+| `pause`, `resume` | Human-selected campaign, ad set, or ad, with empty `params`. | Supported under Ask or Full, with current policy checks and execution authorization. |
+| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer currency minor units. | Supported under Ask or Full, with provider-state checks. Lifetime-budget changes are not supported. |
 | `adjust_budget` | Typed recommendation with a new daily budget. | This legacy MCP action does not execute. |
 | `set_status` | Typed recommendation with `active` or `paused`. | This legacy MCP action does not execute, including activation. |
 
@@ -56,11 +56,10 @@ Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/
 
 | Mode | Passing proposal |
 | --- | --- |
-| **Suggest only** | Waits for a person. Approval ends as **Approved without execution**. |
-| **Auto within limits** | Every supported Meta proposal still requires a person. Approval queues governed execution. |
-| **Full auto** | Uses the same hard safeguards. Every supported Meta proposal still requires a person in this release. |
+| **Ask** | Waits for a person. Approval queues supported execution after current checks. |
+| **Full** | Queues automatically when policy allows; no separate human approval. |
 
-The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
+Ask is the default. Older `suggest_only` snapshots still end without execution when approved. The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
 
 An execution kill switch can stop further Meta writes, including an approved batch. It does not undo a change that already landed. Inspect [Inbox and receipts](/actions/review-proposals) before retrying a refused or interrupted operation.
 
@@ -79,6 +78,8 @@ For synchronous verification, the receipt state, verification summary, terminal 
 Signals reads provide aggregate account and dataset evidence. They do not prove campaign CPA, spend, budget, learning phase, or target-level performance.
 
 `get_signal_health` is diagnostic and cannot support a proposal containing a budget, status, or creative-spend action. Use `get_performance` for admissible stored reconciliation evidence. A batch is treated as spend-affecting when any action in it can affect spend or delivery; only an upload-only asset proposal may retain signal-health context.
+
+Quantitative Signals citations must include a ledger-class numeric field. Platform-reported or derived numbers alone cannot support the measurability claim; unclassified cited fields are refused. See [evidence restrictions](/mcp/tools#evidence-restrictions).
 
 Modeled and portfolio-only events are excluded from reconciliation-derived proposal evidence. Plainrouter does not blend them into observed performance used by governed actions.
 

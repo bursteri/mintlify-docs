@@ -1,7 +1,7 @@
 ---
 title: "Review action proposals in Inbox"
 sidebarTitle: "Review proposals"
-description: "Review Plainrouter action proposals, interpret Inbox groups, approve or reject a batch, and distinguish suggest-only approval from verified Meta execution."
+description: "Review Plainrouter proposals in Inbox, follow Ask and Full modes, troubleshoot approval failures, and verify Meta execution."
 ---
 
 Open **Inbox** from the Plainrouter sidebar to review agent proposals for the current workspace. Select an action to read its reasoning, target, policy result, and status. **Approve** and **Reject** decide the containing batch, including its other actions.
@@ -18,13 +18,14 @@ Counts represent actions, grouped into batches:
 
 | Group | What appears here |
 | --- | --- |
-| **Needs your decision** | Pending actions awaiting a human decision. |
+| **Needs your decision** | Pending actions awaiting a human decision, plus halted batches needing attention. A halted batch cannot be approved again. |
 | **Awaiting verification** | Executing, executed-pending-verification, compensating, or measuring actions. These states do not establish a verified production outcome. |
-| **Landed** | Verified actions with a verified execution receipt, **and** suggest-only recommendations recorded as **Approved without execution**. |
+| **Landed** | Verified actions with a verified execution receipt. |
+| **Approval recorded, nothing sent** | Historical suggest-only recommendations approved without a Meta write. |
 | **Drifted or failed** | Rejected, blocked, failed, uncertain, or rolled-back actions, plus actions without the required verified receipt. Read the exact status and reason. |
 
 <Warning>
-  The **Landed** group alone is not proof of a provider change. **Approved without execution** means no Meta write occurred. For production execution acceptance, every action in the batch needs a durable receipt and exact provider verification.
+  **Approval recorded, nothing sent** is separate from **Landed**. **Approved without execution** means no Meta write occurred. For production execution acceptance, every action in the batch needs a durable receipt and exact provider verification.
 </Warning>
 
 ## Review the selected action
@@ -63,15 +64,15 @@ The proposal's evidence must support its claims:
 
 ## Approve a batch
 
-The button is labeled **Approve**. Read the proposal's frozen mode and supported action before clicking; the button label does not describe the execution consequence.
+In Ask, policy-allowed proposals wait for the **Approve** button. Full queues allowed changes automatically. Rule violations cannot be approved. Read the proposal's frozen mode and supported action before clicking; the button label does not describe the execution consequence.
 
 | Proposal scope | Result of approval |
 | --- | --- |
-| **Suggest only** | Records **Approved without execution**. No Meta write occurs. |
-| Supported executable creative proposal | Authorizes the batch and queues a fresh policy check before execution. It does not guarantee a successful provider write. |
+| Historical **Suggest only** snapshot | Records **Approved without execution** in **Approval recorded, nothing sent**. No Meta write occurs. |
+| Pending **Ask** proposal for a supported action | Authorizes the batch and queues a fresh policy check before execution. It does not guarantee a successful provider write. |
 | Closed one-run measurement | Starts a diagnostic run that remains **Not Landed** and requires verified compensation. It is not general production execution. |
 
-For an ad copy, confirm `status: paused`. Creating the copy cannot activate it; a later `resume` requires a separate approved proposal. Approval is authoritative once and does not bypass [execution-time policy](/actions/policies-and-safety#two-policy-gates).
+For an ad copy, confirm `status: paused`. Creating the copy cannot activate it; a later `resume` requires a separate proposal governed by Ask or Full. Approval is authoritative once and does not bypass [execution-time policy](/actions/policies-and-safety#two-policy-gates).
 
 ### How do I verify the outcome?
 
@@ -95,4 +96,7 @@ Approval and rejection are idempotent terminal decisions for a pending batch. A 
 - **No decision control is available:** check whether the batch is still pending. A completed decision is not reopened from Inbox.
 - **The decision is forbidden:** sign in with an authorized human account in the correct workspace. A bearer token is not a substitute for this browser session.
 - **An action is blocked:** read its exact reason and the [policy constraints](/actions/policies-and-safety) before resubmitting.
-- **A suggest-only approval appears under Landed:** verify `approved_without_execution`. No provider object or execution receipt should be inferred from the group label.
+- **Approval recorded, nothing sent:** this is a historical `suggest_only` snapshot. Changing the current policy does not promote it into execution.
+- **Couldn't read the current state from Meta:** temporary connection, server, or throttling failures leave the proposal pending. Retry approval after the read becomes available; do not create a duplicate proposal.
+- **Blocked by current policy:** missing required provider state or a permanent target refusal blocks the batch. Review the named reason; retrying approval cannot override it. If Meta requires reconnection, reconnect the account before proposing further work.
+- **Rollback incomplete or Undo failed:** inspect each receipt and current disposition. These labels do not mean the earlier provider change was undone.

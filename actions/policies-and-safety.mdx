@@ -9,28 +9,29 @@ Only the workspace owner can save policy changes. Other workspace members can re
 
 When the owner changes a policy setting, Plainrouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the owner and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
 
-Policy changes that allow execution are saved atomically with their audit event. If audit-ledger integrity prevents the event from being appended, Plainrouter does not save the executable change. You can still switch to **Suggest only** as a safe fallback, but Plainrouter warns that the audit ledger requires repair if it cannot record that change.
+Policy changes are saved atomically with their audit event. If the audit event cannot be recorded, the change is not saved. Recheck the displayed policy after an error; do not assume a mode switch succeeded.
 
 ## Execution mode
 
 | Mode | Behavior in this release |
 | --- | --- |
-| **Suggest only** | Every passing proposal waits for a person. Approval records the recommendation without execution. |
-| **Auto within limits** | Supported Meta proposals require human approval, then queue execution under all hard stops. |
-| **Full auto** | Uses the same hard safeguards. Supported Meta proposals still require human approval at proposal time. |
+| **Ask** (`ask`) | Every policy-allowed change waits for a person. Approval queues supported execution after a fresh policy check. |
+| **Full** (`full`) | Policy-allowed changes queue automatically without a separate human approval. The same execution checks apply. |
 
-New workspaces default to **Suggest only**. The selected mode is copied into each proposal as an immutable snapshot.
+New workspaces default to **Ask**. Existing workspace policies were migrated to Ask; selecting Full is an explicit owner decision. The selected mode is copied into each proposal as an immutable snapshot. Changing the current mode does not rewrite an older proposal.
+
+Older batches can retain `suggest_only`, `auto_with_limits`, or `full_auto` snapshots. A historical `suggest_only` approval still ends without execution. These are historical values, not choices for a new policy.
 
 <Warning>
-  Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` actions, JPEG/PNG uploads, and paused ad copies require human approval before execution. The legacy `set_status` and `adjust_budget` types remain recommendations only. Video upload execution remains disabled.
+  Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` actions, JPEG/PNG uploads, and paused ad copies follow Ask or Full before execution. Both modes block rule violations; a blocked change cannot be approved. The legacy `set_status` and `adjust_budget` types remain recommendations only. Video upload execution remains disabled.
 </Warning>
 
 ## Two policy gates
 
 Executable Meta work passes policy twice:
 
-1. Proposal-time policy decides whether to block or request human approval.
-2. After approval, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
+1. Proposal-time policy blocks rule violations. Otherwise, Ask requires a person and Full allows automatic queueing.
+2. At dispatch, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
 
 Changing policy does not promote or rewrite an existing proposal. A newly protected target, quiet-hours window, missing driver, unavailable critical field, or other non-`allow` result blocks the queued batch before provider execution.
 
@@ -100,13 +101,13 @@ If commit state is unknown, Plainrouter reconciles before retrying. It does not 
 
 | Check or action | Current result |
 | --- | --- |
-| Human approval for every executable Meta proposal | Enforced. |
+| Human approval in Ask | Required for every policy-allowed change; Full queues allowed changes automatically. |
 | Proposal-time and execution-time policy | Enforced. |
 | Protected entity and quiet hours | Enforced. |
 | Provider account, source, asset readiness, and applicable learning state | Re-read and fail-closed. |
 | Image upload and paused ad duplication | Executable with receipts, verification, outcome reads, and compensation. |
-| Canonical pause, resume, and daily-budget changes | Executable only after human approval and current authorization and policy checks. |
-| Activation during ad duplication | Never; a later resume requires a separate approved proposal. |
+| Canonical pause, resume, and daily-budget changes | Executable under Ask or Full with current authorization and policy checks. |
+| Activation during ad duplication | Never; a later resume requires a separate proposal governed by Ask or Full. |
 | Execution kill switch | Stops further Meta writes without undoing earlier changes. |
 | Legacy MCP `adjust_budget` and `set_status` execution | Disabled. |
 | Video upload execution | Disabled. |

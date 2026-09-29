@@ -6,11 +6,30 @@ rss: true
 
 Plainrouter ships continuously. This page collects the customer-facing changes from September and leaves out formatting, CI, and internal draft work.
 
+<Update label="September 30, 2026">
+
+  ## Choose Ask or Full for governed changes
+
+  **Changed** · Ask waits for your approval; Full automatically queues changes your policy allows. Both modes block rule violations and recheck execution safeguards. Existing workspace policies moved to Ask; historical proposal snapshots keep their original meaning. [Review execution modes](/actions/policies-and-safety#execution-mode).
+
+  ## Browse retained Meta campaigns and metrics
+
+  **New** · Inspect campaigns, ad sets and ads in Campaigns or through MCP inventory reads, with pagination, sync timestamps and undo warnings. These reads use stored data and do not refresh or change Meta. [Read account inventory](/actions/account-inventory).
+
+  ## Tell us when an MCP task fails or is missing
+
+  **New** · Use `submit_feedback` to record a bug or missing capability from your connected client. You receive a report ID; it does not change the account or send a reply in MCP. [Submit feedback](/mcp/tools#submit_feedback).
+
+  ## Distinguish approval from execution and recover from failed reads
+
+  **Improved** · Historical approvals that sent nothing have their own Inbox group. Approval errors distinguish a temporary Meta read failure from a policy block, and undo failures remain visible. [Review proposals and troubleshoot](/actions/review-proposals).
+</Update>
+
 <Update label="September 29, 2026">
 
-  ## Generate Actions clients from the API reference
+  ## Use typed Actions request and response schemas
 
-  **Improved** · The Actions agent API reference now declares typed proposal objects, the optional `account_id` selector on reads, and full response fields, so generated clients match runtime. [Use the Actions API](/api/actions).
+  **Improved** · The published Actions API schema now defines typed proposal objects, account selection on reads, and stable response fields. Use these definitions when validating requests or generating client types. [Use the Actions API](/api/actions).
 </Update>
 
 <Update label="September 28, 2026">

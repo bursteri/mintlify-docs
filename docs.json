@@ -64,6 +64,7 @@
             "icon": "workflow",
             "pages": [
               "actions/overview",
+              "actions/account-inventory",
               "actions/creative-workflow",
               "actions/review-proposals",
               "actions/policies-and-safety",

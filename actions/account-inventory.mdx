@@ -1,0 +1,93 @@
+---
+title: "Read Meta campaign inventory and retained metrics"
+sidebarTitle: "Account inventory"
+description: "Inspect retained Meta campaigns, ad sets, ads and daily metrics in Plainrouter, paginate MCP results, and interpret freshness and undo warnings."
+---
+
+Use **Campaigns** or the MCP inventory tools to inspect Meta objects and retained daily metrics already stored in Plainrouter. These reads do not contact Meta, trigger a refresh, or change delivery. Check freshness before interpreting the result as current account state.
+
+## Before you begin
+
+For the dashboard, sign in to the intended workspace and select an available Meta ad account. For MCP, connect a [Read or Write workspace key](/mcp/workspace-tokens) with an active grant covering the inventory tools. The issuer must still have the required workspace role.
+
+Both tools require `account_id`: the internal Plainrouter account ID, not Meta's external `act_…` identifier. The account must be available to the authorized workspace. An older account-bound key can name only its bound account. Retained data may remain readable for a disconnected account; that does not authorize live provider operations or revive revoked credentials.
+
+## Browse Campaigns
+
+1. Open **Campaigns** and select the intended account.
+2. Check the connection indicator, structure-sync time, metrics-sync time and any last-read issue.
+3. Expand a campaign to inspect its ad sets and ads. Use **Load more campaigns** and the child load-more control when available; the first visible page is not the complete inventory.
+4. Inspect object status and any undo warning before deciding what needs attention.
+
+The page shows retained recent metrics. Missing rows or displayed zero totals do not prove zero provider activity when synchronization is incomplete. This page is read-only; changes use the separate [governed Actions workflow](/actions/overview).
+
+## Read objects with MCP
+
+Call `get_account_inventory` with tool arguments such as:
+
+```json
+{
+  "account_id": 91,
+  "level": "campaign",
+  "limit": 100
+}
+```
+
+The response contains `account`, `sync`, `staleness`, `objects` and `next_cursor`. Verify the returned account first.
+
+| Input | Meaning |
+| --- | --- |
+| `account_id` | Required positive internal account ID. |
+| `level` | Optional `campaign`, `adset`, or `ad`. Inventory uses `adset`; action proposals use `ad_set`. |
+| `effective_status` | Optional Meta status, such as `ACTIVE`, `PAUSED`, or `ARCHIVED`. |
+| `campaign_id`, `adset_id` | Optional external Meta parent IDs. |
+| `after_id` | Positive internal object-row cursor from the previous `next_cursor`. |
+| `limit` | 1–200 objects; default 100. |
+
+When `next_cursor` is non-null, repeat the same request with that value as `after_id`. Stop when it is null. Keep filters unchanged between pages. An object's internal `id` is not its external Meta `external_id`.
+
+Objects include configured/effective status, hierarchy, available budget fields, sync timestamps and related Plainrouter receipt fields. Budget fields ending in `_minor` use integer currency minor units; unavailable values remain null.
+
+## Read retained metrics and changes
+
+Call `get_inventory_metrics`:
+
+```json
+{
+  "account_id": 91,
+  "start_date": "2026-09-20",
+  "end_date": "2026-09-26",
+  "include_changes": true
+}
+```
+
+Use dates appropriate to your account's available history. Optional `campaign_id`, `adset_id` and `ad_id` filters use external Meta IDs. Dates use `YYYY-MM-DD`; the end cannot precede the start.
+
+The response contains `metrics`, `changes`, `effective_range`, account details and freshness. Daily rows include currency, spend, impressions, clicks, inline link clicks, Meta action data and fetch time. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
+
+Date bounds are inclusive in the account timezone, with UTC as the fallback. Plainrouter clips the requested range to the workspace's customer-visible retention cutoff and today. Inspect `effective_range` rather than assuming the full request was returned. If no range remains, it is null and both arrays are empty. `changes` is populated only when `include_changes` is true; it records observed field changes, not a complete causal audit of every Meta edit.
+
+These are stored Meta-reported metrics, separate from [Signals reconciliation](/signals/health-and-performance). They do not establish attribution accuracy, causal lift or admissible quantitative proposal evidence by themselves.
+
+## What do freshness and undo warnings mean?
+
+| Field or state | Interpretation and next step |
+| --- | --- |
+| `fresh` | Stored timestamps meet the applicable freshness threshold; this is not a live Meta read. |
+| `behind` | Stored structure or applicable metrics are behind. Check timestamps and last error before relying on them. |
+| `never_synced` | No structure sync is recorded. An empty response does not prove the account has no campaigns. |
+| `reconnect_needed`, `disconnected` | Retained data may be present, but the connection is not ready for current provider work. Review [Meta connection setup](/signals/connect-meta). |
+| `created_by_plainrouter` and receipt fields | A related Plainrouter creation receipt is available; inspect its exact status and verification result. |
+| `undone_but_active` | A compensated receipt exists, but the stored object's effective status is `ACTIVE`. Investigate the conflicting evidence. |
+| `undo_failed` / **Undo failed** | The deciding receipt records compensation failure and the stored object is not `ARCHIVED`. Do not report successful undo. |
+
+Follow [Inbox and current disposition](/actions/review-proposals#current-disposition-and-late-restoration) and [Audit](/actions/audit-log) before retrying uncertain or failed recovery. Reading this inventory never performs an undo.
+
+## Troubleshoot access and incomplete results
+
+- **Account not found or outside key binding:** check the internal account ID, workspace access and older key binding. Trying another workspace's ID cannot widen access.
+- **Missing tool or insufficient scope:** inspect discovery and the active grant; replace a credential with the intended permitted scope if necessary. Read-only inventory does not require the separate Write-only Actions record-read grant.
+- **Only some objects appear:** follow `next_cursor`; remove unintended status/parent filters and check freshness.
+- **Dates return less history:** inspect `effective_range` and the workspace retention limit. Empty retained results are not proof of zero provider activity.
+
+Tool names and input contracts are published in the [Plainrouter MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json). For live image/video asset selection, use the separate [creative-library workflow](/actions/creative-workflow).
