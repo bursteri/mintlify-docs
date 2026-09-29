@@ -82,12 +82,13 @@ export default {
         proxyRequest.headers.set("CF-Connecting-IP", clientIp);
       }
       if (isRead && (
+        urlObject.pathname === "/docs/llms.txt" ||
         urlObject.pathname === "/docs/llms-full.txt" ||
         urlObject.pathname === "/docs/.well-known/llms-full.txt"
       )) {
-        // The legacy .site proxy retains this aggregate even with no-store.
+        // The legacy .site proxy retains these discovery files even with no-store.
         // Fetch the verified Mintlify subdirectory origin directly for these
-        // two URLs, bypassing that extra cache and downstream storage.
+        // URLs, bypassing that extra cache and downstream storage.
         const aggregateUrl = new URL(proxyRequest.url);
         aggregateUrl.hostname = "plainrouter.subdirectory-docs.mintlify.me";
         const aggregateRequest = new Request(aggregateUrl, proxyRequest);
