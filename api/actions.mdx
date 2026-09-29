@@ -29,13 +29,13 @@ Supply a positive integer `account_id` as a query parameter on GET requests and 
 
 | Method | Path relative to the base URL | Result |
 | --- | --- | --- |
-| `GET` | [`/actions`](/api/actions/list/actionreadapi/read-actions-data) | Paginated actions for the selected account. |
-| `GET` | [`/action-batches/{actionBatch}`](/api/actions/batch/actionreadapi/read-actions-data) | One batch and its actions. |
-| `GET` | [`/actions/{action}`](/api/actions/action/actionreadapi/read-actions-data) | One action. |
-| `GET` | [`/actions/{action}/decision-receipt`](/api/actions/receipt/actionreadapi/read-actions-data) | Its stored decision receipt and audit-chain reference. |
-| `GET` | [`/actions/policy`](/api/actions/policy/actionreadapi/read-actions-data) | Current workspace policy, including effective defaults. |
-| `POST` | [`/actions/dry-run`](/api/actions/proposals/actiondryrunapi/preview-actions) | Preview policy decisions and diffs without creating a proposal. May read provider state. |
-| `POST` | [`/actions`](/api/actions/proposals/actionproposalapi/propose-actions) | Submit a proposal through the policy and approval workflow. |
+| `GET` | [`/actions`](/api/actions/actionreadapi/list-actions) | Paginated actions for the selected account. |
+| `GET` | [`/action-batches/{actionBatch}`](/api/actions/actionreadapi/get-action-batch) | One batch and its actions. |
+| `GET` | [`/actions/{action}`](/api/actions/actionreadapi/get-action) | One action. |
+| `GET` | [`/actions/{action}/decision-receipt`](/api/actions/actionreadapi/get-decision-receipt) | Its stored decision receipt and audit-chain reference. |
+| `GET` | [`/actions/policy`](/api/actions/actionreadapi/get-action-policy) | Current workspace policy, including effective defaults. |
+| `POST` | [`/actions/dry-run`](/api/actions/actiondryrunapi/preview-actions) | Preview policy decisions and diffs without creating a proposal. May read provider state. |
+| `POST` | [`/actions`](/api/actions/actionproposalapi/propose-actions) | Submit a proposal through the policy and approval workflow. |
 
 `{actionBatch}` and `{action}` are the ULIDs returned by Plainrouter, not Meta object IDs. All successful reads return HTTP `200`.
 
@@ -51,15 +51,15 @@ curl --fail-with-body --get \
   --data-urlencode 'page=1'
 ```
 
-The [list reference](/api/actions/list/actionreadapi/read-actions-data) defines the query and response fields. Filter by an exact [action status](/reference/statuses-and-terms#action-statuses), such as `pending`, `verified`, or `execution_uncertain`; batch-only values such as `completed` are invalid. Pages contain at most 25 actions, ordered by action ID descending. Continue through the returned pages; there is no configurable `per_page` parameter.
+The [list reference](/api/actions/actionreadapi/list-actions) defines the query and response fields. Filter by an exact [action status](/reference/statuses-and-terms#action-statuses), such as `pending`, `verified`, or `execution_uncertain`; batch-only values such as `completed` are invalid. Pages contain at most 25 actions, ordered by action ID descending. Continue through the returned pages; there is no configurable `per_page` parameter.
 
-To inspect a returned action, request `/actions/{action}?account_id=91` and use the [single-action reference](/api/actions/action/actionreadapi/read-actions-data). To inspect its batch, request `/action-batches/{actionBatch}?account_id=91` and use the [batch reference](/api/actions/batch/actionreadapi/read-actions-data). Confirm the scope and read both batch and action statuses.
+To inspect a returned action, request `/actions/{action}?account_id=91` and use the [single-action reference](/api/actions/actionreadapi/get-action). To inspect its batch, request `/action-batches/{actionBatch}?account_id=91` and use the [batch reference](/api/actions/actionreadapi/get-action-batch). Confirm the scope and read both batch and action statuses.
 
 ## Interpret current disposition and recovery
 
-List, single-action, and batch reads include each action's current `disposition` alongside its historical `status` and `batch_status`. The [action response reference](/api/actions/action/actionreadapi/read-actions-data) defines the fields. Use `receipt_status` for current execution-receipt state and `outcome_status` for later measurement; measurement is separate from execution verification. An unavailable reason, check time, or recovery value remains unknown, not successful.
+List, single-action, and batch reads include each action's current `disposition` alongside its historical `status` and `batch_status`. The [action response reference](/api/actions/actionreadapi/get-action) defines the fields. Use `receipt_status` for current execution-receipt state and `outcome_status` for later measurement; measurement is separate from execution verification. An unavailable reason, check time, or recovery value remains unknown, not successful.
 
-Read `compensation_reason_code` with `recovery_disposition` using the [recovery interpretation](/actions/audit-log#interpret-unavailable-outcomes-and-recovery). `late_restored` records later compensation evidence without rewriting the earlier action or batch result. The [batch response reference](/api/actions/batch/actionreadapi/read-actions-data) defines `restoration_summary`; `all_receipts_compensated_late` means every existing execution receipt in that batch is compensated and at least one has late-restoration evidence. It does not mean every proposed action executed, and it does not turn the batch into a successful original execution.
+Read `compensation_reason_code` with `recovery_disposition` using the [recovery interpretation](/actions/audit-log#interpret-unavailable-outcomes-and-recovery). `late_restored` records later compensation evidence without rewriting the earlier action or batch result. The [batch response reference](/api/actions/actionreadapi/get-action-batch) defines `restoration_summary`; `all_receipts_compensated_late` means every existing execution receipt in that batch is compensated and at least one has late-restoration evidence. It does not mean every proposed action executed, and it does not turn the batch into a successful original execution.
 
 Keep nullable values as unknown. A historical `rollback_incomplete` can remain alongside later restoration evidence; read both rather than replacing one with the other.
 
@@ -73,19 +73,19 @@ curl --fail-with-body --get \
   --data-urlencode 'account_id=91'
 ```
 
-The [policy response reference](/api/actions/policy/actionreadapi/read-actions-data) defines the current policy fields. If no policy has been saved, the read returns effective defaults with `id: null`; it does not create a policy. This is the **current** policy, not the frozen mode or policy evidence from an earlier proposal. Review [policy and safety](/actions/policies-and-safety) before interpreting execution permissions.
+The [policy response reference](/api/actions/actionreadapi/get-action-policy) defines the current policy fields. If no policy has been saved, the read returns effective defaults with `id: null`; it does not create a policy. This is the **current** policy, not the frozen mode or policy evidence from an earlier proposal. Review [policy and safety](/actions/policies-and-safety) before interpreting execution permissions.
 
 ## Retrieve a decision receipt
 
-Request `/actions/{action}/decision-receipt?account_id=91` with the same headers. The [decision-receipt reference](/api/actions/receipt/actionreadapi/read-actions-data) defines its response. The stored `document` records the terminal outcome and available verification evidence. `document_sha256` is a digest of the canonical document, not the downloaded JSON file's formatting; `chain_entry` identifies the receipt's audit event.
+Request `/actions/{action}/decision-receipt?account_id=91` with the same headers. The [decision-receipt reference](/api/actions/actionreadapi/get-decision-receipt) defines its response. The stored `document` records the terminal outcome and available verification evidence. `document_sha256` is a digest of the canonical document, not the downloaded JSON file's formatting; `chain_entry` identifies the receipt's audit event.
 
 The stored `document`, digest, and chain reference remain immutable. The separate `disposition` can reflect later recovery; do not include it when checking `document_sha256`. A receipt may not exist yet, and a receipt can describe failure. Check its terminal status and verification evidence before reporting success. This endpoint exposes one scoped receipt, not the complete workspace audit export. See [receipt interpretation and integrity limits](/actions/audit-log#download-an-action-decision-receipt).
 
 ## Preview a proposal without submitting it
 
-Use `POST /actions/dry-run` to inspect policy decisions and proposed diffs before creating a batch. Use the complete [dry-run request schema](/api/actions/proposals/actiondryrunapi/preview-actions) and the same permissions as submission: a Write Workspace key, an active `propose-actions` grant, and `actions.propose`. Upload and creative-duplication previews also require `creative.write`.
+Use `POST /actions/dry-run` to inspect policy decisions and proposed diffs before creating a batch. Use the complete [dry-run request schema](/api/actions/actiondryrunapi/preview-actions) and the same permissions as submission: a Write Workspace key, an active `propose-actions` grant, and `actions.propose`. Upload and creative-duplication previews also require `creative.write`.
 
-Prepare `proposal.json` using the [dry-run reference](/api/actions/proposals/actiondryrunapi/preview-actions) and [evidence rules](/mcp/tools#evidence-restrictions). Include `rationale`, `idempotency_key`, and valid evidence even though the preview does not save a proposal. Targets must be human-selected; evidence fields must exist in the fresh server-side capture.
+Prepare `proposal.json` using the [dry-run reference](/api/actions/actiondryrunapi/preview-actions) and [evidence rules](/mcp/tools#evidence-restrictions). Include `rationale`, `idempotency_key`, and valid evidence even though the preview does not save a proposal. Targets must be human-selected; evidence fields must exist in the fresh server-side capture.
 
 ```bash
 curl --fail-with-body \
@@ -96,7 +96,7 @@ curl --fail-with-body \
   --data-binary @proposal.json
 ```
 
-A successful request returns HTTP `200`. Use the [dry-run response reference](/api/actions/proposals/actiondryrunapi/preview-actions) and inspect **every** action's `status`. An `evaluated` item has a policy prediction, not execution availability or success. `approval_required` and `would_auto_execute` reflect the combined batch prediction, not approval or execution. `diff.before` contains state available to policy evaluation; an empty object or array does not mean a known zero or absent provider object. `diff.proposed` is the normalized action, not a request sent to Meta. A `dry_run_unavailable` item needs a persisted Action row and has a reason instead of a policy prediction or diff. HTTP `200` alone does not mean every action was evaluated.
+A successful request returns HTTP `200`. Use the [dry-run response reference](/api/actions/actiondryrunapi/preview-actions) and inspect **every** action's `status`. An `evaluated` item has a policy prediction, not execution availability or success. `approval_required` and `would_auto_execute` reflect the combined batch prediction, not approval or execution. `diff.before` contains state available to policy evaluation; an empty object or array does not mean a known zero or absent provider object. `diff.proposed` is the normalized action, not a request sent to Meta. A `dry_run_unavailable` item needs a persisted Action row and has a reason instead of a policy prediction or diff. HTTP `200` alone does not mean every action was evaluated.
 
 The preview can read real account and provider state. It does not create a batch, action, decision receipt, or proposal audit event, queue execution, or write to Meta. It uses the current policy or unsaved defaults when no policy exists.
 
@@ -104,9 +104,9 @@ Repeating a preview evaluates current state again; the required idempotency key 
 
 ## Submit a governed proposal
 
-Use the [generated proposal request reference](/api/actions/proposals/actionproposalapi/propose-actions) for the typed action input and response fields. A batch contains 1–25 actions and 1–3 evidence declarations. Select targets yourself and include rationale for each action; supply `account_id` when account selection requires it.
+Use the [generated proposal request reference](/api/actions/actionproposalapi/propose-actions) for the typed action input and response fields. A batch contains 1–25 actions and 1–3 evidence declarations. Select targets yourself and include rationale for each action; supply `account_id` when account selection requires it.
 
-Prepare `proposal.json` using the [proposal reference](/api/actions/proposals/actionproposalapi/propose-actions) and [evidence rules](/mcp/tools#evidence-restrictions). For creative work, follow the [paused-variant walkthrough](/actions/creative-workflow). Do not invent target IDs, asset IDs, or evidence. Submission also requires `actions.propose`; upload and creative-duplication proposals require `creative.write`.
+Prepare `proposal.json` using the [proposal reference](/api/actions/actionproposalapi/propose-actions) and [evidence rules](/mcp/tools#evidence-restrictions). For creative work, follow the [paused-variant walkthrough](/actions/creative-workflow). Do not invent target IDs, asset IDs, or evidence. Submission also requires `actions.propose`; upload and creative-duplication proposals require `creative.write`.
 
 ```bash
 curl --fail-with-body \
@@ -117,7 +117,7 @@ curl --fail-with-body \
   --data-binary @proposal.json
 ```
 
-A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/proposals/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
+A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
 
 Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or bypass human review. **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
 
