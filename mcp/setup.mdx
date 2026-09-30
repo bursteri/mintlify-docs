@@ -284,7 +284,7 @@ Confirm `PLAINROUTER_WORKSPACE_TOKEN` is set in the environment that starts Clau
 
 Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. Also confirm its issuing person still holds a workspace role that covers the token tier.
 
-If the client is sending an OAuth access token, the rejection is expected. Replace it with a workspace execution token.
+If the client is sending an OAuth management credential, the rejection is expected. Create a workspace key, then configure the MCP client to use it as the bearer credential.
 
 ### A creative tool reports a missing permission
 
