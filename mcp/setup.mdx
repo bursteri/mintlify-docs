@@ -31,7 +31,7 @@ or OAuth management credential, see [Authentication and
 clients](/api/authentication).
 
 <Warning>
-  OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Use a workspace token for every MCP tool call.
+  OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Tool calls and other protected methods require a workspace credential: a workspace key (the documented path) or a workspace-scoped OAuth execution token. OAuth management credentials, management keys and Signals secrets are refused.
 </Warning>
 
 ## Before you begin
