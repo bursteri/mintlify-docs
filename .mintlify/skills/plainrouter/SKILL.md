@@ -1,20 +1,20 @@
 ---
 name: plainrouter
-description: Test PlainRouter MCP without credentials, connect workspace-scoped production clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
+description: Test Plainrouter MCP without credentials, connect workspace-scoped production clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
 license: Proprietary
-compatibility: Test mode needs only an MCP client. Production workflows require a PlainRouter workspace and the credential or workspace-token tier required by the selected workflow.
+compatibility: Test mode needs only an MCP client. Production workflows require a Plainrouter workspace and the credential or workspace-token tier required by the selected workflow.
 metadata:
-  product: PlainRouter
+  product: Plainrouter
   documentation_revision: "2026-09-27"
 ---
 
-# Use PlainRouter safely
+# Use Plainrouter safely
 
-Use this skill when a person wants to configure PlainRouter Signals, connect an
-AI client to PlainRouter MCP, inspect Signal or creative state, create a
+Use this skill when a person wants to configure Plainrouter Signals, connect an
+AI client to Plainrouter MCP, inspect Signal or creative state, create a
 governed advertising proposal, or prepare a Launcher draft.
 
-PlainRouter MCP test mode is available at
+Plainrouter MCP test mode is available at
 `https://plainrouter.com/mcp/sandbox`; production is available at
 `https://plainrouter.com/mcp`. Every account-specific production workflow must begin with
 `get_account_state` so the person and agent can confirm the key-scoped
@@ -76,7 +76,7 @@ Revoking a Management key does not revoke workspace keys it issued.
   active account owned by that workspace with an active connection. Omission
   selects the sole eligible account; multiple accounts require an explicit ID.
   An older account-bound key cannot override its binding.
-- A proposal-producing tool writes a governed PlainRouter proposal, not a
+- A proposal-producing tool writes a governed Plainrouter proposal, not a
   direct Meta change.
 - Write or Admin access does not bypass policy, approval, provider
   verification, or account restrictions.
@@ -84,7 +84,7 @@ Revoking a Management key does not revoke workspace keys it issued.
   evidence for a proposal that can affect spend or delivery.
 - Use `get_performance` for stored reconciliation-derived evidence. Cite
   quantitative values only when `quantitative_citations_allowed` is true.
-- Treat human-supplied target IDs as selection only. PlainRouter re-reads
+- Treat human-supplied target IDs as selection only. Plainrouter re-reads
   execution-critical provider state.
 - A creative duplicate is always proposed and created as `PAUSED`.
 - A proposal is not Landed until every exact receipt target passes provider
@@ -181,7 +181,7 @@ HTTP routes, pagination, response fields, and failure handling.
 3. If necessary, call `upload-asset` with a JPEG or PNG, a rationale, and a
    stable idempotency key. This stages a private asset and creates a proposal.
 4. Call `duplicate-ad-with-creative` with a human-selected source ad and an
-   asset ID returned by PlainRouter. The normalized status remains `paused`.
+   asset ID returned by Plainrouter. The normalized status remains `paused`.
 5. Send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox. Do not claim that the MCP
    request changed Meta.
 

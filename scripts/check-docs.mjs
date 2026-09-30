@@ -173,7 +173,7 @@ if (!existsSync(linkTargetsPath)) {
   }
 
   if (links.slice(0, 4).some((link) => link.hasAttribute("target"))) {
-    fail("Only external web links outside PlainRouter may open in a new tab");
+    fail("Only external web links outside Plainrouter may open in a new tab");
   }
 
   if (links[4].getAttribute("target") !== "_blank") {
@@ -382,7 +382,7 @@ if (existsSync(skillPath)) {
     const target = link[1];
 
     if (target.startsWith("/")) {
-      fail(`PlainRouter skill link must be an absolute URL: ${target}`);
+      fail(`Plainrouter skill link must be an absolute URL: ${target}`);
       continue;
     }
 
@@ -394,7 +394,7 @@ if (existsSync(skillPath)) {
       : url.pathname.slice("/docs/".length).replace(/\.md$/, "");
 
     if (!mdxPages.has(targetPage)) {
-      fail(`PlainRouter skill links to missing documentation page: ${target}`);
+      fail(`Plainrouter skill links to missing documentation page: ${target}`);
     }
   }
 }
