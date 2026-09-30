@@ -1,8 +1,8 @@
-# PlainRouter documentation agent instructions
+# Plainrouter documentation agent instructions
 
 ## Mission
 
-Maintain accurate customer-facing documentation for PlainRouter. PlainRouter
+Maintain accurate customer-facing documentation for Plainrouter. Plainrouter
 provides privacy-safe first-party Signals measurement, governed advertising
 Actions, and Launcher workflows for account-bound creative preparation.
 
@@ -23,7 +23,7 @@ after the customer-visible implementation is merged and shipped.
   released on the relevant surface. Exclude draft, closed, unmerged,
   internal-only, contract-only, feature-gated, and deliberately closed work.
 - Verify published package versions before changing SDK or CLI version claims.
-- Do not probe PlainRouter production product endpoints to prove behavior. Use
+- Do not probe Plainrouter production product endpoints to prove behavior. Use
   merged source, signed contracts, generated artifacts, package metadata, CI,
   and deployment control-plane evidence appropriate to the request.
 - If the available sources cannot establish a claim, leave the claim out and
@@ -31,14 +31,16 @@ after the customer-visible implementation is merged and shipped.
 
 ## Preserve product boundaries
 
-- Use **workspace** for the PlainRouter tenant boundary. Do not substitute
+- Spell the brand **Plainrouter**. Keep `PlainRouter` only where it is a code
+  identifier, such as the Ruby `PlainRouter::Client` module, or an exact UI label.
+- Use **workspace** for the Plainrouter tenant boundary. Do not substitute
   project, organization, or account.
 - Use **Meta ad account** for the advertising account selected under a workspace
   key or bound to an older execution token. Do not shorten it to workspace account.
 - A **Server secret** (formerly Signals workspace secret) authenticates the Signals Conversion API for
   one workspace. Published `0.5.x` clients retain names such as
   `signalTrackerSecret` and "tracker token" as compatibility labels.
-- A **Workspace key** (formerly workspace execution token) authenticates PlainRouter MCP and authorized
+- A **Workspace key** (formerly workspace execution token) authenticates Plainrouter MCP and authorized
   workspace routes for one workspace. New Read/Write workspace keys select
   eligible active accounts owned by that workspace; older account-bound keys
   retain their binding. Use `account_id` where the tool requires selection.
