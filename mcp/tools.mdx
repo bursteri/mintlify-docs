@@ -230,7 +230,7 @@ The synthetic sandbox account returns `connection.health: "connected"`; that val
 
 ### What do the capability flags mean?
 
-Current capability flags are intentionally explicit:
+The flags describe different account capabilities. For example, this illustrative response has stored Signals context but no current management access:
 
 ```json
 {
@@ -241,7 +241,14 @@ Current capability flags are intentionally explicit:
 }
 ```
 
-`verified_performance` becomes true only when the matching destination is active. It describes stored reconciliation availability, not live target performance. The `marketing_api_reads` and `writes` flags describe this Signals-oriented account-state call; use the separately permissioned creative tools for live creative-library reads and governed creative proposals.
+| Flag | Meaning when true |
+| --- | --- |
+| `signal_health` | Workspace context is available for Signals health reads. It does not establish healthy collection or delivery. |
+| `verified_performance` | The matching Signals destination is active. This describes stored reconciliation availability, not live target performance. |
+| `marketing_api_reads` | The active Meta account and connection have a stored token, a valid Meta account ID, and recorded `ads_read` or `ads_management` permission. |
+| `writes` | Existing-object management is available for this workspace under the current account, connection, stored token, `ads_management` permission, and execution-switch checks. |
+
+A Page or Signals dataset is not required merely to report existing-object management availability. Creating new ads has additional requirements, including a Page. Tool grants, the caller's permissions, policy, current provider state, and execution checks still apply. `writes: true` is neither approval nor a guarantee that a requested change will execute. This inspection uses stored authorization state, not a live Meta permission probe. See [Meta grant labels](/signals/connect-meta#how-do-i-interpret-the-meta-grant).
 
 ## `get_signal_health`
 
@@ -535,6 +542,12 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask; Full queues policy-allowed changes automatically. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes. The legacy `adjust_budget` and `set_status` recommendations remain non-executable. See [supported Actions](/actions/overview#supported-action-types) and the [creative workflow](/actions/creative-workflow).
 
 HTTP field errors return `422`; MCP exposes a tool validation error. Read the field path and message. `action_request_invalid` identifies list, NUL, or duplicate-key problems; `action_target_id_invalid` identifies the guarded target-ID rule; `action_params_invalid` identifies invalid typed parameters. Correct the payload rather than retrying it unchanged.
+
+### Repeated or unsettled management targets
+
+When submitting `pause`, `resume`, `increase_budget`, or `decrease_budget`, include each target type and ID only once per batch. Repeating the same target with a different action or display name still returns `action_target_repeated` on the affected target field.
+
+A target already held by an unsettled management proposal is also refused. Follow the existing batch instead of changing the idempotency key to bypass it. See [management-target refusals](/api/actions#why-is-a-management-target-refused) for recovery steps. These rules do not mean two creation actions must have different parent destinations.
 
 ### Missing staged assets or source ads
 

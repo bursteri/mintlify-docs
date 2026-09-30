@@ -62,9 +62,12 @@ Confirm **Meta profile**, **Selected Page** when present, and **Scopes granted**
 | Grant label | Next step |
 | --- | --- |
 | **Full access** | Continue with the intended dataset or governed Actions setup. This is not proof of delivery or permission to bypass policy and approval. |
-| **Read-only** | Eligible reporting can continue; **Ad changes are unavailable**. Use **Reconnect Meta** with the appropriate team role if you need the missing permissions. |
-| **Grant could not be verified** | Plainrouter could not verify the grant. Do not assume requested scopes were granted; reconnect and check the card again. Ad changes remain unavailable. |
-| **Access incomplete** | Review the granted scopes and reconnect with access to the required assets. |
+| **Ad changes available** | Existing-object management is available even if the full delivery grant is incomplete. Verify the separate Meta delivery setup when sending conversions. |
+| **New ads need a Page** | Select an eligible Page when creating new ads. A missing Page alone does not disable otherwise authorized changes to existing objects. |
+| **Delivery access incomplete** or **Access incomplete** | Inspect granted scopes and the separate ad-change availability message. Reconnect with the required asset access when needed. |
+| **Grant could not be verified** | Do not assume requested scopes were granted. Inspect the card's separate capability messages and reconnect when required. |
+
+The card separately states **Ad changes are available** or **Ad changes are unavailable**. This checks management eligibility; it is not approval or a promise that a particular action will pass policy and Meta verification. Agents can inspect the corresponding [account capability flags](/mcp/tools#what-do-the-capability-flags-mean).
 
 Reconnecting requests missing delivery permissions again. If delivery reports `meta_connection_needs_reconnect`, reconnect the existing Meta connection with an authorized team role, then inspect connection health and the affected delivery trace before considering replay. A dataset ID alone cannot repair expired authorization. It does not guarantee that Meta will grant them or that an executable Actions workflow is enabled. Connection health, granted access, dataset configuration, and event delivery are separate checks.
 

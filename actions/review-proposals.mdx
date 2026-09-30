@@ -1,10 +1,10 @@
 ---
 title: "Review action proposals in Inbox"
 sidebarTitle: "Review proposals"
-description: "Review Plainrouter proposals in Inbox, follow Ask and Full modes, troubleshoot approval failures, and verify Meta execution."
+description: "Compare current and proposed Meta changes in Inbox, check evidence freshness, approve eligible batches, and verify execution or recovery."
 ---
 
-Open **Inbox** from the Plainrouter sidebar to review agent proposals for the current workspace. Select an action to read its reasoning, target, policy result, and status. **Approve** and **Reject** decide the containing batch, including its other actions.
+Open **Inbox** from the Plainrouter sidebar to review proposals for the current workspace, including changes submitted from Campaigns. Select an action to read its reasoning, target, policy result, and status. **Approve** and **Reject** decide the containing batch, including its other actions.
 
 ## Before you decide
 
@@ -46,6 +46,21 @@ Read **Actor**, **Objects**, and **Agent reasoning**. Compare the complete propo
 
 Confirm the person intended each source ad and asset selection. If the detail pane does not provide enough information to verify the account, mode, evidence, or parameters, check the original proposal before approving. Review every action in the containing batch.
 
+### What will change, and how fresh is the comparison?
+
+For supported status and daily-budget changes, compare the current value with the proposed value before deciding. Budget amounts use the account currency. A displayed delta is not a performance forecast.
+
+| Label | What it establishes |
+| --- | --- |
+| **Meta policy read** | The current value was captured when policy evaluated the proposal. Check its read time; it is not a continuously refreshed Meta quote. |
+| **Mirror fallback** | No recorded policy observation was available, so Inbox uses retained inventory. Check **last synced** before relying on it. |
+| **Not recorded** | A value or comparison is unavailable. It does not mean zero budget or a successful change. |
+| **Before execution** and verified fields | Once execution begins, the comparison uses stored execution and verification evidence. A verified field can remain unavailable while work is unsettled. |
+| **New object** | A creation proposal describes a new object, rather than a before-and-after edit to an existing one. |
+| **Execution disabled** | The proposal uses a legacy action type that cannot execute. |
+
+Older proposals can lack a recorded policy observation. A comparison alone does not prove the change landed; check action status and the receipt below.
+
 ### Current disposition and late restoration
 
 The detail pane's **Current disposition** shows receipt status, outcome status and check time, compensation reason, and recovery disposition. **Not recorded** means the field is unavailable, not a successful result.
@@ -64,7 +79,7 @@ The proposal's evidence must support its claims:
 
 ## Approve a batch
 
-In Ask, policy-allowed proposals wait for the **Approve** button. Full queues allowed changes automatically. Rule violations cannot be approved. Read the proposal's frozen mode and supported action before clicking; the button label does not describe the execution consequence.
+In Ask, policy-allowed agent proposals wait for the **Approve** button. A [Campaigns Pause or Resume](/actions/account-inventory#pause-or-resume-a-campaign-ad-set-or-ad) click can include that human approval when the person has permission. Full queues allowed changes automatically. Rule violations cannot be approved. Read the proposal's frozen mode and supported action before clicking; the button label does not describe the execution consequence.
 
 | Proposal scope | Result of approval |
 | --- | --- |
