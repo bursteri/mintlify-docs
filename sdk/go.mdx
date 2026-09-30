@@ -4,7 +4,7 @@ sidebarTitle: "Go"
 description: "Send consented purchases with the Plainrouter Go SDK, preserve original timestamps and event IDs on retries, and check ingestion and Meta delivery."
 ---
 
-[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from Plainrouter's signed OpenAPI contract. Release `v0.5.2` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
+[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from Plainrouter's signed OpenAPI contract. Release `v0.6.0` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
 
 ## Requirements
 
@@ -15,14 +15,14 @@ description: "Send consented purchases with the Plainrouter Go SDK, preserve ori
 ## Install
 
 ```bash
-go get github.com/plainrouter/sdk-go@v0.5.2
+go get github.com/plainrouter/sdk-go@v0.6.0
 ```
 
 Review the package on [Go Packages](https://pkg.go.dev/github.com/plainrouter/sdk-go) and the generated source in [`plainrouter/sdk-go`](https://github.com/plainrouter/sdk-go).
 
 ## Create an authenticated client
 
-Pass the Signals workspace secret through the request context:
+Create one client with the Signals workspace secret. `plainrouter.New` sends it as a bearer token on every request:
 
 ```go
 package main
@@ -30,20 +30,15 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	plainrouter "github.com/plainrouter/sdk-go"
 )
 
 func main() {
-	config := plainrouter.NewConfiguration()
-	client := plainrouter.NewAPIClient(config)
-	ctx := context.WithValue(
-		context.Background(),
-		plainrouter.ContextAccessToken,
-		"YOUR_SIGNALS_WORKSPACE_SECRET",
-	)
+	client := plainrouter.New(os.Getenv("PLAINROUTER_SIGNAL_SECRET"))
 
-	report, _, err := client.OperationsAPI.GetEmqReport(ctx).Execute()
+	report, _, err := client.Operations.GetEmqReport(context.Background()).Execute()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,6 +46,8 @@ func main() {
 	log.Printf("%+v", report)
 }
 ```
+
+Generated request and response models live in the [`openapi`](https://pkg.go.dev/github.com/plainrouter/sdk-go/openapi) subpackage. `client.OpenAPI()` returns the complete generated client for operations outside `Events`, `Operations` and `Sandbox`. Code written for `v0.5` keeps compiling with the deprecated `NewConfiguration`, `NewAPIClient` and `ContextAccessToken` helpers, but generated type names now need the `openapi` qualifier.
 
 Load the secret from your environment or secret manager rather than writing it in source code. The Go SDK does not accept an MCP workspace execution token or OAuth management credential.
 
@@ -64,7 +61,7 @@ Before sending, confirm settlement on your server, load the order's recorded adv
 
 The following helper package accepts a paid order from your application. Use a stable, non-personal order ID, a decimal-string total, an actual checkout URL without personal data, and the original purchase and consent times. Parse stored times with their timezone; do not replace them with `time.Now()` during retries.
 
-The published `v0.5.2` client wraps consented requests in `CreateEventRequestAnyOf`. Its `event_time` wrapper supports an ISO-8601 string; this example uses that branch rather than narrowing a Unix timestamp to `int32`.
+The published `v0.6.0` client wraps consented requests in `CreateEventRequestAnyOf`. Its `event_time` wrapper supports an ISO-8601 string; this example uses that branch rather than narrowing a Unix timestamp to `int32`.
 
 ```go
 package conversions
@@ -77,6 +74,7 @@ import (
 	"time"
 
 	plainrouter "github.com/plainrouter/sdk-go"
+	"github.com/plainrouter/sdk-go/openapi"
 )
 
 type Consent struct {
@@ -95,18 +93,18 @@ func field(value any) *interface{} {
 	return &value
 }
 
-func PurchaseEvent(p Purchase) (plainrouter.CreateEventRequest, error) {
+func PurchaseEvent(p Purchase) (openapi.CreateEventRequest, error) {
 	if strings.TrimSpace(p.ID) == "" || p.PaidAt.IsZero() || p.Consent.CapturedAt.IsZero() {
-		return plainrouter.CreateEventRequest{}, fmt.Errorf("order ID and original timestamps are required")
+		return openapi.CreateEventRequest{}, fmt.Errorf("order ID and original timestamps are required")
 	}
 	c := p.Consent
 	if c.AdStorage != "granted" || c.AdUserData != "granted" || c.AdPersonalization != "granted" {
-		return plainrouter.CreateEventRequest{}, fmt.Errorf("recorded advertising consent must permit this purchase")
+		return openapi.CreateEventRequest{}, fmt.Errorf("recorded advertising consent must permit this purchase")
 	}
 	eventTime := p.PaidAt.UTC().Format(time.RFC3339)
-	event := plainrouter.NewCreateEventRequestAnyOf("Purchase", "consent")
+	event := openapi.NewCreateEventRequestAnyOf("Purchase", "consent")
 	event.SetEventId("purchase:" + p.ID)
-	event.SetEventTime(plainrouter.CreateEventRequestAnyOfEventTime{String: &eventTime})
+	event.SetEventTime(openapi.CreateEventRequestAnyOfEventTime{String: &eventTime})
 	event.SetEventSource(p.SourceURL)
 	event.SetActionSource("website")
 	event.SetConsent(map[string]*interface{}{
@@ -134,20 +132,20 @@ func PurchaseEvent(p Purchase) (plainrouter.CreateEventRequest, error) {
 	if len(clickIDs) > 0 {
 		event.SetClickIds(clickIDs)
 	}
-	value := plainrouter.NewCreateEventRequestAnyOfValueData()
+	value := openapi.NewCreateEventRequestAnyOfValueData()
 	value.SetValue(p.Total)
 	value.SetCurrency(p.Currency)
 	value.SetOrderId(p.ID)
 	event.SetValueData(*value)
-	return plainrouter.CreateEventRequest{CreateEventRequestAnyOf: event}, nil
+	return openapi.CreateEventRequest{CreateEventRequestAnyOf: event}, nil
 }
 
 func SendPurchase(
 	ctx context.Context,
-	client *plainrouter.APIClient,
-	event plainrouter.CreateEventRequest,
-) (*plainrouter.CreateEvent200Response, error) {
-	result, response, err := client.EventAPI.CreateEvent(ctx).
+	client *plainrouter.Client,
+	event openapi.CreateEventRequest,
+) (*openapi.CreateEvent200Response, error) {
+	result, response, err := client.Events.CreateEvent(ctx).
 		CreateEventRequest(event).Execute()
 	if response != nil {
 		defer response.Body.Close()
@@ -168,13 +166,13 @@ func SendPurchase(
 }
 ```
 
-Load `PLAINROUTER_SIGNAL_SECRET` from your server environment or secret manager and attach it to the context as shown in [Create an authenticated client](#create-an-authenticated-client). Call `PurchaseEvent(purchase)` after loading the paid order; if it succeeds, pass that request to `SendPurchase(ctx, client, event)`. The returned model exposes `GetEventId()` and `GetDuplicate()` for both new and duplicate receipts.
+Load `PLAINROUTER_SIGNAL_SECRET` from your server environment or secret manager and create the client as shown in [Create an authenticated client](#create-an-authenticated-client). Call `PurchaseEvent(purchase)` after loading the paid order; if it succeeds, pass that request to `SendPurchase(ctx, client, event)`. The returned model exposes `GetEventId()` and `GetDuplicate()` for both new and duplicate receipts.
 
 The helper checks the recorded grant values; it does not obtain consent or establish permission by itself. Do not change an unknown decision to `granted`. Generated models also do not replace server-side validation. Include only permitted identity values and actual [browser identifiers](https://plainrouter.com/library/fbp-fbc); empty optional values are omitted. Plainrouter normalizes and hashes supported raw identity fields before Meta delivery.
 
 ### Reuse the client and context safely
 
-Create one `APIClient` per configuration and reuse it. Derive a request context with a deadline from your job or HTTP request context, and call its cancellation function after the request. The bearer token lives in the context in `v0.5.2`; never log the context or token. A deadline or lost connection can leave acceptance uncertain.
+Create one client with `plainrouter.New` and reuse it. Derive a request context with a deadline from your job or HTTP request context, and call its cancellation function after the request. In `v0.6.0` the client sends the token as a default `Authorization` header; never log the client configuration or token. A deadline or lost connection can leave acceptance uncertain.
 
 Persist one payload per paid order before sending, including the event ID, original purchase time, amount and applicable consent snapshot. Retry that stored payload after checking that advertising use is still permitted. Do not rebuild it with fresh timestamps or identity data.
 
@@ -188,7 +186,7 @@ A separate browser `signalq("track", ...)` call generates its own ID and cannot 
 
 ### Confirm destination delivery
 
-Call `client.EventAPI.GetEvent(ctx, receipt.GetEventId()).Execute()` for the receipt returned by `SendPurchase`. Check the error and HTTP status before reading the event and deliveries; close any returned response body. Use a fresh, non-expired request context for this later check.
+Call `client.Events.GetEvent(ctx, receipt.GetEventId()).Execute()` for the receipt returned by `SendPurchase`. Check the error and HTTP status before reading the event and deliveries; close any returned response body. Use a fresh, non-expired request context for this later check.
 
 A delivery marked `accepted` confirms Meta acceptance. `queued`, `sent` and `retrying` are pending; an empty delivery list is not a success receipt. Follow [delivery statuses](/reference/statuses-and-terms#destination-delivery) and [Meta troubleshooting](/signals/connect-meta#troubleshoot) for failed or skipped deliveries. Acceptance does not guarantee attribution.
 
@@ -215,6 +213,6 @@ For operation names and request fields, use the [Conversion API reference](/api/
 
 ## Implementation references
 
-- [Published Go package `v0.5.2`](https://pkg.go.dev/github.com/plainrouter/sdk-go@v0.5.2)
-- [Generated create operation at `v0.5.2`](https://github.com/plainrouter/sdk-go/blob/v0.5.2/api_event.go)
+- [Published Go package `v0.6.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go@v0.6.0)
+- [Generated create operation at `v0.6.0`](https://github.com/plainrouter/sdk-go/blob/v0.6.0/openapi/api_event.go)
 - [Plainrouter event request and delivery reference](/api/conversions)
