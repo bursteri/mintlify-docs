@@ -74,7 +74,7 @@ Use **Discard** when only the pending replacement should be canceled. Use **Revo
 
 ## How do I authenticate the TypeScript SDK?
 
-Install `@plainrouter/sdk@0.5.1`, then configure the generated client explicitly:
+Install `@plainrouter/sdk@0.6.0`, then configure the generated client explicitly:
 
 ```ts
 import {
@@ -97,7 +97,7 @@ The property keeps its pre-collapse name for compatibility.
 
 ## How do I authenticate the Python SDK?
 
-Install [`plainrouter==0.5.2`](https://pypi.org/project/plainrouter/), then create a client with the Server secret:
+Install [`plainrouter==0.6.0`](https://pypi.org/project/plainrouter/), then create a client with the Server secret:
 
 ```python
 import os
@@ -113,7 +113,7 @@ an asynchronous `asyncio` method.
 
 ## How do I authenticate the Ruby SDK?
 
-Install [`plainrouter-sdk 0.1.1`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Server secret:
+Install [`plainrouter-sdk 0.2.0`](https://rubygems.org/gems/plainrouter-sdk), then create a client with the Server secret:
 
 ```ruby
 require "plainrouter"
@@ -130,7 +130,7 @@ secret as a bearer token and does not read environment variables automatically.
 
 ## How do I authenticate the Go SDK?
 
-Install `github.com/plainrouter/sdk-go@v0.5.2`, create the generated client, and attach the Server secret to the request context:
+Install `github.com/plainrouter/sdk-go@v0.6.0`, create the generated client, and attach the Server secret to the request context:
 
 ```go
 config := plainrouter.NewConfiguration()
@@ -313,11 +313,11 @@ If an automation receives `401` on a dashboard URL, check the requested interfac
 | Client | Package or endpoint | Current version | Authentication |
 | --- | --- | --- | --- |
 | Signals REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Server secret |
-| [TypeScript setup](/sdk/typescript) | `@plainrouter/sdk` | `0.5.1` | Server secret passed through `signalTrackerSecret` |
-| [Python setup](/sdk/python) | `plainrouter` | `0.5.2` | Server secret passed to `create_client` |
-| [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.1.1` | Server secret passed to `PlainRouter::Client.new` |
-| [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.5.2` | Server secret attached to the request context |
-| [CLI setup](/cli/get-started) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.5.2`; npm `0.5.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
+| [TypeScript setup](/sdk/typescript) | `@plainrouter/sdk` | `0.6.0` | Server secret passed through `signalTrackerSecret` |
+| [Python setup](/sdk/python) | `plainrouter` | `0.6.0` | Server secret passed to `create_client` |
+| [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.2.0` | Server secret passed to `PlainRouter::Client.new` |
+| [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.6.0` | Server secret attached to the request context |
+| [CLI setup](/cli/get-started) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.6.0`; npm `0.6.0` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
 | MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.4.0` | None |
 | MCP production | `https://plainrouter.com/mcp` | Server `0.4.0` | Workspace key for tool calls and account data |
 
