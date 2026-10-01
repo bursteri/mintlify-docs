@@ -31,7 +31,9 @@ or OAuth management credential, see [Authentication and
 clients](/api/authentication).
 
 <Warning>
-  OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Tool calls and other protected methods require a workspace credential: a workspace key (the documented path) or a workspace-scoped OAuth execution token. OAuth management credentials, management keys and Signals secrets are refused.
+  OAuth sign-in from an MCP client, through Plainrouter's consent screen, is supported and binds the chosen ad account. Only OAuth management credentials are rejected among OAuth credentials.
+
+  OAuth management credentials cannot authenticate to the MCP server. They may read only `GET /api/v1/agent/context` for account discovery. Tool calls and other protected methods require a workspace credential: a workspace key or a workspace-scoped OAuth execution token. OAuth management credentials, management keys and Signals secrets are refused.
 </Warning>
 
 ## Before you begin
@@ -40,7 +42,7 @@ For the sandbox, you only need a client with remote HTTP MCP support. For produc
 
 - A Plainrouter account with access to the intended workspace.
 - An active Meta ad account connection for account-scoped reads and creative workflows. Workspace installation reads do not require one.
-- An MCP-compatible client that can send a fixed bearer token to a remote HTTP server.
+- An MCP-compatible client that can send a workspace key to a remote HTTP server or sign in with OAuth. [ChatGPT setup](/mcp/overview#connect-chatgpt) uses OAuth.
 - Current team membership with permission for the key tier you need. [Check key permissions](/mcp/workspace-tokens#issue-a-token).
 - A clear choice of the advertising account for account-scoped workflows.
 
