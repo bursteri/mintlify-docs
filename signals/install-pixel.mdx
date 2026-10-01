@@ -76,6 +76,8 @@ To test browser collection, open your browser's developer tools and reload the p
 
 On a same-origin installation, these requests use the generated forwarding prefix on your website. Confirm both the script and collector requests stay on that origin. Use the [same-origin request checklist](/signals/configure-serving#what-should-i-see-in-the-network-panel) if they return HTML, redirect, or lose the prefix. An accepted arrival confirms edge receipt; setup completes after the arrival is stored for the workspace.
 
+If a Meta dataset is connected, grant advertising consent before checking the managed browser Pixel with Meta's Chrome extension. The [Meta Pixel Helper guide](https://plainrouter.com/library/meta-pixel-helper) explains its statuses and what it cannot see, such as server-side events.
+
 ### Does the consent message verify installation?
 
 The consent-source message on **Install** is separate from the **Verified** arrival status. It describes the configured consent surface or the latest eligible retained consent-source observation; it is not a live test of your CMP on the current page.
@@ -139,4 +141,4 @@ The v4 script uses a one-hour cache lifetime with up to 24 hours of stale-while-
 
 ## Next step
 
-Add your consent state and business events in [Track events and consent](/signals/track-events).
+Add your consent state and business events in [Track events and consent](/signals/track-events). For background on how browser pixels work, see [What is pixel tracking?](https://plainrouter.com/definitions/pixel-tracking)

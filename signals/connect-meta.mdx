@@ -6,7 +6,7 @@ description: "Authorize Meta, choose your ad account and Page, inspect granted a
 
 Connect your Meta dataset to Plainrouter to deliver consented Signals events through the managed browser Pixel and Meta Conversions API. First authorize the relevant Meta assets, then select the dataset and verify delivery. A saved dataset under **Meta delivery** confirms the destination configuration; it does not prove that a conversion has reached Meta.
 
-This guide covers Plainrouter's managed integration. For integration choices, start with the [Meta Conversions API overview](https://plainrouter.com/library/meta-conversions-api). If you are writing directly to Meta instead, use [Meta's direct-integration training](https://www.facebookblueprint.com/student/path/219714-set-up-implement-verify-conversions-api).
+This guide covers Plainrouter's managed integration. For integration choices, start with the [Meta Conversions API overview](https://plainrouter.com/library/meta-conversions-api). To find your Pixel ID and understand the dataset, see [Meta Pixel setup](https://plainrouter.com/library/meta-pixel). If you are writing directly to Meta instead, use [Meta's direct-integration training](https://www.facebookblueprint.com/student/path/219714-set-up-implement-verify-conversions-api).
 
 ## Before you begin
 
@@ -137,6 +137,8 @@ Use Plainrouter's destination test operations when you need a controlled Meta-de
 5. Restore destination test mode to `enabled: false` when the check is finished, before resuming normal conversion delivery.
 
 The [identity-free ingestion diagnostic](/signals/verify-ingestion) is a different test: it contacts no destination and cannot prove Meta delivery.
+
+Meta's browser extension inspects Pixel activity on the page; it does not observe Plainrouter's server-side Conversions API deliveries, so use the checks above for those. The [Meta Pixel Helper guide](https://plainrouter.com/library/meta-pixel-helper) explains its statuses.
 
 ## Refresh available assets
 
