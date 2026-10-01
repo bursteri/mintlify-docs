@@ -23,7 +23,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Choose Ask or Full for governed changes
 
-  **Changed** · Ask waits for your approval; Full automatically queues changes your policy allows. Both modes block rule violations and recheck execution safeguards. Existing workspace policies moved to Ask; historical proposal snapshots keep their original meaning. [Review execution modes](/actions/policies-and-safety#execution-mode).
+  **Changed** · In Ask mode, a person approves every change first. In Full mode, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. Both modes recheck admission and provider verification. Existing workspace policies moved to Ask; historical proposal snapshots keep their original meaning. [Review execution modes](/actions/policies-and-safety#execution-mode).
 
   ## Browse retained Meta campaigns and metrics
 
@@ -49,7 +49,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Review Meta pauses, resumes, and daily-budget changes
 
-  **Improved** · Canonical pause, resume, and daily-budget proposals can run after a person approves the batch and current policy checks pass. Suggest-only approval still makes no Meta change. Creating an ad copy keeps it paused; a later resume needs a separate approval. [Review supported Actions](/actions/overview#supported-action-types).
+  **Improved** · In Ask mode, canonical pause, resume, and daily-budget proposals can run after a person approves the batch and current policy checks pass. Suggest-only approval still makes no Meta change. Creating an ad copy keeps it paused; a later resume needs a separate proposal, with human approval in Ask mode. [Review supported Actions](/actions/overview#supported-action-types).
 
   ## Compare purchases with their attribution context
 
@@ -98,7 +98,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Track Actions through HTTP or MCP
 
-  **New** · Submit governed proposals through the Actions API, then read actions, batches, current policy, and decision receipts from your integration. Five matching MCP tools let agents follow the stored outcome. These reads require a Write Workspace key; approval remains in Inbox. [Use the Actions API](/api/actions).
+  **New** · Submit governed proposals through the Actions API, then read actions, batches, current policy, and decision receipts from your integration. Five matching MCP tools let agents follow the stored outcome. These reads require a Write Workspace key; human approval in Ask mode remains in Inbox. [Use the Actions API](/api/actions).
 
   ## Read provider connection health through MCP
 

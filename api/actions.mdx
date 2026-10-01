@@ -4,7 +4,7 @@ sidebarTitle: "Actions"
 description: "Preview and submit governed proposals, then read action status, policy, and decision receipts with a Write Workspace key."
 ---
 
-Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. **Ask** waits for human approval; **Full** can queue policy-allowed changes automatically. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
+Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
 
 ## Before you start
 
@@ -73,7 +73,7 @@ curl --fail-with-body --get \
   --data-urlencode 'account_id=91'
 ```
 
-The [policy response reference](/api/actions/actionreadapi/get-action-policy) defines the current policy fields. If no policy has been saved, the read returns effective defaults with `id: null`; it does not create a policy. This is the **current** policy, not the frozen mode or policy evidence from an earlier proposal. Review [policy and safety](/actions/policies-and-safety) before interpreting execution permissions.
+The [policy response reference](/api/actions/actionreadapi/get-action-policy) defines the current policy fields: `id`, `workspace_id`, `execution_mode`, `outcome_check_after_hours`, and `anomaly_threshold_percent`. If no policy has been saved, the read returns effective defaults with `id: null`; it does not create a policy. This is the **current** policy, not the frozen mode or policy evidence from an earlier proposal. Review [policy and safety](/actions/policies-and-safety) before interpreting execution permissions.
 
 ## Retrieve a decision receipt
 
@@ -134,7 +134,7 @@ curl --fail-with-body \
 
 A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
 
-Send the reviewer to **Inbox** and use the reads above to follow the result. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue them automatically. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
+In Ask mode, send the reviewer to **Inbox**. Use the reads above to follow the result in either mode. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue them automatically. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
 
 The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
 
