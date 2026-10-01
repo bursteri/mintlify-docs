@@ -1,0 +1,69 @@
+---
+title: "Connect Make to Plainrouter"
+sidebarTitle: "Make"
+description: "Connect Make scenarios to Plainrouter MCP, verify a tool call, and distinguish workspace-key agent access from Server-secret conversion sending."
+---
+
+Use Make’s **MCP Client** app in a scenario. Start with a direct tool call before adding an AI task. Make currently labels this app Open Beta; account features and pricing can change.
+
+## 1. Try the sandbox
+
+1. Add **MCP Client → Call a tool** to a scenario and create a connection.
+2. Choose **+ New MCP Server** and enter `https://plainrouter.com/mcp/sandbox`.
+3. Leave **API Key / Access token** empty and save.
+4. Select `get_account_state`, supply no arguments, and run that module. Check for `sandbox: true`.
+
+For an AI-led check, use **Execute an action with AI**, select the sandbox tools, configure its AI provider and use the prompt below. AI usage follows your Make or provider billing.
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Create a separate MCP Client connection:
+
+1. Choose **+ New MCP Server** with URL `https://plainrouter.com/mcp`.
+2. Enter your Workspace key in **API Key / Access token**, then save. Plainrouter expects the credential as a bearer token.
+3. If the connection instead starts OAuth, complete Plainrouter sign-in and choose the account and access tier.
+4. Use **Call a tool → get_install_instructions** without arguments for the first production check. For AI tasks, use **Execute an action with AI** and initially expose only that tool.
+
+Keep credentials in the saved connection, not scenario text or the AI task prompt.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## Send conversions from a workflow
+
+Conversion sending uses a separate HTTP request to `POST https://plainrouter.com/api/v1/events`, authenticated with a **Server secret**, not an MCP Workspace key. Map the [Conversion API body](/api/conversions) from a real eligible website event. Preserve its event ID and original time on retries, and supply the required consent and visitor context.
+
+Start with the [automation solution and synthetic n8n exercise](https://plainrouter.com/solutions/automation). A sandbox result does not verify production event delivery or attribution. Verify HTTP event acceptance and Meta delivery separately from the MCP connection.
+
+## 5. Troubleshooting
+
+- **Wrong MCP app:** use MCP Client to call Plainrouter. Make's own MCP server exposes Make scenarios to other clients.
+- **401 on a tool call:** check the saved credential and selected connection; the sandbox needs none, production requires workspace authorization.
+- **AI task does not call a tool:** try **Call a tool** first, then check selected tools and AI provider access. A module's accepted configuration is not a completed tool call.
+
+Reference: [Make MCP Client connection and module reference](https://apps.make.com/c5ZhYquO55e90hoCJ0rzt).
+
+[Choose another client](/mcp/clients).

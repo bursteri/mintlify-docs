@@ -1,0 +1,39 @@
+---
+title: "Connect your AI client to Plainrouter"
+sidebarTitle: "Choose your client"
+description: "Find Plainrouter setup for Claude, ChatGPT, Cursor, Grok, Gemini CLI, Meta Muse, Hermes, OpenClaw, n8n and Make. Start with synthetic data."
+---
+
+Choose your client to try Plainrouter’s account-free sandbox, then connect your workspace. Chat clients, terminal agents and workflow platforms use different configuration screens; the server and workspace boundaries stay the same.
+
+## Choose your setup guide
+
+| Client | Setup path |
+| --- | --- |
+| [Claude](/mcp/setup#start-in-test-mode) | Claude Code terminal configuration and first read. |
+| [ChatGPT](/mcp/overview#connect-chatgpt) | Custom MCP app with OAuth for production. |
+| [Cursor](/mcp/clients/cursor) | Cursor Agent and user-level MCP configuration. |
+| [Grok](/mcp/clients/grok) | Custom connector in Grok. |
+| [Gemini](/mcp/clients/gemini) | Gemini CLI; not the Gemini web app. |
+| [Meta Muse](/mcp/clients/muse) | Muse web custom connector; prompt-led setup, not Muse Code. |
+| [Hermes](/mcp/clients/hermes) | Nous Research Hermes Agent. |
+| [OpenClaw](/mcp/clients/openclaw) | The OpenClaw installation or Gateway running your agent. |
+| [n8n](/mcp/clients/n8n) | MCP Client Tool attached to an AI Agent; separate HTTP conversion workflow. |
+| [Make](/mcp/clients/make) | MCP Client scenario modules; separate HTTP conversion workflow. |
+
+## Endpoints and access
+
+| Connection | Endpoint | Authentication |
+| --- | --- | --- |
+| Sandbox | `https://plainrouter.com/mcp/sandbox` | None. Synthetic data, no Plainrouter account, never contacts Meta. |
+| Production | `https://plainrouter.com/mcp` | Streamable HTTP with `Authorization: Bearer …` using a Workspace key, or client-supported Plainrouter OAuth sign-in. |
+
+[Create a Workspace key](/mcp/workspace-tokens) for one workspace. Read covers analysis; Actions require Write, including their record-read tools. Keep credentials in protected client settings, never prompts or source control. OAuth clients obtain workspace-scoped execution credentials through sign-in instead of requiring a pasted key.
+
+**Ask** waits for approval; **Full** runs policy-allowed changes automatically. Rule violations are blocked either way. Client permission prompts do not override [Plainrouter policy](/actions/policies-and-safety).
+
+## What proves the connection worked?
+
+Inspect a real tool result. In the sandbox, a successful read contains `sandbox: true`. In production, a read must return the intended workspace. A discovered tool list or an assistant saying “connected” does not prove authenticated access. Agent wording can vary, and connecting a client does not verify conversion delivery or ad execution.
+
+For another client, use the [transport and authentication reference](/mcp/setup#which-mcp-protocol-should-my-client-use). For conversion sending without an agent, start with [n8n and Make automation](https://plainrouter.com/solutions/automation).

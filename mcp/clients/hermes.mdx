@@ -1,0 +1,69 @@
+---
+title: "Connect Hermes Agent to Plainrouter"
+sidebarTitle: "Hermes"
+description: "Configure Nous Research Hermes Agent for Plainrouter MCP, test synthetic reads, and authenticate a workspace connection."
+---
+
+Use Nous Research’s Hermes Agent as an MCP client for Plainrouter. Start with an installed Hermes environment and a configured model provider.
+
+## 1. Try the sandbox
+
+Add this to `~/.hermes/config.yaml`, preserving existing entries:
+
+```yaml
+mcp_servers:
+  plainrouter-test:
+    url: "https://plainrouter.com/mcp/sandbox"
+```
+
+Start a new Hermes session or use `/reload-mcp`.
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Add a production server under `mcp_servers` in your private local config:
+
+```yaml
+mcp_servers:
+  plainrouter:
+    url: "https://plainrouter.com/mcp"
+    headers:
+      Authorization: "Bearer REPLACE_WITH_WORKSPACE_KEY"
+```
+
+Replace the placeholder only in that private file; keep it out of repositories and shared config exports. Preserve the sandbox entry if you still need it. Reload MCP or start a new session. The URL connects over HTTP; do not configure Plainrouter as a local `command`.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## 5. Troubleshooting
+
+- **New server is missing:** reload the Hermes session or gateway that actually owns the connection.
+- **401 on calls:** check the complete bearer header and current key. A Server secret cannot authenticate MCP.
+- **Tool names differ:** Hermes prefixes MCP tool names with the server name. Select tools belonging to `plainrouter`, not the sandbox.
+
+Reference: [Hermes MCP configuration, reload and tool naming](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp).
+
+[Choose another client](/mcp/clients).
