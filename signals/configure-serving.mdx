@@ -151,7 +151,7 @@ Granting consent, calling `track`, or using the [identity-free ingestion diagnos
 
 First check all three advertising permissions in your [CMP integration](/signals/track-events#verify-grant-partial-consent-and-withdrawal). No visitor cookie on an arrival is expected; it is not evidence of broken forwarding.
 
-After a full grant, inspect the consented event response for `Set-Cookie` and the browser's cookie-storage rejection reason, if any. The server-owned `pr_vid` cookie is `HttpOnly`, so its absence from `document.cookie` is expected. Use the browser's **Application** or **Storage** panel instead. [MDN explains `HttpOnly` and `Secure`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie).
+After a full grant, inspect the consented event response for `Set-Cookie` and the browser's cookie-storage rejection reason, if any. The server-owned `pr_vid` [first-party cookie](https://plainrouter.com/definitions/first-party-cookies) is `HttpOnly`, so its absence from `document.cookie` is expected. Use the browser's **Application** or **Storage** panel instead. [MDN explains `HttpOnly` and `Secure`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie).
 
 If the browser receives the cookie but later consented requests do not retain it, check HTTPS, the actual request hostname, browser storage restrictions, and whether the proxy strips `Cookie` or `Set-Cookie`. Keep both headers intact. Do not add cookies to the identity-free arrival request as a workaround.
 
