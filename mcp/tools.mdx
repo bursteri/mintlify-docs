@@ -27,12 +27,11 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_action_decision_receipt` | Read-only, idempotent | Retrieve a stored decision receipt and chain reference. |
 | `get_action_policy` | Read-only, idempotent | Read current policy or effective defaults without creating it. |
 | `dry_run_actions` | Policy preview; may read provider state | Evaluate a proposed batch without saving or executing it. Requires Write access. |
-| `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed recommendation to policy and approval. |
+| `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed proposal governed by Ask or Full. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a copy created and verified paused of a source Meta ad with a selected asset. |
 | `revoke_grant` | Idempotent authorization write | Revoke an authorized grant in the caller's workspace. |
-| `show_spend_cap_approval` | Read-only MCP App preview | Render a static approval-card mockup with disabled controls and no account read or write. |
 
 **Conditional legacy tools**
 
@@ -373,18 +372,6 @@ The tool returns `grant_id`, `workspace_id`, and `revoked_at`. It records the re
 
 Invalid grant-ID input fails validation. Missing or inactive caller authorization, another workspace's grant, or insufficient revocation authority is refused.
 
-## `show_spend_cap_approval`
-
-This read-only, idempotent tool renders the static
-`ui://resources/spend-cap-approval-app` MCP App preview. It accepts no input and
-returns only a confirmation that the preview card loaded.
-
-The card contains fixed demonstration values and is labeled **Preview — not a
-live control**. Its **Approve** and **Reject** buttons are disabled. The tool
-does not read an account, submit an approval, call another tool, persist data,
-contact Meta, or change spend. Use it only to verify that an MCP host can render
-Plainrouter's app presentation.
-
 ## Read Actions and policy
 
 Use these five production tools to follow a proposal without visiting the dashboard. They read stored Plainrouter records, make no provider calls, and do not change ads, action decisions, or policy. They are absent from the synthetic sandbox.
@@ -431,7 +418,7 @@ Accepts only the optional account selector. Returns the current workspace policy
 
 ### Verify the result and handle failures
 
-Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. Human approval still happens in [Inbox](/actions/review-proposals).
+Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. In Ask mode, a person approves every change in [Inbox](/actions/review-proposals) first. Full runs admitted changes automatically without a per-change approval.
 
 If a read is refused, check the key's current role and `propose-actions` grant, then account selection. A missing or out-of-scope action, batch, or decision receipt returns a `not_found` tool error; a receipt may not exist yet. Correct invalid status, page, or ID arguments before retrying. An empty list can reflect a filter or the selected account.
 
@@ -505,10 +492,10 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 
 <AccordionGroup>
   <Accordion title="pause and resume">
-    Use a human-selected campaign, ad set, or ad and empty `params: {}`. These canonical actions can execute after approval and current policy checks.
+    Use a human-selected campaign, ad set, or ad and empty `params: {}`. These canonical actions can execute after a person approves them in Ask, or automatically in Full, subject to current admission checks.
   </Accordion>
   <Accordion title="increase_budget and decrease_budget">
-    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's minor unit. These change daily budgets only after approval and current policy checks.
+    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's minor unit. These change daily budgets after a person approves them in Ask, or automatically in Full, subject to current admission checks.
   </Accordion>
   <Accordion title="adjust_budget (legacy recommendation)">
     Requires `new_daily_budget_minor`, a positive integer in the account currency's minor unit. For example, `4900` means 49.00 for a two-decimal currency.

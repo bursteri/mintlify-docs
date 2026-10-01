@@ -31,7 +31,7 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
 
-Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals require human approval in Ask; Full automatically queues policy-allowed changes. Both modes apply current execution checks. The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. Historical **Suggest only** batches record approvals without executing them.
+In Ask mode, a person approves every change first. In Full mode, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals follow the selected mode. Both modes apply current execution checks. The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. Historical **Suggest only** batches record approvals without executing them.
 
 For repeatable Signals tasks, the server also supplies three [built-in prompts](/mcp/tools#built-in-signals-prompts): installation, claimed-versus-counted comparison, and signal health. They return instructions; the client still needs authorization to run the referenced tools.
 

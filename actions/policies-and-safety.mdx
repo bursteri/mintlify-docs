@@ -3,7 +3,7 @@ title: "Action policy and safety"
 description: "Configure workspace safeguards for proposals, creative execution, provider verification, and rollback without widening token or account authority."
 ---
 
-Open **Settings** → **Action policy** to review the workspace's non-negotiable boundaries. Agents can supply reasoning and proposals, but they cannot edit or bypass policy.
+Open **Settings** → **Action policy** to choose Ask or Full and configure outcome checks. Agents can supply reasoning and proposals, but they cannot edit these settings or bypass provider verification.
 
 Only the workspace owner can save policy changes. Other workspace members can review the current settings.
 
@@ -15,65 +15,27 @@ Policy changes are saved atomically with their audit event. If the audit event c
 
 | Mode | Behavior in this release |
 | --- | --- |
-| **Ask** (`ask`) | Every policy-allowed change waits for a person. Approval queues supported execution after a fresh policy check. |
-| **Full** (`full`) | Policy-allowed changes queue automatically without a separate human approval. The same execution checks apply. |
+| **Ask** (`ask`) | A person approves every change first. Approval queues supported execution after a fresh admission check. |
+| **Full** (`full`) | The workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. |
 
 New workspaces default to **Ask**. Existing workspace policies were migrated to Ask; selecting Full is an explicit owner decision. The selected mode is copied into each proposal as an immutable snapshot. Changing the current mode does not rewrite an older proposal.
 
 Older batches can retain `suggest_only`, `auto_with_limits`, or `full_auto` snapshots. A historical `suggest_only` approval still ends without execution. These are historical values, not choices for a new policy.
 
 <Warning>
-  Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` actions, JPEG/PNG uploads, and paused ad copies follow Ask or Full before execution. Both modes block rule violations; a blocked change cannot be approved. The legacy `set_status` and `adjust_budget` types remain recommendations only. Video upload execution remains disabled.
+  Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` actions, JPEG/PNG uploads, and paused ad copies follow Ask or Full before execution. Both modes enforce admission checks; a refused change cannot be approved. The legacy `set_status` and `adjust_budget` types remain recommendations only. Video upload execution remains disabled.
 </Warning>
 
 ## Two policy gates
 
 Executable Meta work passes policy twice:
 
-1. Proposal-time policy blocks rule violations. Otherwise, Ask requires a person and Full allows automatic queueing.
+1. Proposal-time admission checks validate scope, authorization, evidence, and supported actions. Ask requires a person to approve every admitted change first; Full queues admitted changes automatically.
 2. At dispatch, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
 
-Changing policy does not promote or rewrite an existing proposal. A newly protected target, quiet-hours window, missing driver, unavailable critical field, or other non-`allow` result blocks the queued batch before provider execution.
+Changing policy does not promote or rewrite an existing proposal. A missing driver, unavailable critical provider field, revoked authorization, or other non-`allow` result blocks the queued batch before provider execution.
 
-## Spend boundaries
-
-### Maximum budget change
-
-The maximum percentage change allowed per budget action, measured from the target's current daily budget.
-
-### Hard account daily cap
-
-The maximum projected combined daily budget for the account. Leave it blank for no configured cap.
-
-Canonical daily-budget actions re-read the target and account state from Meta. Missing execution-critical state blocks execution; aggregate Signals data cannot supply a missing budget or target-level metric.
-
-## Protected delivery
-
-### Protected entities
-
-Add one platform-native entity reference per line:
-
-```text
-campaign:120012345
-ad_set:120067890
-ad:120098765
-```
-
-Supported prefixes are `campaign`, `ad_set`, and `ad`. An exact match blocks the proposal. The execution-time recheck also stops an approved batch if its source ad becomes protected before the worker runs.
-
-### Protect learning phase
-
-When enabled, Plainrouter blocks applicable delivery changes while the target is learning. Creative duplication re-reads the source ad and nested ad-set learning state from Meta. If the required learning state is unknown, execution is blocked.
-
-Image upload does not require target learning-phase state.
-
-## Timing and outcome safety
-
-### Quiet hours
-
-Set both a start and end time. Plainrouter evaluates the window in the advertising account's timezone, falling back to the application timezone if the account has none.
-
-Quiet hours can cross midnight. For example, `22:00` to `06:00` blocks proposals and execution during the overnight window.
+## Outcome safety
 
 ### Outcome check after
 
@@ -90,7 +52,7 @@ Aggregate Signals reconciliation is never substituted for target-level provider 
 Plainrouter does not treat a successful provider response as proof that an action Landed. It persists an execution receipt and re-reads the exact object.
 
 - Image upload verification matches the receipt asset, frozen content hash, and provider readiness.
-- Ad-copy verification matches the receipt ad, approved account, selected creative, and `PAUSED` state at creation.
+- Ad-copy verification matches the receipt ad, authorized account, selected creative, and `PAUSED` state at creation.
 - An `IN_PROCESS` copy can enter durable asynchronous verification for up to 48 hours.
 - Hard mismatches, provider rejection, verification expiry, or later anomaly trigger compensation.
 - Compensation is itself verified: an uploaded image must be absent after deletion, and a copied ad must be `ARCHIVED` after rollback.
@@ -103,12 +65,11 @@ If commit state is unknown, Plainrouter reconciles before retrying. It does not 
 | --- | --- |
 | Human approval in Ask | Required for every policy-allowed change; Full queues allowed changes automatically. |
 | Proposal-time and execution-time policy | Enforced. |
-| Protected entity and quiet hours | Enforced. |
-| Provider account, source, asset readiness, and applicable learning state | Re-read and fail-closed. |
+| Provider account, source, and asset readiness | Re-read and fail-closed. |
 | Image upload and paused ad duplication | Executable with receipts, verification, outcome reads, and compensation. |
 | Canonical pause, resume, and daily-budget changes | Executable under Ask or Full with current authorization and policy checks. |
 | Activation during ad duplication | Never; a later resume requires a separate proposal governed by Ask or Full. |
-| Execution kill switch | Stops further Meta writes without undoing earlier changes. |
+| Execution kill switch | Stops all changes without undoing earlier changes. |
 | Legacy MCP `adjust_budget` and `set_status` execution | Disabled. |
 | Video upload execution | Disabled. |
 | Unknown provider commit | Reconciled before any retry or compensation. |

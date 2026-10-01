@@ -78,7 +78,7 @@ Revoking a Management key does not revoke workspace keys it issued.
   An older account-bound key cannot override its binding.
 - A proposal-producing tool writes a governed Plainrouter proposal, not a
   direct Meta change.
-- Write or Admin access does not bypass policy, approval, provider
+- Write or Admin access does not bypass admission checks, human approval in Ask, provider
   verification, or account restrictions.
 - `get_signal_health` is diagnostic. Do not use its quantitative fields as
   evidence for a proposal that can affect spend or delivery.
@@ -182,8 +182,7 @@ HTTP routes, pagination, response fields, and failure handling.
    stable idempotency key. This stages a private asset and creates a proposal.
 4. Call `duplicate-ad-with-creative` with a human-selected source ad and an
    asset ID returned by Plainrouter. The normalized status remains `paused`.
-5. Send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox. Do not claim that the MCP
-   request changed Meta.
+5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. Do not claim that the MCP request changed Meta.
 
 Read
 [Create governed Meta creatives](https://plainrouter.com/docs/actions/creative-workflow)

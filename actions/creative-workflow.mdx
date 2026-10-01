@@ -85,7 +85,7 @@ Persist the idempotency key with this intent and reuse it for an identical retry
 
 There is no `status` argument: Plainrouter fixes `params.status` to `paused`. It re-reads the selected source and asset under the approved account before producing the proposal. Do not ask the agent to choose a different account, guess a target, or activate the copy when validation fails.
 
-### 3. Read the proposal before requesting approval
+### 3. Read the proposal before requesting approval in Ask
 
 A passing proposal in **Ask** can return this excerpt. Other fields, including scope, evidence, and the queue URL, are omitted here:
 
@@ -131,7 +131,7 @@ If the client reports a protocol error or a tool result with `isError: true`, do
 
 ### 4. Follow the human decision and final outcome
 
-Open the returned `inbox_url` for **Inbox**. The older `approval_queue_url` field remains an alias to the same link. [Review the proposal](/actions/review-proposals) and its `execution_mode_snapshot` before using the generic **Approve** button. The decision applies to the containing batch, not just the selected action.
+For the Ask example, open the returned `inbox_url` for **Inbox**. The older `approval_queue_url` field remains an alias to the same link. [Review the proposal](/actions/review-proposals) and its `execution_mode_snapshot` before using the generic **Approve** button. The decision applies to the containing batch, not just the selected action.
 
 | Outcome | What it proves | Next step |
 | --- | --- | --- |

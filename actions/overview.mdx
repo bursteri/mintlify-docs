@@ -6,7 +6,7 @@ description: "Understand how agents propose, approve, execute, verify, and audit
 Actions is Plainrouter's governed workflow for advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy. People can also [pause or resume campaigns, ad sets, and ads from Campaigns](/actions/account-inventory#pause-or-resume-a-campaign-ad-set-or-ad) through the same policy and verification checks.
 
 <Info>
-  New workspaces start in **Ask**, where policy-allowed changes wait for human approval. In **Full**, allowed changes queue automatically. Both modes recheck policy before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target under the selected policy mode; creating a copy never activates it.
+  New workspaces start in **Ask**, where policy-allowed changes wait for human approval. In **Full**, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. Both modes recheck policy before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target under the selected policy mode; creating a copy never activates it.
 </Info>
 
 ## The governed loop
@@ -22,10 +22,10 @@ Actions is Plainrouter's governed workflow for advertising changes. An authorize
     Each batch includes typed actions, a plain-language rationale, exact evidence fields, a stable idempotency key, and a human-supplied target.
   </Step>
   <Step title="Plainrouter applies policy">
-    Policy evaluates the proposal against protected entities, quiet hours, provider state, and the selected execution mode. Unknown execution-critical state blocks execution.
+    Admission checks evaluate scope, authorization, evidence, provider state, supported actions, and the selected execution mode. Unknown execution-critical state blocks execution.
   </Step>
   <Step title="The selected mode controls approval">
-    Ask waits for a person to approve each policy-allowed change. Full queues allowed changes automatically. Rule violations remain blocked and cannot be approved. Historical suggest-only approvals record agreement without execution.
+    In Ask, a person approves every change first. Full queues admitted changes automatically. Admission refusals remain blocked and cannot be approved. Historical suggest-only approvals record agreement without execution.
   </Step>
   <Step title="Plainrouter executes and verifies">
     The execution worker rechecks current policy before any provider write. It records a durable receipt, reads the exact provider object back, and marks the action verified only when the receipt-addressed state matches.
@@ -56,12 +56,12 @@ Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/
 
 | Mode | Passing proposal |
 | --- | --- |
-| **Ask** | Waits for a person. Approval queues supported execution after current checks. |
-| **Full** | Queues automatically when policy allows; no separate human approval. |
+| **Ask** | A person approves every change first. Approval queues supported execution after current checks. |
+| **Full** | The workspace lets changes run automatically without a per-change approval. Every change gets a receipt. |
 
-Ask is the default. For a human-submitted Pause or Resume from Campaigns, the click can include approval when the person has the required permission. Older `suggest_only` snapshots still end without execution when approved. The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. A newly protected target or unavailable critical provider state blocks the queued action before a write.
+Ask is the default. For a human-submitted Pause or Resume from Campaigns, the click can include approval when the person has the required permission. Older `suggest_only` snapshots still end without execution when approved. The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. Revoked authorization or unavailable critical provider state blocks the queued action before a write.
 
-An execution kill switch can stop further Meta writes, including an approved batch. It does not undo a change that already landed. Inspect [Inbox and receipts](/actions/review-proposals) before retrying a refused or interrupted operation.
+The execution kill switch stops all changes, including queued batches. It does not undo a change that already landed. Inspect [Inbox and receipts](/actions/review-proposals) before retrying a refused or interrupted operation.
 
 ## Verification and Landed
 
@@ -102,7 +102,7 @@ Creative-library evidence proves the selected asset's identity, approved-account
     Read evidence, policy results, and execution state before deciding.
   </Card>
   <Card title="Configure policy" icon="shield-check" href="/actions/policies-and-safety">
-    Set hard workspace boundaries for proposals and execution.
+    Choose Ask or Full and configure outcome checks.
   </Card>
 </CardGroup>
 
