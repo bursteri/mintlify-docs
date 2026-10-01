@@ -6,6 +6,8 @@ description: "Preview and submit governed proposals, then read action status, po
 
 Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
 
+The Actions API covers a focused set of governed Meta changes, not the full Meta Marketing API. The [Meta Ads API guide](https://plainrouter.com/library/meta-ads-api) explains the difference.
+
 ## Before you start
 
 - Create a **Write Workspace key** for the intended workspace, with an active grant covering `propose-actions`. This grant is required for Actions reads too; a normal Read key is insufficient. Older Admin keys still need the applicable grant and current role.
