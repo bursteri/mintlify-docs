@@ -101,6 +101,21 @@
             ]
           },
           {
+            "group": "Clients",
+            "icon": "bot",
+            "pages": [
+              "mcp/clients",
+              "mcp/clients/cursor",
+              "mcp/clients/grok",
+              "mcp/clients/gemini",
+              "mcp/clients/muse",
+              "mcp/clients/hermes",
+              "mcp/clients/openclaw",
+              "mcp/clients/n8n",
+              "mcp/clients/make"
+            ]
+          },
+          {
             "group": "Access",
             "icon": "key-round",
             "pages": [

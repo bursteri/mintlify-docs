@@ -1,0 +1,71 @@
+---
+title: "Connect n8n to Plainrouter"
+sidebarTitle: "n8n"
+description: "Connect an n8n AI Agent to Plainrouter MCP, verify sandbox reads, and distinguish agent credentials from HTTP conversion sending."
+---
+
+Use n8n’s **MCP Client Tool** with an AI Agent. You need an n8n workflow, an AI Agent and a configured chat model. This connects n8n to Plainrouter; the MCP Server Trigger serves the opposite direction.
+
+## 1. Try the sandbox
+
+1. Attach **MCP Client Tool** to your AI Agent's tool connection.
+2. Set **Endpoint** to `https://plainrouter.com/mcp/sandbox`.
+3. Select **Server Transport → HTTP Streamable** and **Authentication → None**.
+4. Set **Tools to Include → Selected** and choose `get_account_state` and `get_signal_health`.
+5. Run a manual chat with the sandbox prompt below. Name the node `plainrouter-test` to distinguish it.
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Duplicate or reconfigure the MCP Client Tool for production:
+
+| Setting | Value |
+| --- | --- |
+| Endpoint | `https://plainrouter.com/mcp` |
+| Server Transport | **HTTP Streamable** |
+| Authentication | **Bearer Auth** |
+| Credential | Store the Workspace key in n8n's bearer credential; enter the token value without another `Bearer` prefix. |
+| Tools to Include | Start with **Selected → get_install_instructions**. |
+
+Name the production node `plainrouter`, attach it to the AI Agent, and keep credentials in n8n's credential store. Add other tools only as needed.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## Send conversions from a workflow
+
+Conversion sending uses a separate HTTP request to `POST https://plainrouter.com/api/v1/events`, authenticated with a **Server secret**, not an MCP Workspace key. Map the [Conversion API body](/api/conversions) from a real eligible website event. Preserve its event ID and original time on retries, and supply the required consent and visitor context.
+
+Start with the [automation solution and synthetic n8n exercise](https://plainrouter.com/solutions/automation). A sandbox result does not verify production event delivery or attribution. Verify HTTP event acceptance and Meta delivery separately from the MCP connection.
+
+## 5. Troubleshooting
+
+- **Only an SSE Endpoint field appears:** that is the older node shape. Use a current MCP Client Tool with HTTP Streamable support.
+- **401 on calls:** use the raw Workspace key in Bearer Auth; do not double-prefix it or use a Server secret.
+- **Agent never calls the tool:** check the tool connection and selected-tool list, then inspect the workflow execution rather than trusting the chat summary.
+
+References: [n8n MCP Client Tool](https://docs.n8n.io/integrations/builtin/cluster-nodes/sub-nodes/n8n-nodes-langchain.toolmcp/) and [current node configuration](https://github.com/n8n-io/n8n/blob/master/packages/%40n8n/nodes-langchain/nodes/mcp/McpClientTool/McpClientTool.node.ts).
+
+[Choose another client](/mcp/clients).

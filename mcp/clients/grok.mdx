@@ -1,0 +1,58 @@
+---
+title: "Connect Grok to Plainrouter"
+sidebarTitle: "Grok"
+description: "Add Plainrouter as a custom Grok MCP connector, start with synthetic data, and verify workspace access before requesting changes."
+---
+
+Use Grok’s custom MCP connector to reach Plainrouter over Streamable HTTP. You need a Grok account with permission to add connectors; organization access can require an administrator.
+
+## 1. Try the sandbox
+
+1. Open [Grok connectors](https://grok.com/connectors).
+2. Choose **New Connector → Custom**.
+3. Enter `https://plainrouter.com/mcp/sandbox` and name the connector `plainrouter-test` where a name is requested. No Plainrouter authentication is needed.
+4. Use the connector in a conversation.
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Create another custom connector for `https://plainrouter.com/mcp`.
+
+Plainrouter accepts `Authorization: Bearer …` with the workspace key. If your connector exposes bearer/header configuration, keep the key there, never in the conversation. If Grok starts a Plainrouter OAuth sign-in instead, sign in and choose the intended account and Read or Write access; that issues a workspace-scoped OAuth credential without pasting a key. A manually created key is not needed for that route.
+
+Grok's published setup specifies a server URL followed by authentication; it does not specify a universal manual-header field. Do not paste your key into the URL to work around a missing field.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## 5. Troubleshooting
+
+- **Connector creation is unavailable:** check organization provisioning with your Grok administrator.
+- **Authentication is requested:** use Plainrouter sign-in or the client's protected bearer setting. Do not use a Management key or Server secret.
+- **A summary appears without data:** inspect the actual tool result. Ask explicitly for the connector and read-only tool; a connected label alone is not a successful read.
+
+Reference: [Grok custom MCP connectors and organization access](https://docs.x.ai/grok/connectors).
+
+[Choose another client](/mcp/clients).

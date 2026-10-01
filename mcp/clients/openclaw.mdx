@@ -1,0 +1,77 @@
+---
+title: "Connect OpenClaw to Plainrouter"
+sidebarTitle: "OpenClaw"
+description: "Add Plainrouter as an OpenClaw MCP server, test the sandbox, configure a bearer workspace key, and check tool access."
+---
+
+Connect an installed OpenClaw agent to Plainrouter over Streamable HTTP. Configure the installation or Gateway that runs your agent.
+
+## 1. Try the sandbox
+
+Run on that installation:
+
+```bash
+openclaw mcp add plainrouter-test \
+  --url https://plainrouter.com/mcp/sandbox \
+  --transport streamable-http
+openclaw mcp doctor plainrouter-test --probe
+```
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Merge this entry into `~/.openclaw/openclaw.json`, preserving existing settings:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "plainrouter": {
+        "url": "https://plainrouter.com/mcp",
+        "transport": "streamable-http",
+        "enabled": true,
+        "headers": {
+          "Authorization": "Bearer ${PLAINROUTER_WORKSPACE_KEY}"
+        }
+      }
+    }
+  }
+}
+```
+
+Provide the variable securely to the process running the Gateway or agent, not just a separate terminal. Keep the reference in config. Apply the config, then run `openclaw mcp doctor plainrouter --probe`.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## 5. Troubleshooting
+
+- **Config saved but no tools:** run the probe and inspect tool policy or session restrictions; saving an entry alone does not establish a connection.
+- **401 from a Gateway:** check the credential environment on the Gateway host.
+- **Old configuration persists:** reload or restart the process that owns the connection. A CLI reload does not reload a separate Gateway.
+
+References: [OpenClaw MCP setup](https://docs.openclaw.ai/tools/mcp), [config location](https://docs.openclaw.ai/gateway/configuration), and [HTTP header interpolation](https://docs.openclaw.ai/plugins/bundles).
+
+[Choose another client](/mcp/clients).

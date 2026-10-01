@@ -1,0 +1,73 @@
+---
+title: "Connect Meta Muse to Plainrouter"
+sidebarTitle: "Meta Muse"
+description: "Set up a custom Plainrouter connection in the Muse web assistant, test synthetic reads, and keep workspace credentials out of prompts."
+---
+
+Use the **Muse web assistant** to build a custom connection to Plainrouter. This is a prompt-led custom connector, not Muse Code CLI configuration. Review the generated connection and its tool results before using workspace data.
+
+## 1. Try the sandbox
+
+Ask Muse to prepare the connection:
+
+```text
+Create a custom connector named plainrouter-test for the remote MCP server
+https://plainrouter.com/mcp/sandbox using Streamable HTTP.
+Use an MCP client to discover the server's tools. No credentials are needed.
+Call get_account_state and get_signal_health, show their tool results,
+and stop. Do not use the production endpoint or contact Meta Ads.
+```
+
+Muse may generate connector code and request network permission. Review the destination before allowing it. The generated implementation can vary; do not substitute an invented built-in Plainrouter connector.
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Ask Muse to prepare a separate production connection:
+
+```text
+Prepare a connector named plainrouter for https://plainrouter.com/mcp
+using Streamable HTTP. Authentication is an Authorization header with
+Bearer followed by a Plainrouter workspace key. Request the key through
+your protected credential-entry flow; never ask me to paste it into chat,
+write it in connector source, or display it. Limit the first check to
+get_install_instructions with no arguments. Stop if protected credential
+entry is unavailable.
+```
+
+Enter the key only through the protected credential flow, if offered. Meta documents credential storage separately from the agent and credential insertion at the network boundary. A generated connector still needs its own successful read; a promise to connect is not verification.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## 5. Troubleshooting
+
+- **Muse suggests Muse Code settings:** this guide is for Muse web; a CLI settings file will not configure this connection.
+- **Muse asks for the key in chat or code:** stop and use protected credential entry. Do not expose the key to make a generated connector work.
+- **Connector was created but the read fails:** inspect the tool error, exact endpoint and credential. If it is only describing a call, ask for the actual read-only tool result.
+
+Reference: [Meta’s Muse custom connectors and credential handling](https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse).
+
+[Choose another client](/mcp/clients).

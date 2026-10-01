@@ -1,0 +1,72 @@
+---
+title: "Connect Gemini CLI to Plainrouter"
+sidebarTitle: "Gemini CLI"
+description: "Set up Plainrouter in Gemini CLI, try synthetic MCP data, add a workspace key, and verify a read-only production connection."
+---
+
+Use Gemini CLI with Plainrouter over Streamable HTTP. This guide is for the terminal client, not the Gemini web app. Install and sign in to Gemini CLI first.
+
+## 1. Try the sandbox
+
+Run:
+
+```bash
+gemini mcp add --scope user --transport http plainrouter-test https://plainrouter.com/mcp/sandbox
+```
+
+Start Gemini CLI and use `/mcp` to inspect the connection.
+
+The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
+
+```text
+Use plainrouter-test to call get_account_state, then get_signal_health.
+Show the tool results and stop. Do not call other tools.
+```
+
+Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
+
+## 2. Create a workspace key
+
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+
+## 3. Add Plainrouter to the client
+
+Merge this entry into `~/.gemini/settings.json`, preserving other settings:
+
+```json
+{
+  "mcpServers": {
+    "plainrouter": {
+      "httpUrl": "https://plainrouter.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${PLAINROUTER_WORKSPACE_KEY}"
+      }
+    }
+  }
+}
+```
+
+Provide `PLAINROUTER_WORKSPACE_KEY` through your local secret manager in the environment that starts Gemini CLI. Leave the variable reference in the file. Restart the client, check `/mcp`, and select `plainrouter` for production reads.
+
+## 4. Verify the connection
+
+Start with this read-only request:
+
+```text
+Use plainrouter to call get_install_instructions with no arguments.
+Show the workspace and installation status, then stop. Do not change anything.
+```
+
+Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
+
+Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+
+## 5. Troubleshooting
+
+- **Disconnected:** use `httpUrl` or `--transport http`; `url` configures the older SSE transport.
+- **Tools appear but calls return 401:** discovery can be public. Confirm the key variable is available to the client and has not expired or been revoked.
+- **Wrong server is used:** keep distinct `plainrouter-test` and `plainrouter` names and name the intended one in your request.
+
+References: [Gemini CLI MCP configuration](https://geminicli.com/docs/tools/mcp-server/) and [settings variable expansion](https://geminicli.com/docs/reference/configuration/).
+
+[Choose another client](/mcp/clients).
