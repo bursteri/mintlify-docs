@@ -1,0 +1,29 @@
+---
+title: "October 2026"
+description: "Review Plainrouter updates to Campaigns budget controls, Actions recovery, Signals consent and arrival context, and the released PHP SDK."
+rss: true
+---
+
+Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 2, 2026">
+  ## Review daily budgets and resumes in Campaigns
+
+  **Improved** · Available daily-budget controls show the retained amount, proposed change and sync time before submission. Resume also asks you to confirm the current budget. Inputs and displays use the account currency's Meta units. [Use Campaigns controls](/actions/account-inventory).
+
+  ## Recover interrupted Actions without duplicate writes
+
+  **Fixed** · Approved batches can recover from a lost execution job, and stalled execution closes against its recorded receipts. Partial or uncertain Meta results remain visible for review. [Follow recovery](/actions/review-proposals#what-if-an-approved-batch-stalls).
+
+  ## Use the Signals fallback consent card
+
+  **New** · The v4 snippet can use supported external consent signals or a configured Plainrouter card with Accept all, Reject all and Customize. Partial choices keep advertising events silent until all three required permissions are granted. [Choose and test consent](/signals/track-events#how-does-the-snippet-choose-a-consent-source).
+
+  ## Understand traffic context on arrivals
+
+  **Improved** · Current v4 arrivals retain bounded page, campaign, referrer-host and coarse environment dimensions without visitor identifiers. They remain separate from consented conversion events and Meta delivery. [Review retained fields](/signals/install-pixel#which-arrival-fields-are-retained).
+
+  ## Integrate from PHP with the published SDK
+
+  **New** · Composer package `plainrouter/sdk` `0.1.0` provides event, operations and sandbox clients for PHP 8.2 and newer. [Install and verify the PHP SDK](/sdk/php).
+</Update>

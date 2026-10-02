@@ -140,6 +140,23 @@ In Ask mode, send the reviewer to **Inbox**. Use the reads above to follow the r
 
 The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
 
+### What if the same proposal key returns a conflict?
+
+Reuse the saved idempotency key only for an identical proposal from the same proposing principal. Changing action parameters, target, action order, or proposer returns HTTP `409` with a validation-shaped body:
+
+```json
+{
+  "message": "idempotency_key_parameters_mismatch: This submission key belongs to a different proposal.",
+  "errors": {
+    "idempotency_key": [
+      "idempotency_key_parameters_mismatch: This submission key belongs to a different proposal."
+    ]
+  }
+}
+```
+
+Read the existing batch before resolving a timeout. Use a new key for a genuinely new intent after checking outstanding work; do not rotate keys to bypass a conflict. MCP proposals follow the same replay boundary.
+
 ## Why is a management target refused?
 
 A submitted batch can contain only one management change per target type and ID across `pause`, `resume`, `increase_budget`, and `decrease_budget`. Repeating it returns HTTP `422` with `action_target_repeated` in the field message for `actions.N.target_entity.id`. Remove the conflicting action; changing its name or idempotency key does not make it a different target.
@@ -153,7 +170,9 @@ A target held by an outstanding management proposal is also refused. The message
 | `401` | Key type, expiry/revocation, active principal and connection, and the issuer's current role. The issuer losing permission can invalidate a previously working key. |
 | `403` | The active grant must cover `propose-actions`, including for reads. A normal Read key does not qualify. Check any additional proposal permission. |
 | `404` | Workspace/account scope and returned action or batch ID. For receipt reads, inspect the error code: [`receipt_not_available`](#what-does-receipt_not_available-mean) describes a visible action without an execution receipt. Out-of-scope records are not exposed. |
-| `422` | Account selection, status/page values, and [proposal field errors](/mcp/tools#validation-and-retry-keys). Correct the named field before retrying. |
+| `422` | Account selection, status/page values, and [proposal field errors](/mcp/tools#validation-and-retry-keys). Proposal refusals use `message` and an `errors` map; reason codes prefix field messages rather than appearing in `error.code`. |
+| `409` | The idempotency key belongs to different parameters or a different proposer. [Check the original proposal](#what-if-the-same-proposal-key-returns-a-conflict). |
+| `503` with `workspace_lock_timeout` | The workspace is busy. Respect `Retry-After` and retry the identical request with its saved key. |
 | `200` with `dry_run_unavailable` | The preview could not evaluate an action without a persisted row. Do not treat it as a passing policy result. |
 | Empty `data` | Clear the status filter and confirm the selected account. An empty page does not prove the workspace has no action history. |
 

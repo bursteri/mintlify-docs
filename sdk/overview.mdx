@@ -20,6 +20,9 @@ Each language guide covers installation, authentication, requests, and verificat
   <Card title="Ruby" icon="gem" href="/sdk/ruby">
     A client facade for sending events and reading delivery results.
   </Card>
+  <Card title="PHP" icon="code" href="/sdk/php">
+    Composer client for sandbox checks, consented events and delivery reads.
+  </Card>
   <Card title="Go" icon="code" href="/sdk/go">
     Typed requests with context-based authentication and error handling.
   </Card>
@@ -34,9 +37,10 @@ For a terminal workflow, start with the [CLI quickstart](/cli/get-started), then
 | TypeScript | Node.js `22.22.2` or newer | [`@plainrouter/sdk` `0.6.0`](https://www.npmjs.com/package/@plainrouter/sdk) |
 | Python | Python 3.11 or newer | [`plainrouter` `0.6.0`](https://pypi.org/project/plainrouter/) |
 | Ruby | Ruby 3.2 or newer | [`plainrouter-sdk` `0.2.0`](https://rubygems.org/gems/plainrouter-sdk) |
+| PHP | PHP 8.2 or newer, cURL, JSON and mbstring | [`plainrouter/sdk` `0.1.0`](https://packagist.org/packages/plainrouter/sdk) |
 | Go | Go 1.23 or newer | [`sdk-go` `v0.6.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) |
 
-Production requests require a **Signals workspace secret** stored on your server. Published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential. An MCP workspace execution token is a separate credential and cannot authenticate Conversion API requests. See [Authentication](/api/authentication).
+Production Conversion API requests require a **Server secret** stored on your server. Published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential. An MCP Workspace key is a separate credential and cannot authenticate Conversion API requests. See [Authentication](/api/authentication).
 
 To deliver conversions to Meta, [connect the intended dataset](/signals/connect-meta) and capture the required [event consent](/signals/track-events). Without production setup, you can explore the request contract in the [synthetic API sandbox](/api/sandbox).
 
@@ -45,13 +49,13 @@ To deliver conversions to Meta, [connect the intended dataset](/signals/connect-
 1. **Install and configure one client.** Follow your language guide above. Pin its package version and keep the Signals secret out of browser bundles.
 2. **Check access.** Read recent events using the guide's authenticated client. A successful empty response is valid; it does not prove that browser collection is installed.
 3. **Verify ingestion.** Use the SDK's ingestion diagnostic. It records an identity-free verification event; it does not establish real arrival evidence or complete onboarding. See [Verify Signal ingestion](/signals/verify-ingestion).
-4. **Send a conversion and inspect delivery.** Follow the [Node.js and TypeScript recipe](/sdk/recipes/meta-conversions), or the purchase example in the [Python](/sdk/python#send-a-meta-conversion), [Ruby](/sdk/ruby#send-a-meta-conversion), or [Go](/sdk/go#send-a-meta-conversion) guide. Preserve the original event ID and payload on retries.
+4. **Send a conversion and inspect delivery.** Follow the [Node.js and TypeScript recipe](/sdk/recipes/meta-conversions), or the purchase example in the [Python](/sdk/python#send-a-meta-conversion), [Ruby](/sdk/ruby#send-a-meta-conversion), [PHP](/sdk/php#send-a-meta-conversion), or [Go](/sdk/go#send-a-meta-conversion) guide. Preserve the original event ID and payload on retries.
 
 A new event's `202` acknowledgement confirms ingestion. Check the event's delivery trace separately: a delivery with `status: "accepted"` confirms destination acceptance. Acceptance does not establish attribution or improved advertising performance. See [delivery status meanings](/reference/statuses-and-terms#destination-delivery).
 
 ## What do the clients cover?
 
-All four SDKs target signed API contract `0.5.0` and cover event creation and retrieval, ingestion verification, destination testing, delivery replay, reports, and user-data deletion. Package versions are independent of the API contract version. Review release notes before upgrading. For compatibility in published `0.5.x` clients, see [Read workspace identifiers](/api/conversions#read-workspace-identifiers).
+All five published SDKs target signed API contract `0.5.0` and cover event creation and retrieval, ingestion verification, destination testing, delivery replay, reports, and user-data deletion. Package versions are independent of the API contract version. Review release notes before upgrading. For compatibility in published `0.5.x` clients, see [Read workspace identifiers](/api/conversions#read-workspace-identifiers).
 
 | Task | Documentation |
 | --- | --- |

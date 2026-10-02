@@ -130,7 +130,7 @@ Keep unique visitors, visits, pageviews and custom-event goals separate. Start w
 ### Check the collection difference
 
 1. Match the metric, website and reporting period before comparing totals.
-2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by Plainrouter. Arrivals do not wait for consent; conversion events and the channel breakdown do. Keep these counts separate.
+2. Check your [consent configuration](/signals/overview#consent-behavior) and any privacy-limited values shown by Plainrouter. Arrivals and their bounded campaign dimensions do not wait for consent; conversion-event identity and advertising delivery do. Check each report's metric and available breakdown rather than treating a campaign label as a visitor join or attributed conversion. Keep these counts separate.
 3. Test one page load and one in-app navigation with your actual consent choices. Confirm which requests reach each collector using the [installation checks](/signals/install-pixel#verify-the-installation).
 4. Inspect duplicate tags, redirects and blocked requests. Record the settings and request outcomes needed to reproduce an unexplained change.
 

@@ -88,7 +88,21 @@ A detected consent source does not prove that a new purchase was delivered to Me
 
 `signalq("init", ...)` sends one arrival per document and publishable key before checking consent. It does not create or read visitor cookies for that request. Repeating initialization with the same key, changing consent, navigating with the History API, or restoring the page from the back-forward cache does not send another arrival. A full page reload starts a new document and can send a new arrival.
 
-The current snippet sends the publishable key in a `text/plain` JSON body with `credentials: "omit"`. It does not put click IDs or customer data in the arrival body. The stored arrival contains workspace and policy context with time rounded down to the UTC hour; it contains no visitor identity, page URL, referrer, IP address, user agent, or commerce details. Arrivals do not trigger Meta delivery.
+The current snippet sends the publishable key in a `text/plain` JSON body with `credentials: "omit"`. It does not put click IDs or customer data in the arrival body. The current v4 arrival also supplies bounded traffic context: the page path, referrer origin and an allowlisted campaign-query subset. Collector requests use `referrerPolicy: "no-referrer"`, so the browser does not attach the full page URL as an HTTP Referer. Arrivals do not trigger Meta delivery.
+
+### Which arrival fields are retained?
+
+The collector retains the UTC-hour timestamp, workspace and policy context, and these bounded dimensions:
+
+| Dimension | Retained value |
+| --- | --- |
+| Page | Authorized website hostname and path without query or fragment. |
+| Source | External referrer hostname; same-site and authorized-domain referrers are omitted. |
+| Campaign | `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, and validated campaign, ad-set and ad IDs from `pr_c`, `pr_s`, `pr_a`; `utm_id` can supply a fallback campaign ID. |
+| Platform | `pr_p=meta` or `pr_p=google_ads`; unsupported values become `none`. This is traffic classification, not destination support. |
+| Environment | Country and coarse device, browser and operating-system categories, when derivable. |
+
+The arrival has no visitor identifier, IP address, raw user-agent string, full referrer URL, arbitrary query parameters, or commerce payload. The generated arrival ID identifies the arrival record, not a visitor or session. Keep personal data out of website paths and campaign labels; permitted strings are not automatically scrubbed of personal information.
 
 The separate `/v1/events` path requires `consent_basis: "consent"` and `granted` values for `ad_storage`, `ad_user_data`, and `ad_personalization`. After the first complete grant, the collector sends a consented `PageView`. This event does not add a second arrival to the arrival total. Events requested before consent are not replayed retroactively.
 

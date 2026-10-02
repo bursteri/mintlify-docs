@@ -52,6 +52,12 @@ The document is stored when issued, rather than rebuilt from current action sett
 
 For a server integration, use the [Actions decision-receipt endpoint](/api/actions#retrieve-a-decision-receipt) or [`get_action_decision_receipt`](/mcp/tools#get_action_decision_receipt) with a properly scoped Write Workspace key. These are separate from the signed-in download link and do not export the entire workspace audit history.
 
+### What does an exhausted reconciliation mean?
+
+A receipt with `receipt_status: "reconciliation_exhausted"` records provider work that could not be settled within the recovery window. The associated action can be `execution_uncertain`; a batch can remain `rollback_incomplete`. It is not proof of a successful write, absence of a write, or completed compensation.
+
+Use the action's target and recorded provider evidence to check Meta Ads Manager. Preserve earlier verified or compensated outcomes when assessing a partially completed batch. See [stalled-batch guidance](/actions/review-proposals#what-if-an-approved-batch-stalls).
+
 ## Integrity versions
 
 The JSON export retains the hash and predecessor fields. The current Audit page does not display an integrity verdict or recomputation panel; downloading the file is not itself a verification of the chain.
