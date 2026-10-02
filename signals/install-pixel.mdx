@@ -109,7 +109,7 @@ The separate `/v1/events` path requires `consent_basis: "consent"` and `granted`
 Arrival requests are not retried, queued in the browser, or resent by beacon. A failed request can therefore leave that document load uncounted.
 
 <Note>
-  The generated snippet uses `signalq`. Do not rename it to `signal`; the v4 bundle intentionally exposes only the collision-resistant `signalq` global.
+  The generated snippet uses `signalq` for tracking commands. Do not rename it to `signal`. The separate [`plainrouter("consent", "open")` control](/signals/track-events#how-does-the-snippet-choose-a-consent-source) reopens the supported consent surface; it is not the tracking queue.
 </Note>
 
 ## Content Security Policy
