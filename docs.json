@@ -149,6 +149,7 @@
               "sdk/typescript",
               "sdk/python",
               "sdk/ruby",
+              "sdk/php",
               "sdk/go"
             ]
           },
@@ -289,6 +290,7 @@
             "group": "2026",
             "icon": "calendar-days",
             "pages": [
+              "changelog/2026-10",
               "changelog/2026-09",
               "changelog/2026-08"
             ]

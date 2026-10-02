@@ -1,0 +1,97 @@
+---
+title: "PHP SDK: send and verify Meta conversions"
+sidebarTitle: "PHP"
+description: "Install the released Plainrouter PHP SDK with Composer, test the sandbox, send consented purchases, retry safely, and inspect delivery."
+---
+
+Use [`plainrouter/sdk`](https://packagist.org/packages/plainrouter/sdk) to call the Plainrouter Conversion API from PHP. Published version `0.1.0` targets signed API contract `0.5.0`; it provides event, operations and sandbox groups. The generated client does not call Meta's Graph API directly.
+
+## Requirements and installation
+
+You need PHP 8.2 or newer with cURL, JSON and mbstring, plus Composer. For production, store a workspace **Server secret** in your server's secret manager, connect the intended [Meta dataset](/signals/connect-meta), and record the actual [advertising consent](/signals/track-events).
+
+Install the released package:
+
+```bash
+composer require plainrouter/sdk:0.1.0
+```
+
+The [release source](https://github.com/plainrouter/sdk-php/tree/v0.1.0) is authoritative for these examples. SDK main can contain methods awaiting a later package release.
+
+## Try the sandbox first
+
+```php
+<?php
+require 'vendor/autoload.php';
+
+$example = (new Plainrouter\Client())->sandbox->getSandbox();
+```
+
+This credential-free discovery read describes the synthetic sandbox; it sends no production conversion and contacts no advertising provider. Follow the [API sandbox guide](/api/sandbox) to validate a synthetic event.
+
+## Configure production access
+
+```php
+use Plainrouter\Client;
+
+$secret = getenv('PLAINROUTER_SERVER_SECRET');
+if (!is_string($secret) || $secret === '') {
+    throw new RuntimeException('The Server secret is missing');
+}
+$client = new Client(token: $secret, timeout: 30.0);
+$events = $client->operations->listEvents(25);
+```
+
+The default base URL is `https://plainrouter.com/api/v1`. Keep the secret out of source control, browser code and logs. A successful empty list is valid; it does not prove browser installation or Meta delivery. `verifySignalIngestion()` is a separate identity-free diagnostic write and does not replace a browser arrival.
+
+## Send a Meta conversion
+
+Choose your backend as the purchase owner and confirm payment before sending. Persist the event body first. This example assumes `$order` and `$consent` come from your own recorded order and consent data; it can create a real conversion.
+
+```php
+foreach (['ad_storage', 'ad_user_data', 'ad_personalization'] as $field) {
+    if (($consent[$field] ?? null) !== 'granted') {
+        throw new InvalidArgumentException('Recorded advertising consent is required');
+    }
+}
+if (empty($order['id']) || empty($order['paid_at']) || empty($consent['captured_at'])) {
+    throw new InvalidArgumentException('Original order and consent times are required');
+}
+
+$body = [
+    'event_id' => 'purchase:' . $order['id'],
+    'event_name' => 'Purchase',
+    'event_time' => $order['paid_at'],
+    'event_source' => $order['checkout_url'],
+    'action_source' => 'website',
+    'consent_basis' => 'consent',
+    'consent' => $consent,
+    'value_data' => [
+        'value' => $order['total_decimal'],
+        'currency' => $order['currency'],
+        'order_id' => $order['id'],
+    ],
+];
+[$receipt, $status, $headers] = $client->events->createEventWithHttpInfo($body);
+$trace = $client->events->getEvent($receipt->getEventId());
+```
+
+Use decimal-string money, a stable non-personal order ID, the actual checkout URL without personal data, and original timezone-aware timestamps. The consent snapshot needs its source and capture time. The facade rejects invalid or missing `consent.captured_at` locally when visitor identity is present; this does not obtain consent or replace server validation.
+
+New ingestion returns HTTP `202`; an identical event-ID retry can return `200` with `duplicate: true`. Reuse the persisted body after an uncertain timeout, checking that advertising use remains permitted. A duplicate does not update the original event or replay a failed delivery.
+
+Inspect the event's deliveries separately. `accepted` confirms destination acceptance; queued or retrying work remains pending. Acceptance does not prove attribution or better ad performance. See [delivery statuses](/reference/statuses-and-terms#destination-delivery).
+
+## Troubleshooting
+
+| Symptom | Next step |
+| --- | --- |
+| `401` | Check the current Server secret and workspace; MCP keys cannot authenticate this API. |
+| `422` | Inspect protected field errors, recorded consent, timestamps and decimal-string values. |
+| Local `InvalidArgumentException` | Correct the actual stored input; do not fabricate a consent time. |
+| Timeout or transport failure | Acceptance can be uncertain. Retry the original persisted event ID and body. |
+| No delivery acceptance | Check destination setup and event eligibility before assuming Meta received it. |
+
+API failures use `Plainrouter\OpenAPI\ApiException`; inspect the HTTP code without logging its credential-bearing request or customer payload. Generated models and lower-level APIs live under `Plainrouter\OpenAPI`.
+
+Continue with [Conversion API handling](/api/conversions) and [deduplication](/signals/track-events#avoid-duplicate-meta-events).

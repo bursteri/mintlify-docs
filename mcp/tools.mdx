@@ -4,7 +4,7 @@ sidebarTitle: "MCP tool reference"
 description: "Use Plainrouter MCP tools for Signals reads, Actions status and receipts, governed proposals, workspace grants, and synthetic testing."
 ---
 
-Plainrouter MCP server version `0.4.0` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
+Plainrouter MCP server version `0.4.1` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
@@ -83,9 +83,6 @@ account or credential. It exposes four tools:
 
 | Tool | Purpose |
 | --- | --- |
-| `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
-| `get_inventory_metrics` | Read-only, idempotent | Read retained daily metrics and optional change history. |
-| `submit_feedback` | Feedback write | Save a bug report or capability request; no account mutation or reply in MCP. |
 | `get_account_state` | Return an invented account, workspace, connection, and Signal destination. |
 | `get_signal_health` | Return synthetic event flow, delivery, and match-quality diagnostics. |
 | `get_performance` | Return synthetic reconciliation evidence for a requested 1–90 day window. |
@@ -98,6 +95,8 @@ production proposal, creative, approval, Launcher, or spend-affecting tools.
 The production endpoint is `https://plainrouter.com/mcp`. Its handshake, tool
 and resource catalogs, and static `ui://` MCP App shells are publicly
 discoverable. Every tool call requires an authorized workspace key. Account-scoped reads additionally require access to the selected account. The two workspace-scoped installation and arrivals tools do not accept `account_id`.
+
+The inventory reads and `submit_feedback` are production tools and are absent from this sandbox. Use their production credential and scope requirements; a successful synthetic read does not authorize them.
 
 ## Built-in Signals prompts
 

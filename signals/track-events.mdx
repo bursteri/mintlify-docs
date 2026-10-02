@@ -9,11 +9,27 @@ Use `signalq` to pass your consent platform's current decision to Signals and se
 ## Before you begin
 
 - [Install the generated Signals pixel](/signals/install-pixel) once and keep its `init` call before consent and event calls.
-- Configure your consent-management platform (CMP) to report the visitor's actual advertising choices on every page and after changes.
+- Choose a consent source: a supported external signal, an explicit CMP adapter, or the configured Plainrouter fallback card. Verify the actual advertising choices on every page and after changes.
 - [Connect Meta](/signals/connect-meta) if you want managed Meta delivery.
 - Choose whether the browser, your backend, or Stripe owns each purchase. Follow [Avoid duplicate Meta events](#avoid-duplicate-meta-events) before combining integrations.
 
 Calls made before the asynchronous Signals script loads are queued, but the queue stub returns `undefined`. It does not return the later command's result. Run examples that read an event ID, identification result, or visitor ID only after the generated script's `load` event; register that handler before the script can finish loading. Do not install a second snippet to wait for it.
+
+## How does the snippet choose a consent source?
+
+The current v4 snippet sends its arrival first, then uses a queued explicit `signalq("consent", …)` decision when present. Otherwise it checks supported TCF and Consent Mode signals during a 1.5-second detection window. A detected supported CMP without a usable decision suppresses the fallback; it does not grant consent. Keep the explicit adapter below when your CMP needs one.
+
+If no external source takes precedence, the snippet can restore the saved Plainrouter choice or display the enabled fallback consent card. **Accept all**, **Reject all**, and **Customize** record different decisions. In Customize, **Analytics** controls `ad_storage`, while **Marketing** controls both `ad_user_data` and `ad_personalization`. Advertising events and managed Meta delivery still require all three grants; selecting only Analytics is insufficient.
+
+A later valid external decision dismisses the fallback. The `pr_consent` cookie stores the Plainrouter choice; it is separate from visitor measurement identifiers. To reopen the card from your own preferences control, use:
+
+```js
+window.plainrouter("consent", "open");
+```
+
+This command opens the supported consent surface; it does not itself grant permission. Call it after the snippet loads and wire it to a visitor action. The fallback remains subject to its configured enablement and market policy.
+
+For verification, use a fresh browser context: test full acceptance, rejection, a partial Customize choice, a returning saved choice and withdrawal. Check actual event requests and [destination delivery](/signals/connect-meta), not just whether a card appeared. A blocked config request or detected CMP without a decision can leave advertising events silent. Do not turn that unknown state into a grant.
 
 ## Set consent
 

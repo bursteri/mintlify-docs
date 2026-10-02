@@ -99,6 +99,14 @@ When an action has a stored decision receipt, use **Audit → Download decision 
 
 Agents and server integrations can follow the same stored action outcomes through the [MCP Actions reads](/mcp/tools#read-actions-and-policy) or [Actions API](/api/actions). These interfaces do not approve or reject the batch; the human decision remains in Inbox.
 
+## What if an approved batch stalls?
+
+Plainrouter can recover an approved batch whose execution job was lost and settle a stalled execution without repeating a provider write. Follow the existing batch; do not approve it again or create replacement proposals to force progress.
+
+Read each action and its receipt. Already verified work remains recorded. An action with no provider attempt can finish as failed without a write; an attempted operation whose result cannot be established can remain `execution_uncertain` with a `reconciliation_exhausted` receipt. Compensation that cannot be confirmed leaves `rollback_incomplete`. None of these labels proves that nothing reached Meta.
+
+For an uncertain or partial result, inspect the exact target in Meta Ads Manager and the [decision receipt and audit history](/actions/audit-log). Resolve that recorded outcome before proposing further work on the target.
+
 ## Reject a batch
 
 Click **Reject**, optionally explain what the agent should reconsider, and confirm **Reject proposal**. The reason is stored in the audit event. Like approval, rejection applies to the containing batch.
