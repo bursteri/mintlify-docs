@@ -1,10 +1,12 @@
 ---
 title: "Review action proposals in Inbox"
 sidebarTitle: "Review proposals"
-description: "Review governed Meta proposals, verify provider changes, and interpret later counted-arrival and spend outcomes before deciding what to do next."
+description: "Review Meta proposals and account-rule approvals, verify provider changes, and follow counted-arrival outcomes and eligible inverse proposals."
 ---
 
 Open **Inbox** from the Plainrouter sidebar to review proposals for the current workspace, including changes submitted from Campaigns. Select an action to read its reasoning, target, policy result, and status. In Ask mode, a person approves every change first. **Approve** and **Reject** decide the containing batch, including its other actions. Full runs admitted changes automatically without a per-change approval; follow their receipts in Inbox.
+
+[Account rules](/actions/account-rules) can also produce proposals. Their budget increases require human approval even in Full; inspect the stored decision rather than assuming the workspace mode alone authorizes execution.
 
 ## Before you decide
 
@@ -114,16 +116,34 @@ The comparison uses complete days in the Meta ad account's timezone, with UTC as
 
 Each compared side needs at least 50 counted arrivals and positive spend. Compared spend must come from retained inventory with coverage for the completed days. Each check reads the arrival count and stored spend again before recording its result.
 
+Compared daily metrics must have been fetched at least ten minutes after that account-local day ended. This is a completed-day requirement, not a promise that every metric is less than ten minutes old. Missing rows count as zero only when fresh account sync coverage establishes that day. Otherwise the check can request a bounded metrics refresh, at most once per account per hour, within the available recent metrics window. Missing or older data can remain unavailable; refresh does not recover unlimited history.
+
 ### What should I do with the result?
 
 | Result | Meaning and next step |
 | --- | --- |
 | `measurable` with `held` | The observations stayed within the recorded loss rule. Inspect the comparison; this is not a guarantee of future performance. |
-| `measurable` with `lost` | The observations crossed the loss rule. Review arrivals and spend before deciding whether to propose another change. The verdict does not automatically undo the action. |
+| `measurable` with `lost` | The observations crossed the loss rule. Inspect arrivals, spend and any recorded inverse proposal before proposing another change. |
 | `not_measurable` with `insufficient_volume` | One or both sides lack the required arrival volume or positive spend. No held/lost verdict is established. |
 | `unavailable` | Required data could not be established. Inspect `arrivals_unavailable`, `inventory_unavailable`, `outcome_window_pending`, or `outcome_check_exhausted` when recorded. Missing values remain unknown. |
 
 Check the [retained inventory comparison](/actions/account-inventory#how-do-counted-arrivals-compare-with-meta-metrics) and your Signals installation when data is missing. Bounded retries do not require another proposal. A final unavailable outcome leaves the earlier execution verification intact; it does not prove success or failure of performance. For automation, read the [outcome payload](/api/actions#read-the-later-outcome-payload).
+
+### Does a lost outcome create an inverse proposal?
+
+For an eligible verified Resume or daily-budget change proposed by a person or agent, Plainrouter can propose an inverse after recording `lost`. This is a new governed batch, separate from compensation for failed execution:
+
+| Original action | Proposed inverse |
+| --- | --- |
+| Increase daily budget | Decrease to the trustworthy pre-write daily budget recorded on the original action. |
+| Decrease daily budget | Increase to that recorded pre-write daily budget. |
+| Resume | Pause the same target. |
+
+The target must still have the budget or active status produced by the original action. If it already has the inverse state, its budget/status moved, prior-budget evidence is unavailable or a required provider read fails, no inverse is proposed. A lost verdict is not proof that a reversal is appropriate or that it landed.
+
+Read `disposition.outcome_payload.inverse` through the [Actions API](/api/actions#read-the-later-outcome-payload) or MCP Actions reads. `status: "proposed"` returns `batch_id`; inspect that batch's policy result and frozen mode. **Ask** waits for approval; **Full** can execute an admitted inverse automatically. Follow its receipt and verification before claiming restoration. The original action's historical result remains recorded.
+
+`status: "inverse_not_proposed"` includes `reason_code`, such as `already_inverse`, `budget_moved`, `status_moved`, `prior_budget_unavailable`, `target_state_unavailable` or `execution_kill_switch`. Inspect current state and the reason before retrying manually. System-generated actions, including rule actions and inverse proposals, do not trigger another inverse chain.
 
 ## What if an approved batch stalls?
 

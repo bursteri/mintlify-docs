@@ -1,10 +1,24 @@
 ---
 title: "October 2026"
-description: "Review Plainrouter updates to counted-arrival comparisons, Actions outcomes, Meta reconnection, Campaigns controls, Signals consent and the PHP SDK."
+description: "Review Plainrouter account rules, lost-outcome inverse proposals, counted-arrival comparisons, Meta reconnection, Signals consent and PHP SDK updates."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 5, 2026">
+  ## Define account performance rules
+
+  **New** · Create disabled rules in Action policy or through MCP, then explicitly enable counted-arrival cost conditions for governed pauses and daily-budget changes. Inspect revisions and evaluation results. Rule-generated budget increases always need human approval, including in Full. [Set up account rules](/actions/account-rules).
+
+  ## Follow inverse proposals after a lost outcome
+
+  **New** · An eligible lost Resume or budget-change outcome can create a separate inverse proposal using the recorded prior state. Current-state checks protect intervening changes; Ask/Full and provider verification still apply. System-generated actions do not create inverse chains. [Inspect the proposed response](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).
+
+  ## Wait for completed-day metrics before judging an outcome
+
+  **Improved** · Outcome checks require retained metrics fetched after the compared day completed. Missing or stale recent metrics can request a bounded refresh; unavailable data stays unknown rather than becoming zero. [Read the freshness requirements](/actions/review-proposals#how-are-later-performance-outcomes-checked).
+</Update>
 
 <Update label="October 4, 2026">
   ## Compare Meta metrics with counted arrivals

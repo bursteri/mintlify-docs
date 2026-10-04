@@ -68,6 +68,7 @@
               "actions/creative-workflow",
               "actions/review-proposals",
               "actions/policies-and-safety",
+              "actions/account-rules",
               "actions/audit-log"
             ]
           },

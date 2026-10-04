@@ -128,7 +128,7 @@ Use API or MCP `object_metrics` to compare a retained campaign, ad set or ad on 
 
 An arrival can match its campaign, ad set and ad. Do not sum all hierarchy levels into a total: that would count the same arrival more than once. Rows can contain arrivals without Meta metrics, or Meta metrics without matching arrivals.
 
-To verify a comparison, confirm `account` and `effective_range`, choose one hierarchy level, then inspect dates, object IDs, freshness and nullable fields. Check your [snippet installation](/signals/install-pixel), [numeric Meta URL tags](https://plainrouter.com/tools/utm-builder) and inventory synchronization when matching counts are missing. An unavailable arrivals store is not a measured zero.
+To verify a comparison, confirm `account` and `effective_range`, choose one hierarchy level, then inspect dates, object IDs, freshness and nullable fields. Check your [snippet installation and captured URL fields](/signals/install-pixel#which-arrival-fields-are-retained), numeric Meta object IDs in the ad's URL tags, and inventory synchronization when matching counts are missing. An unavailable arrivals store is not a measured zero.
 
 These arrivals count eligible observations, not unique people, purchases or Meta-attributed conversions. Meta clicks and arrivals can differ. This comparison is separate from [Signals reconciliation](/signals/health-and-performance) and does not establish causal lift or admissible quantitative proposal evidence by itself.
 

@@ -1,7 +1,7 @@
 ---
 title: "Meta Ads MCP tools: inputs and limits"
 sidebarTitle: "MCP tool reference"
-description: "Use Plainrouter MCP tools for Signals reads, Actions status and receipts, governed proposals, workspace grants, and synthetic testing."
+description: "Use Plainrouter MCP tools for Signals reads, governed proposals, account rules, Actions receipts, workspace grants and synthetic testing."
 ---
 
 Plainrouter MCP server version `0.4.1` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
@@ -28,6 +28,10 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_action_policy` | Read-only, idempotent | Read current policy or effective defaults without creating it. |
 | `dry_run_actions` | Policy preview; may read provider state | Evaluate a proposed batch without saving or executing it. Requires Write access. |
 | `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed proposal governed by Ask or Full. |
+| `actions.rules.list` | Read-only | List stored account rules and recent evaluation results. |
+| `actions.rules.show` | Read-only | Inspect one rule, immutable revisions and recent runs. |
+| `actions.rules.create` | Configuration write | Store a disabled performance rule; no inline evaluation or Meta write. |
+| `actions.rules.update` | Configuration write | Edit a rule or explicitly enable/disable it; no inline evaluation or Meta write. |
 | `get-creative-library` | Read-only, open-world | Read Meta images and videos with associated ads and last-30-day history. |
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a copy created and verified paused of a source Meta ad with a selected asset. |
@@ -47,8 +51,14 @@ The server version is separate from the MCP protocol revision. For custom client
 </Note>
 
 <Warning>
-  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, policy-allowed changes wait for human approval. In **Full**, they queue automatically. Both modes keep execution checks; a submitted proposal is not proof of a Meta change.
+  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, admitted changes wait for human approval. In **Full**, they can queue automatically; rule-generated budget increases still require human approval. Both modes keep execution checks; a submitted proposal is not proof of a Meta change.
 </Warning>
+
+## Account-rule tools
+
+Follow [Meta ad account performance rules](/actions/account-rules) for disabled creation, complete definition inputs, explicit enabling, evaluation windows, pagination and troubleshooting. Rule reads accept Read or Write Workspace keys; writes require Write. The active grant must cover the corresponding `actions.rules.index`, `actions.rules.show`, `actions.rules.store` or `actions.rules.update` operation. These production tools are absent from the synthetic sandbox.
+
+Rules use `platform_ad_account_id` on creation and the returned `rule_id` for show/update. Saving or enabling does not execute a change during the request. Scheduled evaluation creates separate governed proposals, whose receipts must be followed in Inbox. Creating a rule does not change Ask/Full or the loss threshold.
 
 ## `get_account_inventory` and `get_inventory_metrics`
 

@@ -1,0 +1,103 @@
+---
+title: "Meta ad account performance rules"
+sidebarTitle: "Account rules"
+description: "Create disabled account rules, compare counted-arrival costs, enable governed proposals, and inspect evaluation results through Plainrouter MCP."
+---
+
+Account rules propose a pause or daily-budget change when a target meets your counted-arrival and cost conditions. Create a rule under **Settings → Action policy → Account rules**, or through MCP. New rules start **disabled**; enabling is a separate decision.
+
+In **Ask**, every proposed change waits for approval. In **Full**, admitted pauses and budget decreases can run automatically, but **rule-generated budget increases always require human approval**. Creating or editing a rule never changes Meta during that request.
+
+## Before you create a rule
+
+- Connect the intended [Meta ad account](/signals/connect-meta) and check its [retained inventory and metrics](/actions/account-inventory).
+- Install Signals and verify [counted arrivals](/signals/install-pixel). Rule comparisons use counted arrivals, not purchases, unique visitors or Meta-attributed conversions.
+- Review the workspace's [Action policy](/actions/policies-and-safety). Only the team owner can change rules in the dashboard; other members can review them.
+- For MCP, use the production server and an authorized [Workspace key](/mcp/workspace-tokens). Read keys can list and inspect rules; creating, editing or enabling requires Write and an active grant for that operation. Older account-bound keys keep their restriction. Never put a key in a prompt or source control.
+
+The rule tools are absent from the synthetic sandbox. Their names and inputs appear in the [published MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json).
+
+## What can a rule change?
+
+| Rule action | Target levels | Minimum target arrivals | Budget setting |
+| --- | --- | --- | --- |
+| `pause` | Ad or ad set | At least 50 | Omit `budget_change_percent`. |
+| `increase_budget` | Ad set or campaign | At least 100 | Integer change from 1–50%; always requires approval. |
+| `decrease_budget` | Ad set or campaign | At least 50 | Integer change from 1–50%. |
+
+Budget rules apply to daily budgets and remain subject to current provider state and policy. Rules do not resume targets, change lifetime budgets or create ads.
+
+Both conditions must hold over the **last three complete days in the account timezone**, with UTC as the fallback:
+
+1. The target reaches your `minimum_counted_arrivals`.
+2. Its cost per counted arrival is `at_least` or `at_most` your `cost_ratio` times the **whole account's** cost per counted arrival.
+
+The account also needs at least 50 counted arrivals. The ratio must be 0.10–10.00 with at most two decimal places. For example, `at_least` with `1.5` matches a target costing at least 1.5 times the account average. This comparison includes the target in the account baseline; it differs from the [Resume outcome's rest-of-account comparison](/actions/review-proposals#how-are-later-performance-outcomes-checked). It does not establish causal harm or a performance forecast.
+
+## Create and enable a rule in the dashboard
+
+1. Open **Settings → Action policy**, then **Account rules**. Confirm the workspace and account.
+2. Enter a **Name**, choose the **Account**, **Action** and **Level**, and set the arrival threshold and cost ratio. Budget actions also need **Budget change (%)**.
+3. Click **Create rule**. Confirm the saved rule says **Disabled**, and review its complete condition.
+4. Click **Enable rule** only when you intend scheduled evaluation to propose matching changes under the approval behavior above. Use **Disable rule** to stop future evaluation.
+
+Use **Edit rule → Save rule** to change its name or complete definition. The account cannot be changed after creation. **Revision history** preserves earlier definitions and their author type; editing does not rewrite a stored evaluation's revision. Disabling a rule does not cancel proposals already created; review those separately in [Inbox](/actions/review-proposals).
+
+## Configure the same rule through MCP
+
+Use these tools with their own grant permissions:
+
+| Tool | Access | Result |
+| --- | --- | --- |
+| `actions.rules.list` | Read or Write | Paginated rules visible to the key; does not evaluate them. |
+| `actions.rules.show` | Read or Write | One rule, revisions and recent evaluation runs. |
+| `actions.rules.create` | Write | Stores a disabled rule. |
+| `actions.rules.update` | Write | Edits the definition or explicitly enables/disables the rule. |
+
+For `actions.rules.create`, replace internal Plainrouter account ID `91` with your account's ID. This field is **`platform_ad_account_id`**, rather than `account_id` or an external Meta `act_…` ID. Example arguments for a disabled pause rule:
+
+```json
+{
+  "name": "Pause costly ad sets",
+  "platform_ad_account_id": 91,
+  "definition": {
+    "target_level": "ad_set",
+    "action": "pause",
+    "minimum_counted_arrivals": 50,
+    "cost_comparison": "at_least",
+    "cost_ratio": 1.5
+  }
+}
+```
+
+Creation returns `rule`. Save its `id` and confirm `enabled: false`, account, window and `current_revision`. Do not send `enabled` on creation. To enable it, call `actions.rules.update` with the returned rule ID; the ID below is an illustrative placeholder:
+
+```json
+{
+  "rule_id": "01k6n000000000000000000000",
+  "enabled": true
+}
+```
+
+Use `enabled: false` to disable. A name or definition edit appends an immutable revision; when editing `definition`, supply all its required fields. Enabling or disabling alone does not add a revision. The three-day window is fixed, so omit `window` and `window_days`.
+
+## How do I verify evaluation and execution?
+
+Evaluation is scheduled hourly. It reads retained metrics and arrivals, records a window and revision, then proposes eligible matches through normal Actions admission. Saving a rule is not an evaluation or proof of a Meta change.
+
+Call `actions.rules.show` with `rule_id`. Inspect `enabled`, `suspended_at`, `suspended_reason`, `current_revision` and `runs`. Each run records its window, timezone, status, reason, account totals and per-target decisions. Reads return the latest five runs; each run includes at most 100 decisions, with `decisions_truncated` indicating more. For lists, `page` starts at 1, `per_page` defaults to 25 and accepts 1–100; continue with `rules.next_page_arguments` until it is null.
+
+A decision marked `proposed` includes `action_batch_id`. Follow that batch in Inbox or the [Actions API](/api/actions); confirm approval where required, the execution receipt and exact provider verification. A matching rule or proposed batch is not **Landed**.
+
+## Why did a rule not produce another change?
+
+| Observation | Meaning and next step |
+| --- | --- |
+| Disabled or no matching decision | Confirm the saved definition, account, completed dates and both conditions. An empty decision list is not proof of zero activity. |
+| `deferred` / `metrics_pending`, `arrivals_unavailable` or `inventory_unavailable` | Required data is unavailable or lacks completed-day freshness. Check inventory timestamps and Signals; missing data is not zero. |
+| `conflict` / `different_actions_match` | Different actions match the same target. Resolve the overlapping rules. For the same action, the oldest matching rule is selected and others are `superseded`. |
+| `target_held`, `outcome_pending` or `target_cooling` | An outstanding management proposal or later outcome holds the target. After an outcome check, cooldown lasts until the start of the fourth following account-local day. Follow the existing batch. |
+| `skipped` with a policy or provider reason | Read the recorded reason. Enabling a rule cannot bypass admission, unavailable provider state or the execution kill switch. |
+| `suspended_reason: "two_lost_actions"` | The rule's two most recent judged actions were both lost. Inspect those outcomes and leave the rule disabled while reviewing it. Toggling `enabled` alone does not clear suspension. |
+
+Rules and system-generated inverse proposals do not create recursive lost-outcome inverse chains. For other eligible actions, see [what happens after a lost outcome](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).

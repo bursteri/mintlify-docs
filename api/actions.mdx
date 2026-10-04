@@ -4,7 +4,7 @@ sidebarTitle: "Actions"
 description: "Preview and submit governed proposals, then read verification, outcome comparisons, policy and decision receipts with a Write Workspace key."
 ---
 
-Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
+Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, admitted changes can run automatically; rule-generated budget increases still require approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
 
 The Actions API covers a focused set of governed Meta changes, not the full Meta Marketing API. The [Meta Ads API guide](https://plainrouter.com/library/meta-ads-api) explains the difference.
 
@@ -73,12 +73,17 @@ When recorded, `disposition.outcome_payload` contains the later comparison. Read
 | --- | --- |
 | `status`, `observed_at`, `reason_code`, `reason` | Measurement state, observation time and available explanation. `measurable`, `not_measurable` and `unavailable` are distinct states. |
 | `baseline`, `metrics` | Compared sides, each with `scope`, `days`, `timezone`, `currency`, `spend_minor`, `counted_arrivals` and `cost_per_counted_arrival_minor` for management outcomes. |
+| `inverse` | When recorded, a separate inverse proposal: `status: "proposed"` with `batch_id`, or `status: "inverse_not_proposed"` with `reason_code`. This is not proof of execution or restoration. |
 | `metrics.verdict` | `held` or `lost` for an eligible comparison; `not_judged` for Pause, or null when no verdict is established. |
 | `metrics.loss_threshold_percent` | The percentage used for that check. Do not replace it with a later policy value. |
 
 Here, spend and cost use ISO currency minor units, with decimal strings where needed. The cost can contain fractional minor units. These are different from the decimal currency amounts in inventory `metrics.spend` and Meta's budget-unit representation. Preserve precision and use the accompanying currency when displaying them.
 
-Resume compares the target with the rest of the ad account over the same completed days. Budget changes compare the target before and after the provider-write day. See [comparison windows, volume requirements and loss rules](/actions/review-proposals#how-are-later-performance-outcomes-checked). A missing payload or null count is unknown; `lost` does not automatically issue an undo or prove causal harm.
+Resume compares the target with the rest of the ad account over the same completed days. Budget changes compare the target before and after the provider-write day. See [comparison windows, freshness and loss rules](/actions/review-proposals#how-are-later-performance-outcomes-checked). A missing payload or null count is unknown. A lost result can create an [inverse proposal](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal) governed by Ask/Full; follow its batch and verification separately.
+
+### Configure account rules
+
+Use the [MCP account-rule tools](/actions/account-rules#configure-the-same-rule-through-mcp) to create disabled rules, explicitly enable them and inspect recent evaluation decisions. Rule reads accept Read keys; rule writes require Write and their own grants. Actions record reads on this page retain their separate Write requirement. A rule-generated budget increase requires human approval even in Full. Published SDK versions should not be assumed to include rule methods; use the discovered MCP contract for this workflow.
 
 ## Read the current policy
 

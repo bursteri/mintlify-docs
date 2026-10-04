@@ -1,9 +1,11 @@
 ---
 title: "Action policy and safety"
-description: "Choose Ask or Full, configure the loss threshold, and understand verified execution, later outcome comparisons and compensation boundaries."
+description: "Choose Ask or Full, configure loss checks, and understand account-rule approval, lost-outcome inverse proposals and verified recovery."
 ---
 
 Open **Settings** → **Action policy** to choose Ask or Full and configure outcome checks. Agents can supply reasoning and proposals, but they cannot edit these settings or bypass provider verification.
+
+The same page has [Account rules](/actions/account-rules). Authorized Write keys can create or edit those rules through MCP; this permission does not change the workspace's execution mode or loss threshold.
 
 Only the workspace owner can save policy changes. Other workspace members can review the current settings.
 
@@ -16,7 +18,7 @@ Policy changes are saved atomically with their audit event. If the audit event c
 | Mode | Behavior in this release |
 | --- | --- |
 | **Ask** (`ask`) | A person approves every change first. Approval queues supported execution after a fresh admission check. |
-| **Full** (`full`) | The workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. |
+| **Full** (`full`) | Admitted changes can run automatically. Rule-generated budget increases still require human approval. Every change gets a receipt, and the kill switch stops all changes. |
 
 New workspaces default to **Ask**. Existing workspace policies were migrated to Ask; selecting Full is an explicit owner decision. The selected mode is copied into each proposal as an immutable snapshot. Changing the current mode does not rewrite an older proposal.
 
@@ -30,7 +32,7 @@ Older batches can retain `suggest_only`, `auto_with_limits`, or `full_auto` snap
 
 Executable Meta work passes policy twice:
 
-1. Proposal-time admission checks validate scope, authorization, evidence, and supported actions. Ask requires a person to approve every admitted change first; Full queues admitted changes automatically.
+1. Proposal-time admission checks validate scope, authorization, evidence, and supported actions. Ask requires a person to approve every admitted change first; Full queues admitted changes automatically except rule-generated budget increases.
 2. At dispatch, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
 
 Changing policy does not promote or rewrite an existing proposal. A missing driver, unavailable critical provider field, revoked authorization, or other non-`allow` result blocks the queued batch before provider execution.
@@ -45,7 +47,7 @@ Sets the delay before checking a verified creative action's provider outcome. Th
 
 Sets the percentage used to classify a measurable management outcome as `held` or `lost`. The accepted range is 1–999.99%; the API retains the field name `anomaly_threshold_percent`. Inbox records the threshold used with the comparison.
 
-The comparison uses eligible counted arrivals and retained Meta spend, not purchase CPA or aggregate Signals reconciliation. A `lost` verdict does not automatically compensate a verified action. Review the observations before proposing another change; neither verdict guarantees future performance.
+The comparison uses eligible counted arrivals and retained Meta spend, not purchase CPA or aggregate Signals reconciliation. A `lost` verdict can create a separate [inverse proposal](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal), with current-state checks and Ask/Full approval behavior. It does not directly compensate the original action. Check the recorded proposal before submitting another change; neither verdict guarantees future performance.
 
 ## Verification and compensation
 
@@ -65,7 +67,9 @@ Later outcome measurement is separate from this recovery process. Insufficient a
 
 | Check or action | Current result |
 | --- | --- |
-| Human approval in Ask | Required for every policy-allowed change; Full queues allowed changes automatically. |
+| Human approval | Ask requires it for every admitted change. Rule-generated budget increases also require it in Full. |
+| Account rules | Start disabled; scheduled matches produce governed proposals, not inline Meta writes. |
+| Lost-outcome inverse | A separate governed proposal for an eligible Resume or budget change; cannot overwrite an intervening target change. |
 | Proposal-time and execution-time policy | Enforced. |
 | Provider account, source, and asset readiness | Re-read and fail-closed. |
 | Image upload and paused ad duplication | Executable with receipts, verification, outcome reads, and compensation. |

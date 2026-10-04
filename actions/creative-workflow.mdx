@@ -173,7 +173,7 @@ When requesting `asset_type: "all"`, pagination is returned separately for image
 
 ## Image upload rules
 
-Before staging an image, use the free [Meta Ad Image Checker](https://plainrouter.com/tools/meta-ad-checker) to inspect JPEG/PNG dimensions and a center-crop preview locally in your browser. Its 20 MiB processing limit is separate from the upload limit below; passing the checker does not prove Meta acceptance. [Meta image specifications](https://plainrouter.com/library/meta-ad-specs) explains placement review.
+Before staging an image, check its JPEG/PNG dimensions and crop for the intended placements. [Meta image specifications](https://plainrouter.com/library/meta-ad-specs) explains placement review. Meeting a documented specification does not prove Meta acceptance; verify the upload through its execution receipt.
 
 If the image is not already in Meta, `upload-asset` privately stages its bytes and creates a separate `upload_asset` proposal. It does not immediately produce an uploaded Meta image. Ask requires approval; Full can queue a policy-allowed upload automatically. Wait for verified provider completion, then call `get-creative-library` again to select the returned `image:<hash>`.
 
