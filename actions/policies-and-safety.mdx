@@ -1,6 +1,6 @@
 ---
 title: "Action policy and safety"
-description: "Configure workspace safeguards for proposals, creative execution, provider verification, and rollback without widening token or account authority."
+description: "Choose Ask or Full, configure the loss threshold, and understand verified execution, later outcome comparisons and compensation boundaries."
 ---
 
 Open **Settings** → **Action policy** to choose Ask or Full and configure outcome checks. Agents can supply reasoning and proposals, but they cannot edit these settings or bypass provider verification.
@@ -39,13 +39,13 @@ Changing policy does not promote or rewrite an existing proposal. A missing driv
 
 ### Outcome check after
 
-Sets the delay before checking a verified creative action's provider outcome. The accepted range is 1–168 hours.
+Sets the delay before checking a verified creative action's provider outcome. The accepted range is 1–168 hours. Resume and daily-budget changes use a separate window of three complete account-local days after the provider-write day, with the first check scheduled one hour after that window ends. See [outcome windows and prerequisites](/actions/review-proposals#how-are-later-performance-outcomes-checked).
 
-### CPA anomaly threshold
+### Loss threshold
 
-Sets the percentage threshold that classifies a provider outcome as anomalous. A verified anomaly can trigger automatic compensation.
+Sets the percentage used to classify a measurable management outcome as `held` or `lost`. The accepted range is 1–999.99%; the API retains the field name `anomaly_threshold_percent`. Inbox records the threshold used with the comparison.
 
-Aggregate Signals reconciliation is never substituted for target-level provider outcome data.
+The comparison uses eligible counted arrivals and retained Meta spend, not purchase CPA or aggregate Signals reconciliation. A `lost` verdict does not automatically compensate a verified action. Review the observations before proposing another change; neither verdict guarantees future performance.
 
 ## Verification and compensation
 
@@ -54,10 +54,12 @@ Plainrouter does not treat a successful provider response as proof that an actio
 - Image upload verification matches the receipt asset, frozen content hash, and provider readiness.
 - Ad-copy verification matches the receipt ad, authorized account, selected creative, and `PAUSED` state at creation.
 - An `IN_PROCESS` copy can enter durable asynchronous verification for up to 48 hours.
-- Hard mismatches, provider rejection, verification expiry, or later anomaly trigger compensation.
+- Execution or verification failures can require compensation; check the exact receipt and recovery result.
 - Compensation is itself verified: an uploaded image must be absent after deletion, and a copied ad must be `ARCHIVED` after rollback.
 
 If commit state is unknown, Plainrouter reconciles before retrying. It does not issue unsafe compensation without a trustworthy receipt target.
+
+Later outcome measurement is separate from this recovery process. Insufficient arrival volume, unavailable spend, or an exhausted outcome check does not by itself undo a verified action.
 
 ## Current enforcement boundary
 

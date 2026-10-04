@@ -15,7 +15,7 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
 | `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored Meta outbound clicks and inspect the separate Purchase comparison. |
 | `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
-| `get_inventory_metrics` | Read-only, idempotent | Read retained daily metrics and optional change history. |
+| `get_inventory_metrics` | Read-only, idempotent | Compare stored Meta metrics with counted arrivals; read optional change history. |
 | `submit_feedback` | Feedback write | Save a bug report or capability request; no account mutation or reply in MCP. |
 | `get_account_state` | Read-only, idempotent | Confirm authorization, account, workspace, destination, and available capabilities. |
 | `get_signal_health` | Read-only, idempotent | Diagnose event flow, delivery, match quality, and reconciliation. Not evidence for spend-affecting proposals. |
@@ -54,7 +54,7 @@ The server version is separate from the MCP protocol revision. For custom client
 
 Read retained Meta campaign, ad-set and ad data without a live Meta request or refresh. Both tools require an active workspace grant, current issuer authority and an explicit internal Plainrouter `account_id`. Read and Write tiers include these tools when their grant covers the operation. Existing account bindings still apply.
 
-Follow [Read Meta account inventory](/actions/account-inventory) for filters, cursor pagination, date windows, freshness and recovery flags. This retained inventory is separate from `get-creative-library`, which reads live creative assets from Meta. Inventory history is not a new proposal-evidence source.
+`get_inventory_metrics` includes daily `object_metrics` for retained campaigns, ad sets and ads, plus a workspace/window `unmatched_arrivals` count. Arrival counts are null when unavailable. Ad-level rows can carry receipt-backed creative provenance; missing fields remain unknown. Follow [Read Meta account inventory](/actions/account-inventory) for filters, cursor pagination, date windows, counting limits, freshness and recovery flags. This retained inventory is separate from `get-creative-library`, which reads live creative assets from Meta. Inventory history is not a new proposal-evidence source.
 
 ## `submit_feedback`
 
@@ -412,6 +412,8 @@ Accepts only the optional account selector. Returns the current workspace policy
 ### Current disposition in Actions reads
 
 `list_actions`, `get_action`, and each action returned by `get_action_batch` include `batch_status` and `disposition`. The latter separates receipt status, later outcome, compensation reason, recovery disposition, and late restoration from the historical action status. A batch can also return `restoration_summary`.
+
+When available, `disposition.outcome_payload` provides the stored comparison sides, observation time, reason and management verdict. Read the [outcome payload fields](/api/actions#read-the-later-outcome-payload) and [window and volume requirements](/actions/review-proposals#how-are-later-performance-outcomes-checked). A verified action is not a performance verdict; a `lost` outcome does not automatically undo it.
 
 `get_action_decision_receipt` returns current `disposition` beside the immutable `document`, `document_sha256`, and `chain_entry`. The projection is outside the document hash. Preserve nulls and do not turn late restoration into a successful original execution. Use the [shared field reference](/api/actions#interpret-current-disposition-and-recovery).
 

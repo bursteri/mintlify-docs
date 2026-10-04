@@ -1,10 +1,24 @@
 ---
 title: "October 2026"
-description: "Review Plainrouter updates to Campaigns budget controls, Actions recovery, Signals consent and arrival context, and the released PHP SDK."
+description: "Review Plainrouter updates to counted-arrival comparisons, Actions outcomes, Meta reconnection, Campaigns controls, Signals consent and the PHP SDK."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 4, 2026">
+  ## Compare Meta metrics with counted arrivals
+
+  **New** · API and MCP inventory reads include daily counted arrivals beside stored Meta metrics for campaigns, ad sets and ads. Ad rows can also show receipt-backed creative provenance when available. Unknown values stay distinct from zero. [Read the comparison](/actions/account-inventory#how-do-counted-arrivals-compare-with-meta-metrics).
+
+  ## Review later outcomes in Inbox
+
+  **Improved** · Verified resumes and budget changes show a comparison of counted arrivals and spend over completed account-local days, with the loss threshold and an eligible held/lost verdict. Unavailable data gets bounded retries. A verdict does not automatically undo the action. [Interpret the result](/actions/review-proposals#how-are-later-performance-outcomes-checked).
+
+  ## Restore Meta access to the existing destination
+
+  **Fixed** · Reconnecting the same Meta ad account after revocation or disconnection reuses its existing destination binding. Confirm the restored grant and check any failed delivery separately. [Reconnect Meta](/signals/connect-meta#reconnect-after-access-is-revoked-or-disconnected).
+</Update>
 
 <Update label="October 2, 2026">
   ## Review daily budgets and resumes in Campaigns

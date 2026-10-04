@@ -1,7 +1,7 @@
 ---
 title: "Inspect Meta inventory and manage ad delivery"
 sidebarTitle: "Account inventory"
-description: "Inspect Meta campaigns, ad sets and ads, confirm resumes and daily-budget changes, and verify governed Actions against receipts and inventory freshness."
+description: "Inspect retained Meta campaigns, compare daily metrics with counted arrivals through MCP or API, and verify governed pauses, resumes and budget changes."
 ---
 
 Use **Campaigns** to inspect retained Meta campaigns, ad sets, ads and daily metrics, then use **Pause**, **Resume**, or an available daily-budget control for a governed change to an eligible object. The MCP inventory tools provide the same kind of stored inspection without making changes. Inventory reads do not contact Meta or trigger a refresh; check freshness before treating them as current account state.
@@ -95,11 +95,48 @@ Call `get_inventory_metrics`:
 
 Use dates appropriate to your account's available history. Optional `campaign_id`, `adset_id` and `ad_id` filters use external Meta IDs. Dates use `YYYY-MM-DD`; the end cannot precede the start.
 
-The response contains `metrics`, `changes`, `effective_range`, account details and freshness. Daily rows include currency, spend, impressions, clicks, inline link clicks, Meta action data and fetch time. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
+The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `effective_range`, account details and freshness. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
 
-Date bounds are inclusive in the account timezone, with UTC as the fallback. Plainrouter clips the requested range to the workspace's customer-visible retention cutoff and today. Inspect `effective_range` rather than assuming the full request was returned. If no range remains, it is null and both arrays are empty. `changes` is populated only when `include_changes` is true; it records observed field changes, not a complete causal audit of every Meta edit.
+Date bounds are inclusive in the account timezone, with UTC as the fallback. Plainrouter clips the requested range to the workspace's customer-visible retention cutoff and today. Inspect `effective_range` rather than assuming the full request was returned. If no range remains, it is null and `metrics`, `object_metrics` and `changes` are empty. `changes` is populated only when `include_changes` is true; it records observed field changes, not a complete causal audit of every Meta edit.
 
-These are stored Meta-reported metrics, separate from [Signals reconciliation](/signals/health-and-performance). They do not establish attribution accuracy, causal lift or admissible quantitative proposal evidence by themselves.
+### Read the same metrics over REST
+
+Use a Read or Write Workspace key with an active `get_inventory_metrics` grant for the workspace and account. A Signals Server secret cannot authenticate this route. Replace workspace `42`, internal account `91` and the dates with your own values; load the key from server-side secret storage.
+
+```bash
+curl --fail-with-body --get \
+  https://plainrouter.com/api/v1/workspaces/42/admin/ad-accounts/91/inventory/metrics \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_KEY" \
+  --header 'Accept: application/json' \
+  --data-urlencode 'start_date=2026-09-20' \
+  --data-urlencode 'end_date=2026-09-26' \
+  --data-urlencode 'include_changes=1'
+```
+
+The response has the same top-level comparison fields described below. This read does not call Meta or refresh inventory. Account scope, date filters and nullable values still apply. The [public OpenAPI contract](https://plainrouter.com/openapi.json) defines the route and authentication.
+
+### How do counted arrivals compare with Meta metrics?
+
+Use API or MCP `object_metrics` to compare a retained campaign, ad set or ad on the same account-local date. The **Campaigns** dashboard currently shows retained Meta metrics; the counted-arrival comparison is available through these read interfaces.
+
+| Field | Interpretation |
+| --- | --- |
+| `level`, `external_id`, `date` | The mirrored object and account-local day. Levels are `campaign`, `adset`, and `ad`. |
+| `meta` | Stored Meta spend, impressions, clicks and inline link clicks for that object/day; `null` when no matching Meta metrics are retained. |
+| `arrivals` | Eligible observed Meta arrivals whose numeric object IDs match retained inventory. `0` is an available count with no matches for that row; `null` means arrival counting is unavailable. |
+| `unmatched_arrivals` | One workspace/window count of eligible arrivals that matched no readable inventory object. It is not an account total or a count restricted by your object filters. Unknown IDs are not exposed. |
+
+An arrival can match its campaign, ad set and ad. Do not sum all hierarchy levels into a total: that would count the same arrival more than once. Rows can contain arrivals without Meta metrics, or Meta metrics without matching arrivals.
+
+To verify a comparison, confirm `account` and `effective_range`, choose one hierarchy level, then inspect dates, object IDs, freshness and nullable fields. Check your [snippet installation](/signals/install-pixel), [numeric Meta URL tags](https://plainrouter.com/tools/utm-builder) and inventory synchronization when matching counts are missing. An unavailable arrivals store is not a measured zero.
+
+These arrivals count eligible observations, not unique people, purchases or Meta-attributed conversions. Meta clicks and arrivals can differ. This comparison is separate from [Signals reconciliation](/signals/health-and-performance) and does not establish causal lift or admissible quantitative proposal evidence by itself.
+
+### Which creative produced an ad?
+
+Ad-level metrics can include `creative_id`, `generator`, `generator_job` and `parent_creative`. Plainrouter resolves these fields from a related creation receipt and a creative in the same workspace. Campaign and ad-set rows do not inherit an ad's provenance.
+
+Treat null fields as unknown. A Meta ad without a related Plainrouter creative receipt can have metrics while all four fields remain null; a creative name or arbitrary URL tag is not proof of its generator. These fields describe recorded provenance, not comparative creative quality or performance. See the [creative workflow](/actions/creative-workflow) for the separate asset-selection and approval process.
 
 ## What do freshness and undo warnings mean?
 
@@ -121,5 +158,6 @@ Follow [Inbox and current disposition](/actions/review-proposals#current-disposi
 - **Missing tool or insufficient scope:** inspect discovery and the active grant; replace a credential with the intended permitted scope if necessary. Read-only inventory does not require the separate Write-only Actions record-read grant.
 - **Only some objects appear:** follow `next_cursor`; remove unintended status/parent filters and check freshness.
 - **Dates return less history:** inspect `effective_range` and the workspace retention limit. Empty retained results are not proof of zero provider activity.
+- **Arrival counts are missing or do not match clicks:** distinguish `null` from `0`, inspect matching tags and freshness, and compare one hierarchy level over the same dates. Do not add the workspace's unmatched count to a filtered ad total.
 
-Tool names and input contracts are published in the [Plainrouter MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json). For live image/video asset selection, use the separate [creative-library workflow](/actions/creative-workflow).
+Tool names and input contracts are published in the [Plainrouter MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json); response fields are defined in the [public OpenAPI contract](https://plainrouter.com/openapi.json). For live image/video asset selection, use the separate [creative-library workflow](/actions/creative-workflow).

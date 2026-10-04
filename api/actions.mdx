@@ -1,7 +1,7 @@
 ---
 title: "Actions API: preview proposals and track outcomes"
 sidebarTitle: "Actions"
-description: "Preview and submit governed proposals, then read action status, policy, and decision receipts with a Write Workspace key."
+description: "Preview and submit governed proposals, then read verification, outcome comparisons, policy and decision receipts with a Write Workspace key."
 ---
 
 Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
@@ -64,6 +64,21 @@ List, single-action, and batch reads include each action's current `disposition`
 Read `compensation_reason_code` with `recovery_disposition` using the [recovery interpretation](/actions/audit-log#interpret-unavailable-outcomes-and-recovery). `late_restored` records later compensation evidence without rewriting the earlier action or batch result. The [batch response reference](/api/actions/actionreadapi/get-action-batch) defines `restoration_summary`; `all_receipts_compensated_late` means every existing execution receipt in that batch is compensated and at least one has late-restoration evidence. It does not mean every proposed action executed, and it does not turn the batch into a successful original execution.
 
 Keep nullable values as unknown. A historical `rollback_incomplete` can remain alongside later restoration evidence; read both rather than replacing one with the other.
+
+### Read the later outcome payload
+
+When recorded, `disposition.outcome_payload` contains the later comparison. Read it alongside `outcome_status` and `outcome_checked_at`, rather than using an action's verified status as a performance verdict.
+
+| Field within `outcome_payload` | Meaning |
+| --- | --- |
+| `status`, `observed_at`, `reason_code`, `reason` | Measurement state, observation time and available explanation. `measurable`, `not_measurable` and `unavailable` are distinct states. |
+| `baseline`, `metrics` | Compared sides, each with `scope`, `days`, `timezone`, `currency`, `spend_minor`, `counted_arrivals` and `cost_per_counted_arrival_minor` for management outcomes. |
+| `metrics.verdict` | `held` or `lost` for an eligible comparison; `not_judged` for Pause, or null when no verdict is established. |
+| `metrics.loss_threshold_percent` | The percentage used for that check. Do not replace it with a later policy value. |
+
+Here, spend and cost use ISO currency minor units, with decimal strings where needed. The cost can contain fractional minor units. These are different from the decimal currency amounts in inventory `metrics.spend` and Meta's budget-unit representation. Preserve precision and use the accompanying currency when displaying them.
+
+Resume compares the target with the rest of the ad account over the same completed days. Budget changes compare the target before and after the provider-write day. See [comparison windows, volume requirements and loss rules](/actions/review-proposals#how-are-later-performance-outcomes-checked). A missing payload or null count is unknown; `lost` does not automatically issue an undo or prove causal harm.
 
 ## Read the current policy
 

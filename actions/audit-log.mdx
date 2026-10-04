@@ -87,7 +87,7 @@ The JSON export retains the hash and predecessor fields. The current Audit page 
 | Verification | `action.verified`, `execution.verified` | The exact provider object matched; all actions are Landed only after the batch-level verified event. |
 | Async verification | `action.verification_handed_off`, `action.async_verification_*` | A committed ad copy remains Not Landed while scheduled verification continues. |
 | Decision receipt | `action.decision_receipt_issued` | A terminal action decision document was stored and linked to the audit chain. Read its status; a receipt is not automatically a successful outcome. |
-| Outcome | `outcome.checked`, `outcome.anomaly_detected`, `outcome.check_exhausted` | A later outcome was classified, or bounded follow-up checks exhausted their retries. |
+| Outcome | `outcome.checked`, `outcome.check_exhausted` | A later outcome was recorded, or bounded follow-up checks exhausted their retries. Historical exports can retain `outcome.anomaly_detected`. |
 | Restoration | `action.rolled_back`, `batch.rolled_back`, `batch.rollback_incomplete` | Compensation restored provider state, or incomplete recovery needs attention. |
 
 Measurement-only events explicitly say **NOT LANDED**. Do not count them as production execution acceptance.
@@ -95,6 +95,8 @@ Measurement-only events explicitly say **NOT LANDED**. Do not count them as prod
 ## Interpret unavailable outcomes and recovery
 
 An execution verification and a later performance outcome answer different questions. `outcome.check_exhausted` reports an unavailable outcome with reason `outcome_check_exhausted`; the execution receipt’s `outcome_status` is `unavailable`. It does not undo an already verified action, change its completed batch to failure, or establish a performance improvement.
+
+For Resume and budget changes, inspect the stored outcome's comparison days, counted arrivals, spend, loss threshold and `held` or `lost` verdict when present. The current comparison records a result without automatically compensating the action. See [outcome interpretation](/actions/review-proposals#how-are-later-performance-outcomes-checked) and [API payload fields](/api/actions#read-the-later-outcome-payload); the immutable decision document and current disposition remain separate.
 
 Recovery events can include `payload.compensation_recovery_disposition`. Read the exact value alongside the action, receipt, and provider proof:
 

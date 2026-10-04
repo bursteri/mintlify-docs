@@ -116,7 +116,7 @@ The dashboard's acceptance-rate denominator includes recent non-test deliveries 
 | `measuring` | A closed provider-measurement run is active. Explicitly Not Landed. |
 | `completed` | All actions have exact verified provider receipts. Counted as Landed unless marked measurement-only. |
 | `failed` | Execution failed. |
-| `rolled_back` | Prior state was restored after failure or anomaly. |
+| `rolled_back` | Prior provider state was restored; inspect the recorded compensation and verification evidence. |
 | `rollback_incomplete` | At least one attempted restoration failed and needs attention. |
 
 ## Action statuses

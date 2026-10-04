@@ -144,6 +144,12 @@ Meta's browser extension inspects Pixel activity on the page; it does not observ
 
 If the intended ad account or dataset is missing, choose **Reconnect Meta** and complete authorization again with access to those assets. Then select the intended dataset and recheck the connection details.
 
+### Reconnect after access is revoked or disconnected
+
+Use **Reconnect Meta** for the existing workspace and select the same Meta ad account when restoring its access. Plainrouter reuses that account's existing destination binding rather than creating a second Meta destination. Reconnection does not create a new conversion sender.
+
+After authorization, confirm the selected account, granted permissions and destination dataset. Check reporting freshness and the affected event's delivery status separately. A restored connection is not proof that an earlier failed delivery was replayed; use [eligible delivery replay](/api/conversions#how-do-i-replay-a-failed-delivery) when required.
+
 ## Troubleshoot
 
 ### Connect, Reconnect, or Disconnect is missing
