@@ -1,10 +1,24 @@
 ---
 title: "October 2026"
-description: "Review Plainrouter account rules, lost-outcome inverse proposals, counted-arrival comparisons, Meta reconnection, Signals consent and PHP SDK updates."
+description: "Review account-rule runs and resumption, inverse proposals, outcome recovery, Meta reconnection, Signals consent and PHP SDK updates."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 6, 2026">
+  ## Inspect rule runs and resume after review
+
+  **Improved** · Account rules show recent windows, account totals and target decisions in Action policy, with links to available proposals. After inspecting two lost outcomes, the team owner can explicitly resume a suspended rule. Only actions judged after resumption count toward a new suspension. [Review runs and resume safely](/actions/account-rules).
+
+  ## Follow inverse proposals for rule-made budget changes
+
+  **Improved** · An eligible lost daily-budget change made by an account rule can propose a separate inverse to its recorded prior budget. Current-state checks and Ask/Full still govern that proposal; inverse proposals do not produce another inverse chain. [Inspect eligibility and verification](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).
+
+  ## Recover missing outcome follow-ups
+
+  **Fixed** · Completed management actions can recover overdue outcome checks without repeating the original Meta write. Expired checks finish as unavailable rather than implying a performance verdict, while verified execution remains recorded. [Follow a delayed outcome](/actions/review-proposals#what-if-a-completed-action-has-no-later-outcome).
+</Update>
 
 <Update label="October 5, 2026">
   ## Define account performance rules
@@ -13,7 +27,7 @@ Customer-facing changes available in October. Read linked guides for prerequisit
 
   ## Follow inverse proposals after a lost outcome
 
-  **New** · An eligible lost Resume or budget-change outcome can create a separate inverse proposal using the recorded prior state. Current-state checks protect intervening changes; Ask/Full and provider verification still apply. System-generated actions do not create inverse chains. [Inspect the proposed response](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).
+  **New** · An eligible lost Resume or budget-change outcome can create a separate inverse proposal using the recorded prior state. Current-state checks protect intervening changes; Ask/Full and provider verification still apply. Inverse proposals do not create another inverse chain. [Inspect the proposed response](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).
 
   ## Wait for completed-day metrics before judging an outcome
 

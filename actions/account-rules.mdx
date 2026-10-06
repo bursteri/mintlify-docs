@@ -1,7 +1,7 @@
 ---
 title: "Meta ad account performance rules"
 sidebarTitle: "Account rules"
-description: "Create disabled account rules, compare counted-arrival costs, enable governed proposals, and inspect evaluation results through Plainrouter MCP."
+description: "Create Meta account rules, inspect recent runs and proposals, and resume suspended rules after reviewing counted-arrival outcomes."
 ---
 
 Account rules propose a pause or daily-budget change when a target meets your counted-arrival and cost conditions. Create a rule under **Settings → Action policy → Account rules**, or through MCP. New rules start **disabled**; enabling is a separate decision.
@@ -85,9 +85,28 @@ Use `enabled: false` to disable. A name or definition edit appends an immutable 
 
 Evaluation is scheduled hourly. It reads retained metrics and arrivals, records a window and revision, then proposes eligible matches through normal Actions admission. Saving a rule is not an evaluation or proof of a Meta change.
 
+In **Settings → Action policy → Account rules**, open the rule's **Recent runs**:
+
+1. Check the window dates and timezone. The displayed end date is excluded from the comparison.
+2. Read account spend, counted arrivals and the run's status or waiting reason. Unavailable data does not mean zero.
+3. Inspect each target's decision and reason. Use **View proposal**, when available, to open the resulting action in Inbox.
+
+The dashboard shows the latest five runs and at most 100 decisions per run. A notice identifies a truncated decision list. **No runs yet** means there is no recorded evaluation to inspect.
+
 Call `actions.rules.show` with `rule_id`. Inspect `enabled`, `suspended_at`, `suspended_reason`, `current_revision` and `runs`. Each run records its window, timezone, status, reason, account totals and per-target decisions. Reads return the latest five runs; each run includes at most 100 decisions, with `decisions_truncated` indicating more. For lists, `page` starts at 1, `per_page` defaults to 25 and accepts 1–100; continue with `rules.next_page_arguments` until it is null.
 
 A decision marked `proposed` includes `action_batch_id`. Follow that batch in Inbox or the [Actions API](/api/actions); confirm approval where required, the execution receipt and exact provider verification. A matching rule or proposed batch is not **Landed**.
+
+## How do I resume a suspended rule?
+
+A rule is suspended when its two most recent judged actions are both `lost`. Only the team owner can clear the suspension in the dashboard:
+
+1. Inspect those actions' [outcome comparisons and any inverse proposals](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal). Review the rule conditions before restarting it.
+2. Open the suspended rule under **Settings → Action policy → Account rules** and click **Resume rule**.
+3. Confirm the suspension clears. If you disabled the rule during review, use **Enable rule** separately; resuming does not change its enabled setting.
+4. Follow **Recent runs** for the next window. Resuming does not repeat an already evaluated window or change Meta during the request.
+
+Only actions judged after resumption count toward a new suspension; this can include an earlier action whose outcome is checked later. Historical runs, revisions and outcomes remain recorded. Editing or toggling `enabled` through MCP cannot clear suspension; there is no MCP resume tool.
 
 ## Why did a rule not produce another change?
 
@@ -98,6 +117,6 @@ A decision marked `proposed` includes `action_batch_id`. Follow that batch in In
 | `conflict` / `different_actions_match` | Different actions match the same target. Resolve the overlapping rules. For the same action, the oldest matching rule is selected and others are `superseded`. |
 | `target_held`, `outcome_pending` or `target_cooling` | An outstanding management proposal or later outcome holds the target. After an outcome check, cooldown lasts until the start of the fourth following account-local day. Follow the existing batch. |
 | `skipped` with a policy or provider reason | Read the recorded reason. Enabling a rule cannot bypass admission, unavailable provider state or the execution kill switch. |
-| `suspended_reason: "two_lost_actions"` | The rule's two most recent judged actions were both lost. Inspect those outcomes and leave the rule disabled while reviewing it. Toggling `enabled` alone does not clear suspension. |
+| `suspended_reason: "two_lost_actions"` | Inspect the two lost outcomes and rule conditions, then use the owner's [Resume rule workflow](#how-do-i-resume-a-suspended-rule) when ready. Toggling `enabled` alone does not clear suspension. |
 
-Rules and system-generated inverse proposals do not create recursive lost-outcome inverse chains. For other eligible actions, see [what happens after a lost outcome](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).
+An eligible lost rule-made daily-budget change can create a separate inverse proposal to the recorded prior budget. A rule-made pause is not judged for performance and cannot trigger that response. An inverse proposal does not create another inverse chain. Follow [what happens after a lost outcome](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).

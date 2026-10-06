@@ -411,6 +411,8 @@ Requires `batch_id`, plus `account_id` when needed. Returns `data` with the batc
 
 Requires `action_id`, plus `account_id` when needed. Returns one action under `data`. It includes `id`, `batch_id`, `workspace_id`, `type`, flat `target_entity_type`/`target_entity_id`/`target_entity_name` fields, `params`, `rationale`, `status`, `policy_decision`, and `policy_reasons`. These are also the action fields returned by the list and batch tools.
 
+System proposals include `proposer.type: "system"`. Their `evidence` identifies either the rule, revision, run and decision, or an inverse proposal's original action and outcome. Inspect the [two evidence shapes](/api/actions#identify-rule-and-outcome-generated-proposals) instead of assuming every system proposal is an inverse. The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) defines the output schema.
+
 ### `get_action_decision_receipt`
 
 Requires `action_id`, plus `account_id` when needed. Returns `document`, `document_sha256`, `chain_entry` (`sequence` and `hash`), and current `disposition` at the top level. There is no `data` wrapper. Read the [receipt's outcome and integrity limits](/actions/audit-log#download-an-action-decision-receipt); its existence alone does not prove success.

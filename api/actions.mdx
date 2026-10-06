@@ -57,6 +57,17 @@ The [list reference](/api/actions/actionreadapi/list-actions) defines the query 
 
 To inspect a returned action, request `/actions/{action}?account_id=91` and use the [single-action reference](/api/actions/actionreadapi/get-action). To inspect its batch, request `/action-batches/{actionBatch}?account_id=91` and use the [batch reference](/api/actions/actionreadapi/get-action-batch). Confirm the scope and read both batch and action statuses.
 
+### Identify rule and outcome-generated proposals
+
+Read `proposer.type` before interpreting an action's `evidence`. For system proposals, the [published OpenAPI schema](https://plainrouter.com/openapi.json) supports two evidence shapes:
+
+| Proposal source | Evidence fields | What to inspect |
+| --- | --- | --- |
+| Account rule | `rule_id`, `revision_id`, `run_id`, `decision_id` | The rule definition and retained [evaluation run](/actions/account-rules#how-do-i-verify-evaluation-and-execution). |
+| Lost-outcome inverse | `original_action_id`, `outcome` | The original action's comparison and [inverse proposal checks](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal). |
+
+Do not require `original_action_id` or `outcome` on every system proposal. A rule proposal has a different evidence shape; its system proposer does not establish approval, execution or restoration.
+
 ## Interpret current disposition and recovery
 
 List, single-action, and batch reads include each action's current `disposition` alongside its historical `status` and `batch_status`. The [action response reference](/api/actions/actionreadapi/get-action) defines the fields. Use `receipt_status` for current execution-receipt state and `outcome_status` for later measurement; measurement is separate from execution verification. An unavailable reason, check time, or recovery value remains unknown, not successful.

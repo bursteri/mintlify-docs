@@ -129,9 +129,15 @@ Compared daily metrics must have been fetched at least ten minutes after that ac
 
 Check the [retained inventory comparison](/actions/account-inventory#how-do-counted-arrivals-compare-with-meta-metrics) and your Signals installation when data is missing. Bounded retries do not require another proposal. A final unavailable outcome leaves the earlier execution verification intact; it does not prove success or failure of performance. For automation, read the [outcome payload](/api/actions#read-the-later-outcome-payload).
 
+### What if a completed action has no later outcome?
+
+For completed Pause, Resume and daily-budget batches, Plainrouter periodically recovers overdue outcome checks whose queued follow-up was lost. Follow the existing action rather than submitting the change again. Recovery does not repeat the original Meta write or extend the outcome's retry deadline.
+
+An eligible check still within its retry window can continue. An expired check can finish as `unavailable` with `outcome_check_exhausted`, leaving the verified execution intact. A missing outcome is not a held/lost verdict, and recovery does not guarantee sufficient data for comparison.
+
 ### Does a lost outcome create an inverse proposal?
 
-For an eligible verified Resume or daily-budget change proposed by a person or agent, Plainrouter can propose an inverse after recording `lost`. This is a new governed batch, separate from compensation for failed execution:
+For an eligible verified Resume or daily-budget change, Plainrouter can propose an inverse after recording `lost`. This includes daily-budget changes made by [account rules](/actions/account-rules), as well as eligible changes proposed by people or agents. A rule-made pause is not judged for performance and cannot trigger an inverse. The inverse is a new governed batch, separate from compensation for failed execution:
 
 | Original action | Proposed inverse |
 | --- | --- |
@@ -143,7 +149,7 @@ The target must still have the budget or active status produced by the original 
 
 Read `disposition.outcome_payload.inverse` through the [Actions API](/api/actions#read-the-later-outcome-payload) or MCP Actions reads. `status: "proposed"` returns `batch_id`; inspect that batch's policy result and frozen mode. **Ask** waits for approval; **Full** can execute an admitted inverse automatically. Follow its receipt and verification before claiming restoration. The original action's historical result remains recorded.
 
-`status: "inverse_not_proposed"` includes `reason_code`, such as `already_inverse`, `budget_moved`, `status_moved`, `prior_budget_unavailable`, `target_state_unavailable` or `execution_kill_switch`. Inspect current state and the reason before retrying manually. System-generated actions, including rule actions and inverse proposals, do not trigger another inverse chain.
+`status: "inverse_not_proposed"` includes `reason_code`, such as `already_inverse`, `budget_moved`, `status_moved`, `prior_budget_unavailable`, `target_state_unavailable` or `execution_kill_switch`. Inspect current state and the reason before retrying manually. An inverse proposal's own lost outcome does not generate another inverse proposal.
 
 ## What if an approved batch stalls?
 
