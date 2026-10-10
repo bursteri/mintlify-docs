@@ -1,22 +1,23 @@
 ---
 title: "Create workspace keys and manage grants"
 sidebarTitle: "Workspace keys"
-description: "Create Read or Write MCP workspace keys, select an authorized ad account, replace keys, and inspect or revoke workspace grants in Plainrouter."
+description: "Create Read or Write keys for selected workspaces, use workspace_id in MCP, select an authorized Meta ad account, and replace keys or revoke grants."
 ---
 
-A **workspace key** authenticates Plainrouter MCP clients and the [Actions API](/api/actions) within one workspace. New keys created in **Settings → Workspace keys** are not pinned to one ad account. Account-scoped calls select an active account owned by that workspace. Older account-bound keys retain their original restriction.
+A **workspace key** authenticates Plainrouter MCP clients and the [Actions API](/api/actions) for a fixed set of selected workspaces, one workspace per call. New keys created in **Settings → Workspace keys** are not pinned to one ad account. Account-scoped calls select an active account owned by that workspace. Older account-bound keys retain their original restriction.
 
 The interface calls these credentials workspace keys; API fields and older integrations may still call them workspace execution tokens. They are separate from the Signals **Server secret** and **Management keys**. See [Authentication](/api/authentication#which-credential-should-i-use).
 
 ## Issue a token
 
-Sign in as the workspace owner or a current team member and select the workspace your agent should use. Members can issue Read keys; Write keys also require update permission. The page lists and revokes only your own keys. A key can be created before connecting an ad account. The workspace-scoped [installation and arrivals tools](/mcp/tools#get_install_instructions) work without account selection; account reads need an eligible account and active provider connection.
+Sign in as the workspace owner or a current team member and select the workspace your agent should use. The effective tier is capped by your current role in each selected workspace; a requested Write key can have Read access in a workspace where you lack update permission. The page lists and revokes only your own keys. A key can be created before connecting an ad account. The workspace-scoped [installation and arrivals tools](/mcp/tools#get_install_instructions) work without account selection; account reads need an eligible account and active provider connection.
 
 1. Open **Settings → Workspace keys**.
 2. Enter a **Name** and check **Tier**: **Write** is preselected. Choose **Read** explicitly for supported reporting or diagnostic tools; Actions previews, proposals, and Actions record reads require **Write**. Select a 30, 90, or 365 day expiry.
-3. Choose **Create key**, then **Copy** the revealed key. It is shown once.
-4. Configure your MCP client with `https://plainrouter.com/mcp` and the key as its bearer credential. The reveal dialog includes Claude Desktop and Claude Code configuration examples.
-5. Call `get_account_state` and confirm the returned workspace and intended account before further work.
+3. Under **Workspaces**, select one or more workspaces. The current workspace is selected by default; this set stays fixed for the key.
+4. Choose **Create key**, then **Copy** the revealed key. It is shown once.
+5. Configure your MCP client with `https://plainrouter.com/mcp` and the key as its bearer credential. The reveal dialog includes Claude Desktop and Claude Code configuration examples.
+6. Call `list_workspaces` to inspect authorized workspaces and their effective tiers. If more than one is available, include `workspace_id` on subsequent tool calls. Confirm the returned workspace and intended account with `get_account_state` before account-scoped work.
 
 ```http
 Authorization: Bearer <workspace-key>
@@ -25,6 +26,23 @@ Authorization: Bearer <workspace-key>
 Store the key in your client's protected configuration or a secret manager. Keep it out of source control, logs, URLs, screenshots, and agent prompts.
 
 For developer automation, the [management API](/api/authentication#how-do-i-use-the-management-api) provides the same role-capped issuance and revocation using a separate Management key. Revoking that Management key does not revoke workspace keys it issued.
+
+## How does workspace selection work?
+
+Call `list_workspaces` with no arguments. It returns only the workspaces available to the execution credential, with `workspace_id`, `workspace_name`, `ad_account_name` and effective `tier`. A null account name or tier is unknown, not a grant of access.
+
+When the credential has multiple authorized workspaces, include the selected positive integer `workspace_id` in each workspace-scoped MCP call:
+
+```json
+{
+  "workspace_id": 42,
+  "account_id": 91
+}
+```
+
+For a credential with one authorized workspace, `workspace_id` can be omitted. Workspace-only reads, such as installation, cookie scan and consent reporting, do not require `account_id`.
+
+For the Actions API, `/workspaces/{workspace}/…` selects the workspace. If a query or body also supplies `workspace_id`, it must agree with that URL. Neither an argument nor the dashboard's current workspace can widen the credential's selected set. Create a replacement key to change that set.
 
 ## How does account selection work?
 
@@ -51,7 +69,7 @@ If the tool reports `no_signals_destination`, [connect the intended destination]
 | New workspace key; no eligible active account | Connect an account before using account-scoped tools. |
 | Older key bound to an account | Omit `account_id` or supply that same bound ID. A different account is rejected. |
 
-An eligible account for an unbound key must be owned by the key's workspace, active, and have an active provider connection. A destination binding to another workspace's account does not grant access. The key cannot switch workspaces or use an ownerless team account.
+An eligible account for an unbound key must be owned by the key's workspace, active, and have an active provider connection. A destination binding to another workspace's account does not grant access. The key cannot select a workspace outside its authorized set or use an ownerless team account.
 
 ### Retained inventory uses an explicit account
 
@@ -72,9 +90,9 @@ Plainrouter rechecks the issuer's current workspace role and the linked grant on
 
 ## Workspace grants
 
-Each execution credential is linked to a grant that identifies its principal, workspace, allowed operations, and expiry. Plainrouter checks that the grant is active and covers the requested operation, in addition to the credential's existing account and role restrictions.
+Each selected workspace has its own grant identifying the credential's principal, allowed operations and expiry in that workspace. Plainrouter checks that the grant is active and covers the requested operation, in addition to the credential's existing account and role restrictions.
 
-Token-management responses include `grant_id`. An authorized administrator can use [`revoke_grant`](/mcp/tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
+Token-management creation responses include a legacy `grant_id` for the primary workspace. It is not a grant shared by every workspace. Inspect the selected workspace's **Grants** section for its own grant; `list_workspaces` reports effective tiers, not grant IDs. An authorized administrator can use [`revoke_grant`](/mcp/tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
 
 ### Inspect and revoke a grant in the dashboard
 
@@ -94,7 +112,7 @@ Open **Settings → Workspace keys** to inspect names, creation time, last use, 
 
 To replace a key, create a new one, install it in the client, and verify `get_account_state` with the intended account. Then use **Delete** on the old key and confirm. The current page does not have a Rotate button. If a key is exposed, delete it immediately before preparing its replacement.
 
-Deleting a workspace key revokes its credential and grant; the revoked record remains security history. It does not undo earlier provider actions. Issuance and revocation record `token.issued` and `token.revoked` metadata without plaintext credentials.
+Deleting a workspace key revokes its credential and linked grants; the revoked record remains security history. It does not undo earlier provider actions. Issuance and revocation record `token.issued` and `token.revoked` metadata without plaintext credentials.
 
 ## Troubleshoot
 
@@ -102,13 +120,17 @@ Deleting a workspace key revokes its credential and grant; the revoked record re
 
 Check the complete bearer credential, expiry, revocation, grant state, and issuer's current role. Use a workspace key, not a Management key, OAuth management credential, or Signals Server secret. Older account-bound keys also depend on the bound account remaining available.
 
+### A multi-workspace call fails or selects the wrong context
+
+Call `list_workspaces`, choose an authorized `workspace_id`, and include it in each workspace-scoped MCP call. Missing selection is refused when several workspaces are available. On REST routes, remove conflicting workspace selectors or make them agree with the URL. Check the selected workspace's effective tier before proposing a change.
+
 ### The tool asks for an account or rejects the selected account
 
 For Signals reads, check the workspace's Meta destination binding and use that account. For Actions and creative tools, supply `account_id` when multiple eligible active accounts exist; verify workspace ownership and an active connection. Do not use Meta's external ID in this field. An older bound key cannot select another account; create a new workspace key when that restriction no longer fits the intended work.
 
 ### A tool reports insufficient permission
 
-Use Read for supported Signals, account, or creative reads. Actions record reads, dry runs, and proposal-producing tools require Write and the applicable grant. Create a replacement with the needed tier; do not try to elevate an existing key. Missing feature enablement or provider permissions is separate from its tier.
+Use Read for supported Signals, account, or creative reads. Actions record reads, dry runs, and proposal-producing tools require Write and the applicable grant. Existing grants retain their issued operations. OAuth refresh does not add newer operations or upgrade the original tier. Create a replacement or complete a fresh authorization with the needed access; do not try to elevate an existing key. Missing feature enablement or provider permissions is separate from its tier.
 
 ### You cannot open Workspace keys
 

@@ -21,20 +21,20 @@ Counts represent actions, grouped into batches:
 | Group | What appears here |
 | --- | --- |
 | **Needs your decision** | Pending actions awaiting a human decision, plus halted batches needing attention. A halted batch cannot be approved again. |
-| **Awaiting verification** | Executing, executed-pending-verification, compensating, or measuring actions. These states do not establish a verified production outcome. |
-| **Landed** | Verified actions with a verified execution receipt. |
-| **Approval recorded, nothing sent** | Historical suggest-only recommendations approved without a Meta write. |
-| **Drifted or failed** | Rejected, blocked, failed, uncertain, or rolled-back actions, plus actions without the required verified receipt. Read the exact status and reason. |
+| **In progress** | Executing, executed-pending-verification, compensating, or measuring actions. These states do not establish a verified production outcome. |
+| **Done** | Verified actions with a verified execution receipt. |
+| **Approved, not sent** | Historical suggest-only recommendations approved without a Meta write. |
+| **Stopped or failed** | Rejected, blocked, failed, uncertain, or rolled-back actions, plus actions without the required verified receipt. Read the exact status and reason. |
 
 <Warning>
-  **Approval recorded, nothing sent** is separate from **Landed**. **Approved without execution** means no Meta write occurred. For production execution acceptance, every action in the batch needs a durable receipt and exact provider verification.
+  **Approved, not sent** is separate from **Done**. **Approved without execution** means no Meta write occurred. For production execution acceptance, every action in the batch needs a durable receipt and exact provider verification.
 </Warning>
 
 ## Review the selected action
 
 ### Batch status and action status
 
-The detail header labels **Batch status** for the containing proposal; **Action status** describes the selected action. Read both, especially in a batch with multiple actions. One verified action does not prove that all actions in its batch completed or that recovery succeeded.
+The detail pane shows the selected action's **Status**, its reasoning, policy check and activity. Expand **All details** for **Batch status**, **Action status**, receipt status and later outcome fields. Read both action and batch status, especially in a batch with multiple actions. One verified action does not prove that all actions in its batch completed or that recovery succeeded.
 
 ### What does a halted batch mean?
 
@@ -44,7 +44,7 @@ A halted batch cannot be approved again or resumed by retrying its old approval.
 
 ### Proposer, target, and reasoning
 
-Read **Actor**, **Objects**, and **Agent reasoning**. Compare the complete proposal with the intended Meta ad account and platform-native target IDs. For creative duplication, `target_entity.id` identifies the source ad; the new ad ID exists only in the execution receipt after a provider write.
+Read **Proposed by**, **Object** or **Objects**, and **Why**. System proposals can show **PlainRouter’s reasoning** instead. Expand **All details** for identifiers and authorization fields. Compare the complete proposal with the intended Meta ad account and platform-native target IDs. For creative duplication, `target_entity.id` identifies the source ad; the new ad ID exists only in the execution receipt after a provider write.
 
 Confirm the person intended each source ad and asset selection. If the detail pane does not provide enough information to verify the account, mode, evidence, or parameters, check the original proposal before approving. Review every action in the containing batch.
 
@@ -65,7 +65,7 @@ Older proposals can lack a recorded policy observation. A comparison alone does 
 
 ### Current disposition and late restoration
 
-The detail pane's **Current disposition** shows receipt status, outcome status and check time, compensation reason, and recovery disposition. **Not recorded** means the field is unavailable, not a successful result.
+Expand **All details** to inspect the current disposition. It shows receipt status, outcome status and check time, compensation reason, and recovery disposition. **Not recorded** means the field is unavailable, not a successful result.
 
 **Restored late** reports later compensated-receipt evidence. Historical action and batch statuses remain visible, so a prior failure can coexist with a later restoration. Check [the receipt and disposition](/actions/audit-log#download-an-action-decision-receipt) before retrying or claiming the original action succeeded.
 
@@ -85,7 +85,7 @@ In Ask, policy-allowed agent proposals wait for the **Approve** button. A [Campa
 
 | Proposal scope | Result of approval |
 | --- | --- |
-| Historical **Suggest only** snapshot | Records **Approved without execution** in **Approval recorded, nothing sent**. No Meta write occurs. |
+| Historical **Suggest only** snapshot | Records **Approved without execution** in **Approved, not sent**. No Meta write occurs. |
 | Pending **Ask** proposal for a supported action | Authorizes the batch and queues a fresh policy check before execution. It does not guarantee a successful provider write. |
 | Closed one-run measurement | Starts a diagnostic run that remains **Not Landed** and requires verified compensation. It is not general production execution. |
 
@@ -97,13 +97,13 @@ Follow the action's status in Inbox, then use [Audit and its JSON export](/actio
 
 When an action has a stored decision receipt, use **Audit → Download decision receipt** to inspect its terminal status and verification result. See [receipt fields and access](/actions/audit-log#download-an-action-decision-receipt).
 
-**Approved**, **Executing**, and **Executed pending verification** do not mean Landed. A paused copy that Meta reports as `IN_PROCESS` still needs scheduled receipt-addressed verification. Inspect the exported events for progress or failure; do not create another copy to bypass a pending result. Escalate a `rollback_incomplete` result rather than treating it as restored.
+**Approved**, **Executing**, and **Executed pending verification** do not mean a verified change. A paused copy that Meta reports as `IN_PROCESS` still needs scheduled receipt-addressed verification. Inspect the exported events for progress or failure; do not create another copy to bypass a pending result. Escalate a `rollback_incomplete` result rather than treating it as restored.
 
 Agents and server integrations can follow the same stored action outcomes through the [MCP Actions reads](/mcp/tools#read-actions-and-policy) or [Actions API](/api/actions). These interfaces do not approve or reject the batch; the human decision remains in Inbox.
 
 ## How are later performance outcomes checked?
 
-For a verified Resume or daily-budget change, **Current disposition** can show **Comparison**, **After change**, counted arrivals, spend, cost per counted arrival and the loss threshold used. This later comparison answers whether the observed result held within that threshold. It does not replace verification of the original Meta change, measure purchase CPA or prove causal improvement.
+For a verified Resume or daily-budget change, the detail pane can show **Comparison**, **After change**, counted arrivals, spend, cost per counted arrival and the loss threshold used. This later comparison answers whether the observed result held within that threshold. It does not replace verification of the original Meta change, measure purchase CPA or prove causal improvement.
 
 The comparison uses complete days in the Meta ad account's timezone, with UTC as the fallback. It excludes the provider-write day. The first check is scheduled for one hour after the third complete day following that day; delayed or unavailable data can require bounded retries. The configurable **Outcome check after** delay applies to creative actions, not this management window.
 
@@ -173,7 +173,7 @@ Approval and rejection are idempotent terminal decisions for a pending batch. A 
 - **No decision control is available:** check whether the batch is still pending. A completed decision is not reopened from Inbox.
 - **The decision is forbidden:** sign in with an authorized human account in the correct workspace. A bearer token is not a substitute for this browser session.
 - **An action is blocked:** read its exact reason and the [policy constraints](/actions/policies-and-safety) before resubmitting.
-- **Approval recorded, nothing sent:** this is a historical `suggest_only` snapshot. Changing the current policy does not promote it into execution.
+- **Approved, not sent:** this is a historical `suggest_only` snapshot. Changing the current policy does not promote it into execution.
 - **Couldn't read the current state from Meta:** temporary connection, server, or throttling failures leave the proposal pending. Retry approval after the read becomes available; do not create a duplicate proposal.
 - **Blocked by current policy:** missing required provider state or a permanent target refusal blocks the batch. Review the named reason; retrying approval cannot override it. If Meta requires reconnection, reconnect the account before proposing further work.
 - **Rollback incomplete or Undo failed:** inspect each receipt and current disposition. These labels do not mean the earlier provider change was undone.

@@ -28,7 +28,7 @@ Both calls should succeed and include `sandbox: true`. This checks the connectio
 
 ## 2. Create a workspace key
 
-In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Each key covers one workspace. Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
+In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions, including Actions record reads. Copy it once into your protected credential configuration. Select the intended workspace under **Workspaces**. A key can cover a fixed set of workspaces; for more than one, call `list_workspaces` and pass `workspace_id` on later tool calls. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work). Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
 
 ## 3. Add Plainrouter to the client
 
@@ -58,7 +58,8 @@ Provide the variable securely to the process running the Gateway or agent, not j
 Start with this read-only request:
 
 ```text
-Use plainrouter to call get_install_instructions with no arguments.
+Use plainrouter to call list_workspaces. If several are available, ask me
+which workspace to use. Call get_install_instructions with its workspace_id.
 Show the workspace and installation status, then stop. Do not change anything.
 ```
 

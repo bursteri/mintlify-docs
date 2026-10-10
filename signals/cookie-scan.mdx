@@ -1,0 +1,68 @@
+---
+title: "Scan pre-consent cookies and publish a cookie declaration"
+sidebarTitle: "Cookie scan and declaration"
+description: "Find cookies, storage and tracker requests before consent, review fixes, rescan your website, and embed Plainrouter's scan-based cookie declaration."
+---
+
+Open **Signals → Cookie scan** to inspect what your website sets or requests before a visitor chooses consent. The scan and public cookie declaration are available on every plan. A completed scan reports observations from the pages it visited; it does not automatically block other scripts or establish that every page is clear.
+
+## Before you begin
+
+- [Install Signals](/signals/install-pixel) and confirm an eligible arrival from your website. Hostnames come from the workspace's arrival history; you cannot scan an arbitrary domain from this screen.
+- Sign in with workspace access. Rescanning requires permission to update Signals; viewing the report does not.
+- Have access to your website or tag manager if you need to change a script's consent behavior.
+
+## How do I run and read a scan?
+
+<Steps>
+  <Step title="Choose your hostname">
+    Open **Signals → Cookie scan** and find the website hostname. Check its last scan time and status. Use **Rescan** to queue another scan after changing your site. Manual rescans are limited to three per hostname per UTC day.
+  </Step>
+  <Step title="Wait for completion">
+    Queued or pending means no completed result is available yet. Blocked and failed scans leave findings unknown. A truncated scan can have useful findings while missing other pages or requests.
+
+    **Scanned from** reports the scanner browser's measured country. **Unknown** means it could not be established. This is not a list of visitor countries or a test of every regional version of your banner.
+  </Step>
+  <Step title="Inspect the findings">
+    Review **Findings**, **Cookies by category**, and the visited pages. The report includes cookie metadata, local/session storage key names, and third-party request hosts. It does not expose cookie or storage values.
+
+    Categories include necessary, functional, analytics, marketing and uncategorized. Review unknown classifications against the service's own documentation. No findings from a complete, untruncated scan means none were observed in that scan; it is not a guarantee about unvisited pages.
+  </Step>
+  <Step title="Change the responsible script and rescan">
+    Follow the fix guidance attached to a finding where available. Check the script's site-wide template, plugin or tag-manager trigger. Keep scripts that require consent from running before the relevant choice.
+
+    Enabling the Plainrouter banner does not automatically intercept every third-party script on your site. Test rejection, partial acceptance and withdrawal with the [consent checks](/signals/track-events#verify-grant-partial-consent-and-withdrawal), then rescan.
+  </Step>
+</Steps>
+
+## How do I publish a cookie declaration?
+
+On the same screen, choose **Copy embed code** under **Publish your cookie declaration**. Paste the entire block into the HTML of your cookie-policy page where the declaration should appear:
+
+```html
+<div data-plainrouter-cookie-declaration="YOUR_PUBLISHABLE_KEY"></div>
+<script async src="https://plainrouter.com/cookie-declaration.v1.js"></script>
+```
+
+Use the workspace's **Publishable key**, which is intended for browser use. Never substitute a Server secret or Workspace key. Your CMS must allow the container and external script; [MDN describes how external script elements load](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script).
+
+The declaration lists metadata from the workspace's latest completed scan and updates after another scan completes. It does not merge every historical scan or list cookie values. If the workspace has several hostnames, check which hostname the latest completed scan covered before using the declaration as a site-wide inventory.
+
+### How do I verify the embed?
+
+Open the published page in a fresh browser context. Confirm the container renders a scan date and categories matching the completed scan. In the Network panel, check the declaration script and its data request for errors. A blank declaration before any completed scan does not mean the site sets no cookies.
+
+## Can an AI assistant read the scan?
+
+Use [`get_cookie_scan`](/mcp/tools#get_cookie_scan) with a Read or Write workspace key. It reads retained scan results and does not queue a scan, visit your website or change scripts. No Meta ad account is required. Include `workspace_id` when the key covers multiple workspaces.
+
+## Troubleshoot
+
+| Symptom | Check and next step |
+| --- | --- |
+| My hostname is missing | Confirm Signals receives eligible arrivals from that hostname in this workspace. A collection hostname alone is not the website being scanned. |
+| The scan is blocked by bot protection | Allowlist the exact `PlainRouterScanner` user agent in your site's protection, then rescan. A blocked result is unknown, not clean. |
+| Rescan is unavailable or rate-limited | Check your Signals update permission. After three manual rescans for the hostname, wait until the next UTC day. |
+| The declaration is blank or old | Check the latest completed scan, Publishable key, CMS script handling and CSP. A queued, failed or blocked scan does not replace a completed declaration. |
+
+For recorded Analytics and Marketing decisions, see [Consent choices and receipts](/signals/consent-choices). Scan findings and consent rates answer different questions: one observes the website; the other reads recorded decisions.

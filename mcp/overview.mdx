@@ -59,7 +59,7 @@ For repeatable Signals tasks, the server also supplies three [built-in prompts](
 | Protocol | `2026-07-28` discovery; legacy `initialize` clients remain supported |
 | Production credential | Workspace key sent as a bearer credential, or workspace-scoped OAuth execution token from client sign-in |
 | Sandbox credential | None; all four sandbox tools return synthetic data |
-| Account scope | One workspace per key; Signals reads use its Meta destination binding, while Actions and creative tools select an eligible owned account. Older bound keys retain their account restriction. |
+| Account scope | A fixed set of selected workspaces per key, one workspace per call; use `workspace_id` for multi-workspace access. Signals reads use the selected workspace's Meta destination binding, while Actions and creative tools select an eligible owned account. Older bound keys retain their account restriction. |
 
 ### Which clients can connect?
 

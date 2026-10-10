@@ -261,7 +261,7 @@ Cursor listing accepts `per_page` up to 100. Omit `cursor` on the first request,
 
 Signals configuration now belongs directly to the workspace. API responses use the numeric `workspace_id` as the canonical tenant identifier. Existing response shapes also include `signal_tracker_id` as a deprecated decimal-string alias of the same workspace ID.
 
-The currently published `0.5.x` SDKs were generated before `workspace_id` became canonical, so their models may expose only `signal_tracker_id`. You can continue reading that compatibility field until a regenerated client release adds `workspace_id`. Do not treat the two fields as different tenants.
+Current TypeScript and Python `0.6.0` SDKs expose `workspace_id` in the regenerated response models. Older generated clients can continue reading `signal_tracker_id` where that compatibility field is exposed. Do not treat the two fields as different tenants. Check your installed SDK version before choosing a response field.
 
 The signed contract marks `user_data_hashed` as a deprecated compatibility field whose value is always `null`. Delivery identity is never returned. Use delivery status and explanation to diagnose the outcome, rather than expecting identity hashes in the trace.
 

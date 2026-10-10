@@ -25,7 +25,7 @@ Send `Authorization: Bearer <workspace-key>` and `Accept: application/json`. For
 
 ### Select the account
 
-Supply a positive integer `account_id` as a query parameter on GET requests and in the JSON body on POST. You may omit it when there is only one eligible active account. Multiple eligible accounts require an explicit selection. An older account-bound key accepts only its bound account. The workspace in the URL must match the key's workspace. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
+Supply a positive integer `account_id` as a query parameter on GET requests and in the JSON body on POST. You may omit it when there is only one eligible active account. Multiple eligible accounts require an explicit selection. An older account-bound key accepts only its bound account. The workspace in the URL must belong to the key's authorized set. If `workspace_id` also appears in the query or JSON body, it must match the URL. Calls operate on one workspace; selectors cannot widen access. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
 ## Endpoints
 

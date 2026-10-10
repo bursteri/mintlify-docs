@@ -27,7 +27,7 @@ A later valid external decision dismisses the fallback. The `pr_consent` cookie 
 window.plainrouter("consent", "open");
 ```
 
-This command opens the supported consent surface; it does not itself grant permission. Call it after the snippet loads and wire it to a visitor action. The fallback remains subject to its configured enablement and market policy.
+This command opens the supported consent surface; it does not itself grant permission. Call it after the snippet loads and wire it to a visitor action. The fallback remains subject to its configured enablement and market policy. Set its banner and floating reopen options in [Signals → Install](/signals/install-pixel#can-i-enable-the-included-consent-banner). Use [Cookie scan](/signals/cookie-scan) to check unrelated pre-consent scripts, and [Consent choices](/signals/consent-choices) to read recorded decisions when available.
 
 For verification, use a fresh browser context: test full acceptance, rejection, a partial Customize choice, a returning saved choice and withdrawal. Check actual event requests and [destination delivery](/signals/connect-meta), not just whether a card appeared. A blocked config request or detected CMP without a decision can leave advertising events silent. Do not turn that unknown state into a grant.
 

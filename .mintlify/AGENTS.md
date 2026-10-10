@@ -38,17 +38,20 @@ after the customer-visible implementation is merged and shipped.
 - Use **Meta ad account** for the advertising account selected under a workspace
   key or bound to an older execution token. Do not shorten it to workspace account.
 - A **Server secret** (formerly Signals workspace secret) authenticates the Signals Conversion API for
-  one workspace. Published `0.5.x` clients retain names such as
+  one workspace. Published clients retain names such as
   `signalTrackerSecret` and "tracker token" as compatibility labels.
 - A **Workspace key** (formerly workspace execution token) authenticates Plainrouter MCP and authorized
-  workspace routes for one workspace. New Read/Write workspace keys select
-  eligible active accounts owned by that workspace; older account-bound keys
-  retain their binding. Use `account_id` where the tool requires selection.
+  workspace routes for a fixed set of selected workspaces, one workspace per call.
+  Use `list_workspaces` and `workspace_id` for multi-workspace MCP selection;
+  each workspace's grant is capped by the issuer's role. New keys select
+  eligible active accounts owned by the selected workspace; older account-bound
+  keys retain their binding. Use `account_id` where the tool requires selection.
 - An **OAuth management credential** may read the account-discovery context
   route. It cannot authenticate MCP tool calls.
 - Keep **Signal**, **destination**, **Actions**, **Launcher**, **Suggest only**,
-  **Landed**, and **Not Landed** consistent with the product UI and status
-  reference.
+  and technical **Landed**/**Not Landed** meanings consistent with the status
+  reference. Inbox uses **Done** and **Approved, not sent** as separate groups;
+  do not substitute those display labels for technical receipt evidence.
 - Never imply that a token can widen its workspace or Meta ad-account binding.
 - Never imply that a proposal, approval, queued action, provider write, or
   pending verification is Landed. Landed requires exact provider verification.

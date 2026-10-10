@@ -28,7 +28,7 @@ Choose your client to try Plainrouter’s account-free sandbox, then connect you
 | Sandbox | `https://plainrouter.com/mcp/sandbox` | None. Synthetic data, no Plainrouter account, never contacts Meta. |
 | Production | `https://plainrouter.com/mcp` | Streamable HTTP with `Authorization: Bearer …` using a Workspace key, or client-supported Plainrouter OAuth sign-in. |
 
-[Create a Workspace key](/mcp/workspace-tokens) for one workspace. Read covers analysis; Actions require Write, including their record-read tools. Keep credentials in protected client settings, never prompts or source control. OAuth clients obtain workspace-scoped execution credentials through sign-in instead of requiring a pasted key.
+[Create a Workspace key](/mcp/workspace-tokens) for the intended workspace or fixed set of workspaces. For multiple workspaces, use `list_workspaces` and pass `workspace_id` on subsequent tool calls. Read covers analysis; Actions require Write, including their record-read tools. Keep credentials in protected client settings, never prompts or source control. OAuth clients obtain workspace-scoped execution credentials through sign-in instead of requiring a pasted key.
 
 **Ask** waits for approval; **Full** runs policy-allowed changes automatically. Rule violations are blocked either way. Client permission prompts do not override [Plainrouter policy](/actions/policies-and-safety).
 

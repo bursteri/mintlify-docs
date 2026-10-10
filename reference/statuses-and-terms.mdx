@@ -140,7 +140,7 @@ A receipt marked `irreversible` does not establish restoration. A batch with `ro
 
 ### Can a failed batch later show restoration?
 
-Yes. Current receipt evidence can show late restoration while the historical action or batch status stays unchanged. Inspect `disposition` and the batch's `restoration_summary` through the [Actions reads](/api/actions#interpret-current-disposition-and-recovery), or **Current disposition** in Inbox. A compensated receipt is evidence of recovery, not a successful original execution.
+Yes. Current receipt evidence can show late restoration while the historical action or batch status stays unchanged. Inspect `disposition` and the batch's `restoration_summary` through the [Actions reads](/api/actions#interpret-current-disposition-and-recovery), or expand **All details** in Inbox. A compensated receipt is evidence of recovery, not a successful original execution.
 
 ## Core terms
 
@@ -169,7 +169,7 @@ Yes. Current receipt evidence can show late restoration while the historical act
   <Accordion title="Landed">
     A production action batch in which every action has a durable provider receipt and an exact matching verification read. Approval or a provider write alone is not Landed.
 
-    The **Inbox** display group named **Landed** also includes `approved_without_execution` recommendations. Check the action status and receipt; that group alone does not prove provider execution. See [Inbox groups](/actions/review-proposals#read-the-inbox-groups).
+    The **Inbox** display group **Done** contains verified actions. Historical `approved_without_execution` recommendations appear separately under **Approved, not sent**. Check action and batch status together with their receipts before claiming complete provider execution. See [Inbox groups](/actions/review-proposals#read-the-inbox-groups).
   </Accordion>
   <Accordion title="Executed pending verification">
     A committed provider action that has not yet reached exact verification. Plainrouter may continue scheduled receipt-addressed reads, but the action remains Not Landed.

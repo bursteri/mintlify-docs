@@ -6,12 +6,17 @@ description: "Use Plainrouter MCP tools for Signals reads, governed proposals, a
 
 Plainrouter MCP server version `0.4.1` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
+For credentials covering several workspaces, call `list_workspaces` and pass the selected `workspace_id` on each workspace-scoped tool call. The examples below can omit it only for a single-workspace credential. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work) and account selection are separate checks.
+
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
 The server version is separate from the MCP protocol revision. For custom clients, see the [stateless discovery and request-header requirements](/mcp/setup#which-mcp-protocol-should-my-client-use). MCP App support is advertised under `capabilities.extensions["io.modelcontextprotocol/ui"]` in the [server card](https://plainrouter.com/.well-known/mcp/server-card.json).
 
 | Tool | Type | Purpose |
 | --- | --- | --- |
+| `list_workspaces` | Read-only, idempotent | List the execution credential's authorized workspaces and effective tiers. |
+| `get_cookie_scan` | Read-only, idempotent | Read retained pre-consent scan findings; does not start a scan. |
+| `get_consent_rates` | Read-only, idempotent | Read recorded Analytics and Marketing choices and recent receipts. |
 | `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
 | `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored Meta outbound clicks and inspect the separate Purchase comparison. |
 | `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
@@ -159,9 +164,27 @@ Account-scoped Signals responses identify:
 
 `get_account_state`, `get_signal_health`, and `get_performance` resolve this workspace's bound Meta destination when `account_id` is omitted. Supplying an ID selects only that same bound account, not another account in the team. A missing destination returns `no_signals_destination`; a different available account returns `account_not_bound`. Older account-bound keys retain their restriction. Actions and creative tools use their separate eligible-account selection rules. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
+## list_workspaces
+
+Call with no arguments using a workspace execution credential. Returns `workspaces`, each with `workspace_id`, `workspace_name`, `ad_account_name` and effective `tier`. Null metadata is unknown. This is a bounded directory of authorized workspaces, not all workspaces owned by a user or team. It does not require a Meta connection.
+
+Use a returned `workspace_id` for subsequent tool calls when multiple workspaces are authorized. A supplied workspace or account ID cannot widen the credential's scope.
+
+## get_cookie_scan
+
+Use a Read or Write key. The only optional input is `workspace_id`, required for multi-workspace selection. No `account_id` is needed.
+
+Returns `workspace_id`, `status: "ready" | "unavailable"`, and `scans`. Each scan includes its hostname, lifecycle status, last scan time, findings, categories, pages, truncation state and scanner location. Unavailable data is null; blocked or failed scans do not establish a clean website. This read neither queues nor performs a scan. [Run and interpret a cookie scan](/signals/cookie-scan).
+
+## get_consent_rates
+
+Use a Read or Write key with a grant covering this read. The only optional input is `workspace_id`, required for multi-workspace selection. No `account_id` is needed.
+
+On `status: "available"`, read `window_days`, `since`, `until`, `summary`, `daily`, `daily_by_dimension`, `breakdowns` and `recent_receipts`. The summary contains `decisions`, `analytics_grants`, `marketing_grants`, `analytics_rate` and `marketing_rate`. The rates count recorded decisions, not visitors. On `status: "unavailable"`, report data is null, not zero. This tool neither records nor changes consent. [Reporting limits and CSV export](/signals/consent-choices).
+
 ## `get_install_instructions`
 
-Read the authorized workspace's managed-hostname installation material without provisioning a hostname, changing DNS, or sending a test event. This production-only tool accepts an empty arguments object:
+Read the authorized workspace's managed-hostname installation material without provisioning a hostname, changing DNS, or sending a test event. With a single-workspace credential, this production-only tool accepts an empty arguments object. For multiple workspaces, pass the selected `workspace_id` instead:
 
 ```json
 {}
@@ -197,7 +220,7 @@ Read the same stored workspace comparison used by Dashboard and Signals: counted
 }
 ```
 
-Use a Read or Write workspace key with an active grant for `get_arrivals_comparison`. The tool resolves the workspace from the key and does not accept `account_id`. Confirm `workspace_id` and the returned `period` before interpreting the result.
+Use a Read or Write workspace key with an active grant for `get_arrivals_comparison`. The tool uses the authorized workspace, with `workspace_id` required for a multi-workspace credential, and does not accept `account_id`. Confirm `workspace_id` and the returned `period` before interpreting the result.
 
 The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
 
@@ -419,7 +442,7 @@ Requires `action_id`, plus `account_id` when needed. Returns `document`, `docume
 
 ### `get_action_policy`
 
-Accepts only the optional account selector. Returns the current workspace policy under `data`; see the [policy response fields](/api/actions#read-the-current-policy). If no policy is saved, the result contains effective defaults and `id: null`, without creating a record. Do not substitute current policy for an earlier proposal's frozen mode or evidence.
+Accepts the optional `account_id` selector and `workspace_id` for multi-workspace selection. Returns the current workspace policy under `data`; see the [policy response fields](/api/actions#read-the-current-policy). If no policy is saved, the result contains effective defaults and `id: null`, without creating a record. Do not substitute current policy for an earlier proposal's frozen mode or evidence.
 
 ### Current disposition in Actions reads
 

@@ -59,9 +59,15 @@ If your collection domain is still pending, complete [Configure DNS and CNAME](/
   You can close the setup screen after deployment. Reopen **Signals** later to check the workspace's Signals status.
 </Note>
 
+## Can I enable the included consent banner?
+
+Open **Signals → Install → Consent banner**. A workspace manager can enable **Show the PlainRouter consent banner** and optionally **Show a floating reopen control**. Use the included banner when your site does not already have a consent platform; supported external sources can take precedence. Verify actual grant, rejection and withdrawal behavior using [Track events and consent](/signals/track-events#how-does-the-snippet-choose-a-consent-source).
+
+The banner does not automatically block unrelated scripts installed by your CMS, plugins or tag manager. Use [Cookie scan and declaration](/signals/cookie-scan) to inspect pre-consent activity and publish the observed inventory.
+
 ## Can an AI assistant read my installation instructions?
 
-Yes. With a production [Read workspace key](/mcp/workspace-tokens), call [`get_install_instructions`](/mcp/tools#get_install_instructions) with no arguments. Confirm the returned workspace, then use its existing CNAME and snippet. The call is read-only and reports stored `first_arrival` state; it does not provision DNS or install code.
+Yes. With a production [Read workspace key](/mcp/workspace-tokens), call [`get_install_instructions`](/mcp/tools#get_install_instructions). A single-workspace key needs no arguments; a multi-workspace key needs `workspace_id`. Confirm the returned workspace, then use its existing CNAME and snippet. The call is read-only and reports stored `first_arrival` state; it does not provision DNS or install code.
 
 This tool supports managed hostnames only. A null snippet means the hostname is not ready; finish setup in Install. For same-origin forwarding, use [Configure serving](/signals/configure-serving).
 

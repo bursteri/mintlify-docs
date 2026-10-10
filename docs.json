@@ -55,6 +55,8 @@
               "signals/configure-serving",
               "signals/verify-ingestion",
               "signals/track-events",
+              "signals/cookie-scan",
+              "signals/consent-choices",
               "signals/connect-meta",
               "signals/health-and-performance"
             ]

@@ -18,8 +18,8 @@ Conversion API and all use the same Server secret.
 | --- | --- | --- | --- |
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Server secret | One workspace and its Signals resources |
 | Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
-| Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | One workspace, Read or Write tier, and an eligible account selected per account-scoped call |
-| Submit or inspect Actions | [Actions API](/api/actions) and [MCP Actions reads](/mcp/tools#read-actions-and-policy) | Write Workspace key with an active `propose-actions` grant, including for reads | One workspace and selected eligible account |
+| Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | Fixed selected workspace set, role-capped tier per workspace, and an eligible account selected per account-scoped call |
+| Submit or inspect Actions | [Actions API](/api/actions) and [MCP Actions reads](/mcp/tools#read-actions-and-policy) | Write Workspace key with an active `propose-actions` grant, including for reads | One authorized workspace per call and selected eligible account |
 | List accessible workspaces and manage your workspace keys | [Management API](#how-do-i-use-the-management-api) | Management key | Limited by its owner's current access and role; not an MCP credential |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |
@@ -148,8 +148,8 @@ The Go SDK requires Go 1.23 or newer. Keep the Server secret in server-side cred
 
 ## How do I authenticate the CLI?
 
-The CLI uses the same Server secret. Current `0.5.x` builds call it a
-tracker token in prompts for compatibility. Store it through the hidden login
+The CLI uses the same Server secret and retains the name "tracker token"
+in its login prompt. Store it through the hidden login
 prompt for an interactive workstation:
 
 ```bash
@@ -188,10 +188,9 @@ Configure an MCP-compatible client with these exact connection values:
 | Server URL | `https://plainrouter.com/mcp` |
 | Authorization | `Bearer <workspace-execution-token>` |
 
-A workspace owner or member creates a key in **Settings → Workspace keys** for one workspace,
-a Read or Write tier within their current role, and a 30, 90, or 365 day expiry.
+A workspace owner or member creates a key in **Settings → Workspace keys** for one or more selected workspaces, a requested Read or Write tier capped by their role in each workspace, and a 30, 90, or 365 day expiry. The selected set is fixed at creation.
 
-For account-scoped work, call `get_account_state` first. Confirm the returned workspace and Meta ad
+Call `list_workspaces` to inspect the authorized set and effective tiers. Include `workspace_id` on subsequent MCP calls when more than one workspace is available. For account-scoped work, call `get_account_state` first. Confirm the returned workspace and Meta ad
 account before continuing. For installation before connecting Meta, use [`get_install_instructions`](/mcp/tools#get_install_instructions) and confirm its workspace. Signals reads use the workspace's bound Meta destination; Actions and creative calls require `account_id` when eligible-account selection is ambiguous. Older
 account-bound keys cannot override their binding. See [account selection](/mcp/workspace-tokens#how-does-account-selection-work).
 
@@ -245,12 +244,15 @@ curl --fail-with-body https://plainrouter.com/api/v1/workspaces/42/tokens \
 | Field | Accepted value |
 | --- | --- |
 | `name` | Required string, up to 255 characters. |
-| `tier` | `read` or `write`. Write requires current update permission; the workspace owner can issue either tier. |
+| `tier` | Requested `read` or `write`. Each workspace's effective grant is capped by the issuer's current role. |
 | `expires_in_days` | `30`, `90`, or `365`. |
+| `workspace_ids` | Optional nonempty array of distinct accessible workspace IDs. Omit it to use the workspace in the URL. Each grant is capped to your current role. |
 
-The new key is scoped to the workspace and has no fixed ad-account binding. Do not send an account ID when issuing it; follow [account selection](/mcp/workspace-tokens#how-does-account-selection-work) when using it.
+The new key is scoped to the submitted workspace set and has no fixed ad-account binding. For example, add `"workspace_ids":[42,43]` to authorize those two workspaces. Both must be accessible to the issuer. Do not send an account ID when issuing it; follow [account selection](/mcp/workspace-tokens#how-does-account-selection-work) when using it.
 
 The response contains a secret. Capture `token` directly into protected client configuration or secret storage and retain `access_token.id` for lifecycle operations. Plaintext is returned only on creation; the response uses `Cache-Control: no-store, private`. Keep it out of terminal recordings and request/response logs. A repeated POST creates another key; do not treat issuance as an idempotent retry.
+
+Call `list_workspaces` with the issued execution key to inspect effective workspace tiers. The creation response's legacy `access_token.grant_id` identifies the primary grant; it does not enumerate every selected workspace's grant. An owner can inspect each workspace's [Grants section](/mcp/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard).
 
 Verify the new workspace key with [`get_account_state`](/mcp/tools#get_account_state), supplying `account_id` when required. Confirm the returned workspace and Meta ad account before any proposal. Use the new workspace key for that MCP call, not the Management key.
 

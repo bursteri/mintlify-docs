@@ -26,7 +26,7 @@ Find your tool in the [client setup directory](/mcp/clients), including Gemini C
 | `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
 | `https://plainrouter.com/mcp` | Inspect workspace Signals, read an approved account, and submit governed proposals. | Workspace execution token for tool calls and account data |
 
-Plainrouter MCP uses workspace execution tokens issued by a current owner or member. New workspace keys authorize one workspace and a Read or Write tier. Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
+Plainrouter MCP uses workspace execution tokens issued by a current owner or member. New workspace keys authorize a fixed set of selected workspaces, with role-capped Read or Write access in each. Calls act on one workspace at a time. Use `list_workspaces` and include `workspace_id` when multiple workspaces are authorized. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work). Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
 
 If you are choosing between a Signals workspace secret, workspace execution token,
 or OAuth management credential, see [Authentication and
@@ -208,7 +208,8 @@ For the returned fields and their meaning, see the [MCP tool reference](/mcp/too
 With a production Read key configured, ask the agent:
 
 ```text
-Call get_install_instructions with no arguments. Confirm the workspace,
+Call list_workspaces. If several are available, ask which workspace to use.
+Call get_install_instructions with the selected workspace_id. Confirm the workspace,
 show its managed-hostname setup status and first-arrival state, then stop.
 Do not change DNS or install anything.
 ```

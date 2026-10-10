@@ -1,0 +1,60 @@
+---
+title: "Read consent choices and export consent receipts"
+sidebarTitle: "Consent choices"
+description: "Interpret recorded Analytics and Marketing grant rates, inspect country and language breakdowns, and export workspace consent receipts from Plainrouter."
+---
+
+Open **Dashboard → Consent choices** to read recorded Analytics and Marketing decisions for your workspace. The panel appears when recorded decisions are available. These are decision counts, not unique visitors, conversion rates or proof that a particular event reached Meta.
+
+## Before you begin
+
+You need workspace access and retained consent receipts. Installing Signals or seeing a consent banner does not by itself establish that receipts have reached the reporting store. An external CMP's own records are separate; do not assume its entire consent history has been imported.
+
+For banner configuration and browser event gating, use [Track events and consent](/signals/track-events#how-does-the-snippet-choose-a-consent-source). To inspect scripts running before consent, use [Cookie scan](/signals/cookie-scan).
+
+## What do the rates mean?
+
+The report reads a rolling 180-day receipt window on every plan, separate from your arrival history and visitor identity retention. Check its dates before comparing it with another report. Daily choices use UTC receipt dates.
+
+| Field | Meaning |
+| --- | --- |
+| Decisions | Recorded decisions in the selected reporting scope, deduplicated by receipt ID. A later choice can be another decision. |
+| Analytics rate | Recorded Analytics grants divided by recorded decisions. |
+| Marketing rate | Recorded Marketing grants divided by recorded decisions. |
+| Country, Language, Banner version | Breakdowns of the recorded receipts, not inferred preferences for visitors without a receipt. Blank values remain unknown. |
+
+Use the dimension selector to compare recorded groups. Breakdowns are bounded to 50 values per dimension; they may not represent every recorded value. The recent-receipt table shows the latest 20 receipts, not the entire export.
+
+## How do I inspect or export a receipt?
+
+1. Select the intended workspace and open **Dashboard**.
+2. Find **Consent choices**. Compare the overall rates with the daily trend and a country, language or banner-version breakdown.
+3. Inspect the recent receipts or use the panel's CSV download for retained records in the reporting window. Export requires workspace access, independently of MCP credentials.
+
+The CSV includes receipt ID, received and client timestamps, action, Analytics and Marketing choices, banner version, language, page hostname and country. It does not include visitor IDs, IP addresses, full page URLs or cookie values. Keep the exported records in your own controlled storage if you need them beyond the reporting window.
+
+## Can an AI assistant read consent choices?
+
+Call [`get_consent_rates`](/mcp/tools#get_consent_rates) with a Read or Write workspace key. No Meta ad account is required. For a key covering several workspaces, pass the workspace ID:
+
+```json
+{
+  "workspace_id": 42
+}
+```
+
+The read returns the reporting window, summary, daily rates, breakdowns and recent receipts. It does not change consent or configure a banner. Confirm `workspace_id` and `status` before interpreting the result.
+
+## Troubleshoot
+
+### Why is Consent choices missing?
+
+The panel is hidden when there are no recorded decisions or the reader is unavailable. Use `get_consent_rates` to distinguish an available summary with zero decisions from `status: "unavailable"` with null data. Neither condition establishes that nobody granted consent. Check receipt collection and reporting availability separately from whether the banner appears.
+
+### Why is a rate or country missing?
+
+No decisions means a rate cannot be calculated. A blank dimension or missing breakdown remains unknown. Do not replace null values with zero or infer a visitor's country from the cookie scanner's location.
+
+### Why can my key not read the report?
+
+Select an authorized workspace and confirm a live grant with the required read operation. An older credential does not automatically gain operations introduced after issuance; [replace the key or authorize new access](/mcp/workspace-tokens#access-tiers) when needed. A Server secret is not an MCP workspace key.

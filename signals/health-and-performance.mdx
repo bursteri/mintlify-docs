@@ -4,11 +4,36 @@ sidebarTitle: "Health and troubleshooting"
 description: "Compare arrivals with Meta outbound clicks, interpret attributed Purchase counts, and troubleshoot reporting, match quality, and accepted deliveries."
 ---
 
-Open **Signals** to check collection status and compare arrivals with stored platform activity. Before the workspace's first arrival, this screen shows installation instructions instead of reports. Follow the [first-arrival checks](/signals/install-pixel#verify-the-installation) if you have already deployed the snippet.
+Open **Dashboard** to compare arrivals and paid-account performance with stored platform activity. Use **Signals** for installation, collection health, destination settings and cookie scans. Before the workspace's first arrival, Dashboard shows installation instructions instead of reports. Follow the [first-arrival checks](/signals/install-pixel#verify-the-installation) if you have already deployed the snippet.
 
 Once reporting is available, use **Last 7 days**, **Last 30 days**, or **Last 90 days** to select a completed reporting window. The dates and timezone shown above the metrics define the actual period; retention can shorten it. **Today so far** is a separate, incomplete local-day count.
 
 Opening this page or choosing **Export** reads stored data. It does not trigger a live Meta Marketing API request.
+
+## How do I read paid-account performance?
+
+Select the Meta ad account on **Dashboard**. The account view combines retained Meta spend and link clicks with Plainrouter arrivals and eligible observed purchases. Campaign, ad set and ad rows show the available breakdown; they do not replace [Signals delivery checks](#delivery-acceptance).
+
+| Metric | Interpretation |
+| --- | --- |
+| Spend and Link clicks | Meta-reported figures for the selected account and period. |
+| Arrivals and Cost per arrival | Arrivals carrying that account's Plainrouter ad URL tags, and tagged-ad spend divided by those arrivals. |
+| Purchases, CPA and ROAS | Meta-reported figures beside eligible Plainrouter-observed consented purchases carrying an ad ID. Compare the two sources rather than treating them as identical attribution. |
+| Verified revenue and MER | Stripe-verified revenue across channels, net of refunds; MER divides that revenue by this ad account's spend. This does not attribute all revenue to the account. |
+
+Use the dates and account timezone shown for paid figures. The window can differ from the broader workspace report. Unknown or unavailable figures stay unknown; a dash is not zero.
+
+### Why do some ads have no arrivals or observed purchases?
+
+Ads need the Plainrouter URL tags. Ads created by Plainrouter carry them; for other ads, add this to their URL parameters:
+
+```text
+pr_p=meta&pr_c={{campaign.id}}&pr_s={{adset.id}}&pr_a={{ad.id}}
+```
+
+Meta must resolve its dynamic placeholders on a real ad click. A manually opened URL containing literal `{{ad.id}}` is not an ad ID and cannot establish an ad-level conversion join. Existing ad IDs and eligible consented visitor context are also required for observed purchase attribution. [Landing click IDs](/signals/track-events#how-landing-click-ids-are-handled) remain separate from these tags.
+
+Inspect any partial-coverage note: it compares tagged-ad spend with total account spend. Account-level Meta totals include untagged ads, while Plainrouter ad-level measurements cover tagged ads. A missing tag or partial coverage is not evidence that Meta lost the purchase.
 
 ## Why is the available history shorter than my selected range?
 
@@ -20,7 +45,7 @@ Dashboard's third arrival total uses its displayed reporting-window label, such 
 
 ### Which reporting windows can I select?
 
-Signals offers **Last 7 days**, **Last 30 days**, **Last 90 days**, and **Last 12 months** only when the window fits the workspace's plan and any explicit shorter setting. The month option means 12 calendar months, not a fixed 365-day request. Completed days and **Today so far** remain separate.
+Dashboard offers **Last 7 days**, **Last 30 days**, **Last 90 days**, and **Last 12 months** only when the window fits the workspace's plan and any explicit shorter setting. The month option means 12 calendar months, not a fixed 365-day request. Completed days and **Today so far** remain separate.
 
 Requests beyond the available window are refused rather than silently shortened. A stale Signals page link returns to the default window with a refusal message; CSV and MCP callers receive an error. Choose an offered window and retry. A refusal saying **this workspace plan keeps** points to the plan allowance; **this workspace is set to keep** points to a shorter workspace setting. Check the named limit before changing the request. This window policy does not extend [`get_performance`](/mcp/tools#get_performance), whose reconciliation range remains 1–90 days.
 
