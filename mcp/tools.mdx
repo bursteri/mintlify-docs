@@ -56,7 +56,7 @@ The server version is separate from the MCP protocol revision. For custom client
 </Note>
 
 <Warning>
-  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, admitted changes wait for human approval. In **Full**, they can queue automatically; rule-generated budget increases still require human approval. Both modes keep execution checks; a submitted proposal is not proof of a Meta change.
+  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, admitted changes wait for human approval. In **Full**, admitted unprotected batches can queue automatically; protected batches still require person approval. Both modes keep execution checks; a submitted proposal is not proof of a Meta change.
 </Warning>
 
 ## Account-rule tools
@@ -408,7 +408,7 @@ Invalid grant-ID input fails validation. Missing or inactive caller authorizatio
 
 Use these five production tools to follow a proposal without visiting the dashboard. They read stored Plainrouter records, make no provider calls, and do not change ads, action decisions, or policy. They are absent from the synthetic sandbox.
 
-All five require `ad-account.read` and an active workspace grant covering `propose-actions`. Use a **Write Workspace key**; normal Read keys do not have that grant. Older Admin keys remain subject to the same grant and current-role checks. Read-only behavior does not mean the Read tier is sufficient here.
+All five require `ad-account.read` and an active workspace grant covering `read-actions`. Newly issued **Read** and **Write** keys include it. Existing `propose-actions` grants remain compatible for reads. Older Read credentials without either operation need replacement or fresh authorization; current workspace role and account scope still apply.
 
 Every tool accepts an optional positive integer `account_id`, required when the workspace has multiple eligible active accounts. First confirm the workspace and account with `get_account_state`. Batch and action IDs are Plainrouter ULIDs returned by proposal or read responses, not Meta object IDs.
 
@@ -444,6 +444,10 @@ Requires `action_id`, plus `account_id` when needed. Returns `document`, `docume
 
 Accepts the optional `account_id` selector and `workspace_id` for multi-workspace selection. Returns the current workspace policy under `data`; see the [policy response fields](/api/actions#read-the-current-policy). If no policy is saved, the result contains effective defaults and `id: null`, without creating a record. Do not substitute current policy for an earlier proposal's frozen mode or evidence.
 
+### Frozen target comparison
+
+`list_actions`, `get_action` and batch action records can contain `counted_evidence`. It is a proposal-time display snapshot over seven completed account-local days, with target, capture time, window, currency, Meta-reported figures, counted figures and coverage. Null values remain unknown. It is not fresh policy state or spend-admission evidence. [Interpret the comparison](/actions/review-proposals#what-is-the-frozen-counted-evidence).
+
 ### Current disposition in Actions reads
 
 `list_actions`, `get_action`, and each action returned by `get_action_batch` include `batch_status` and `disposition`. The latter separates receipt status, later outcome, compensation reason, recovery disposition, and late restoration from the historical action status. A batch can also return `restoration_summary`.
@@ -454,9 +458,9 @@ When available, `disposition.outcome_payload` provides the stored comparison sid
 
 ### Verify the result and handle failures
 
-Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. In Ask mode, a person approves every change in [Inbox](/actions/review-proposals) first. Full runs admitted changes automatically without a per-change approval.
+Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. In Ask mode, a person approves every change in [Inbox](/actions/review-proposals) first. Full can run admitted unprotected changes automatically; protected batches still require person approval. See [protected changes](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
 
-If a read is refused, check the key's current role and `propose-actions` grant, then account selection. A missing or out-of-scope action, batch, or decision receipt returns a `not_found` tool error; a receipt may not exist yet. Correct invalid status, page, or ID arguments before retrying. An empty list can reflect a filter or the selected account.
+If a read is refused, check the key's current role and `read-actions` grant (or compatible `propose-actions`), then account selection. A missing or out-of-scope action, batch, or decision receipt returns a `not_found` tool error; a receipt may not exist yet. Correct invalid status, page, or ID arguments before retrying. An empty list can reflect a filter or the selected account.
 
 Use the [Actions HTTP API](/api/actions) for the same scoped reads from a server integration. These tools do not provide a workspace audit export, policy editor, or approval/rejection operation.
 
@@ -499,25 +503,23 @@ Each evidence declaration contains:
 }
 ```
 
-Aggregate `source_tool` values are `get_account_state`, `get_signal_health`, and `get_performance`. Creative actions can also use the action-bound sources `get-creative-library` and `staged-asset-manifest`.
+Aggregate `source_tool` values are `get_account_state`, `get_signal_health`, and `get_performance`. `get_inventory_metrics` can cite target-matching leaf fields for Meta inline link clicks, counted arrivals, and Purchase count/value. The cited row must match the proposed campaign, ad set or ad at its own level. Spend, impressions, child rows, containers and ratios are refused for that source. Creative actions can also use the action-bound sources `get-creative-library` and `staged-asset-manifest`.
 
 Every field path must exist in a fresh server-side capture. Aggregate sources cannot include `action_index`. An action-bound source requires `action_index` and can cite only its matching creative action.
 
 ### Action object
 
-Every action has this common shape. The `set_status` example below describes a recommendation only: the legacy `set_status` and `adjust_budget` actions do not execute, even after approval. For the executable creative path, use [Create governed Meta creatives](/actions/creative-workflow).
+Every action has this common shape. This example pauses a human-selected campaign; policy, approval and verification still apply. Use the canonical action names for new proposals. Legacy `set_status` and `adjust_budget` do not execute. For creative work, use [Create governed Meta creatives](/actions/creative-workflow).
 
 ```json
 {
-  "type": "set_status",
+  "type": "pause",
   "target_entity": {
     "type": "campaign",
     "id": "120012345",
     "name": "Prospecting"
   },
-  "params": {
-    "status": "paused"
-  },
+  "params": {},
   "rationale": "Pause the human-selected campaign for manual review."
 }
 ```
@@ -528,10 +530,10 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 
 <AccordionGroup>
   <Accordion title="pause and resume">
-    Use a human-selected campaign, ad set, or ad and empty `params: {}`. These canonical actions can execute after a person approves them in Ask, or automatically in Full, subject to current admission checks.
+    Use a human-selected campaign, ad set, or ad and empty `params: {}`. Ask requires person approval. Full can automate admitted unprotected changes; campaign/ad-set resume remains protected. See [approval boundaries](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
   </Accordion>
   <Accordion title="increase_budget and decrease_budget">
-    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's minor unit. These change daily budgets after a person approves them in Ask, or automatically in Full, subject to current admission checks.
+    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's minor unit. Budget increases require person approval in Ask and Full. An admitted decrease can follow Full automation; current policy and provider-state checks still apply.
   </Accordion>
   <Accordion title="adjust_budget (legacy recommendation)">
     Requires `new_daily_budget_minor`, a positive integer in the account currency's minor unit. For example, `4900` means 49.00 for a two-decimal currency.

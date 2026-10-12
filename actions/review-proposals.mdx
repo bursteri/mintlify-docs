@@ -4,7 +4,7 @@ sidebarTitle: "Review proposals"
 description: "Review Meta proposals and account-rule approvals, verify provider changes, and follow counted-arrival outcomes and eligible inverse proposals."
 ---
 
-Open **Inbox** from the Plainrouter sidebar to review proposals for the current workspace, including changes submitted from Campaigns. Select an action to read its reasoning, target, policy result, and status. In Ask mode, a person approves every change first. **Approve** and **Reject** decide the containing batch, including its other actions. Full runs admitted changes automatically without a per-change approval; follow their receipts in Inbox.
+Open **Inbox** from the Plainrouter sidebar to review proposals for the current workspace, including changes submitted from Campaigns. Select an action to read its reasoning, target, policy result, and status. In Ask mode, a person approves every change first. **Approve** and **Reject** decide the containing batch, including its other actions. Full can run admitted unprotected changes automatically; protected batches still need person approval; follow their receipts in Inbox.
 
 [Account rules](/actions/account-rules) can also produce proposals. Their budget increases require human approval even in Full; inspect the stored decision rather than assuming the workspace mode alone authorizes execution.
 
@@ -101,6 +101,12 @@ When an action has a stored decision receipt, use **Audit → Download decision 
 
 Agents and server integrations can follow the same stored action outcomes through the [MCP Actions reads](/mcp/tools#read-actions-and-policy) or [Actions API](/api/actions). These interfaces do not approve or reject the batch; the human decision remains in Inbox.
 
+## What is the frozen counted evidence?
+
+Supported Meta target proposals capture `counted_evidence` over the last seven completed account-local days at proposal time. Inbox compares Meta-reported clicks and purchase figures with counted arrivals and eligible observed purchases for that target. Inspect the capture time, window, currency and coverage; null means unavailable, not zero.
+
+This snapshot is for review. It does not refresh when you reopen Inbox, establish causal improvement, replace live policy checks, or feed spend admission. It is separate from the later outcome comparison below. Actions reads expose it, and decision receipts preserve it when recorded. [Receipt version and fields](/actions/audit-log#download-an-action-decision-receipt).
+
 ## How are later performance outcomes checked?
 
 For a verified Resume or daily-budget change, the detail pane can show **Comparison**, **After change**, counted arrivals, spend, cost per counted arrival and the loss threshold used. This later comparison answers whether the observed result held within that threshold. It does not replace verification of the original Meta change, measure purchase CPA or prove causal improvement.
@@ -147,9 +153,15 @@ For an eligible verified Resume or daily-budget change, Plainrouter can propose 
 
 The target must still have the budget or active status produced by the original action. If it already has the inverse state, its budget/status moved, prior-budget evidence is unavailable or a required provider read fails, no inverse is proposed. A lost verdict is not proof that a reversal is appropriate or that it landed.
 
-Read `disposition.outcome_payload.inverse` through the [Actions API](/api/actions#read-the-later-outcome-payload) or MCP Actions reads. `status: "proposed"` returns `batch_id`; inspect that batch's policy result and frozen mode. **Ask** waits for approval; **Full** can execute an admitted inverse automatically. Follow its receipt and verification before claiming restoration. The original action's historical result remains recorded.
+Read `disposition.outcome_payload.inverse` through the [Actions API](/api/actions#read-the-later-outcome-payload) or MCP Actions reads. `status: "proposed"` returns `batch_id`; inspect that batch's policy result and frozen mode. **Ask** waits for approval; **Full** can execute an admitted unprotected inverse automatically. An inverse that increases budget or resumes a campaign/ad set still needs a person approval. Follow its receipt and verification before claiming restoration. The original action's historical result remains recorded.
 
 `status: "inverse_not_proposed"` includes `reason_code`, such as `already_inverse`, `budget_moved`, `status_moved`, `prior_budget_unavailable`, `target_state_unavailable` or `execution_kill_switch`. Inspect current state and the reason before retrying manually. An inverse proposal's own lost outcome does not generate another inverse proposal.
+
+## Why are approval controls missing or refused?
+
+Inbox shows **Approve** and **Reject** only when your current human permission and the stored batch policy allow a decision. Team update permission is required. A Workspace key cannot approve a batch.
+
+A pending proposal made under a retired execution mode cannot be approved. Inspect and reject it where permitted, then prepare a new proposal under Ask or Full if the intent is still needed. Changing the current workspace mode does not promote the old snapshot. For `dispatch_approval_missing`, verify a recorded person approval for the batch's protected actions before expecting execution.
 
 ## What if an approved batch stalls?
 

@@ -4,7 +4,7 @@ sidebarTitle: "Track events and consent"
 description: "Integrate browser consent, send one managed Meta purchase, and configure Stripe Checkout webhooks to verify settled revenue in Plainrouter."
 ---
 
-Use `signalq` to pass your consent platform's current decision to Signals and send business events after a full advertising grant. With a connected Meta dataset, one browser `track` call supplies the managed Pixel and server event with a shared ID.
+Use `signalq` to pass your consent platform's current decision to Signals and send business events. The examples below use the full advertising-consent path; eligible global policy has a separate [legitimate-interest boundary](/signals/overview#how-does-the-global-policy-differ). With a connected Meta dataset, one browser `track` call supplies the managed Pixel and server event with a shared ID.
 
 ## Before you begin
 
@@ -19,7 +19,7 @@ Calls made before the asynchronous Signals script loads are queued, but the queu
 
 The current v4 snippet sends its arrival first, then uses a queued explicit `signalq("consent", …)` decision when present. Otherwise it checks supported TCF and Consent Mode signals during a 1.5-second detection window. A detected supported CMP without a usable decision suppresses the fallback; it does not grant consent. Keep the explicit adapter below when your CMP needs one.
 
-If no external source takes precedence, the snippet can restore the saved Plainrouter choice or display the enabled fallback consent card. **Accept all**, **Reject all**, and **Customize** record different decisions. In Customize, **Analytics** controls `ad_storage`, while **Marketing** controls both `ad_user_data` and `ad_personalization`. Advertising events and managed Meta delivery still require all three grants; selecting only Analytics is insufficient.
+If no external source takes precedence, the snippet can restore the saved Plainrouter choice or display the enabled fallback consent card. **Accept all**, **Reject all**, and **Customize** record different decisions. In the current card, **Analytics** controls `analytics_storage`; **Marketing** controls `ad_storage`, `ad_user_data` and `ad_personalization`. The consent-based advertising path requires all three advertising grants. Selecting only Analytics does not grant Marketing. Previously saved v1 choices keep their original meaning rather than being reinterpreted as new choices.
 
 A later valid external decision dismisses the fallback. The `pr_consent` cookie stores the Plainrouter choice; it is separate from visitor measurement identifiers. To reopen the card from your own preferences control, use:
 
@@ -70,7 +70,7 @@ When you provide more than one adapter, their derived permission states must agr
   Do not infer consent. Leave each permission `unknown` until your consent-management platform has an explicit choice.
 </Warning>
 
-Conversion events, visitor-cookie access, identity transmission, and managed Meta delivery require all three permissions to be `granted`. Granting `ad_storage` alone is insufficient. The identity-free arrival sent once at document initialization is a separate request and does not wait for these permissions. See [What happens on initialization](/signals/install-pixel#what-happens-on-initialization).
+On the consent-based path, conversion events, visitor-cookie access, identity transmission and managed Meta delivery require all three permissions to be `granted`. Granting `ad_storage` alone is insufficient. The identity-free arrival sent once at document initialization is a separate request and does not wait for these permissions. See [What happens on initialization](/signals/install-pixel#what-happens-on-initialization).
 
 A complete grant creates or refreshes the first-party identifiers used for session joins and eligible destination delivery. Leaving full consent stops event transmission and clears the current page's consent-dependent identifiers. Explicit storage denial or withdrawal also discards the in-memory landing context. Send the latest structured state whenever the visitor's choice changes.
 
@@ -251,23 +251,23 @@ The browser normalizes and SHA-256 hashes the values before sending them. Plainr
 const visitorId = signalq("getVisitorId");
 ```
 
-For a custom backend integration, a visitor ID alone is not an advertising consent grant. Follow the [server-event recipe](/sdk/recipes/meta-conversions) and preserve the actual consent decision. The Stripe verified-revenue adapter below does not use checkout metadata to establish an attributed visitor join.
+For a custom backend integration, a visitor ID alone is not an advertising consent grant. Follow the [server-event recipe](/sdk/recipes/meta-conversions) and preserve the actual consent decision. Checkout metadata alone does not establish an attributed visitor join. The verified revenue adapter below also applies the effective policy, opt-out and retained-context checks.
 
 ## Verify Stripe Checkout settlement
 
-Stripe verified revenue records paid Checkout Sessions in Plainrouter. This is a revenue connection, not a Meta Conversions API integration: do not expect `metadata.visitor_id` to join the purchase to a browser visit or trigger Meta delivery. For consented advertising conversions, use the [managed browser purchase](#avoid-duplicate-meta-events) or [backend recipe](/sdk/recipes/meta-conversions).
+Stripe verified revenue records settled Checkout Sessions and eligible paid subscription renewals. Revenue verification and advertising delivery are separate: an eligible global-policy record can use already-retained customer context, while strict-EU, opted-out or unmatched records do not establish an attributed advertising conversion. `metadata.visitor_id` alone is not proof of a join or Meta acceptance. For your own consented event flow, use the [managed browser purchase](#avoid-duplicate-meta-events) or [backend recipe](/sdk/recipes/meta-conversions).
 
 ### What do I need before connecting Stripe?
 
-You need an active Signals workspace, workspace-owner access to **Connections**, and permission to configure webhook endpoints for the Stripe account that receives your customers' payments. Your application must already create Checkout Sessions and handle order fulfillment. This connection is separate from [paying for Plainrouter](/billing/overview).
+You need an active Signals workspace, current team update permission for **Connections**, and permission to configure webhook endpoints for the Stripe account that receives your customers' payments. Your application must already create Checkout Sessions and handle order fulfillment. This connection is separate from [paying for Plainrouter](/billing/overview).
 
-The supported settlement flow uses Checkout Session events. It does not establish support for every Stripe payment flow or recurring invoice event. Stripe's [fulfillment guide](https://docs.stripe.com/checkout/fulfillment) explains delayed payments and why returning to a success URL does not prove payment.
+The supported settlement flow uses Checkout Session events. Eligible `invoice.paid` renewals are limited to paid, positive-value `subscription_cycle` invoices under a global workspace and effective global policy; this does not establish support for every Stripe payment flow or invoice. Stripe's [fulfillment guide](https://docs.stripe.com/checkout/fulfillment) explains delayed payments and why returning to a success URL does not prove payment.
 
 ### Configure the webhook
 
 1. Open **Connections → Revenue sources → Stripe**.
 2. Copy the workspace's **Webhook endpoint** and add it as an endpoint in the intended Stripe account.
-3. Subscribe to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.async_payment_failed`. Add `refund.created` and `charge.refunded` if you track refunds.
+3. Use Stripe snapshot events and subscribe to the required list shown in Plainrouter: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `refund.created`, `refund.updated` and `refund.failed`. You can also keep `checkout.session.async_payment_failed` for failure notifications. [Stripe's webhook guide](https://docs.stripe.com/webhooks) explains event formats and endpoint setup.
 4. Copy that endpoint's signing secret into **Endpoint signing secret** in Plainrouter and choose **Save secret**. This is the webhook signing secret, not your Stripe API key.
 5. Confirm the Stripe card shows `connected`. That status confirms a signing secret is configured; verify a settled payment separately below.
 
@@ -320,6 +320,14 @@ Use the returned `event_id` to find the retained record through [GET event](/api
 
 Duplicate paid notifications for the same Session reuse one purchase record and return `duplicate: true`. The first recorded purchase uses its settlement-confirming webhook's time. An older duplicate can return `duplicate: true` without an `event_id`; do not create another purchase to force a receipt or recover expired payload data. Supported refund notifications record an idempotent negative revenue adjustment. Plainrouter first tries the saved PaymentIntent-to-purchase link in this workspace, then available order metadata and charge references. Purchase lineage is attached only when a matching purchase exists; an unmatched refund does not establish a browser or advertising attribution link. Do not assume Stripe copies Session metadata onto refund objects; see [Stripe metadata propagation](https://docs.stripe.com/metadata).
 
+### How are renewals and refund status checked?
+
+For an eligible renewal, inspect the signed `invoice.paid` event: the invoice must be paid, have a positive amount, and use `billing_reason: "subscription_cycle"`. New subscriptions and arbitrary invoice events are not the same flow. A matched prior acquisition can supply retained attribution context; absence of that match does not imply an ad acquired the renewal.
+
+Subscribe to all three refund events above. A succeeded refund can adjust verified revenue; pending, failed or canceled states must not be treated as settled refunds. The **Refund status is unverified** notice means only charge-summary fallback evidence has been observed. Follow its subscription guidance rather than assuming status is confirmed. [Stripe's refund statuses and events](https://docs.stripe.com/refunds) explain the provider side.
+
+Revenue adjustments and downstream advertising delivery remain separate. Inspect the purchase/refund lineage and destination trace; a refund row or a connected Stripe card alone does not prove a platform correction.
+
 ### Why is the Stripe purchase missing?
 
 | Symptom | Check or recovery |
@@ -350,7 +358,7 @@ Choose one purchase owner before adding a confirmation-page event:
 | --- | --- |
 | Browser `signalq("track", "purchase", payload)` | Signals generates one ID for its managed browser/server pair. Built-in transport retries preserve it; another `track` call generates another ID. |
 | Your backend using the [Node.js SDK](/sdk/recipes/meta-conversions) or [REST API](/api/conversions) | Your application supplies and persists the ID. Reuse the same ID and purchase payload on retries. A separate `signalq` call does not share it. |
-| [Stripe verified revenue](#verify-stripe-checkout-settlement) | Plainrouter derives the canonical purchase from the settled Checkout Session. Do not add a second browser or custom-backend purchase for that session. |
+| [Stripe verified revenue](#verify-stripe-checkout-settlement) | Plainrouter derives the canonical purchase from the settled Checkout Session. Choose the intended senders deliberately. If another legitimate source reports the same order, align its explicit order key with Session `metadata.order_id`; do not add another sender merely to force delivery. |
 
 ### Send one managed purchase after payment confirmation
 

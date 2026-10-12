@@ -25,13 +25,13 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 | Diagnose conversion signals | `get_signal_health` | Stored collection, delivery, matching, and reconciliation diagnostics. |
 | Inspect stored performance | `get_performance` | An account-scoped comparison of gateway and Meta conversions. |
 | Preview a proposal | [`dry_run_actions`](/mcp/tools#dry_run_actions) | Current policy decisions and proposed diffs without creating a batch or writing to Meta; requires a Write key. |
-| Track an action proposal | `list_actions`, `get_action_batch`, `get_action`, `get_action_decision_receipt`, `get_action_policy` | Stored outcomes, receipts, and current policy; requires a Write key even though these are reads. |
+| Track an action proposal | `list_actions`, `get_action_batch`, `get_action`, `get_action_decision_receipt`, `get_action_policy` | Stored outcomes, receipts and current policy; a new Read key with `read-actions` is sufficient. |
 | Browse retained campaigns | [`get_account_inventory`, `get_inventory_metrics`](/actions/account-inventory) | Stored Meta objects, daily metrics, freshness and recovery flags; these calls do not refresh Meta. |
 | Report a problem | [`submit_feedback`](/mcp/tools#submit_feedback) | A saved feedback receipt, not a support reply or account change. |
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
 
-In Ask mode, a person approves every change first. In Full mode, the workspace lets changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals follow the selected mode. Both modes apply current execution checks. The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. Historical **Suggest only** batches record approvals without executing them.
+In Ask mode, a person approves every change first. In Full mode, admitted unprotected changes can run automatically; protected batches still need a person approval. Every change gets a receipt, and the kill switch stops all changes. Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals follow the selected mode. Both modes apply current execution checks. The legacy `adjust_budget` and `set_status` MCP proposals do not execute budget or delivery-status changes. Historical **Suggest only** batches record approvals without executing them.
 
 For repeatable Signals tasks, the server also supplies three [built-in prompts](/mcp/tools#built-in-signals-prompts): installation, claimed-versus-counted comparison, and signal health. They return instructions; the client still needs authorization to run the referenced tools.
 
@@ -77,7 +77,7 @@ On a paid ChatGPT plan with [developer mode](https://developers.openai.com/api/d
 
 ## Access and approval
 
-A workspace owner or member creates a key within their current role under **Settings → Workspace keys**. Start with the **Read** tier for account and creative-library inspection; proposal-producing tools and the [Actions read tools](/mcp/tools#read-actions-and-policy) require **Write**. [Choose a token tier](/mcp/workspace-tokens#access-tiers).
+A workspace owner or member creates a key within their current role under **Settings → Workspace keys**. Start with **Read** for account, creative-library and [Actions record inspection](/mcp/tools#read-actions-and-policy). Previews and proposals require **Write** and their applicable grants. Older Read keys without `read-actions` need fresh authorization for those reads. [Choose a token tier](/mcp/workspace-tokens#access-tiers).
 
 <Note>
   Plainrouter MCP accepts Workspace keys and workspace-scoped OAuth execution tokens from client sign-in. OAuth management credentials and Server secrets do not authenticate MCP tool calls.

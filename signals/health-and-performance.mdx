@@ -18,7 +18,7 @@ Select the Meta ad account on **Dashboard**. The account view combines retained 
 | --- | --- |
 | Spend and Link clicks | Meta-reported figures for the selected account and period. |
 | Arrivals and Cost per arrival | Arrivals carrying that account's Plainrouter ad URL tags, and tagged-ad spend divided by those arrivals. |
-| Purchases, CPA and ROAS | Meta-reported figures beside eligible Plainrouter-observed consented purchases carrying an ad ID. Compare the two sources rather than treating them as identical attribution. |
+| Purchases, CPA and ROAS | Meta-reported figures beside eligible Plainrouter-observed purchases carrying an ad ID. Compare the two sources rather than treating them as identical attribution. |
 | Verified revenue and MER | Stripe-verified revenue across channels, net of refunds; MER divides that revenue by this ad account's spend. This does not attribute all revenue to the account. |
 
 Use the dates and account timezone shown for paid figures. The window can differ from the broader workspace report. Unknown or unavailable figures stay unknown; a dash is not zero.
@@ -111,7 +111,7 @@ A completed read with no reported row is different from a missing read. Missing 
 
 ### Channel details and export
 
-Channel details read consented, attributed conversion-event data separately from arrival totals. They include global consent rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows do not appear in the channel view. Because arrival records carry no channel identity, channel rows do not allocate or sum to the arrival total.
+Channel details read consented, attributed conversion-event data separately from arrival totals. They include eligible global-policy rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows do not appear in the channel view. Because arrival records carry no channel identity, channel rows do not allocate or sum to the arrival total.
 
 Choose **Export** to download the stored comparison as CSV with its reporting period and total-basis labels. The export preserves the distinction between unavailable data and zero.
 
@@ -214,7 +214,7 @@ EMQ is match-quality evidence, not confirmation of an individual conversion's ac
 
 ## What does Meta recovery evidence show?
 
-The **Meta recovery** panel groups eligible server-side Meta `Purchase` deliveries by UTC day and separates their browser-pixel observations. It includes non-test, accepted deliveries for consented, observed, joined, attributed purchase events. It does not count identity-free arrivals or every purchase recorded in Plainrouter.
+The **Meta recovery** panel groups eligible server-side Meta `Purchase` deliveries by UTC day and separates their browser-pixel observations. It includes non-test, accepted deliveries for eligible observed, joined, attributed purchase events. It does not count identity-free arrivals or every purchase recorded in Plainrouter.
 
 Expand a day to inspect `event_id`, **Provenance**, `observed_browser`, and **Source**:
 

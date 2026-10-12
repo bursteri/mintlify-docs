@@ -7,9 +7,9 @@ Open **Settings** → **Action policy** to choose Ask or Full and configure outc
 
 The same page has [Account rules](/actions/account-rules). Authorized Write keys can create or edit those rules through MCP; this permission does not change the workspace's execution mode or loss threshold.
 
-Only the workspace owner can save policy changes. Other workspace members can review the current settings.
+Saving policy changes requires current team update permission. Workspace members with view access can review the settings; a Workspace key cannot edit them.
 
-When the owner changes a policy setting, Plainrouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the owner and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
+When an authorized person changes a policy setting, Plainrouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the person and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
 
 Policy changes are saved atomically with their audit event. If the audit event cannot be recorded, the change is not saved. Recheck the displayed policy after an error; do not assume a mode switch succeeded.
 
@@ -18,7 +18,7 @@ Policy changes are saved atomically with their audit event. If the audit event c
 | Mode | Behavior in this release |
 | --- | --- |
 | **Ask** (`ask`) | A person approves every change first. Approval queues supported execution after a fresh admission check. |
-| **Full** (`full`) | Admitted changes can run automatically. Rule-generated budget increases still require human approval. Every change gets a receipt, and the kill switch stops all changes. |
+| **Full** (`full`) | Admitted unprotected changes can run automatically. Protected batches still require person approval. Every change gets a receipt, and the kill switch stops all changes. |
 
 New workspaces default to **Ask**. Existing workspace policies were migrated to Ask; selecting Full is an explicit owner decision. The selected mode is copied into each proposal as an immutable snapshot. Changing the current mode does not rewrite an older proposal.
 
@@ -32,7 +32,7 @@ Older batches can retain `suggest_only`, `auto_with_limits`, or `full_auto` snap
 
 Executable Meta work passes policy twice:
 
-1. Proposal-time admission checks validate scope, authorization, evidence, and supported actions. Ask requires a person to approve every admitted change first; Full queues admitted changes automatically except rule-generated budget increases.
+1. Proposal-time admission checks validate scope, authorization, evidence and supported actions. Ask requires a person for every admitted change; Full can queue admitted unprotected changes automatically. Protected batches still need person approval.
 2. At dispatch, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
 
 Changing policy does not promote or rewrite an existing proposal. A missing driver, unavailable critical provider field, revoked authorization, or other non-`allow` result blocks the queued batch before provider execution.
@@ -48,6 +48,20 @@ Sets the delay before checking a verified creative action's provider outcome. Th
 Sets the percentage used to classify a measurable management outcome as `held` or `lost`. The accepted range is 1–999.99%; the API retains the field name `anomaly_threshold_percent`. Inbox records the threshold used with the comparison.
 
 The comparison uses eligible counted arrivals and retained Meta spend, not purchase CPA or aggregate Signals reconciliation. A `lost` verdict can create a separate [inverse proposal](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal), with current-state checks and Ask/Full approval behavior. It does not directly compensate the original action. Check the recorded proposal before submitting another change; neither verdict guarantees future performance.
+
+## Which changes still need a person in Full?
+
+**Ask** requires a person for every admitted change. **Full** can automatically execute admitted changes that do not require person approval. The following remain protected in Full, regardless of whether a person, agent, account rule or inverse proposed them:
+
+| Change | Approval requirement |
+| --- | --- |
+| Increase a daily budget | A person approves the batch. |
+| Resume a campaign or ad set | A person approves the batch. Ad-level resume still follows current policy and parent-state checks. |
+| Create a campaign or ad set, where the workflow is enabled | A person approves the batch. |
+| A paused creation carrying budget fields | A person approves the batch. Being paused does not waive the budget boundary. |
+
+If any action is protected, the containing batch needs a recorded person approval. Automatically approved state is insufficient; dispatch can refuse it with `dispatch_approval_missing`. Inspect the existing batch in [Inbox](/actions/review-proposals) instead of trying to bypass that result. Rule violations remain blocked in both modes.
+
 
 ## Verification and compensation
 
@@ -67,7 +81,7 @@ Later outcome measurement is separate from this recovery process. Insufficient a
 
 | Check or action | Current result |
 | --- | --- |
-| Human approval | Ask requires it for every admitted change. Rule-generated budget increases also require it in Full. |
+| Human approval | Ask requires it for every admitted change. Protected changes require it in Full too; see the table above. |
 | Account rules | Start disabled; scheduled matches produce governed proposals, not inline Meta writes. |
 | Lost-outcome inverse | A separate governed proposal for an eligible Resume or budget change; cannot overwrite an intervening target change. |
 | Proposal-time and execution-time policy | Enforced. |

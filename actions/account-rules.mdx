@@ -12,7 +12,7 @@ In **Ask**, every proposed change waits for approval. In **Full**, admitted paus
 
 - Connect the intended [Meta ad account](/signals/connect-meta) and check its [retained inventory and metrics](/actions/account-inventory).
 - Install Signals and verify [counted arrivals](/signals/install-pixel). Rule comparisons use counted arrivals, not purchases, unique visitors or Meta-attributed conversions.
-- Review the workspace's [Action policy](/actions/policies-and-safety). Only the team owner can change rules in the dashboard; other members can review them.
+- Review the workspace's [Action policy](/actions/policies-and-safety). Changing rules in the dashboard requires current team update permission; workspace viewers can review them.
 - For MCP, use the production server and an authorized [Workspace key](/mcp/workspace-tokens). Read keys can list and inspect rules; creating, editing or enabling requires Write and an active grant for that operation. Older account-bound keys keep their restriction. Never put a key in a prompt or source control.
 
 The rule tools are absent from the synthetic sandbox. Their names and inputs appear in the [published MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json).
@@ -99,7 +99,7 @@ A decision marked `proposed` includes `action_batch_id`. Follow that batch in In
 
 ## How do I resume a suspended rule?
 
-A rule is suspended when its two most recent judged actions are both `lost`. Only the team owner can clear the suspension in the dashboard:
+A rule is suspended when its two most recent judged actions are both `lost`. A person with current team update permission can clear the suspension in the dashboard:
 
 1. Inspect those actions' [outcome comparisons and any inverse proposals](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal). Review the rule conditions before restarting it.
 2. Open the suspended rule under **Settings → Action policy → Account rules** and click **Resume rule**.
@@ -117,6 +117,6 @@ Only actions judged after resumption count toward a new suspension; this can inc
 | `conflict` / `different_actions_match` | Different actions match the same target. Resolve the overlapping rules. For the same action, the oldest matching rule is selected and others are `superseded`. |
 | `target_held`, `outcome_pending` or `target_cooling` | An outstanding management proposal or later outcome holds the target. After an outcome check, cooldown lasts until the start of the fourth following account-local day. Follow the existing batch. |
 | `skipped` with a policy or provider reason | Read the recorded reason. Enabling a rule cannot bypass admission, unavailable provider state or the execution kill switch. |
-| `suspended_reason: "two_lost_actions"` | Inspect the two lost outcomes and rule conditions, then use the owner's [Resume rule workflow](#how-do-i-resume-a-suspended-rule) when ready. Toggling `enabled` alone does not clear suspension. |
+| `suspended_reason: "two_lost_actions"` | Inspect the two lost outcomes and rule conditions, then use the authorized person's [Resume rule workflow](#how-do-i-resume-a-suspended-rule) when ready. Toggling `enabled` alone does not clear suspension. |
 
 An eligible lost rule-made daily-budget change can create a separate inverse proposal to the recorded prior budget. A rule-made pause is not judged for performance and cannot trigger that response. An inverse proposal does not create another inverse chain. Follow [what happens after a lost outcome](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).

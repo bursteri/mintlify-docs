@@ -1,16 +1,18 @@
 ---
 title: "Actions API: preview proposals and track outcomes"
 sidebarTitle: "Actions"
-description: "Preview and submit governed proposals, then read verification, outcome comparisons, policy and decision receipts with a Write Workspace key."
+description: "Read Actions with a Read key, preview or propose with Write, and inspect protected approvals, frozen evidence, verification and decision receipts."
 ---
 
-Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, admitted changes can run automatically; rule-generated budget increases still require approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
+Use the Actions API to preview and submit a governed proposal, then follow its stored outcome from your application. In **Ask**, a person approves every change first. In **Full**, admitted unprotected changes can run automatically; budget increases and campaign/ad-set resumes still require person approval. Every change gets a receipt, and the kill switch stops all changes. The five read endpoints inspect Plainrouter records without calling Meta or changing ads. Proposal submission creates a Plainrouter batch; it does not execute a provider change during the request.
 
 The Actions API covers a focused set of governed Meta changes, not the full Meta Marketing API. The [Meta Ads API guide](https://plainrouter.com/library/meta-ads-api) explains the difference.
 
+For current Read access and protected approvals, see [Workspace keys](/mcp/workspace-tokens#access-tiers) and [Action policy](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
+
 ## Before you start
 
-- Create a **Write Workspace key** for the intended workspace, with an active grant covering `propose-actions`. This grant is required for Actions reads too; a normal Read key is insufficient. Older Admin keys still need the applicable grant and current role.
+- Use a **Read or Write Workspace key** for record/policy reads with `read-actions`; older grants with `propose-actions` remain compatible for reads. Previews and proposals require **Write** and `propose-actions`. Older Read keys without either operation need replacement or fresh authorization. Current workspace role and account scope still apply.
 - Connect an active Meta ad account owned by that workspace. Confirm its scope with [`get_account_state`](/mcp/tools#get_account_state).
 - Obtain the workspace's integer ID and Plainrouter's internal integer `account_id`. The latter is different from Meta's external account ID. The examples use workspace `42` and account `91`; replace both.
 - Load the key into `PLAINROUTER_WORKSPACE_KEY` through your secret manager. A Signals Server secret, Management key, OAuth management credential, or browser session cannot replace it.
@@ -167,7 +169,7 @@ curl --fail-with-body \
 
 A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
 
-In Ask mode, send the reviewer to **Inbox**. Use the reads above to follow the result in either mode. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue them automatically. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
+In Ask mode, send the reviewer to **Inbox**. Use the reads above to follow the result in either mode. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue admitted unprotected changes automatically. Protected batches, including budget increases and campaign/ad-set resumes, still need a person approval. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
 
 The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
 
@@ -188,6 +190,10 @@ Reuse the saved idempotency key only for an identical proposal from the same pro
 
 Read the existing batch before resolving a timeout. Use a new key for a genuinely new intent after checking outstanding work; do not rotate keys to bypass a conflict. MCP proposals follow the same replay boundary.
 
+## What does counted_evidence represent?
+
+When available, an action read includes the frozen target comparison captured at proposal time: target, capture time, completed account-local window, currency, Meta-reported figures, counted figures and coverage. It is display evidence, separate from current policy and later `disposition.outcome_payload`. Null means unavailable. [Read the frozen comparison](/actions/review-proposals#what-is-the-frozen-counted-evidence).
+
 ## Why is a management target refused?
 
 A submitted batch can contain only one management change per target type and ID across `pause`, `resume`, `increase_budget`, and `decrease_budget`. Repeating it returns HTTP `422` with `action_target_repeated` in the field message for `actions.N.target_entity.id`. Remove the conflicting action; changing its name or idempotency key does not make it a different target.
@@ -199,7 +205,7 @@ A target held by an outstanding management proposal is also refused. The message
 | Result | What to check |
 | --- | --- |
 | `401` | Key type, expiry/revocation, active principal and connection, and the issuer's current role. The issuer losing permission can invalidate a previously working key. |
-| `403` | The active grant must cover `propose-actions`, including for reads. A normal Read key does not qualify. Check any additional proposal permission. |
+| `403` | Reads need `read-actions` or a compatible `propose-actions` grant. Previews and proposals need Write and their proposal permissions. Check the current workspace role and selected account too. |
 | `404` | Workspace/account scope and returned action or batch ID. For receipt reads, inspect the error code: [`receipt_not_available`](#what-does-receipt_not_available-mean) describes a visible action without an execution receipt. Out-of-scope records are not exposed. |
 | `422` | Account selection, status/page values, and [proposal field errors](/mcp/tools#validation-and-retry-keys). Proposal refusals use `message` and an `errors` map; reason codes prefix field messages rather than appearing in `error.code`. |
 | `409` | The idempotency key belongs to different parameters or a different proposer. [Check the original proposal](#what-if-the-same-proposal-key-returns-a-conflict). |

@@ -26,7 +26,7 @@ Plainrouter uses the same managed collector, consent rules, and event contract f
 Path A sends collection traffic through your Plainrouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run Plainrouter code in your hosting account and does not change which visitors are eligible for measurement.
 
 <Note>
-  Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for consented, server-issued browser identifiers. Both paths send identity-free arrivals independently of consent and require full consent for conversion events and advertising identity.
+  Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for eligible server-issued browser identifiers under the effective consent and jurisdiction policy. Both paths send identity-free arrivals independently of consent and require full consent for conversion events and advertising identity.
 </Note>
 
 ## Generate your setup

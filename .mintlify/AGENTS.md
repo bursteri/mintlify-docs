@@ -52,6 +52,8 @@ after the customer-visible implementation is merged and shipped.
   and technical **Landed**/**Not Landed** meanings consistent with the status
   reference. Inbox uses **Done** and **Approved, not sent** as separate groups;
   do not substitute those display labels for technical receipt evidence.
+- New Read keys include `read-actions` for Actions record/policy/receipt reads; previews and proposals remain Write. Older grants do not silently gain operations; `propose-actions` retains read compatibility.
+- Protected changes require person approval even in Full, including budget increases and campaign/ad-set resumes. One protected action protects the batch.
 - Never imply that a token can widen its workspace or Meta ad-account binding.
 - Never imply that a proposal, approval, queued action, provider write, or
   pending verification is Landed. Landed requires exact provider verification.

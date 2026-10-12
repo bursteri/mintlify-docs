@@ -1,10 +1,40 @@
 ---
 title: "October 2026"
-description: "Review account-rule runs and resumption, inverse proposals, outcome recovery, Meta reconnection, Signals consent and PHP SDK updates."
+description: "Review Actions Read access, protected approvals, frozen evidence, Signals purchase and consent handling, and current SDK releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 12, 2026">
+  ## Inspect Actions with a Read key
+
+  **Improved** · Newly issued Read keys can inspect action records, policy and decision receipts. Existing proposal grants remain compatible for reads; older Read keys need fresh authorization for the new operation. Previews and proposals still require Write. [Check key permissions](/mcp/workspace-tokens#access-tiers).
+
+  ## Keep protected changes under person approval
+
+  **Improved** · Budget increases and campaign/ad-set resumes require a person approval even in Full. One protected action protects the containing batch. Retired-mode proposals cannot be promoted by changing today's policy. [Review protected changes](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
+
+  ## Review frozen target evidence
+
+  **New** · Supported target proposals preserve a seven-completed-day comparison of Meta figures, counted arrivals and eligible purchases for Inbox, API/MCP reads and decision receipts. Missing values remain unknown; the snapshot does not authorize spend. [Interpret the comparison](/actions/review-proposals#what-is-the-frozen-counted-evidence).
+
+  ## Reconcile purchases with shared order keys
+
+  **Improved** · Browser, backend and verified Stripe observations can reconcile against the same explicit workspace order key. Keep event IDs stable for retries and align Session metadata when sources describe one order. [Set up order keys](/api/conversions#how-do-shared-order-ids-reconcile-purchases).
+
+  ## Verify renewals and refund status
+
+  **Improved** · Eligible global-policy subscription renewals can retain prior acquisition context. Stripe setup lists renewal and refund-status events, with an unverified-status notice when only charge summaries were observed. [Update Stripe webhook subscriptions](/signals/track-events#configure-the-webhook).
+
+  ## Keep Analytics and Marketing choices separate
+
+  **Improved** · The current v4 card records Analytics independently from the three advertising permissions controlled by Marketing. Saved older choices retain their original meaning; recorded choices can be inspected in the consent report. [Verify consent choices](/signals/track-events#how-does-the-snippet-choose-a-consent-source).
+
+  ## Upgrade generated clients
+
+  **Updated** · TypeScript, Python and CLI `0.9.0`, Ruby `0.5.0`, and PHP `0.3.0` refresh the signed-contract models. Go remains `v0.6.0`; package upgrades do not expand credential access. [Choose a client](/sdk/overview#what-changed-in-the-current-releases).
+</Update>
 
 <Update label="October 10, 2026">
   ## Use one key across selected workspaces

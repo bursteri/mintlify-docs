@@ -49,7 +49,7 @@ Use **Dashboard** for [paid-account performance and arrival comparisons](/signal
 
 ## Consent behavior
 
-The identity-free arrival runs once on initialization regardless of consent. Consent controls the separate conversion-event, identifier, and advertising-delivery paths:
+The identity-free arrival runs once on initialization. The separate conversion-event, identifier and advertising-delivery paths follow the effective jurisdiction policy. The table below describes the strict-EU consent path:
 
 | Consent state | Collection behavior | Identifier behavior | Destination delivery |
 | --- | --- | --- | --- |
@@ -60,7 +60,13 @@ The identity-free arrival runs once on initialization regardless of consent. Con
 
 The v4 snippet can consume supported external consent signals or display a configured Plainrouter fallback card. [Choose and verify the consent source](/signals/track-events#how-does-the-snippet-choose-a-consent-source). For an explicit adapter, connect your consent-management platform by calling `signalq("consent", input)` with the structured permission state whenever the visitor's choice changes. A consent update does not send another arrival. See [Track events and consent](/signals/track-events) for examples and click-ID handling.
 
-Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. Plainrouter stores the normalized consent decision with the event and allows Meta delivery only for observed, joined, attributed events with consent.
+Server-side `POST /events` requests must include a `consent_basis` of `consent` or `legitimate_interest`. Requests using `consent` must include granted downstream advertising state. Plainrouter stores the normalized decision with the event. Meta delivery requires observed, joined, attributed events and an eligible consent/policy state; server acknowledgement alone does not establish destination acceptance.
+
+### How does the global policy differ?
+
+When the workspace is configured for the global market and the server resolves an eligible global policy, the current v4 snippet can use `legitimate_interest` without turning unknown permissions into granted permissions. It waits for configuration and preserves explicit denial, withdrawal and supported opt-out signals. GPC can suppress transmission. A detected external choice remains a separate input.
+
+Strict-EU policy requires the full advertising grant. An unknown same-origin policy is not assumed global. Changing `consent_basis` in JSON does not override the server's jurisdiction or opt-out checks. Keep the actual decision and effective policy, and verify your collection using [Track events and consent](/signals/track-events).
 
 ## Identity retention
 

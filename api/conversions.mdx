@@ -94,7 +94,15 @@ You can supply `Idempotency-Key` instead of a body `event_id`. If you supply bot
 
 For browser consent and visitor joins, see [Track events and consent](/signals/track-events).
 
-Every `POST /events` request must include `consent_basis`. Use `consent` only with granted downstream advertising state. `legitimate_interest` is restricted to allowlisted lifecycle events and does not create an attributed advertising join.
+Every `POST /events` request must include `consent_basis`. Use `consent` only with granted downstream advertising state. `legitimate_interest` can create an eligible observed join only under the configured global market and effective global policy, with applicable opt-out checks. Strict-EU, denied, opted-out and portfolio-only data do not gain attributed delivery by changing that field. See [policy behavior](/signals/overview#how-does-the-global-policy-differ).
+
+## How do shared order IDs reconcile purchases?
+
+Keep `event_id` stable for retries of one event. Use `value_data.order_id` as the same non-personal order key when a browser, backend and verified Stripe source describe the same purchase. Cross-source purchase reconciliation uses that explicit shared key in the workspace; it does not guess from equal amounts or nearby timestamps.
+
+Keep each source's event ID and original evidence. Multiple source records can remain inspectable while the purchase and destination handling select the eligible canonical observation. A bounded wait for another observation can leave a delivery queued; do not create another purchase or reset timestamps to force progress. `skipped:duplicate` records a suppressed duplicate destination delivery, not a new Meta acceptance.
+
+For Stripe, set `metadata.order_id` on the Checkout Session. Without that metadata, its Session ID is a separate fallback key; a different browser order ID will not automatically match it. See [Stripe setup and order association](/signals/track-events#associate-a-checkout-session-with-your-order).
 
 ## Why is the consent capture time invalid?
 
@@ -261,7 +269,7 @@ Cursor listing accepts `per_page` up to 100. Omit `cursor` on the first request,
 
 Signals configuration now belongs directly to the workspace. API responses use the numeric `workspace_id` as the canonical tenant identifier. Existing response shapes also include `signal_tracker_id` as a deprecated decimal-string alias of the same workspace ID.
 
-Current TypeScript and Python `0.6.0` SDKs expose `workspace_id` in the regenerated response models. Older generated clients can continue reading `signal_tracker_id` where that compatibility field is exposed. Do not treat the two fields as different tenants. Check your installed SDK version before choosing a response field.
+Current TypeScript and Python `0.9.0` SDKs expose `workspace_id` in the regenerated response models. Older generated clients can continue reading `signal_tracker_id` where that compatibility field is exposed. Do not treat the two fields as different tenants. Check your installed SDK version before choosing a response field.
 
 The signed contract marks `user_data_hashed` as a deprecated compatibility field whose value is always `null`. Delivery identity is never returned. Use delivery status and explanation to diagnose the outcome, rather than expecting identity hashes in the trace.
 

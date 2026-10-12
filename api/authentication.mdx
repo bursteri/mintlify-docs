@@ -19,7 +19,7 @@ Conversion API and all use the same Server secret.
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Server secret | One workspace and its Signals resources |
 | Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
 | Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | Fixed selected workspace set, role-capped tier per workspace, and an eligible account selected per account-scoped call |
-| Submit or inspect Actions | [Actions API](/api/actions) and [MCP Actions reads](/mcp/tools#read-actions-and-policy) | Write Workspace key with an active `propose-actions` grant, including for reads | One authorized workspace per call and selected eligible account |
+| Submit or inspect Actions | [Actions API](/api/actions) and [MCP Actions reads](/mcp/tools#read-actions-and-policy) | Read or Write Workspace key: `read-actions` for reads, `propose-actions` for previews/proposals | One authorized workspace per call and selected eligible account |
 | List accessible workspaces and manage your workspace keys | [Management API](#how-do-i-use-the-management-api) | Management key | Limited by its owner's current access and role; not an MCP credential |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |
 | Manage tokens, policies, or approvals in the dashboard | Browser session | Signed-in person's current workspace role | Interactive UI only |

@@ -13,7 +13,7 @@ The interface calls these credentials workspace keys; API fields and older integ
 Sign in as the workspace owner or a current team member and select the workspace your agent should use. The effective tier is capped by your current role in each selected workspace; a requested Write key can have Read access in a workspace where you lack update permission. The page lists and revokes only your own keys. A key can be created before connecting an ad account. The workspace-scoped [installation and arrivals tools](/mcp/tools#get_install_instructions) work without account selection; account reads need an eligible account and active provider connection.
 
 1. Open **Settings → Workspace keys**.
-2. Enter a **Name** and check **Tier**: **Write** is preselected. Choose **Read** explicitly for supported reporting or diagnostic tools; Actions previews, proposals, and Actions record reads require **Write**. Select a 30, 90, or 365 day expiry.
+2. Enter a **Name** and check **Tier**: **Write** is preselected. Choose **Read** explicitly for supported reporting or diagnostic tools; Actions previews and proposals require **Write**; new Read keys also cover Actions record reads. Select a 30, 90, or 365 day expiry.
 3. Under **Workspaces**, select one or more workspaces. The current workspace is selected by default; this set stays fixed for the key.
 4. Choose **Create key**, then **Copy** the revealed key. It is shown once.
 5. Configure your MCP client with `https://plainrouter.com/mcp` and the key as its bearer credential. The reveal dialog includes Claude Desktop and Claude Code configuration examples.
@@ -79,10 +79,10 @@ An eligible account for an unbound key must be owned by the key's workspace, act
 
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
-| **Read** | `workspace:read` | Account, Signals, inventory and creative reads; feedback submission; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
-| **Write** | `workspace:read`, `workspace:write` | Read access plus Actions status, policy, and receipt reads, and governed action previews, action proposals, and creative proposals; legacy Launcher drafting and preview where enabled. |
+| **Read** | `workspace:read` | Account, Signals, inventory, creative, Actions status/policy/receipt reads; feedback submission; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
+| **Write** | `workspace:read`, `workspace:write` | Read access plus governed action previews, action proposals and creative proposals; legacy Launcher drafting and preview where enabled. |
 
-The five [Actions read tools](/mcp/tools#read-actions-and-policy) and corresponding HTTP endpoints require an active grant covering `propose-actions`. A normal Read key does not have this grant, despite those operations being read-only.
+The five [Actions read tools](/mcp/tools#read-actions-and-policy) and corresponding HTTP endpoints accept an active `read-actions` grant, included in newly issued Read and Write keys. Existing grants containing `propose-actions` remain compatible for reads. Older Read credentials without either operation need replacement or fresh authorization; scopes are not silently expanded.
 
 New keys expose Read and Write, not Admin. Older Admin-tier credentials may still appear in compatibility responses; their tier does not bypass policy, the selected approval mode, provider verification, or account restrictions. A workspace key is not a management key or browser session.
 
@@ -96,7 +96,7 @@ Token-management creation responses include a legacy `grant_id` for the primary 
 
 ### Inspect and revoke a grant in the dashboard
 
-Sign in as the workspace owner and open **Workspace settings → Workspace grants**. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. Inspect the linked grant here; **Settings → Workspace keys** lists the key's status and last use.
+Sign in as the team owner or an authorized team administrator and open **Workspace settings → Workspace grants**. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. Inspect the linked grant here; **Settings → Workspace keys** lists the key's status and last use.
 
 1. Identify the intended principal and bound token before making a change.
 2. For a live grant, click **Revoke**, then confirm **Revoke grant**.
@@ -104,7 +104,7 @@ Sign in as the workspace owner and open **Workspace settings → Workspace grant
 
 The receipt records authorization revocation; it is not a Meta execution receipt. Revocation prevents subsequent operations under the grant and does not reverse earlier advertising actions. Grants cannot be edited to add operations; issue a replacement credential when the authorized scope must change.
 
-If no grants appear, confirm the workspace and whether a credential has been issued. If the section is unavailable, check that you are signed in as the owner. An expired or already revoked grant has no live-grant **Revoke** action. If confirmation fails, keep the error and recheck the grant's displayed status before assuming access has stopped.
+If no grants appear, confirm the workspace and whether a credential has been issued. If the section is unavailable, check that you are signed in as the owner or an authorized team administrator. An expired or already revoked grant has no live-grant **Revoke** action. If confirmation fails, keep the error and recheck the grant's displayed status before assuming access has stopped.
 
 ## Rotate or revoke a token
 
@@ -130,7 +130,7 @@ For Signals reads, check the workspace's Meta destination binding and use that a
 
 ### A tool reports insufficient permission
 
-Use Read for supported Signals, account, or creative reads. Actions record reads, dry runs, and proposal-producing tools require Write and the applicable grant. Existing grants retain their issued operations. OAuth refresh does not add newer operations or upgrade the original tier. Create a replacement or complete a fresh authorization with the needed access; do not try to elevate an existing key. Missing feature enablement or provider permissions is separate from its tier.
+Use Read for supported Signals, account, or creative reads. Actions record reads need `read-actions` or compatible `propose-actions` access. Dry runs and proposal-producing tools need Write and their applicable grants. Existing grants retain their issued operations. OAuth refresh does not add newer operations or upgrade the original tier. Create a replacement or complete a fresh authorization with the needed access; do not try to elevate an existing key. Missing feature enablement or provider permissions is separate from its tier.
 
 ### You cannot open Workspace keys
 

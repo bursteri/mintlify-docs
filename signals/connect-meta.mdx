@@ -33,7 +33,7 @@ Signals reporting requires this workspace's account binding, an active Meta conn
 
 This reporting connection is separate from selecting a conversion destination. Connecting an ad account alone does not prove that a Pixel is configured or that conversions are being delivered.
 
-Connections also has separate **Google Ads**, **Stripe**, and **Site snippet** sections. Google Ads reads account spend; its presence does not enable a Google conversion destination. Stripe records [verified Checkout revenue](/signals/track-events#verify-stripe-checkout-settlement). The site snippet section links to installation.
+Connections also has separate **Google Ads**, **Stripe**, and **Site snippet** sections. Google Ads account-spend access is separate from conversion delivery; a connected account alone does not configure a conversion destination. Its available delivery controls are shown separately in Connections. Stripe records [verified Checkout revenue](/signals/track-events#verify-stripe-checkout-settlement). The site snippet section links to installation.
 
 ### Who can connect or change an ad account?
 
@@ -47,7 +47,7 @@ Connection permissions depend on the team's current connection for that platform
 
 A healthy Meta binding has an active connection, stored credentials, and a selected ad account. The check covers the team's Meta connections, so switching workspaces does not let a member replace an existing healthy binding. Google Ads uses the same role boundary for its spend connection.
 
-These permissions apply to ad-platform connections. **Meta delivery**, Stripe configuration, and site setup retain their separate workspace-owner controls.
+These permissions apply to ad-platform connections. **Meta delivery**, Stripe configuration and site setup retain their separate workspace permission checks. Configuring them requires the appropriate update permission; connection access alone does not grant it.
 
 ### What does the connection status mean?
 
