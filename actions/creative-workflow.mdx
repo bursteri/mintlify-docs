@@ -163,13 +163,15 @@ human review. Do not select another target or claim that an ad was created.
 
 ## Creative library output
 
-`get-creative-library` returns account-owned images and videos, asset metadata, pagination, associated ads, and aggregated last-30-day impressions, clicks, spend, and conversions.
+`get-creative-library` returns account-owned images and videos, asset metadata, pagination, associated ads, and last-30-day impressions, clicks, spend and conversions for the scanned performance page.
 
 <Warning>
   Do not treat creative-library history as causal performance or proof that an asset is a winner. Durable proposal provenance records only identity, account ownership, readiness, and status.
 </Warning>
 
 When requesting `asset_type: "all"`, pagination is returned separately for images and videos. To continue from a cursor, request either `image` or `video`.
+
+The returned page is capped at 10 assets per type, even when a larger `limit` is requested; the response-size budget can return fewer. Associated ads default to three per asset and have their own `performance.next_cursor`; pass it as `ads_cursor` with the same asset-page arguments. The provider performance scan uses `performance_pagination.next_cursor` as `performance_cursor`. Inspect each `truncated` flag and continue the relevant collection before describing it as complete. [Creative-library input and continuation reference](/mcp/tools#get-creative-library).
 
 ## Image upload rules
 

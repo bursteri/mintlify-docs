@@ -55,9 +55,11 @@ curl --fail-with-body --get \
   --data-urlencode 'page=1'
 ```
 
-The [list reference](/api/actions/actionreadapi/list-actions) defines the query and response fields. Filter by an exact [action status](/reference/statuses-and-terms#action-statuses), such as `pending`, `verified`, or `execution_uncertain`; batch-only values such as `completed` are invalid. Pages contain at most 25 actions, ordered by action ID descending. Continue through the returned pages; there is no configurable `per_page` parameter.
+The [list reference](/api/actions/actionreadapi/list-actions) defines the query and response fields. Filter by an exact [action status](/reference/statuses-and-terms#action-statuses), such as `pending`, `verified`, or `execution_uncertain`; batch-only values such as `completed` are invalid. Set `limit` from 1–100 (default 25); there is no configurable `per_page` request parameter. Actions are ordered by action ID descending. Repeat with `meta.next_page_arguments`, preserving account and status, until `meta.next_cursor` is null. The response-size budget can return fewer complete rows than requested.
 
 To inspect a returned action, request `/actions/{action}?account_id=91` and use the [single-action reference](/api/actions/actionreadapi/get-action). To inspect its batch, request `/action-batches/{actionBatch}?account_id=91` and use the [batch reference](/api/actions/actionreadapi/get-action-batch). Confirm the scope and read both batch and action statuses.
+
+Batch action reads also accept `limit` from 1–100 (default 25). Pass `data.next_cursor` as integer `cursor`, keeping the batch and account, until null. Inspect `data.total`, `data.truncated` and `data.continuation`. A partial action page cannot establish that the whole batch completed.
 
 ### Identify rule and outcome-generated proposals
 
@@ -210,6 +212,7 @@ A target held by an outstanding management proposal is also refused. The message
 | `422` | Account selection, status/page values, and [proposal field errors](/mcp/tools#validation-and-retry-keys). Proposal refusals use `message` and an `errors` map; reason codes prefix field messages rather than appearing in `error.code`. |
 | `409` | The idempotency key belongs to different parameters or a different proposer. [Check the original proposal](#what-if-the-same-proposal-key-returns-a-conflict). |
 | `503` with `workspace_lock_timeout` | The workspace is busy. Respect `Retry-After` and retry the identical request with its saved key. |
+| `503` with `proposal_not_recorded` | The required proposal or policy result could not be recorded. No proposal is committed by that attempt. Respect `Retry-After: 1` and retry the identical payload with its original key. |
 | `200` with `dry_run_unavailable` | The preview could not evaluate an action without a persisted row. Do not treat it as a passing policy result. |
 | Empty `data` | Clear the status filter and confirm the selected account. An empty page does not prove the workspace has no action history. |
 

@@ -140,6 +140,7 @@ Use a development or test site and inspect its Network panel. Test the installed
 | All three advertising permissions granted | Consented `PageView` on entering a grant; subsequent `track` calls can reach the collector. |
 | `ad_storage: "granted"`, with `ad_user_data` or `ad_personalization` denied or unknown | No conversion transmission. A storage grant alone is insufficient. |
 | Full grant followed by denial or withdrawal | New conversions stop; consent-dependent in-flight work is cancelled. This cannot recall requests already received by a destination. |
+| Grant while browser configuration is pending, then denial or withdrawal | Held `track` calls resolve to `null` and held `identify` calls resolve to `false`. A later grant does not revive those earlier calls. |
 | Returning page with a stored explicit grant | Arrival runs during initialization; conversions wait for the CMP to restore and report the grant. |
 
 For a CMP with separate permissions, exercise a partial choice through its UI and confirm the transmitted snapshot preserves it. Do not replace partial choices with the Cookiebot adapter's shared marketing value.
@@ -225,6 +226,8 @@ const identified = await signalq("identify", {
 ```
 
 The browser normalizes and SHA-256 hashes the values before sending them. Plainrouter never sends the raw email or phone in the identity request.
+
+If consent is withdrawn while `identify` waits for browser configuration, the call resolves to `false` and does not resume after a later grant. Obtain current consent and make a new call only when that new identity use is permitted. The same superseding denial cancels a held `track` call with `null`.
 
 - Email is trimmed and lowercased.
 - International phone numbers must start with `+` and include 8–15 digits after normalization.

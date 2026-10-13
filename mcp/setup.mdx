@@ -1,10 +1,10 @@
 ---
 title: "Connect your agent to Plainrouter MCP"
 sidebarTitle: "Setup"
-description: "Connect Claude Code, Codex, ChatGPT or another MCP client to Plainrouter's Meta Ads MCP server, read signal health and submit proposals for approval."
+description: "Try the Plainrouter MCP sandbox, connect Claude with OAuth or a Workspace key, verify your workspace and account, and troubleshoot authentication."
 ---
 
-Connect Claude Code to Plainrouter MCP, verify a synthetic response, then configure a workspace execution token for your own Meta ad account. A successful account-scoped read returns the intended workspace and selected account. For installation before connecting Meta, use the workspace-only read below.
+Try Plainrouter MCP with synthetic data, then connect Claude through OAuth or configure a Workspace key for your client. A successful production read returns the intended workspace and selected Meta ad account. For installation before connecting Meta, use the workspace-only read below.
 
 For supported tasks, client requirements, and approval boundaries, start with the [MCP introduction](/mcp/overview). For a summary of supported clients, account scope and pricing, see the [Meta Ads MCP server overview](https://plainrouter.com/solutions/meta-ads-mcp).
 
@@ -12,8 +12,8 @@ For supported tasks, client requirements, and approval boundaries, start with th
   <Card title="Try synthetic data" icon="flask-conical" href="#start-in-test-mode">
     Check the client connection without a Plainrouter account or token.
   </Card>
-  <Card title="Connect your account" icon="key-round" href="#connect-with-a-workspace-token">
-    Configure your workspace token and confirm the first account read.
+  <Card title="Connect Claude" icon="key-round" href="#connect-claude-with-oauth">
+    Sign in with OAuth and confirm the first account read.
   </Card>
 </CardGroup>
 
@@ -24,7 +24,7 @@ Find your tool in the [client setup directory](/mcp/clients), including Gemini C
 | Endpoint | Use | Credential |
 | --- | --- | --- |
 | `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
-| `https://plainrouter.com/mcp` | Inspect workspace Signals, read an approved account, and submit governed proposals. | Workspace execution token for tool calls and account data |
+| `https://plainrouter.com/mcp` | Inspect workspace Signals, read an approved account, and submit governed proposals. | Workspace key or workspace-scoped OAuth execution credential |
 
 Plainrouter MCP uses workspace execution tokens issued by a current owner or member. New workspace keys authorize a fixed set of selected workspaces, with role-capped Read or Write access in each. Calls act on one workspace at a time. Use `list_workspaces` and include `workspace_id` when multiple workspaces are authorized. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work). Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
 
@@ -146,7 +146,35 @@ Requests are stateless: do not wait for or require an `Mcp-Session-Id` response 
 
 The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) lists the current protocol, tools, and resources. The [transport upgrade reference](https://github.com/laravel/mcp/blob/cfa4f38f82873eeb6848527883545f98f871e229/UPGRADE.md) explains modern headers and legacy compatibility.
 
+## Connect Claude with OAuth
+
+OAuth sign-in creates a workspace-scoped execution credential without copying a key into your configuration. You still need a Plainrouter account, workspace access and the intended Meta connection for account-scoped reads. Choose **Read** for analysis; **Write** is required for previews and proposals.
+
+### Claude Code
+
+After trying the sandbox, add the production server:
+
+```bash
+claude mcp add --transport http plainrouter https://plainrouter.com/mcp
+```
+
+Open Claude Code in the same directory, run `/mcp`, select Plainrouter and follow the sign-in prompt. Review the Plainrouter consent screen, callback host, workspace, Meta ad account and requested access before approving. Then [confirm a read-only production connection](#confirm-a-read-only-production-connection).
+
+If a server named `plainrouter` is already configured at that scope, inspect it in `/mcp` first. An existing `Authorization` header selects key authentication; remove that header from the Plainrouter entry before switching to OAuth. Preserve other server entries. See [Claude Code's authentication instructions](https://code.claude.com/docs/en/mcp#authenticate-with-remote-mcp-servers).
+
+### Claude web and Desktop
+
+1. Open **Customize → Connectors**, select the plus icon, then **Add custom connector**. On a managed Claude team, an administrator may need to add the connector first.
+2. Name it **Plainrouter** and enter `https://plainrouter.com/mcp` as the remote server URL.
+3. Choose **Sign in now** for authentication and **Register automatically** for the OAuth client. Plainrouter does not currently support **Use Claude's published identity**.
+4. Add and connect the connector. Sign in to Plainrouter, select the intended workspace and account, and authorize the access tier you need.
+5. Enable Plainrouter for the conversation through **Connectors**, then use the [first read prompt](#confirm-a-read-only-production-connection).
+
+Claude's controls depend on your plan and organization settings. Follow [Anthropic's custom connector instructions](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) if the controls differ. To try synthetic data in this interface first, use `https://plainrouter.com/mcp/sandbox` with **No sign in**.
+
 ## Connect with a workspace token
+
+Use a Workspace key when your client uses bearer headers or your scripted setup cannot complete interactive OAuth.
 
 <Steps>
   <Step title="Issue the token">
@@ -290,6 +318,12 @@ Confirm `PLAINROUTER_WORKSPACE_TOKEN` is set in the environment that starts Clau
 Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. Also confirm its issuing person still holds a workspace role that covers the token tier.
 
 If the client is sending an OAuth management credential, the rejection is expected. Create a workspace key, then configure the MCP client to use it as the bearer credential.
+
+### OAuth does not complete or new tools are refused
+
+For Claude web or Desktop, check **Register automatically**. For Claude Code, check that the server entry has no stale `Authorization` header when you intend OAuth. Restart sign-in from `/mcp` if a localhost callback fails; review the displayed callback host rather than changing redirect URLs manually. Plainrouter permits changing the port of a registered HTTP `localhost` callback, while its other URI components must still match.
+
+A connector created before a new operation shipped may need a new grant. Disconnect and reconnect, review the requested access, and verify the selected workspace and account again. Successful catalog discovery alone does not prove permission to call a tool.
 
 ### A creative tool reports a missing permission
 

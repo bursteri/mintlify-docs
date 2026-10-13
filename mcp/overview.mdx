@@ -63,7 +63,7 @@ For repeatable Signals tasks, the server also supplies three [built-in prompts](
 
 ### Which clients can connect?
 
-Clients can authenticate with a workspace key sent as a bearer credential, or sign in with OAuth. OAuth sign-in asks you to choose the Meta ad account and Read or Write access. The [setup guide](/mcp/setup#configure-claude-code-for-your-meta-ad-account) includes Claude Code configuration.
+Clients can authenticate with a workspace key sent as a bearer credential, or sign in with OAuth. OAuth sign-in asks you to choose the Meta ad account and Read or Write access. Follow [Claude OAuth setup](/mcp/setup#connect-claude-with-oauth), or use [Claude Code key configuration](/mcp/setup#configure-claude-code-for-your-meta-ad-account) for scripted access.
 
 Custom clients should follow the [protocol and header requirements](/mcp/setup#which-mcp-protocol-should-my-client-use). Plainrouter does not issue an `Mcp-Session-Id`; authenticate each production tool request with the workspace credential.
 

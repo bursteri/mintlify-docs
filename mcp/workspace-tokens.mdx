@@ -31,6 +31,8 @@ For developer automation, the [management API](/api/authentication#how-do-i-use-
 
 Call `list_workspaces` with no arguments. It returns only the workspaces available to the execution credential, with `workspace_id`, `workspace_name`, `ad_account_name` and effective `tier`. A null account name or tier is unknown, not a grant of access.
 
+The first page defaults to 25 workspaces. Use `limit` from 1–100 and pass the returned integer `next_cursor` as `cursor` until it is null. `total` describes the matching set; `truncated: true` means more workspaces remain. A short page is not necessarily the complete credential scope.
+
 When the credential has multiple authorized workspaces, include the selected positive integer `workspace_id` in each workspace-scoped MCP call:
 
 ```json

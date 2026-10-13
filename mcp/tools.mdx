@@ -10,6 +10,26 @@ For credentials covering several workspaces, call `list_workspaces` and pass the
 
 Start with the [MCP introduction](/mcp/overview) for supported tasks and access boundaries. For client configuration and your first account read, follow [Setup](/mcp/setup).
 
+## How do I read every result?
+
+Collection tools return bounded pages of complete rows. A short page can reflect the response-size budget rather than the end of the collection. Follow the returned continuation fields, preserving workspace, account, filters and date window; stop only when the corresponding cursor is null. Do not report partial results as a complete account inventory or history.
+
+| Read | Continuation |
+| --- | --- |
+| `list_workspaces`, `get_cookie_scan` | Pass top-level `next_cursor` as integer `cursor`; inspect `total` and `truncated`. |
+| `get_account_inventory` | Pass `next_cursor` as `after_id`; defaults to 25 objects. |
+| `get_inventory_metrics` | Pass the opaque top-level `next_cursor` as `cursor` with the same filters and `include_changes`; inspect each collection under `pagination`. |
+| `list_actions` | Pass `meta.next_cursor` as `cursor`, keeping account, status and `limit`; `meta.next_page_arguments` supplies the next arguments. |
+| `get_action_batch` | Pass `data.next_cursor` as `cursor`, keeping `batch_id`, account and `limit`. |
+| `actions.rules.list` | Use `rules.next_page_arguments`; summaries are separate from rule detail. |
+| `actions.rules.show` | Use `rule.next_cursor` for older revisions; use each run's `next_cursor` as `decisions_cursor` together with `run_id`. |
+
+For live creative assets, associated ads and performance scans, use the [separate creative-library cursors](#get-creative-library). Cursors are tool-specific; do not substitute an inventory row ID or decode an opaque cursor into a new request. If a row cannot fit and the call returns a validation error, narrow the requested object or asset instead of treating the error as an empty result.
+
+## What do tool annotations mean?
+
+The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) and MCP discovery expose `readOnlyHint`, `destructiveHint`, `idempotentHint` and `openWorldHint`. These describe effects for the client; they do not grant authority or replace Plainrouter policy. A tool that saves feedback, a rule, a diagnostic or a proposal writes Plainrouter state even when it makes no Meta change. An idempotent tool can still write, and a read-only tool can contact Meta, as `get-creative-library` does. Check the specific tool, grant and approval requirements before calling it.
+
 The server version is separate from the MCP protocol revision. For custom clients, see the [stateless discovery and request-header requirements](/mcp/setup#which-mcp-protocol-should-my-client-use). MCP App support is advertised under `capabilities.extensions["io.modelcontextprotocol/ui"]` in the [server card](https://plainrouter.com/.well-known/mcp/server-card.json).
 
 | Tool | Type | Purpose |
@@ -140,6 +160,8 @@ If prompts are missing from your client, confirm the production URL and refresh 
 ## Busy-workspace errors
 
 A concurrent operation can return `workspace_lock_timeout` through MCP. Affected JSON HTTP routes return HTTP `503` with `Retry-After: 1`; the browser shows **The workspace is busy. Retry the operation shortly.** Wait before retrying and retain the original idempotency key for the same operation.
+
+A proposal can also fail with **The proposal could not be recorded. Retry.** MCP returns a tool error; affected HTTP routes return `503`, `error.code: "proposal_not_recorded"` and `Retry-After: 1`. No proposal is committed by that failed attempt. Retry the identical request with its original key after the delay. Do not interpret the failure as approval or queue a different proposal to bypass it. [HTTP failure reference](/api/actions#troubleshoot-a-request).
 
 ## Shared authorization and scope
 
@@ -414,7 +436,7 @@ Every tool accepts an optional positive integer `account_id`, required when the 
 
 ### `list_actions`
 
-Accepts `account_id`, optional `status` from the [action-status list](/reference/statuses-and-terms#action-statuses), and `page` (positive integer, default `1`). For example:
+Accepts `account_id`, optional `status` from the [action-status list](/reference/statuses-and-terms#action-statuses), `page` (positive integer, default `1`), `limit` (1–100, default `25`) and an integer `cursor`. For example:
 
 ```json
 {
@@ -424,11 +446,13 @@ Accepts `account_id`, optional `status` from the [action-status list](/reference
 }
 ```
 
-Returns `data` and pagination `meta` containing `current_page`, `last_page`, `per_page`, and `total`. Pages contain at most 25 actions, ordered by action ID descending. Do not use batch-only statuses such as `completed` as an action filter.
+Returns `data` and pagination `meta` containing `current_page`, `last_page`, `per_page`, `total`, `next_cursor`, `truncated`, `next_page_arguments` and `continuation`. Actions are ordered by action ID descending. Follow `meta.next_page_arguments` until null; the response-size budget can return fewer rows than `limit`. Do not use batch-only statuses such as `completed` as an action filter.
 
 ### `get_action_batch`
 
 Requires `batch_id`, plus `account_id` when needed. Returns `data` with the batch ID, workspace and platform-account IDs, status, policy decision/reasons, rationale, idempotency key, and `actions` array.
+
+Use `limit` from 1–100 (default 25). Continue with `data.next_cursor` as integer `cursor` until null. `data.total`, `data.truncated` and `data.continuation` describe the action collection. Read every page before concluding that all actions in a batch have been verified.
 
 ### `get_action`
 
@@ -618,8 +642,11 @@ This tool makes live Meta Marketing API reads for the approved account. It requi
 | Field | Required | Rules |
 | --- | --- | --- |
 | `asset_type` | No | `all`, `image`, or `video`. Default is `all`. |
-| `limit` | No | Integer from 1 to 100 per requested asset type. Default is 25. |
+| `limit` | No | Integer from 1 to 100; default 25. The returned asset page is capped at 10 per type and can be smaller to fit the response budget. |
 | `cursor` | No | Opaque Meta cursor from a previous call. Choose `image` or `video` when using it. |
+| `ads_limit` | No | Associated ads per asset: 1–10, default 3; at most 30 across the requested asset pages. |
+| `ads_cursor` | No | Integer continuation from the asset's `performance.next_cursor`; retain the same asset-page arguments. |
+| `performance_cursor` | No | Opaque continuation from `performance_pagination.next_cursor` for the provider performance scan. |
 
 ### Output
 
@@ -631,6 +658,8 @@ The response includes:
 - Aggregated last-30-day impressions, clicks, spend, and conversions.
 - Separate image and video pagination cursors.
 - `performance_window: "last_30d"`.
+
+Asset pagination uses `pagination.images.after` or `pagination.videos.after` with `has_more`. Associated-ad pages use each asset's `performance.next_cursor` and `truncated`. The provider performance scan has its own `performance_pagination`; pass its `next_cursor` as `performance_cursor`. Performance totals describe the scanned page, so a truncated scan is not complete last-30-day account history. Keep these three continuation paths separate.
 
 <Warning>
   The performance block is descriptive account history, not causal lift. When this tool supplies proposal provenance, Plainrouter persists only the selected asset's identity, account ownership, readiness, and status.

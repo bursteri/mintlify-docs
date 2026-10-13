@@ -1,10 +1,28 @@
 ---
 title: "October 2026"
-description: "Review Actions Read access, protected approvals, frozen evidence, Signals purchase and consent handling, and current SDK releases."
+description: "Review MCP pagination, OAuth sign-in, proposal retry errors, Actions approvals, Signals consent handling and current SDK releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 13, 2026">
+  ## Continue large result lists
+
+  **Updated** · MCP and Actions API reads now return bounded pages with continuation fields. Follow cursors for workspace lists, retained metrics, Actions batches, rule history and creative-library results before treating a response as complete. Inventory defaults to 25 objects. [Read every result](/mcp/tools#how-do-i-read-every-result).
+
+  ## Retry a proposal that could not be recorded
+
+  **Improved** · A failed required proposal or policy-result save returns a retryable error without committing the proposal. Keep the original payload and retry key; HTTP clients receive `503` with `proposal_not_recorded` and a retry delay. [Handle proposal failures](/api/actions#troubleshoot-a-request).
+
+  ## Sign in from a localhost OAuth client
+
+  **Fixed** · Native OAuth clients can use a new port on their registered HTTP localhost callback. The consent screen identifies the callback host; other redirect components still have to match. [Connect Claude with OAuth](/mcp/setup#connect-claude-with-oauth).
+
+  ## Cancel held identity calls after withdrawal
+
+  **Fixed** · If consent is denied while browser configuration is pending, a held identity call stays cancelled even if another grant follows. Held tracking calls follow the same boundary. [Verify consent transitions](/signals/track-events#verify-grant-partial-consent-and-withdrawal).
+</Update>
 
 <Update label="October 12, 2026">
   ## Inspect Actions with a Read key

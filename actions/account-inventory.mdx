@@ -74,7 +74,7 @@ The response contains `account`, `sync`, `staleness`, `objects` and `next_cursor
 | `effective_status` | Optional Meta status, such as `ACTIVE`, `PAUSED`, or `ARCHIVED`. |
 | `campaign_id`, `adset_id` | Optional external Meta parent IDs. |
 | `after_id` | Positive internal object-row cursor from the previous `next_cursor`. |
-| `limit` | 1–200 objects; default 100. |
+| `limit` | 1–200 objects; default 25. The response-size budget can return fewer complete objects. |
 
 When `next_cursor` is non-null, repeat the same request with that value as `after_id`. Stop when it is null. Keep filters unchanged between pages. An object's internal `id` is not its external Meta `external_id`.
 
@@ -95,7 +95,9 @@ Call `get_inventory_metrics`:
 
 Use dates appropriate to your account's available history. Optional `campaign_id`, `adset_id` and `ad_id` filters use external Meta IDs. Dates use `YYYY-MM-DD`; the end cannot precede the start.
 
-The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `effective_range`, account details and freshness. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
+The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `effective_range`, account details, freshness and pagination. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
+
+Set `limit` from 1–100 (default 25) for each of `metrics`, `object_metrics` and `changes`. Inspect each collection's `total`, `next_cursor` and `truncated` under `pagination`. Repeat with the opaque top-level `next_cursor` as `cursor`, preserving the account, dates, filters and `include_changes`; stop when the top-level cursor is null. One collection can finish before another. A short or empty collection on a page does not establish that the complete window has no activity.
 
 Date bounds are inclusive in the account timezone, with UTC as the fallback. Plainrouter clips the requested range to the workspace's customer-visible retention cutoff and today. Inspect `effective_range` rather than assuming the full request was returned. If no range remains, it is null and `metrics`, `object_metrics` and `changes` are empty. `changes` is populated only when `include_changes` is true; it records observed field changes, not a complete causal audit of every Meta edit.
 
@@ -113,7 +115,7 @@ curl --fail-with-body --get \
   --data-urlencode 'include_changes=1'
 ```
 
-The response has the same top-level comparison fields described below. This read does not call Meta or refresh inventory. Account scope, date filters and nullable values still apply. The [public OpenAPI contract](https://plainrouter.com/openapi.json) defines the route and authentication.
+The response has the same comparison and pagination fields as MCP. Add `limit=25` and, for later requests, the returned opaque `cursor` as query parameters. This read does not call Meta or refresh inventory. Account scope, date filters and nullable values still apply. The [public OpenAPI contract](https://plainrouter.com/openapi.json) defines the route and authentication.
 
 ### How do counted arrivals compare with Meta metrics?
 

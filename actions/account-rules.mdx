@@ -93,7 +93,17 @@ In **Settings → Action policy → Account rules**, open the rule's **Recent ru
 
 The dashboard shows the latest five runs and at most 100 decisions per run. A notice identifies a truncated decision list. **No runs yet** means there is no recorded evaluation to inspect.
 
-Call `actions.rules.show` with `rule_id`. Inspect `enabled`, `suspended_at`, `suspended_reason`, `current_revision` and `runs`. Each run records its window, timezone, status, reason, account totals and per-target decisions. Reads return the latest five runs; each run includes at most 100 decisions, with `decisions_truncated` indicating more. For lists, `page` starts at 1, `per_page` defaults to 25 and accepts 1–100; continue with `rules.next_page_arguments` until it is null.
+Call `actions.rules.show` with `rule_id`. Inspect `enabled`, `suspended_at`, `suspended_reason`, `current_revision` and `runs`. Each run records its window, timezone, status, reason, account totals and per-target decisions. The read returns recent runs and bounded decision pages; do not assume the first response contains the complete history.
+
+### How do I continue rule history?
+
+| Collection | What to pass next |
+| --- | --- |
+| Rule summaries | `actions.rules.list` accepts `page` starting at 1, `per_page` from 1–100 (default 25) and a string `cursor`. Repeat with `rules.next_page_arguments` until null. Each summary has account, status, selected current-revision fields, latest-run status and revision/run counts. Use `actions.rules.show` for detail. |
+| Older revisions | `actions.rules.show` accepts `limit` from 1–25 (default 5). Pass `rule.next_cursor` as `cursor` with the same `rule_id`; `current_revision` remains separate from the revision page. Inspect `revision_count` and `truncated`. |
+| Decisions for one run | Inspect `decision_count`, `decisions_truncated` and `next_cursor` on the run. Pass its ID as `run_id` and its `next_cursor` as `decisions_cursor`, keeping `rule_id`. Continue until the run cursor is null. |
+
+Read responses can contain fewer rows to fit the response-size budget. Continue history with the read tool; do not repeat `actions.rules.create` or `actions.rules.update` just to retrieve another page.
 
 A decision marked `proposed` includes `action_batch_id`. Follow that batch in Inbox or the [Actions API](/api/actions); confirm approval where required, the execution receipt and exact provider verification. A matching rule or proposed batch is not **Landed**.
 
