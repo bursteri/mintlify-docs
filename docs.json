@@ -192,9 +192,14 @@
           {
             "group": "Overview",
             "icon": "book-open",
+            "openapi": {
+              "source": "https://plainrouter.com/openapi.json",
+              "directory": "api/overview"
+            },
             "pages": [
               "api/introduction",
               "api/authentication",
+              "GET /agent/context",
               "api/sandbox",
               "api/conversions"
             ]
@@ -233,8 +238,7 @@
                   "GET /agent/workspaces/{workspace}/action-rules",
                   "POST /agent/workspaces/{workspace}/action-rules",
                   "GET /agent/workspaces/{workspace}/action-rules/{action_rule}",
-                  "PATCH /agent/workspaces/{workspace}/action-rules/{action_rule}",
-                  "GET /agent/context"
+                  "PATCH /agent/workspaces/{workspace}/action-rules/{action_rule}"
                 ]
               },
               {
