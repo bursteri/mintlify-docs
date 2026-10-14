@@ -4,7 +4,7 @@ sidebarTitle: "MCP tool reference"
 description: "Use Plainrouter MCP tools for Signals reads, governed proposals, account rules, Actions receipts, workspace grants and synthetic testing."
 ---
 
-Plainrouter MCP server version `0.4.1` provides Signals reads and governed Actions tools. Four additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
+Plainrouter MCP server version `0.4.1` provides Signals reads and governed Actions tools. Three additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
 For credentials covering several workspaces, call `list_workspaces` and pass the selected `workspace_id` on each workspace-scoped tool call. The examples below can omit it only for a single-workspace credential. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work) and account selection are separate checks.
 
@@ -69,10 +69,9 @@ The server version is separate from the MCP protocol revision. For custom client
 | `launcher.draft_batch` | Non-destructive Plainrouter write | Create a Launcher draft batch from already-synced Drive assets. |
 | `launcher.batch_status` | Read-only, idempotent | Read the bounded status of one Launcher batch. |
 | `launcher.preview_batch` | Non-destructive Plainrouter write | Evaluate the authoritative preflight gate without provider work. |
-| `launcher.execute_batch` | Closed execution entry | Returns a bounded refusal during Launcher Phase B-1 and performs no mutation. |
 
 <Note>
-  The four `launcher.*` entries above describe the conditional legacy contract. Launcher is disabled by default, so those tools are absent from discovery and the file-import route returns `404`.
+  The three `launcher.*` entries above describe the conditional legacy contract. Launcher is disabled by default, so those tools are absent from discovery and the file-import route returns `404`.
 </Note>
 
 <Warning>
@@ -169,7 +168,7 @@ Signals read tools require an active principal with `ad-account.read`. `verify_s
 
 Clients authenticate with a role-capped [workspace execution token](/mcp/workspace-tokens). A **Read** token derives the read scopes. **Write** keys also derive the proposal scopes. New keys offer Read and Write; older Admin-tier keys retain their existing role and grant checks. Management keys and OAuth management credentials cannot authenticate to the MCP server.
 
-`launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, `launcher.execute_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview and the closed execution entry require `actions.propose`.
+`launcher.batch_status` accepts a Read, Write, or Admin token. `launcher.draft_batch`, `launcher.preview_batch`, and the file-import adapter require the Write or Admin tier. Drafting also requires `creative.write` and `actions.propose`; preview requires `actions.propose`.
 
 Every production tool call also checks an active, unexpired grant for the same workspace and the requested operation. Revoked grants cannot authorize a call. The `revoke_grant` tool applies its separate revocation-authority check described below.
 
@@ -759,12 +758,6 @@ The `previews` array is intentionally empty in this release. No provider preview
 
 This tool requires a Write or Admin token with `actions.propose`.
 
-### `launcher.execute_batch`
-
-When legacy Launcher is enabled, the execution entry is discoverable but deliberately closed. After validating the token and token-bound batch, every call returns `not_executable_in_phase_b1`.
-
-It does not evaluate the gate, advance the batch, create an Actions proposal or receipt, contact Meta, or mutate provider state.
-
 ### Refusals
 
-All three tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `account_required`, `batch_not_found`, or `internal_error`. `account_required` means account selection could not be resolved; check `account_id`, ownership, active connection, and any older key binding. Preview can also return `batch_not_operable` or `gate_receipt_raced`. Execute returns `not_executable_in_phase_b1` after successful authorization and batch resolution.
+Both status and preview tools can return `invalid_token`, `insufficient_scope`, `invalid_arguments`, `account_required`, `batch_not_found`, or `internal_error`. `account_required` means account selection could not be resolved; check `account_id`, ownership, active connection, and any older key binding. Preview can also return `batch_not_operable` or `gate_receipt_raced`.

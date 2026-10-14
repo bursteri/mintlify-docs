@@ -30,6 +30,12 @@ Counts represent actions, grouped into batches:
   **Approved, not sent** is separate from **Done**. **Approved without execution** means no Meta write occurred. For production execution acceptance, every action in the batch needs a durable receipt and exact provider verification.
 </Warning>
 
+## How do I find older actions?
+
+Inbox loads a bounded history alongside actions that need attention. Choose **Load older** below the list to continue through earlier history; repeat while the button remains available. Group counts cover the matching workspace actions, so a count can exceed the rows currently loaded. A partly loaded group does not mean its older actions were deleted.
+
+Confirm the workspace before paging. Loading history does not repeat a proposal, approve it or contact Meta. For a specific retained batch, you can also use the [Actions API](/api/actions) or [Audit](/actions/audit-log).
+
 ## Review the selected action
 
 ### Batch status and action status

@@ -89,8 +89,8 @@ Revoking a Management key does not revoke workspace keys it issued.
 - A creative duplicate is always proposed and created as `PAUSED`.
 - A proposal is not Landed until every exact receipt target passes provider
   verification. Pending verification is Not Landed.
-- `launcher.execute_batch` is deliberately closed during Phase B-1. It returns
-  `not_executable_in_phase_b1` and performs no mutation.
+- Legacy Launcher has draft, status and preview tools only. A successful
+  preview does not authorize or execute a Meta change.
 - Reuse the same idempotency key when retrying the same intent after a timeout.
 
 ## Inspect installation and arrivals without selecting an account
@@ -201,8 +201,7 @@ for upload, verification, retry, and compensation behavior.
    gate or contacting a provider.
 5. Call `launcher.preview_batch` to re-evaluate the authoritative preflight gate
    without provider work. A successful preview is not execution authorization.
-6. Do not call `launcher.execute_batch` expecting execution during Phase B-1;
-   the entry is closed and non-mutating.
+6. Do not invent a Launcher execution call; use only tools returned by discovery.
 
 Read
 [Connect Google Drive](https://plainrouter.com/docs/launcher/connect-drive),

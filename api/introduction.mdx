@@ -22,7 +22,7 @@ Use the Plainrouter REST API to send consented conversion events, inspect delive
 | Base URL | `https://plainrouter.com/api/v1` |
 | Request and response format | JSON; each endpoint documents its schema |
 | Signals authentication | Bearer Server secret for the workspace |
-| Actions authentication | Bearer Write Workspace key; see [Actions API](/api/actions) |
+| Actions authentication | Bearer Workspace key with the operation grant: Read for supported reads, Write for previews and proposals; see [Actions API](/api/actions) |
 | Management authentication | Bearer Management key; see [management operations](/api/authentication#how-do-i-use-the-management-api) |
 | Synthetic sandbox | No credential for `/sandbox/events`; a short-lived sandbox key for `/sandbox/keyed-events` |
 | API schema | [Published OpenAPI contract](https://plainrouter.com/openapi.json) |
@@ -86,6 +86,10 @@ Expand a group in the sidebar for its request fields, responses, and examples. P
 4. Preserve the event ID on retries and [inspect the delivery trace](/api/conversions#how-do-i-confirm-meta-accepted-the-event). HTTP `202` is ingestion acceptance; destination acceptance is a separate result.
 
 ## Handle errors and retries
+
+Send `Accept: application/json` on REST requests and `Content-Type: application/json` when sending a JSON body. Agent API routes under `/api/v1/agent/` return JSON errors for authentication, validation and busy-workspace failures even when `Accept` is absent. This does not change MCP's [streaming headers](/mcp/setup#which-mcp-protocol-should-my-client-use).
+
+If a client receives HTML or a sign-in redirect, inspect the original status, `Content-Type` and request URL before parsing the body. Use the API base URL and the endpoint's credential type; a dashboard URL is not an API endpoint. Do not forward a bearer key to a redirect target.
 
 | Result | Next step |
 | --- | --- |

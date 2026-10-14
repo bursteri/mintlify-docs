@@ -1,10 +1,10 @@
 ---
 title: "Meta ad account performance rules"
 sidebarTitle: "Account rules"
-description: "Create Meta account rules, inspect recent runs and proposals, and resume suspended rules after reviewing counted-arrival outcomes."
+description: "Configure Meta account rules in the dashboard, MCP or REST API; verify evaluation, approval and counted-arrival outcomes."
 ---
 
-Account rules propose a pause or daily-budget change when a target meets your counted-arrival and cost conditions. Create a rule under **Settings → Action policy → Account rules**, or through MCP. New rules start **disabled**; enabling is a separate decision.
+Account rules propose a pause or daily-budget change when a target meets your counted-arrival and cost conditions. Create a rule under **Settings → Action policy → Account rules**, through MCP, or through the REST API. New rules start **disabled**; enabling is a separate decision.
 
 In **Ask**, every proposed change waits for approval. In **Full**, admitted pauses and budget decreases can run automatically, but **rule-generated budget increases always require human approval**. Creating or editing a rule never changes Meta during that request.
 
@@ -80,6 +80,31 @@ Creation returns `rule`. Save its `id` and confirm `enabled: false`, account, wi
 ```
 
 Use `enabled: false` to disable. A name or definition edit appends an immutable revision; when editing `definition`, supply all its required fields. Enabling or disabling alone does not add a revision. The three-day window is fixed, so omit `window` and `window_days`.
+
+## Read or manage rules through REST
+
+The [API reference](/api/actions#configure-account-rules) lists the same rule operations. Use a Workspace key with the matching operation grant, not a Signals Server secret. Paths below are relative to `https://plainrouter.com/api/v1`.
+
+| Method and path | Access and result |
+| --- | --- |
+| `GET /agent/workspaces/{workspace}/action-rules` | Read or Write with `actions.rules.index`; returns a bounded `rules` collection. |
+| `GET /agent/workspaces/{workspace}/action-rules/{action_rule}` | Read or Write with `actions.rules.show`; returns one `rule`. |
+| `POST /agent/workspaces/{workspace}/action-rules` | Write with `actions.rules.store`; creates a disabled rule. |
+| `PATCH /agent/workspaces/{workspace}/action-rules/{action_rule}` | Write with `actions.rules.update`; edits or toggles the rule. |
+
+For a first read, set `PLAINROUTER_WORKSPACE_ID` to the key's workspace ID and load `PLAINROUTER_WORKSPACE_KEY` from secure server configuration:
+
+```bash
+curl --include --get \
+  "https://plainrouter.com/api/v1/agent/workspaces/$PLAINROUTER_WORKSPACE_ID/action-rules" \
+  --header "Authorization: Bearer $PLAINROUTER_WORKSPACE_KEY" \
+  --header "Accept: application/json" \
+  --data-urlencode "per_page=25"
+```
+
+Expect `200` and inspect `rules`, including continuation fields, before treating the list as complete. Keep the same filters when following `rules.next_cursor` as the `cursor` query parameter. An account-bound key retains its account restriction. For these REST routes, an unbound key requires exactly one eligible active account; multiple active accounts return `422` even if `account_id` is supplied. Check the [published contract](https://plainrouter.com/openapi.json) before assuming MCP account-selection behavior applies.
+
+Creation accepts `name` and the complete `definition` shown above; omit `enabled`. Verify the `201` response has `rule.enabled: false`. Enabling requires a separate PATCH with `{"enabled": true}`. Editing cannot change the account, and neither request performs a Meta change. A `403` calls for checking the key's workspace, tier and operation grant; `422` requires correcting the input or resolving account ambiguity. Use the dashboard's [Resume rule](#how-do-i-resume-a-suspended-rule) action to clear a suspension.
 
 ## How do I verify evaluation and execution?
 

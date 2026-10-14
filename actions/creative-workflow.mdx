@@ -125,7 +125,9 @@ Check these fields in the complete response:
 | `execution_mode_snapshot` | Confirm Ask for this walkthrough; Full can queue automatically. Historical suggest-only batches do not execute. |
 | `status`, `policy_decision`, and `policy_reasons` | Read any block before requesting another proposal. |
 | `approval_required` and `inbox_url` | Follow the returned queue link when a human decision is required. |
-| `actions` | Confirm the source ad, chosen asset, and `params.status: "paused"`. |
+| `actions` | Confirm the source ad, chosen asset, `params.status: "paused"` and frozen creative feature choices. |
+
+The complete proposal also stores `params.degrees_of_freedom_spec.creative_features_spec`: Plainrouter's Meta creative enhancement opt-outs at proposal time. Execution uses those frozen choices, so a later default change cannot silently change what was approved. These are server-produced proposal fields; do not add them to the MCP arguments above. The response excerpt omits them.
 
 If the client reports a protocol error or a tool result with `isError: true`, do not interpret transport success as proposal creation. Read the error and inspect the queue before retrying an uncertain result. The [MCP error model](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling) distinguishes protocol failures from tool execution failures.
 
@@ -214,5 +216,6 @@ After a timeout, check the returned or existing proposal in **Inbox** before att
 | Cursor rejected | Continue with `asset_type: "image"` or `"video"`, not `"all"`, and use the corresponding returned cursor. |
 | Approved, but no new Meta ad | Check `execution_mode_snapshot`. A suggest-only approval records a recommendation without execution. |
 | Request timed out | Check the existing proposal in the queue and retry only the same intent with the saved key. |
+| `launch_creative_features_missing` | The stored proposal lacks frozen creative feature choices. Inspect its status and receipt, then submit a fresh proposal for review. Retrying or editing the old approval cannot supply the missing choices. |
 | Proposal blocked | Read its policy reasons and current [policy constraints](/actions/policies-and-safety); approval does not bypass them. |
 | Ad remains Not Landed | Follow the status in [Inbox](/actions/review-proposals) and receipt events in [Audit](/actions/audit-log). Do not activate or duplicate it to bypass verification. |

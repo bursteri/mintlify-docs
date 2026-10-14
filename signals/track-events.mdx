@@ -264,13 +264,13 @@ Stripe verified revenue records settled Checkout Sessions and eligible paid subs
 
 You need an active Signals workspace, current team update permission for **Connections**, and permission to configure webhook endpoints for the Stripe account that receives your customers' payments. Your application must already create Checkout Sessions and handle order fulfillment. This connection is separate from [paying for Plainrouter](/billing/overview).
 
-The supported settlement flow uses Checkout Session events. Eligible `invoice.paid` renewals are limited to paid, positive-value `subscription_cycle` invoices under a global workspace and effective global policy; this does not establish support for every Stripe payment flow or invoice. Stripe's [fulfillment guide](https://docs.stripe.com/checkout/fulfillment) explains delayed payments and why returning to a success URL does not prove payment.
+The supported settlement flow uses Checkout Session events. Eligible `invoice.paid` renewals use paid, positive-value `subscription_cycle` invoices under a global workspace and effective global policy. A [first paid invoice after a captured trial](#how-are-subscriptions-and-trial-conversions-recorded) has a separate eligibility path; this does not establish support for every Stripe payment flow or invoice. Stripe's [fulfillment guide](https://docs.stripe.com/checkout/fulfillment) explains delayed payments and why returning to a success URL does not prove payment.
 
 ### Configure the webhook
 
 1. Open **Connections → Revenue sources → Stripe**.
 2. Copy the workspace's **Webhook endpoint** and add it as an endpoint in the intended Stripe account.
-3. Use Stripe snapshot events and subscribe to the required list shown in Plainrouter: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `refund.created`, `refund.updated` and `refund.failed`. You can also keep `checkout.session.async_payment_failed` for failure notifications. [Stripe's webhook guide](https://docs.stripe.com/webhooks) explains event formats and endpoint setup.
+3. Use Stripe snapshot events and subscribe to the required list shown in Plainrouter: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `refund.created`, `refund.updated` and `refund.failed`. You can also keep `checkout.session.async_payment_failed` for failure notifications. [Stripe's webhook guide](https://docs.stripe.com/webhooks) explains event formats and endpoint setup.
 4. Copy that endpoint's signing secret into **Endpoint signing secret** in Plainrouter and choose **Save secret**. This is the webhook signing secret, not your Stripe API key.
 5. Confirm the Stripe card shows `connected`. That status confirms a signing secret is configured; verify a settled payment separately below.
 
@@ -323,9 +323,23 @@ Use the returned `event_id` to find the retained record through [GET event](/api
 
 Duplicate paid notifications for the same Session reuse one purchase record and return `duplicate: true`. The first recorded purchase uses its settlement-confirming webhook's time. An older duplicate can return `duplicate: true` without an `event_id`; do not create another purchase to force a receipt or recover expired payload data. Supported refund notifications record an idempotent negative revenue adjustment. Plainrouter first tries the saved PaymentIntent-to-purchase link in this workspace, then available order metadata and charge references. Purchase lineage is attached only when a matching purchase exists; an unmatched refund does not establish a browser or advertising attribution link. Do not assume Stripe copies Session metadata onto refund objects; see [Stripe metadata propagation](https://docs.stripe.com/metadata).
 
+### How are subscriptions and trial conversions recorded?
+
+Subscribe to all three `customer.subscription.*` events in the setup list so Plainrouter can keep the signed subscription state current. Supported transitions into `trialing` and `active` can record `trial_started` and `subscribed` lifecycle events. A subscription status or lifecycle event is not a paid purchase. See the [webhook contract](https://plainrouter.com/webhooks.md) and [Stripe subscription events](https://docs.stripe.com/billing/subscriptions/webhooks) for the event inputs.
+
+For an eligible global-policy subscription Checkout Session with `payment_status: "no_payment_required"`, Plainrouter can retain an available acquisition match for the trial without counting revenue. A later positive, paid `invoice.paid` for that same workspace, Stripe customer and subscription can use that retained match when recording the first paid conversion. This path can accept a first invoice that is not a `subscription_cycle` renewal. Missing matches, strict-EU policy, opt-out or erased identity do not establish advertising attribution; adding `metadata.visitor_id` cannot bypass those checks.
+
+To verify using an existing trial and payment:
+
+1. In Stripe, confirm the workspace endpoint received the subscription snapshot and trial Checkout event. The unpaid trial must not appear as paid revenue.
+2. Find the later signed `invoice.paid`. Confirm positive `amount_paid`, `paid: true`, `status: "paid"`, and the matching customer and subscription.
+3. Use the webhook response's `event_id`, when supplied, to inspect the retained Signals record. Compare the paid amount and currency, then inspect acquisition and destination evidence separately. A `200` acknowledgement or `subscribed` event alone proves neither a purchase nor Meta acceptance.
+
+If the first payment has no retained trial match, do not manufacture a purchase or resend different metadata to force attribution. Check the workspace, event subscriptions, original identifiers and applicable policy first.
+
 ### How are renewals and refund status checked?
 
-For an eligible renewal, inspect the signed `invoice.paid` event: the invoice must be paid, have a positive amount, and use `billing_reason: "subscription_cycle"`. New subscriptions and arbitrary invoice events are not the same flow. A matched prior acquisition can supply retained attribution context; absence of that match does not imply an ad acquired the renewal.
+For an eligible renewal, inspect the signed `invoice.paid` event: the invoice must be paid, have a positive amount, and use `billing_reason: "subscription_cycle"`. The first paid trial conversion follows the separate checks above; arbitrary invoice events are not equivalent to renewals. A matched prior acquisition can supply retained attribution context; absence of that match does not imply an ad acquired the renewal.
 
 Subscribe to all three refund events above. A succeeded refund can adjust verified revenue; pending, failed or canceled states must not be treated as settled refunds. The **Refund status is unverified** notice means only charge-summary fallback evidence has been observed. Follow its subscription guidance rather than assuming status is confirmed. [Stripe's refund statuses and events](https://docs.stripe.com/refunds) explain the provider side.
 
