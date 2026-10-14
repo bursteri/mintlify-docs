@@ -98,7 +98,7 @@ Resume compares the target with the rest of the ad account over the same complet
 
 ### Configure account rules
 
-Use the [MCP account-rule tools](/actions/account-rules#configure-the-same-rule-through-mcp) to create disabled rules, explicitly enable them and inspect recent evaluation decisions. Rule reads accept Read keys; rule writes require Write and their own grants. Actions record reads on this page retain their separate Write requirement. A rule-generated budget increase requires human approval even in Full. Published SDK versions should not be assumed to include rule methods; use the discovered MCP contract for this workflow.
+Use the generated action-rule endpoints in the sidebar or the [MCP account-rule tools](/actions/account-rules#configure-the-same-rule-through-mcp) to list, create, inspect and update rules. Create a disabled rule, then explicitly enable it. Rule reads accept Read keys; rule writes require Write and their own grants. Actions record reads accept Read keys with `read-actions` or compatible `propose-actions` access. A rule-generated budget increase requires human approval even in Full. Published SDK versions should not be assumed to include rule methods; use the [published OpenAPI contract](https://plainrouter.com/openapi.json) for REST or the discovered MCP contract.
 
 ## Read the current policy
 

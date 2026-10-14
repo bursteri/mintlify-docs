@@ -229,7 +229,12 @@
                   "GET /agent/workspaces/{workspace}/action-batches/{actionBatch}",
                   "GET /agent/workspaces/{workspace}/actions/{action}",
                   "GET /agent/workspaces/{workspace}/actions/{action}/decision-receipt",
-                  "GET /agent/workspaces/{workspace}/actions/policy"
+                  "GET /agent/workspaces/{workspace}/actions/policy",
+                  "GET /agent/workspaces/{workspace}/action-rules",
+                  "POST /agent/workspaces/{workspace}/action-rules",
+                  "GET /agent/workspaces/{workspace}/action-rules/{action_rule}",
+                  "PATCH /agent/workspaces/{workspace}/action-rules/{action_rule}",
+                  "GET /agent/context"
                 ]
               },
               {
