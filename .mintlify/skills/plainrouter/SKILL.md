@@ -162,8 +162,9 @@ before representing execution consequences.
 
 Use `list_actions`, `get_action_batch`, `get_action`,
 `get_action_decision_receipt`, and `get_action_policy` to inspect stored records.
-These reads require a Write Workspace key and an active `propose-actions` grant;
-a normal Read key is insufficient. Confirm account selection first. They make no
+These reads accept Read Workspace keys with `read-actions` or compatible
+`propose-actions` access; action-rule list and show declare `ruleReader`, and
+create and update declare `ruleWriter`. Confirm account selection first. They make no
 provider calls and cannot approve, reject, or edit policy. Preserve unavailable
 receipts and distinguish current policy from a proposal's frozen mode. Read
 `disposition` for current receipt/recovery evidence; it is outside the immutable
