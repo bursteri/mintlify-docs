@@ -52,7 +52,7 @@ The document is stored when issued, rather than rebuilt from current action sett
 - **Access denied:** use a signed-in browser session with access to the action's workspace. An MCP workspace key or Signals secret cannot substitute for the browser session.
 - **Receipt not found:** confirm the workspace and action. A receipt from another workspace or a missing receipt cannot be downloaded through this action's link.
 
-For a server integration, use the [Actions decision-receipt endpoint](/api/actions#retrieve-a-decision-receipt) or [`get_action_decision_receipt`](/mcp/tools#get_action_decision_receipt) with a properly scoped Write Workspace key. These are separate from the signed-in download link and do not export the entire workspace audit history.
+For a server integration, use the [Actions decision-receipt endpoint](/api/actions#retrieve-a-decision-receipt) or [`get_action_decision_receipt`](/mcp/tools#get_action_decision_receipt) with a properly scoped Read or Write Workspace key and an active `read-actions` or compatible `propose-actions` grant. These are separate from the signed-in download link and do not export the entire workspace audit history.
 
 ### What does an exhausted reconciliation mean?
 

@@ -171,6 +171,11 @@ A pending proposal made under a retired execution mode cannot be approved. Inspe
 
 ## What if an approved batch stalls?
 
+**Approved. Execution could not start yet and will be retried automatically.** means the approval was saved, but its execution handoff failed. Keep following that batch and its receipts; do not approve a replacement or change the retry key to force another write. Current execution checks still apply when recovery runs.
+
+**Proposal saved; approval did not complete. Approve it in Inbox.** means a different state: the proposal exists but still needs a person decision. Open the existing pending batch and review it before approving. A missing notification alone is not evidence that the proposal or decision failed.
+
+
 Plainrouter can recover an approved batch whose execution job was lost and settle a stalled execution without repeating a provider write. Follow the existing batch; do not approve it again or create replacement proposals to force progress.
 
 Read each action and its receipt. Already verified work remains recorded. An action with no provider attempt can finish as failed without a write; an attempted operation whose result cannot be established can remain `execution_uncertain` with a `reconciliation_exhausted` receipt. Compensation that cannot be confirmed leaves `rollback_incomplete`. None of these labels proves that nothing reached Meta.

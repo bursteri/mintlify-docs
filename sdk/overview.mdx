@@ -83,4 +83,10 @@ The CLI exposes nine API commands. It has no ingestion-verification or cursor-ba
 | Event accepted but Meta delivery is pending | Read the event trace and check the [connected destination](/signals/connect-meta). Ingestion and delivery are separate results. |
 | Empty event list despite visible arrivals | Arrival totals are aggregate-only and do not appear as conversion events. Use [Signals reporting](/signals/health-and-performance#arrivals-vs-platform-claimed-clicks). |
 
+### Why does an Actions request fail validation?
+
+The current server contract applies even when your installed generated client accepts a broader object. Supply only the [documented action parameters](/api/actions#which-request-values-are-accepted), use actual integers where required, and omit optional pagination fields when you want the default. Do not send booleans as numbers or copy server-owned fields from a stored response into a new request.
+
+Inspect HTTP `422` field errors before retrying. A package upgrade does not change credential permissions, and a repository change is not necessarily in your installed release. Compare the published version above with your lockfile and the [current API contract](https://plainrouter.com/openapi.json).
+
 The language guides describe each client's response and error handling. For terminal-specific failures, see [CLI troubleshooting](/cli/get-started#what-if-the-first-command-fails).

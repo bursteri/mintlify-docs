@@ -1,10 +1,28 @@
 ---
 title: "October 2026"
-description: "Review MCP pagination, OAuth sign-in, proposal retry errors, Actions approvals, Signals consent handling and current SDK releases."
+description: "Review Actions API validation, Stripe lifecycle events, browser consent fixes, approval recovery and current SDK releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 15, 2026">
+  ## Match Actions requests to their parameter schema
+
+  **Changed** · Proposals and previews reject unknown action parameters and caller-supplied creative enhancement choices. Integer inputs reject booleans. Remove extra fields, preserve returned cursor types and inspect field errors before retrying. [Check accepted inputs](/api/actions#which-request-values-are-accepted).
+
+  ## Distinguish subscription activation, churn and upgrades
+
+  **Improved** · Signed Stripe subscription snapshots can record churn and verified recurring-price increases. Recovery from a past-due state is not counted as a new subscription, and scheduling cancellation alone is not churn. Paid revenue remains separate. [Verify lifecycle events](/signals/track-events#how-are-subscriptions-and-trial-conversions-recorded).
+
+  ## Honor CMP denial while a grant is waiting
+
+  **Fixed** · The v4 browser snippet cancels a pending external CMP grant when a supported listener reports denial. External CMP denial after transmission also triggers withdrawal in strict workspaces. [Verify the consent sequence](/signals/track-events#verify-grant-partial-consent-and-withdrawal).
+
+  ## Keep saved approvals when execution cannot start yet
+
+  **Improved** · A failed execution handoff no longer makes a saved approval look like a failed decision. Inbox identifies the saved approval and automatic retry; a saved proposal still needing approval has separate guidance. [Follow the existing batch](/actions/review-proposals#what-if-an-approved-batch-stalls).
+</Update>
 
 <Update label="October 14, 2026">
   ## Follow Stripe subscriptions through the first paid conversion

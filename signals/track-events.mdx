@@ -130,9 +130,11 @@ function withdrawAdvertisingConsent() {
 
 Keep the consent bridge running when consent is denied so it can report changes. Check your CMP's script-blocking configuration if callbacks never reach Signals.
 
+A denial received through a supported TCF or Consent Mode listener cancels an earlier grant still waiting for configuration or consent resolution. That earlier grant must not resume transmission later. After transmission has started, a supported external CMP denial triggers withdrawal in strict workspaces as well as global workspaces. Test the listener your site actually uses; a banner's visual state alone does not establish that Signals received the change.
+
 ### Verify grant, partial consent, and withdrawal
 
-Use a development or test site and inspect its Network panel. Test the installed library, not just the pre-load queue. A successful arrival is a separate initialization check and can appear in every row below.
+Use a development or test site and inspect its Network panel. Test the installed library, not just the pre-load queue. Include grant → denial while configuration is delayed, and grant → transmitted event → denial on an initialized page. After restoring network access, confirm the earlier grant does not resume event transmission. A successful arrival is a separate initialization check and can appear in every row below.
 
 | Current choice | Expected Signals behavior |
 | --- | --- |
@@ -325,7 +327,20 @@ Duplicate paid notifications for the same Session reuse one purchase record and 
 
 ### How are subscriptions and trial conversions recorded?
 
-Subscribe to all three `customer.subscription.*` events in the setup list so Plainrouter can keep the signed subscription state current. Supported transitions into `trialing` and `active` can record `trial_started` and `subscribed` lifecycle events. A subscription status or lifecycle event is not a paid purchase. See the [webhook contract](https://plainrouter.com/webhooks.md) and [Stripe subscription events](https://docs.stripe.com/billing/subscriptions/webhooks) for the event inputs.
+Subscribe to all three `customer.subscription.*` events in the setup list so Plainrouter can keep the signed subscription state current. Eligible signed snapshots can record these lifecycle events:
+
+| Plainrouter event | Required Stripe observation |
+| --- | --- |
+| `trial_started` | A subscription is created as `trialing`, or a signed update changes its status to `trialing`. |
+| `subscribed` | A subscription is created as `active`, or changes from `trialing` or `incomplete` to `active`. |
+| `churned` | A subscription deletion other than `incomplete_expired`, or an update that changes its status to `canceled`. |
+| `upgraded` | An `active` or `trialing` subscription update proves an increase in the comparable recurring monthly total using signed previous values. |
+
+Recovery from `past_due` to `active` is not a new subscription activation. Setting `cancel_at_period_end` alone is not churn. A plan name change, discount, unmatched currency or uncomputable previous price does not by itself establish an upgrade. Plainrouter does not fetch missing historical prices to invent the comparison.
+
+Lifecycle events do not add purchase revenue. Verify paid amounts through Checkout settlement or `invoice.paid` separately. Repeated webhook deliveries must not create another lifecycle conversion; keep the original Stripe event ID when redelivering through Stripe. An ignored or duplicate response is not proof of a new event, and old delivery cannot restore erased identity or expired history. See the [webhook contract](https://plainrouter.com/webhooks.md) and [Stripe subscription events](https://docs.stripe.com/billing/subscriptions/webhooks) for the inputs.
+
+If a lifecycle event is missing, inspect the signed snapshot's event type, current status and `data.previous_attributes`. For upgrades, compare the recurring items, currency and quantities; a larger invoice alone is insufficient. Then inspect the retained event and its destination trace. A lifecycle record is not proof of Meta acceptance or attribution.
 
 For an eligible global-policy subscription Checkout Session with `payment_status: "no_payment_required"`, Plainrouter can retain an available acquisition match for the trial without counting revenue. A later positive, paid `invoice.paid` for that same workspace, Stripe customer and subscription can use that retained match when recording the first paid conversion. This path can accept a first invoice that is not a `subscription_cycle` renewal. Missing matches, strict-EU policy, opt-out or erased identity do not establish advertising attribution; adding `metadata.visitor_id` cannot bypass those checks.
 

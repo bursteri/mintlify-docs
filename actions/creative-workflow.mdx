@@ -127,7 +127,7 @@ Check these fields in the complete response:
 | `approval_required` and `inbox_url` | Follow the returned queue link when a human decision is required. |
 | `actions` | Confirm the source ad, chosen asset, `params.status: "paused"` and frozen creative feature choices. |
 
-The complete proposal also stores `params.degrees_of_freedom_spec.creative_features_spec`: Plainrouter's Meta creative enhancement opt-outs at proposal time. Execution uses those frozen choices, so a later default change cannot silently change what was approved. These are server-produced proposal fields; do not add them to the MCP arguments above. The response excerpt omits them.
+The complete proposal also stores `params.degrees_of_freedom_spec.creative_features_spec`: Plainrouter's Meta creative enhancement opt-outs at proposal time. Execution uses those frozen choices, so a later default change cannot silently change what was approved. These are server-produced proposal fields; do not add them to the MCP arguments above or to `params` when using `propose-actions`, `dry_run_actions` or the REST proposal routes. Even a `null` value is refused. Retry with the original submitted fields rather than copying the stored response; replay preserves the original frozen choices. The response excerpt omits them.
 
 If the client reports a protocol error or a tool result with `isError: true`, do not interpret transport success as proposal creation. Read the error and inspect the queue before retrying an uncertain result. The [MCP error model](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling) distinguishes protocol failures from tool execution failures.
 

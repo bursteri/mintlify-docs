@@ -104,6 +104,10 @@ Keep each source's event ID and original evidence. Multiple source records can r
 
 For Stripe, set `metadata.order_id` on the Checkout Session. Without that metadata, its Session ID is a separate fallback key; a different browser order ID will not automatically match it. See [Stripe setup and order association](/signals/track-events#associate-a-checkout-session-with-your-order).
 
+## Why is optional identity data absent?
+
+Use a recognized ISO 3166-1 alpha-2 country code in `user_data.country` and a valid phone number with the required country context. An unusable optional country or phone can be omitted from identity matching while an otherwise eligible event is retained. This does not turn missing geography into a consent grant or relax the workspace's policy. Check the event and delivery trace instead of assuming every supplied identifier was accepted.
+
 ## Why is the consent capture time invalid?
 
 A new server event authenticated with a Signals workspace secret returns HTTP `202` with a `warnings` array. The array is empty when no warning applies. If you supply `visitor_id` or `user_data` without a parseable consent capture time, the acknowledgement includes `consent_captured_at_invalid`:
@@ -264,6 +268,8 @@ SDKs and CLI clients derive their method and command names from these semantic o
 Resource IDs remain scoped to the authenticated workspace. A client cannot use its Signals secret to read another workspace's events or destinations.
 
 Cursor listing accepts `per_page` up to 100. Omit `cursor` on the first request, then pass the returned `next_cursor` unchanged to fetch the next page. TypeScript exposes `listEventsByCursor`; Python exposes it through `plainrouter.generated.api.operations.list_events_by_cursor`. The CLI has no cursor-listing command.
+
+The reconciliation report returns `buckets` as a JSON object keyed by reason. When there are no buckets, its value is `{}`, not `[]`; an empty object is not evidence that every conversion reached Meta. Read the report's counts, window and delivery states together.
 
 ## Read workspace identifiers
 

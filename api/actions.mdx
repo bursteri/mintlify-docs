@@ -154,6 +154,21 @@ The preview can read real account and provider state. It does not create a batch
 
 Repeating a preview evaluates current state again; the required idempotency key does not reserve a proposal or freeze the result. If you choose to submit, use the proposal endpoint below with the intended body. Submission reevaluates the proposal and creates its review record. A dry run cannot enable a closed action workflow or override the workspace approval mode.
 
+## Which request values are accepted?
+
+Proposal and dry-run `params` objects accept only the fields defined for that action type in the [published contract](https://plainrouter.com/openapi.json). Unknown keys are rejected, including keys with `null` values. Do not send a complete stored action response back as a new request.
+
+| Input | Required shape |
+| --- | --- |
+| `pause` or `resume` | Send `"params": {}`. Omit extra labels or provider fields. |
+| Daily budget | Send only `new_daily_budget_minor`, such as `4900`, inside `params`. Use a positive JSON integer, not a quoted amount, decimal or boolean. |
+| Creative duplicate | Send `asset_id`, `status: "paused"`, and optional `name_suffix`. Omit `degrees_of_freedom_spec`; Plainrouter supplies and freezes it. |
+| Integer selectors and pagination | Use documented integer values and bounds. Do not send `true` or `false` as account IDs, page numbers, limits or numeric cursors. |
+
+Pagination types differ: for example, Actions reads use a numeric cursor while rule lists use a string cursor. Copy the returned continuation fields without converting one endpoint's cursor into another type. Omit optional pagination fields to use defaults; `null` is not the same as omission unless the endpoint explicitly allows it.
+
+For HTTP `422`, read `errors` by field path. A proposal parameter refusal includes `action_params_invalid` in the field message. Remove unknown fields or correct the value before retrying; a new idempotency key cannot make an invalid body valid. MCP exposes the corresponding tool validation error. [Full validation and retry rules](/mcp/tools#validation-and-retry-keys).
+
 ## Submit a governed proposal
 
 Use the [generated proposal request reference](/api/actions/actionproposalapi/propose-actions) for the typed action input and response fields. A batch contains 1–25 actions and 1–3 evidence declarations. Select targets yourself and include rationale for each action; supply `account_id` when account selection requires it.
@@ -169,7 +184,7 @@ curl --fail-with-body \
   --data-binary @proposal.json
 ```
 
-A new batch returns `201`; an idempotent repeat returns `200` with the existing result. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
+A new batch returns `201`; an idempotent repeat returns `200` with the existing result. A later notification or execution-queue failure does not undo an already saved proposal. Read the returned batch before retrying an uncertain result; do not submit a second intent to force a notification. Preserve the original idempotency key for the same intent after a timeout. Read the [proposal response reference](/api/actions/actionproposalapi/propose-actions) for its fields; `approval_queue_url` remains a compatibility alias for `inbox_url`.
 
 In Ask mode, send the reviewer to **Inbox**. Use the reads above to follow the result in either mode. These routes do not approve or reject proposals, edit policy, manage keys, or override the workspace's approval mode. In **Ask**, allowed changes wait for human approval; **Full** can queue admitted unprotected changes automatically. Protected batches, including budget increases and campaign/ad-set resumes, still need a person approval. Historical **Suggest only** approval ends without execution. A successful proposal response is not proof of a provider change or **Landed** status.
 

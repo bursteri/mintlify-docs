@@ -577,6 +577,8 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 These rules apply to both `propose-actions` and `dry_run_actions`:
 
 - Send `actions` and `evidence` as JSON arrays, not objects keyed by index or name. NUL characters (`U+0000`) are rejected in request keys and values.
+- Every action's `params` object is closed: supply only fields documented for that type, even when an extra field would be `null`. Types with no parameters require `{}`. A stored response can include server-owned fields that cannot be submitted.
+- Boolean values do not satisfy integer inputs such as account selectors, page sizes or `evidence[].action_index`. Use the documented type and range, and preserve each tool's cursor type.
 - Each action can supply its own `idempotency_key`. Otherwise its effective key is the batch key plus `:` and its zero-based action index. Effective action keys must be unique within the batch, including collisions between explicit and derived keys.
 - Keep the original batch key and payload when retrying the same submission after a timeout. A preview does not reserve that key or return a stored submission.
 
@@ -585,7 +587,7 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 | `pause`, `resume` | `target_entity.id` must be a non-empty string of digits. Send empty `params: {}`. |
 | `increase_budget`, `decrease_budget` | Use a digits-only target ID string. `params` contains only `new_daily_budget_minor`, a positive JSON integer, not a quoted number, decimal, or boolean. |
 | `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. For optional `size_bytes`, use a positive integer byte count. |
-| `duplicate_ad_with_creative` | Use the exact `image:…` or `video:…` asset ID returned by the creative library, not a bare numeric provider ID; `status` is `paused`. |
+| `duplicate_ad_with_creative` | Supply only `asset_id`, `status: "paused"` and optional `name_suffix`. Use the exact `image:…` or `video:…` library asset ID. `degrees_of_freedom_spec` is server-owned and must be omitted, including on retries. |
 
 Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask; Full queues policy-allowed changes automatically. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes. The legacy `adjust_budget` and `set_status` recommendations remain non-executable. See [supported Actions](/actions/overview#supported-action-types) and the [creative workflow](/actions/creative-workflow).
 

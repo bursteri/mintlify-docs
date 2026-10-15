@@ -249,6 +249,10 @@ Reconciliation normally runs daily. History older than 48 hours is stale. When `
 
 ## Delete a Signal
 
-The Signals overview no longer has the old health-header delete control. During collection-domain setup, workspace owners can use the domain's delete control to reset Signals. This removes its collection configuration and related data; accepted events already held by Meta are not retracted.
+The Signals overview no longer has the old health-header delete control. During collection-domain setup, workspace owners can use the domain's delete control to reset Signals. This removes its collection configuration and starts cleanup of related Signals data; accepted events already held by Meta are not retracted.
 
-Deleting the entire workspace is a separate permanent action in workspace settings and also removes its linked accounts and workspace data.
+### Why is setup blocked after a reset?
+
+**Signals data cleanup is still in progress for this workspace. Try setting up Signals again after cleanup finishes.** means the previous cleanup has not completed. Wait, then retry setup in the same workspace. Reloading, changing the collection domain or submitting setup repeatedly does not complete cleanup. Do not interpret a temporary setup refusal as a DNS error.
+
+Deleting the entire workspace is a separate permanent action in workspace settings. It can be refused while Signals cleanup is pending or when retained Actions or Launch evidence prevents deletion. Read the displayed reason and resolve it before retrying; a refused request does not mean the workspace was deleted.
