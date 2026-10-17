@@ -72,9 +72,9 @@ You need an active Signal for arrival collection and a connected Meta destinatio
 
 The arrival total counts dedicated arrival records sent once per document load. A consented `PageView`, purchase, or other conversion does not add another arrival. Arrivals confirm collection; they never create Meta deliveries.
 
-Arrivals stay aggregate-only and do not appear in event-level lists or detail APIs. Their records contain no page URL, referrer, platform or channel source, visitor identity, IP address, user agent, or commerce details. Event time is rounded down to the UTC hour. Invalid traffic, synthetic events, and legacy exposure rows do not enter the arrival total.
+Customer-visible arrival totals stay aggregate-only and do not appear in conversion-event lists or detail APIs. Browser collection can carry the [bounded traffic context](/signals/install-pixel#what-happens-on-initialization) described in the installation guide; it does not make the total an individual visitor or channel attribution report. Invalid traffic, synthetic events and legacy exposure rows do not enter the arrival total.
 
-The total remains a complete number, including when it is below five. A strict-EU severed subtotal from one to four is withheld separately. In that case, the page and CSV say **Complete total; one small cell is withheld**. The `partial` marker refers to the withheld component; it does not subtract arrivals from the total or the difference calculation.
+The total remains a complete number, including when it is below five. The dashboard, MCP summary and CSV publish one arrival count for the same workspace and reporting window. They do not expose jurisdiction subtotals or a `partial` marker alongside the total. Compare the workspace, time window and freshness before diagnosing a mismatch; today so far is separate from completed days.
 
 ### Match quality
 
@@ -113,7 +113,7 @@ A completed read with no reported row is different from a missing read. Missing 
 
 Channel details read consented, attributed conversion-event data separately from arrival totals. They include eligible global-policy rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows do not appear in the channel view. Because arrival records carry no channel identity, channel rows do not allocate or sum to the arrival total.
 
-Choose **Export** to download the stored comparison as CSV with its reporting period and total-basis labels. The export preserves the distinction between unavailable data and zero.
+Choose **Export** to download the stored comparison as CSV with its reporting period and complete arrival total. The export preserves the distinction between unavailable data and zero.
 
 ### Verified revenue
 

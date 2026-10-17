@@ -12,6 +12,8 @@ Start with the [MCP introduction](/mcp/overview) for supported tasks and access 
 
 ## How do I read every result?
 
+Use integer values for `get_arrivals_comparison.days` and `get_cookie_scan.limit`; booleans are rejected. Page-based Actions and Launch lists accept `page` from 1 to `10000000000000000` inclusive; omit it for page 1 and correct page-validation errors before retrying. Prefer returned continuation arguments, particularly in JavaScript where large integers can lose precision.
+
 Collection tools return bounded pages of complete rows. A short page can reflect the response-size budget rather than the end of the collection. Follow the returned continuation fields, preserving workspace, account, filters and date window; stop only when the corresponding cursor is null. Do not report partial results as a complete account inventory or history.
 
 | Read | Continuation |

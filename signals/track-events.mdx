@@ -298,6 +298,28 @@ curl https://api.stripe.com/v1/checkout/sessions \
 
 Replace the example return URLs with your application's URLs. Store the returned Session `id` alongside your order and redirect the customer to its `url`. See Stripe's [Create a Checkout Session reference](https://docs.stripe.com/api/checkout/sessions/create) for the complete request. Session creation and the success-page redirect are not payment verification.
 
+### How do I associate Stripe customers with app users?
+
+Use your application's stable internal user ID consistently across server events and Stripe. This lets Plainrouter record a workspace-scoped customer-to-user association when an eligible signed webhook contains both identifiers. Use an opaque ID that is never reassigned and is distinct from an order ID or browser visitor ID. Use the same exact value throughout; do not substitute an email address.
+
+1. Send the signup through your [server-event integration](/api/conversions) with that ID in `user_data.external_id`, preserving the real consent and event fields. Use server events for this app-user ID; the current browser `identify` flow above handles email and phone.
+2. When creating Checkout on your server, set `client_reference_id` to the same ID. The signed event must also identify a Stripe Customer. For one-time Checkout that would not otherwise create a Customer, use Stripe's supported `customer` or `customer_creation` option.
+3. If you create Stripe Customers directly, set Customer `metadata.user_id` to the same ID and subscribe your workspace endpoint to `customer.created` and `customer.updated`. A signed subscription snapshot can also supply `metadata.user_id`. Plainrouter uses metadata present in the webhook; it does not fetch missing nested Customer or Subscription data.
+4. Inspect the signed webhook in Stripe: check the workspace endpoint, Customer ID and selected app-user field. Then verify the retained purchase or lifecycle event separately. HTTP `200` alone does not prove a user association, paid revenue or advertising attribution.
+
+For a Checkout event, Plainrouter checks `client_reference_id` first, then Session `metadata.user_id`, then available nested Customer and Subscription `metadata.user_id`. For a Customer event it reads Customer `metadata.user_id`; for a subscription event it reads Subscription metadata before available nested Customer metadata. Use one consistent ID so these sources cannot disagree.
+
+Add these fields to your server-side Checkout creation request when using an existing Customer. These are Stripe fields, separate from the Plainrouter event body:
+
+```json
+{
+  "customer": "cus_example",
+  "client_reference_id": "app_user_1042"
+}
+```
+
+Keep `metadata.order_id` for order reconciliation; `client_reference_id` does not replace it. See Stripe's [Checkout Session fields](https://docs.stripe.com/api/checkout/sessions/create) and [metadata propagation rules](https://docs.stripe.com/metadata). Missing Customer data or app-user metadata cannot establish the association. An existing conflicting association is not silently reassigned, and opt-out, erasure and policy boundaries still apply. This setup does not guarantee a browser join, Meta acceptance or attribution.
+
 ### How do I verify a settled purchase?
 
 Inspect the endpoint's delivery in Stripe for a known Checkout Session, then compare the order and amount with Signals. Plainrouter records revenue only when the settlement event has `payment_status` exactly `paid`.

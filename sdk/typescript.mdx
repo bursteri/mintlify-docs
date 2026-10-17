@@ -6,11 +6,19 @@ description: "Install and use the generated @plainrouter/sdk client and Zod sche
 
 [`@plainrouter/sdk`](https://www.npmjs.com/package/@plainrouter/sdk) is the generated TypeScript client for the signed Plainrouter OpenAPI contract. It exposes typed request and response models, API methods, and Zod schemas for the Conversion API, including cursor-based event listing.
 
-The current [npm release](https://www.npmjs.com/package/@plainrouter/sdk) is `0.9.0` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/sdk). Review release notes before upgrading while the SDK remains in the `0.x` series.
+The current [npm release](https://www.npmjs.com/package/@plainrouter/sdk) is `0.10.0` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/sdk). Review release notes before upgrading while the SDK remains in the `0.x` series.
 
 <Note>
-  Version `0.9.0` includes the required event consent fields and `verifySignalIngestion`.
+  Version `0.10.0` includes the required event consent fields and `verifySignalIngestion`.
 </Note>
+
+## What changes when upgrading?
+
+In `0.10.0`, use `DeploymentPlanRead` and `zDeploymentPlanRead` instead of the removed `DeploymentPlan` names. Exhaustive status handling must include delivery `held` and destination `needs_attention`. Hand-built `Destination` objects need `attention_reason`, `held_count` and `notices` with the declared types.
+
+The client defaults to `Accept: application/json` and rejects redirects with `ApiRedirectError`, which retains the response status and headers. Exported Zod request parsers reject extra keys on closed objects; request functions still leave server validation responsible for submitted fields. Follow response cursors with unchanged filters rather than assuming one page is complete.
+
+Review the [published release notes](https://github.com/plainrouter/sdk/blob/v0.10.0/packages/sdk/CHANGELOG.md) and the [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
 
 ## Requirements
 
@@ -21,7 +29,7 @@ The current [npm release](https://www.npmjs.com/package/@plainrouter/sdk) is `0.
 ## Install
 
 ```bash
-npm install @plainrouter/sdk@0.9.0
+npm install @plainrouter/sdk@0.10.0
 ```
 
 ## Configure the client
@@ -50,7 +58,7 @@ if (!result.response?.ok || !result.data) {
 console.log({ returnedEvents: result.data.events.data.length });
 ```
 
-The client sends the Signals workspace secret as a bearer token. The `signalTrackerSecret` property keeps its compatibility name in `0.9.0`. The client does not read credentials from the environment automatically.
+The client sends the Signals workspace secret as a bearer token. The `signalTrackerSecret` property keeps its compatibility name in `0.10.0`. The client does not read credentials from the environment automatically.
 
 ## Configure another API origin
 

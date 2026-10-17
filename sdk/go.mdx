@@ -4,7 +4,13 @@ sidebarTitle: "Go"
 description: "Send consented purchases with the Plainrouter Go SDK, preserve original timestamps and event IDs on retries, and check ingestion and Meta delivery."
 ---
 
-[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from Plainrouter's signed OpenAPI contract. Release `v0.6.0` targets signed API contract `0.5.0` and adds canonical package documentation and runnable examples.
+[`github.com/plainrouter/sdk-go`](https://pkg.go.dev/github.com/plainrouter/sdk-go) is the official Go SDK generated from Plainrouter's signed OpenAPI contract. Release `v0.7.0` targets signed API contract `0.5.0` and refreshes generated operations and models. Review the source compatibility changes below before upgrading.
+
+## What changes when upgrading?
+
+In `v0.7.0`, generated page setters use `int64`, including `ApiActionsApiIndexRequest.Page`. `PlanCopyError` becomes `PlanCopyNotFound`. Pause and resume parameter models use `EmptyClosedObject` rather than an open map. Destination and delivery constructors have new required arguments; update manual model construction against the declared signatures.
+
+The root client remains available. Generated model and helper names can change across this `0.x` upgrade, so compile your application and follow the [complete source migration list](https://github.com/plainrouter/sdk-go/blob/v0.7.0/CHANGELOG.md). Follow returned cursors for partial Actions, plan and inventory results; a package upgrade does not authorize a product workflow.
 
 ## Requirements
 
@@ -15,7 +21,7 @@ description: "Send consented purchases with the Plainrouter Go SDK, preserve ori
 ## Install
 
 ```bash
-go get github.com/plainrouter/sdk-go@v0.6.0
+go get github.com/plainrouter/sdk-go@v0.7.0
 ```
 
 Review the package on [Go Packages](https://pkg.go.dev/github.com/plainrouter/sdk-go) and the generated source in [`plainrouter/sdk-go`](https://github.com/plainrouter/sdk-go).
@@ -61,7 +67,7 @@ Before sending, confirm settlement on your server, load the order's recorded adv
 
 The following helper package accepts a paid order from your application. Use a stable, non-personal order ID, a decimal-string total, an actual checkout URL without personal data, and the original purchase and consent times. Parse stored times with their timezone; do not replace them with `time.Now()` during retries.
 
-The published `v0.6.0` client wraps consented requests in `CreateEventRequestAnyOf`. Its `event_time` wrapper supports an ISO-8601 string; this example uses that branch rather than narrowing a Unix timestamp to `int32`.
+The published `v0.7.0` client wraps consented requests in `CreateEventRequestAnyOf`. Its `event_time` wrapper supports an ISO-8601 string; this example uses that branch rather than narrowing a Unix timestamp to `int32`.
 
 ```go
 package conversions
@@ -172,7 +178,7 @@ The helper checks the recorded grant values; it does not obtain consent or estab
 
 ### Reuse the client and context safely
 
-Create one client with `plainrouter.New` and reuse it. Derive a request context with a deadline from your job or HTTP request context, and call its cancellation function after the request. In `v0.6.0` the client sends the token as a default `Authorization` header; never log the client configuration or token. A deadline or lost connection can leave acceptance uncertain.
+Create one client with `plainrouter.New` and reuse it. Derive a request context with a deadline from your job or HTTP request context, and call its cancellation function after the request. In `v0.7.0` the client sends the token as a default `Authorization` header; never log the client configuration or token. A deadline or lost connection can leave acceptance uncertain.
 
 Persist one payload per paid order before sending, including the event ID, original purchase time, amount and applicable consent snapshot. Retry that stored payload after checking that advertising use is still permitted. Do not rebuild it with fresh timestamps or identity data.
 
@@ -213,6 +219,6 @@ For operation names and request fields, use the [Conversion API reference](/api/
 
 ## Implementation references
 
-- [Published Go package `v0.6.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go@v0.6.0)
-- [Generated create operation at `v0.6.0`](https://github.com/plainrouter/sdk-go/blob/v0.6.0/openapi/api_event.go)
+- [Published Go package `v0.7.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go@v0.7.0)
+- [Generated create operation at `v0.7.0`](https://github.com/plainrouter/sdk-go/blob/v0.7.0/openapi/api_event.go)
 - [Plainrouter event request and delivery reference](/api/conversions)

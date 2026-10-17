@@ -1,10 +1,28 @@
 ---
 title: "October 2026"
-description: "Review Actions API validation, Stripe lifecycle events, browser consent fixes, approval recovery and current SDK releases."
+description: "Review current SDK releases, workspace API errors, Stripe app-user setup, arrival reporting and October product improvements."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 17, 2026">
+  ## Upgrade SDKs with current request and response handling
+
+  **Changed** · TypeScript, Python and CLI `0.10.0`, Ruby `0.6.0`, PHP `0.4.0`, and Go `v0.7.0` are published. Review model renames, required fields, pagination and redirect handling before upgrading. [Check the migration guidance](/sdk/overview#what-should-i-check-before-upgrading).
+
+  ## Handle unavailable workspaces consistently
+
+  **Changed** · Workspace-scoped API requests return `404` with `api_route_not_found` for missing, inaccessible or non-canonical workspace selectors. Check the authorized workspace ID and error body before retrying. [Troubleshoot workspace errors](/api/authentication#why-does-a-workspace-request-return-404).
+
+  ## Use a stable app-user ID with Stripe
+
+  **Added** · Use the same internal user ID in a Signals server event and Stripe Checkout or Customer metadata so eligible signed webhooks can record a workspace-scoped customer association. Keep order IDs separate and verify settlement independently. [Configure the association](/signals/track-events#how-do-i-associate-stripe-customers-with-app-users).
+
+  ## Read one complete arrival count
+
+  **Changed** · Dashboard, MCP summaries and CSV exports publish one complete arrival total for the same workspace and window. Clients should read the total directly rather than expecting jurisdiction components or a partial marker. [Interpret arrival reporting](/signals/health-and-performance#events-received).
+</Update>
 
 <Update label="October 15, 2026">
   ## Match Actions requests to their parameter schema

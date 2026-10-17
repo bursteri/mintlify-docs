@@ -4,7 +4,7 @@ sidebarTitle: "PHP"
 description: "Install the released Plainrouter PHP SDK with Composer, test the sandbox, send consented purchases, retry safely, and inspect delivery."
 ---
 
-Use [`plainrouter/sdk`](https://packagist.org/packages/plainrouter/sdk) to call the Plainrouter Conversion API from PHP. Published version `0.3.0` targets signed API contract `0.5.0`; it provides event, operations and sandbox groups. The generated client does not call Meta's Graph API directly.
+Use [`plainrouter/sdk`](https://packagist.org/packages/plainrouter/sdk) to call the Plainrouter Conversion API from PHP. Published version `0.4.0` targets signed API contract `0.5.0`; it provides event, operations and sandbox groups. The generated client does not call Meta's Graph API directly.
 
 ## Requirements and installation
 
@@ -13,10 +13,18 @@ You need PHP 8.2 or newer with cURL, JSON and mbstring, plus Composer. For produ
 Install the released package:
 
 ```bash
-composer require plainrouter/sdk:0.3.0
+composer require plainrouter/sdk:0.4.0
 ```
 
-The [release source](https://github.com/plainrouter/sdk-php/tree/v0.3.0) is authoritative for these examples. SDK main can contain methods awaiting a later package release.
+The [release source](https://github.com/plainrouter/sdk-php/tree/v0.4.0) is authoritative for these examples. SDK main can contain methods awaiting a later package release.
+
+## What changes when upgrading?
+
+Version `0.4.0` exposes more operation groups through the curated client, including `actionReads`, `actionRules`, `adTests`, `cookieDeclarations`, `creatives` and `inventory`. Use an appropriately scoped Workspace key for Actions operations; the Server secret in the conversion example does not grant Actions access.
+
+Use named arguments when calling generated methods whose pagination or content-type parameters changed. For example, `launchPlansIndex(1, 50)` can now mean page 50 rather than a page size of 50; use `launchPlansIndex(workspace: 1, per_page: 50)`. Replace the removed `Plainrouter\OpenAPI\Model\DeploymentPlan` with `DeploymentPlanRead`.
+
+The curated client defaults to JSON responses and rejects redirects with `Plainrouter\OpenAPI\ApiException`, retaining status and response headers. Follow returned cursors for incomplete collections. Review the [published release notes](https://github.com/plainrouter/sdk/blob/php-v0.4.0/packages/php/CHANGELOG.md) and [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
 
 ## Try the sandbox first
 

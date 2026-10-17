@@ -302,11 +302,23 @@ credential cannot call MCP tools, Launcher imports, or other agent-authenticated
 routes. Use a separately issued Workspace key for MCP after
 discovery.
 
+## Why does a workspace request return 404?
+
+On documented workspace-scoped machine routes, a missing, inaccessible or non-canonical workspace selector returns HTTP `404` with `error.code: "api_route_not_found"`. A credential can be valid while the requested workspace is unavailable to it. This response does not reveal whether another workspace exists.
+
+Use the exact positive integer ID returned by discovery. Leading zeros, signs, spaces, decimal forms and booleans are not canonical workspace path IDs. A `workspace_id` query or body selector matters only on routes that read it; it cannot widen credential access. A foreign or malformed entry in a `workspace_ids` selection is a field-validation error rather than a way to enumerate workspaces.
+
+1. Confirm the route's credential type and intended workspace locally.
+2. Copy the authorized ID from workspace discovery and check both the URL and any documented selector.
+3. Inspect the response code and body together. A `403` for an accessible workspace's missing operation is different from workspace `404`; an Actions `receipt_not_available` is a separate scoped response. Do not retry neighboring IDs or infer deletion from a generic `404`.
+
+The current [public contract](https://plainrouter.com/openapi.json) governs these server responses even if an older generated client describes a narrower error union. See [Actions receipts](/api/actions#what-does-receipt_not_available-mean) and [Workspace key access](/mcp/workspace-tokens#access-tiers).
+
 ## Why does a dashboard URL reject my bearer token?
 
 Dashboard settings and approval pages require a signed-in browser session. A valid Workspace key or OAuth management credential cannot replace that session, even with an active grant or Admin tier.
 
-A bearer header causes `401` on these session routes even when a valid browser session cookie is also present. Remove the `Authorization: Bearer ...` header from browser-session requests; check any proxy or client that adds it automatically. Signing in again does not make a bearer header valid on a session route.
+On an accessible session route, a bearer header causes `401` even when a valid browser session cookie is also present. Remove the `Authorization: Bearer ...` header from browser-session requests; check any proxy or client that adds it automatically. Signing in again does not make a bearer header valid on a session route.
 
 If an automation receives `401` on a dashboard URL, check the requested interface before rotating credentials. Use the documented MCP or API operation with its matching credential, or sign in to complete the interactive action. For grant management, follow [the dashboard revocation steps](/mcp/workspace-tokens#inspect-and-revoke-a-grant-in-the-dashboard) or the separately authorized [`revoke_grant` MCP tool](/mcp/tools#revoke_grant).
 
@@ -315,15 +327,16 @@ If an automation receives `401` on a dashboard URL, check the requested interfac
 | Client | Package or endpoint | Current version | Authentication |
 | --- | --- | --- | --- |
 | Signals REST | `https://plainrouter.com/api/v1` | Signed OpenAPI `0.5.0` | Server secret |
-| [TypeScript setup](/sdk/typescript) | `@plainrouter/sdk` | `0.6.0` | Server secret passed through `signalTrackerSecret` |
-| [Python setup](/sdk/python) | `plainrouter` | `0.6.0` | Server secret passed to `create_client` |
-| [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.2.0` | Server secret passed to `PlainRouter::Client.new` |
-| [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.6.0` | Server secret attached to the request context |
-| [CLI setup](/cli/get-started) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.6.0`; npm `0.6.0` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
-| MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.4.0` | None |
-| MCP production | `https://plainrouter.com/mcp` | Server `0.4.0` | Workspace key for tool calls and account data |
+| [TypeScript setup](/sdk/typescript) | `@plainrouter/sdk` | `0.10.0` | Server secret passed through `signalTrackerSecret` |
+| [Python setup](/sdk/python) | `plainrouter` | `0.10.0` | Server secret passed to `create_client` |
+| [Ruby setup](/sdk/ruby) | `plainrouter-sdk` | `0.6.0` | Server secret passed to `PlainRouter::Client.new` |
+| [PHP setup](/sdk/php) | `plainrouter/sdk` | `0.4.0` | Server secret passed to `Plainrouter\Client` |
+| [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.7.0` | Server secret passed to `plainrouter.New` |
+| [CLI setup](/cli/get-started) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.10.0`; npm `0.10.0` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
+| MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.4.1` | None |
+| MCP production | `https://plainrouter.com/mcp` | Server `0.4.1` | Workspace key for tool calls and account data |
 
-The REST contract and all four SDKs expose the signed Conversion API operations. The
+The REST contract and all five SDKs expose the signed Conversion API operations. The
 PyPI and npm CLI distributions expose nine commands and do not include an ingestion-verification
 command. Use REST, an SDK, or MCP for ingestion verification.
 
