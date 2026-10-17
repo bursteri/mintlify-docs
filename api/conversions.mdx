@@ -1,7 +1,7 @@
 ---
 title: "Conversion API: send and verify server events"
 sidebarTitle: "Conversion API overview"
-description: "Authenticate the Plainrouter Conversion API, submit consented server events, retry safely, inspect Meta delivery, and use the signed OpenAPI contract."
+description: "Send consented server events through Plainrouter, interpret identity normalization, retry safely, and verify ingestion and Meta delivery."
 ---
 
 Send server-side conversion events to Plainrouter at `https://plainrouter.com/api/v1/events` using a Signals workspace secret. A new event returns `202`; check its delivery trace separately to confirm Meta acceptance. SDKs and command-line clients use the same Signals REST API.
