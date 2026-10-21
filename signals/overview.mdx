@@ -47,6 +47,10 @@ Use **Dashboard** for [paid-account performance and arrival comparisons](/signal
   Signals health and reconciliation are account- or dataset-level measurements. They do not provide campaign, ad set, ad, spend, budget, learning-phase, or target-level CPA state.
 </Warning>
 
+## How do I choose and inspect conversions?
+
+Choose [workspace conversion events](/signals/conversions) for the dashboard metric, then use [conversion journeys and channel costs](/signals/conversion-journeys) to inspect observed credit. These definitions are distinct from Meta's attributed claims and delivery acceptance. Read [signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp) for retained delivery gaps and evidence limits.
+
 ## Consent behavior
 
 The identity-free arrival runs once on initialization. The separate conversion-event, identifier and advertising-delivery paths follow the effective jurisdiction policy. The table below describes the strict-EU consent path:
@@ -65,6 +69,8 @@ Server-side `POST /events` requests must include a `consent_basis` of `consent` 
 ### How does the global policy differ?
 
 When the workspace is configured for the global market and the server resolves an eligible global policy, the current v4 snippet can use `legitimate_interest` without turning unknown permissions into granted permissions. It waits for configuration and preserves explicit denial, withdrawal and supported opt-out signals. GPC can suppress transmission. A detected external choice remains a separate input.
+
+Global admission also requires the server-verified market activation and a valid edge policy. Selecting a global workspace alone is insufficient. If that context is missing or invalid, the server applies the stricter path. Disabling a banner or sending `source: "global_default"` does not manufacture a consent grant.
 
 Strict-EU policy requires the full advertising grant. An unknown same-origin policy is not assumed global. Changing `consent_basis` in JSON does not override the server's jurisdiction or opt-out checks. Keep the actual decision and effective policy, and verify your collection using [Track events and consent](/signals/track-events).
 

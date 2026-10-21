@@ -35,6 +35,12 @@ Meta must resolve its dynamic placeholders on a real ad click. A manually opened
 
 Inspect any partial-coverage note: it compares tagged-ad spend with total account spend. Account-level Meta totals include untagged ads, while Plainrouter ad-level measurements cover tagged ads. A missing tag or partial coverage is not evidence that Meta lost the purchase.
 
+## Where do workspace conversions and journey costs appear?
+
+Paid performance can show **Conversions** beside **Purchases**, using the selected [workspace event definition](/signals/conversions). Check the effective choices and reporting window before comparing an ad row with a workspace total. Historical Tests and proposal evidence retain the definition captured when created.
+
+For model-based credit across observed touches and cost per earned conversion, use the [journey and channel-cost tools](/signals/conversion-journeys). Those read their own explicit conversion kinds, rather than silently inheriting the dashboard selection.
+
 ## Why is the available history shorter than my selected range?
 
 Check **Workspace settings → Read window** for the effective number of days. **Identity retention** is shown separately. Choose a shorter range and check the actual report dates; the label does not guarantee N complete days of source data.
@@ -211,6 +217,32 @@ The daily rows in the stored performance response identify gateway-verified conv
 | **Meta returned no composite Event Match Quality scores.** | A capture completed without a usable composite score. Treat the score as unavailable and check the capture date. |
 
 EMQ is match-quality evidence, not confirmation of an individual conversion's acceptance, attribution, or revenue impact. Use the [event delivery trace](/api/conversions#how-do-i-confirm-meta-accepted-the-event) to investigate a purchase and the [EMQ guide](https://plainrouter.com/library/meta-event-match-quality) for matching concepts.
+
+## How do I read signal quality through MCP?
+
+Call `get_signal_quality` with a Read or Write Workspace key authorized for Signals reads. It uses stored evidence and makes no live advertising API request. The default window is the last 30 days; default kinds are `trial_started` and `subscribed`. To include ordinary purchases and leads, select them explicitly:
+
+```json
+{
+  "workspace_id": 42,
+  "conversion_kinds": ["trial_started", "subscribed", "purchase", "lead"]
+}
+```
+
+You can supply inclusive `from` and `to` timestamps. Read `range_used` before interpreting the result: retention can shorten the requested period, and restricted account scope can leave provider figures unavailable.
+
+| Result | What to inspect |
+| --- | --- |
+| `delivery_outcomes.rows` | Each conversion kind and destination, live states, separate test sends, scoped no-delivery gaps and recorded reasons. |
+| `retained_identity_presence` | Identity material still retained, not a reconstruction of which keys were historically sent. |
+| `journey_coverage` | Retained snapshot and touch coverage; it is independent of the chosen journey-credit model. |
+| `latest_emq` | Latest stored Meta EMQ evidence with its availability and scope. |
+| `consent_rates` | Recorded consent decisions in the effective window; missing receipts do not prove a broken CMP. |
+| `unavailable` | Explicit limits, including acceptance latency, historical sent-key coverage, complete deduplication counts and opted-out person counts. |
+
+Keep null values and their reasons. Do not label an unexplained delivery gap as a consent refusal or turn a missing destination into successful acceptance. Trial and subscribed rows labeled **not sent to Google by design** are not missing Google conversions; a Google row does not establish that Google delivery is enabled.
+
+The Signals screen also groups delivery problems by destination. Inspect the affected destination's statuses and errors instead of applying one connection's failure to every event. Queued, retrying and accepted work are different from terminal failures. For a SaaS installation, use the separate [setup-ready and live-verification states](/signals/track-events#how-do-i-verify-saas-setup-without-creating-a-paid-conversion).
 
 ## What does Meta recovery evidence show?
 

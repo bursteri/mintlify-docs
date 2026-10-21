@@ -1,10 +1,32 @@
 ---
 title: "October 2026"
-description: "Review current SDK releases, workspace API errors, Stripe app-user setup, arrival reporting and October product improvements."
+description: "Review workspace conversion choices, journey and channel-cost reporting, signal quality, SaaS setup verification and current SDK fixes."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 21, 2026">
+  ## Choose what counts as a workspace conversion
+
+  **Added** · Select purchases, subscriptions, trial starts and leads in Workspace settings. Dashboard counts use the saved choices, while existing Tests and proposal evidence keep their captured definition. [Configure conversions](/signals/conversions).
+
+  ## Read journey credit and channel costs
+
+  **Added** · Read observed conversion journeys and cost per earned conversion through MCP. Choose a credit model and lookback, compare Meta claims separately, and retain coverage and currency limits. [Read journeys and costs](/signals/conversion-journeys).
+
+  ## Diagnose signal quality from stored evidence
+
+  **Added** · Inspect scoped delivery outcomes, gaps, test sends, retained identity and journey coverage with `get_signal_quality`. Missing or unavailable evidence stays explicit. [Interpret signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp).
+
+  ## Separate SaaS setup readiness from live delivery
+
+  **Improved** · Installation guidance reports `setup_ready` separately from `live_verified`. Check existing evidence and owner handoffs without creating a paid conversion; live verification still needs retained real Meta acceptance. [Verify SaaS setup](/signals/track-events#how-do-i-verify-saas-setup-without-creating-a-paid-conversion).
+
+  ## Update SDK error and import handling
+
+  **Fixed** · TypeScript, Python and CLI `0.10.1`, Ruby `0.6.1`, PHP `0.4.1`, and Go `v0.7.1` correct workspace/inventory error handling and Launcher import routing. Ruby also fixes standalone multipart loading, and PHP improves async error decoding. [Check package upgrade notes](/sdk/overview#what-changed-in-the-current-releases).
+</Update>
 
 <Update label="October 17, 2026">
   ## Upgrade SDKs with current request and response handling

@@ -272,7 +272,7 @@ The supported settlement flow uses Checkout Session events. Eligible `invoice.pa
 
 1. Open **Connections → Revenue sources → Stripe**.
 2. Copy the workspace's **Webhook endpoint** and add it as an endpoint in the intended Stripe account.
-3. Use Stripe snapshot events and subscribe to the required list shown in Plainrouter: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `refund.created`, `refund.updated` and `refund.failed`. You can also keep `checkout.session.async_payment_failed` for failure notifications. [Stripe's webhook guide](https://docs.stripe.com/webhooks) explains event formats and endpoint setup.
+3. Use Stripe snapshot events and subscribe to the required list shown in Plainrouter: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `refund.created`, `refund.updated`, `refund.failed`, `customer.created` and `customer.updated`. You can also keep `checkout.session.async_payment_failed` for failure notifications. [Stripe's webhook guide](https://docs.stripe.com/webhooks) explains event formats and endpoint setup.
 4. Copy that endpoint's signing secret into **Endpoint signing secret** in Plainrouter and choose **Save secret**. This is the webhook signing secret, not your Stripe API key.
 5. Confirm the Stripe card shows `connected`. That status confirms a signing secret is configured; verify a settled payment separately below.
 
@@ -319,6 +319,35 @@ Add these fields to your server-side Checkout creation request when using an exi
 ```
 
 Keep `metadata.order_id` for order reconciliation; `client_reference_id` does not replace it. See Stripe's [Checkout Session fields](https://docs.stripe.com/api/checkout/sessions/create) and [metadata propagation rules](https://docs.stripe.com/metadata). Missing Customer data or app-user metadata cannot establish the association. An existing conflicting association is not silently reassigned, and opt-out, erasure and policy boundaries still apply. This setup does not guarantee a browser join, Meta acceptance or attribution.
+
+### How do I verify SaaS setup without creating a paid conversion?
+
+For a managed-hostname (Path A) workspace, call `get_install_instructions` with the authorized workspace. Same-origin forwarding workspaces use their separate [serving setup](/signals/configure-serving); this tool does not return Path B material. Follow `saas_steps` and read `saas_verification`; these are stored-evidence reads, not commands to create a customer, payment or advertising event.
+
+| State | What establishes it |
+| --- | --- |
+| `setup_ready` | Stored collection evidence, configured Stripe signing secret, recent authenticated Stripe evidence, a retained conflict-free app-user link and an active scoped Meta destination. It does not require a paid conversion. |
+| `live_verified` | Setup evidence plus retained live Meta acceptance for an eligible `StartTrial` or `Subscribe`. Synthetic ingestion and test-mode sends do not establish it. |
+
+Inspect each fact's `status`, `value` and `reason`. `observed`, `not_observed`, `test_only` and `unavailable` are distinct. The recent webhook evidence uses the last 24 hours within retention; an ignored webhook, replay or metadata-only update may not leave a new receipt. Missing evidence can also mean erasure or expiry, not faulty setup. Consent receipts are reported separately; neither setup readiness nor missing receipts requires inventing a grant.
+
+Collection evidence can say `browser_snippet` or `server_only`. Keep that distinction: a server observation is not proof that the browser snippet loaded. Browser app-user `identify` remains `pending_release` in the recipe until a production Workers release includes it; use the server-event path above and do not invent a browser command.
+
+Ask your assistant to read the returned state and [signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp), then name the missing evidence and next owner. The workspace owner completes DNS, Stripe secret entry and Meta connection in the app. A setup time estimate is not a deadline for real traffic, billing or live provider acceptance.
+
+### What do StartTrial and Subscribe delivery mean?
+
+Eligible signed Stripe `trial_started` events map to Meta `StartTrial` without monetary value. An eligible `subscribed` event maps to Meta `Subscribe` only after verified first-positive-invoice evidence supplies its value and currency. A status change alone does not prove a paid subscription. Current delivery uses retained, permitted identity context and remains subject to consent, policy, opt-out, destination and freshness checks.
+
+Subscription renewals are not another Meta `Subscribe`, and invoice purchase rows are not sent to Meta as an extra Purchase. `upgraded` and `churned` remain recorded lifecycle facts rather than new Meta delivery promises. Signal quality explicitly labels trial/subscribed Google rows as not sent by design; this does not enable Google delivery.
+
+Use the returned event ID and delivery trace. Do not construct subscription lifecycle event IDs from Stripe IDs: current IDs are workspace-keyed and legacy IDs remain compatibility details. A webhook acknowledgement or recorded lifecycle event is separate from provider acceptance and attribution.
+
+### Is the restricted Stripe revenue key the webhook signing secret?
+
+No. **Connections → Stripe revenue** accepts a restricted read-only Stripe API key and displays its status, live/test mode, account binding and verification reason. The **Stripe** webhook card uses a different endpoint signing secret. [Stripe distinguishes restricted API keys from webhook signing secrets](https://docs.stripe.com/keys). Keep both in their intended app fields and out of MCP prompts, chat, source control and logs.
+
+Saving a revenue key can fail if the account or mode does not match retained signed webhook evidence; a different account or mode requires the app's Signals reset flow. Review the data-removal consequences before resetting. The card states that history import is not available yet. Saving or verifying this key does not import past subscriptions, prove live event delivery or complete the SaaS installation.
 
 ### How do I verify a settled purchase?
 

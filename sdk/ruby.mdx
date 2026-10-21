@@ -4,17 +4,19 @@ sidebarTitle: "Ruby"
 description: "Install the official Ruby SDK, send a consented purchase through Plainrouter, retry safely, inspect delivery, and handle API errors."
 ---
 
-[`plainrouter-sdk`](https://rubygems.org/gems/plainrouter-sdk) is the official Ruby SDK for Plainrouter's signed OpenAPI contract. Gem `0.6.0` targets signed API contract `0.5.0` and exposes a compact client over the generated API.
+[`plainrouter-sdk`](https://rubygems.org/gems/plainrouter-sdk) is the official Ruby SDK for Plainrouter's signed OpenAPI contract. Gem `0.6.1` targets signed API contract `0.5.0` and exposes a compact client over the generated API.
 
 The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/ruby). Review release notes before upgrading while the gem remains in the `0.x` series.
 
 ## What changes when upgrading?
 
-In `0.6.0`, replace `PlainRouter::OpenAPI::DeploymentPlan` with `PlainRouter::OpenAPI::DeploymentPlanRead`. Hand-built destination models require `attention_reason`, `held_count` and `notices`. Creative projection classes have also changed; update any explicit class checks using the release notes.
+Version `0.6.1` loads `Pathname` for standalone multipart requests and corrects the Launcher import route. Inventory `GetAccountInventory404Response` is now an anyOf module using `.build`, not a message model with `.new` or `.build_from_hash`. Inspect the selected `ApiRouteNotFound` or account-error branch.
+
+When upgrading from releases before `0.6.0`, replace `PlainRouter::OpenAPI::DeploymentPlan` with `PlainRouter::OpenAPI::DeploymentPlanRead`. Hand-built destination models require `attention_reason`, `held_count` and `notices`. Creative projection classes have also changed; update any explicit class checks using the release notes.
 
 The curated client defaults to JSON responses and raises `PlainRouter::OpenAPI::ApiError` on API redirects without following them. Closed request objects reject unknown keys. Omit an optional page argument for the default and follow returned cursors for incomplete results.
 
-Review the [published release notes](https://github.com/plainrouter/sdk/blob/ruby-v0.6.0/packages/ruby/CHANGELOG.md) and the [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
+Review the [published release notes](https://github.com/plainrouter/sdk/blob/ruby-v0.6.1/packages/ruby/CHANGELOG.md) and the [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
 
 ## Requirements
 
@@ -24,16 +26,16 @@ Review the [published release notes](https://github.com/plainrouter/sdk/blob/rub
 
 ## Install
 
-Install [`plainrouter-sdk 0.6.0`](https://rubygems.org/gems/plainrouter-sdk):
+Install [`plainrouter-sdk 0.6.1`](https://rubygems.org/gems/plainrouter-sdk):
 
 ```bash
-gem install plainrouter-sdk -v 0.6.0
+gem install plainrouter-sdk -v 0.6.1
 ```
 
 Or add the gem to your `Gemfile`, then run `bundle install`:
 
 ```ruby
-gem "plainrouter-sdk", "~> 0.6.0"
+gem "plainrouter-sdk", "~> 0.6.1"
 ```
 
 ## Create an authenticated client

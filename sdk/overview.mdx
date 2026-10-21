@@ -34,11 +34,11 @@ For a terminal workflow, start with the [CLI quickstart](/cli/get-started), then
 
 | Client | Runtime | Published package |
 | --- | --- | --- |
-| TypeScript | Node.js `22.22.2` or newer | [`@plainrouter/sdk` `0.10.0`](https://www.npmjs.com/package/@plainrouter/sdk) |
-| Python | Python 3.11 or newer | [`plainrouter` `0.10.0`](https://pypi.org/project/plainrouter/) |
-| Ruby | Ruby 3.2 or newer | [`plainrouter-sdk` `0.6.0`](https://rubygems.org/gems/plainrouter-sdk) |
-| PHP | PHP 8.2 or newer, cURL, JSON and mbstring | [`plainrouter/sdk` `0.4.0`](https://packagist.org/packages/plainrouter/sdk) |
-| Go | Go 1.23 or newer | [`sdk-go` `v0.7.0`](https://pkg.go.dev/github.com/plainrouter/sdk-go) |
+| TypeScript | Node.js `22.22.2` or newer | [`@plainrouter/sdk` `0.10.1`](https://www.npmjs.com/package/@plainrouter/sdk) |
+| Python | Python 3.11 or newer | [`plainrouter` `0.10.1`](https://pypi.org/project/plainrouter/) |
+| Ruby | Ruby 3.2 or newer | [`plainrouter-sdk` `0.6.1`](https://rubygems.org/gems/plainrouter-sdk) |
+| PHP | PHP 8.2 or newer, cURL, JSON and mbstring | [`plainrouter/sdk` `0.4.1`](https://packagist.org/packages/plainrouter/sdk) |
+| Go | Go 1.23 or newer | [`sdk-go` `v0.7.1`](https://pkg.go.dev/github.com/plainrouter/sdk-go) |
 
 Production Conversion API requests require a **Server secret** stored on your server. Published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential. An MCP Workspace key is a separate credential and cannot authenticate Conversion API requests. See [Authentication](/api/authentication).
 
@@ -46,7 +46,7 @@ To deliver conversions to Meta, [connect the intended dataset](/signals/connect-
 
 ## What changed in the current releases?
 
-TypeScript, Python and CLI `0.10.0`, Ruby `0.6.0`, PHP `0.4.0`, and Go `v0.7.0` are published. They refresh generated operations, bounded response models and request validation. The API contract still reports version `0.5.0`; package versions have their own release sequence.
+TypeScript, Python and CLI `0.10.1`, Ruby `0.6.1`, PHP `0.4.1`, and Go `v0.7.1` are published. The patch releases correct workspace and inventory error models and the Launcher import route. Ruby also fixes standalone multipart loading, and PHP improves asynchronous error decoding. The preceding minor releases introduced the bounded response models and request-validation changes below. The API contract still reports version `0.5.0`; package versions have their own release sequence.
 
 The refreshed models include current Actions reads and destination/delivery states. New Actions Read access uses a `read-actions` grant; upgrading a package does not upgrade an older credential. Use a Server secret for Signals and an appropriately scoped Workspace key for [Actions](/api/actions). A generated method or enum does not enable a gated product workflow.
 

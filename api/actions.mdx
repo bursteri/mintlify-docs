@@ -96,6 +96,10 @@ Here, spend and cost use ISO currency minor units, with decimal strings where ne
 
 Resume compares the target with the rest of the ad account over the same completed days. Budget changes compare the target before and after the provider-write day. See [comparison windows, freshness and loss rules](/actions/review-proposals#how-are-later-performance-outcomes-checked). A missing payload or null count is unknown. A lost result can create an [inverse proposal](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal) governed by Ask/Full; follow its batch and verification separately.
 
+### Which conversion definition did the evidence use?
+
+Current counted evidence can include `conversion_definition.version`, `conversion_definition.events` and observed conversion counts. Read those captured choices with the evidence window, rather than substituting today's workspace settings. Existing outcome checks, approvals and provider verification still apply; changing a conversion definition does not establish a successful advertising change. See [frozen conversion definitions](/signals/conversions#do-changes-rewrite-existing-tests-or-proposals).
+
 ### Configure account rules
 
 Use the generated action-rule endpoints in the sidebar or the [MCP account-rule tools](/actions/account-rules#configure-the-same-rule-through-mcp) to list, create, inspect and update rules. Create a disabled rule, then explicitly enable it. Rule reads accept Read keys; rule writes require Write and their own grants. Actions record reads accept Read keys with `read-actions` or compatible `propose-actions` access. A rule-generated budget increase requires human approval even in Full. Published SDK versions should not be assumed to include rule methods; use the [published OpenAPI contract](https://plainrouter.com/openapi.json) for REST or the discovered MCP contract.

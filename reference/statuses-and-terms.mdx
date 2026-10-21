@@ -69,6 +69,7 @@ These labels come from the account-scoped `get_signal_health` diagnostic. The Si
 | `expired` | Terminal | The event exceeded delivery freshness or its retained payload is unavailable. |
 | `skipped:consent` | Terminal | The event was ineligible under its consent, jurisdiction or opt-out state. |
 | `skipped:no_destination` | Terminal | No active destination was configured. |
+| `skipped:lifecycle` | Terminal | The recorded subscription lifecycle stage is not a conversion for this destination. It is not destination acceptance or a missing-send diagnosis. |
 | `skipped:duplicate` | Terminal | A duplicate destination write was suppressed. Inspect the canonical purchase and original delivery; this row is not another acceptance. |
 
 ### What should I do after a delivery fails?

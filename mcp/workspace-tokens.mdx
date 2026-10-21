@@ -48,6 +48,8 @@ For the Actions API, `/workspaces/{workspace}/…` selects the workspace. If a q
 
 ## How does account selection work?
 
+Pass workspace IDs exactly as returned by `list_workspaces`. Booleans, decimal forms, whitespace and leading-zero forms are not canonical selectors. A malformed tool argument or conflicting query/header selector is refused; do not cast arbitrary input to an integer to force access. A refusal does not reveal whether another workspace exists.
+
 For tools that accept `account_id`, use Plainrouter's positive integer advertising-account ID, not Meta's external ad account ID. For example:
 
 ```json

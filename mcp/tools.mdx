@@ -19,6 +19,7 @@ Collection tools return bounded pages of complete rows. A short page can reflect
 | Read | Continuation |
 | --- | --- |
 | `list_workspaces`, `get_cookie_scan` | Pass top-level `next_cursor` as integer `cursor`; inspect `total` and `truncated`. |
+| `get_conversion_journeys` | Pass `pagination.next_cursor` as opaque `cursor` with the same workspace, dates, model, lookback, level, kinds and limit. |
 | `get_account_inventory` | Pass `next_cursor` as `after_id`; defaults to 25 objects. |
 | `get_inventory_metrics` | Pass the opaque top-level `next_cursor` as `cursor` with the same filters and `include_changes`; inspect each collection under `pagination`. |
 | `list_actions` | Pass `meta.next_cursor` as `cursor`, keeping account, status and `limit`; `meta.next_page_arguments` supplies the next arguments. |
@@ -40,6 +41,9 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_cookie_scan` | Read-only, idempotent | Read retained pre-consent scan findings; does not start a scan. |
 | `get_consent_rates` | Read-only, idempotent | Read recorded Analytics and Marketing choices and recent receipts. |
 | `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
+| `get_conversion_journeys` | Read-only, idempotent | Read retained journey credit and separate Meta claims; [guide](/signals/conversion-journeys). |
+| `get_cac_by_channel` | Read-only, idempotent | Compare stored spend with earned conversions by currency; [guide](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). |
+| `get_signal_quality` | Read-only, idempotent | Read scoped delivery outcomes, gaps, retained identity and journey coverage; [guide](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp). |
 | `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored Meta outbound clicks and inspect the separate Purchase comparison. |
 | `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
 | `get_inventory_metrics` | Read-only, idempotent | Compare stored Meta metrics with counted arrivals; read optional change history. |
@@ -223,10 +227,26 @@ Use a Read or Write workspace key with an active grant for `get_install_instruct
 | `cname` | DNS record with `type`, `name`, `target`, and `value` (an alias of `target`), or `null` when unavailable. |
 | `snippet` | Generated browser snippet, or `null` until the managed hostname is active and held by the edge. |
 | `first_arrival` | Whether Plainrouter has stored the workspace's first qualifying arrival. |
+| `saas`, `saas_steps` | Ordered signup/Stripe setup guidance and owner handoffs. A pending browser-identify release is not a runnable command. |
+| `saas_verification` | Separate `setup_ready` and `live_verified` evidence, facts, window and quality gaps. |
+
+For SaaS, follow the returned steps and [separate setup readiness from live Meta verification](/signals/track-events#how-do-i-verify-saas-setup-without-creating-a-paid-conversion). Secrets are entered by the owner in the app, never in chat.
 
 Copy the returned DNS record and snippet exactly. If material is missing, finish [managed-hostname setup](/signals/configure-dns) in the dashboard; do not invent a hostname or construct a snippet from incomplete fields. After installation, check the [browser requests](/signals/install-pixel#verify-the-installation) and read `first_arrival` again. A true value records arrival collection, not consented conversion delivery or Meta acceptance.
 
 Same-origin forwarding (Path B) returns an error. Use the [same-origin setup page](/signals/configure-serving) instead; this tool never returns forwarding material or server secrets. A missing or inactive workspace authorization also fails.
+
+## `get_conversion_journeys` and `get_cac_by_channel`
+
+These production reads use a Read or Write Workspace key authorized for Signals reporting. Their grants use the existing `get_arrivals_comparison` read operation. They accept `workspace_id` and their documented filters, not `account_id`; provider figures remain limited by the credential's account scope. They do not change ads or call live advertising APIs and are not new spend-affecting proposal-evidence sources.
+
+Journeys default to `conversion_kinds: ["subscribed", "purchase"]`; channel costs default to singular `conversion_kind: "subscribed"`. Both support the four credit models, 7/30/60/90-day lookbacks and channel dimensions in the [canonical guide](/signals/conversion-journeys). Align filters explicitly and preserve `basis_note`, effective dates, currency and availability reasons. Journey pages continue through `pagination.next_cursor`.
+
+## `get_signal_quality`
+
+Read stored delivery states and gaps, separate test sends, retained identity presence, journey coverage, stored EMQ and consent summaries. Use a Read or Write Workspace key authorized through the existing `get_arrivals_comparison` operation. Defaults are a 30-day window with `trial_started` and `subscribed`; supported kinds also include `purchase` and `lead`. The tool accepts optional inclusive `from`/`to` timestamps and no `account_id`.
+
+Check scope and null reasons, and preserve the explicit `unavailable` figures rather than inventing latency, historical sent-key coverage or complete dedup counts. See [signal-quality interpretation](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp). This is a read, not an ingestion test or permission to send a conversion.
 
 ## `get_arrivals_comparison`
 

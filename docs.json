@@ -58,6 +58,8 @@
               "signals/cookie-scan",
               "signals/consent-choices",
               "signals/connect-meta",
+              "signals/conversions",
+              "signals/conversion-journeys",
               "signals/health-and-performance"
             ]
           },

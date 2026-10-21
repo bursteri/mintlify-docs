@@ -109,7 +109,7 @@ Agents and server integrations can follow the same stored action outcomes throug
 
 ## What is the frozen counted evidence?
 
-Supported Meta target proposals capture `counted_evidence` over the last seven completed account-local days at proposal time. Inbox compares Meta-reported clicks and purchase figures with counted arrivals and eligible observed purchases for that target. Inspect the capture time, window, currency and coverage; null means unavailable, not zero.
+Supported Meta target proposals capture `counted_evidence` over the last seven completed account-local days at proposal time. Inbox compares Meta-reported clicks and purchase figures with counted arrivals and eligible observed purchases for that target. Inspect the capture time, window, currency and coverage; null means unavailable, not zero. Current evidence can also include `observed_conversions` and a frozen `conversion_definition` with its version and event choices. Later workspace edits do not recalculate that captured definition. See [workspace conversions](/signals/conversions#do-changes-rewrite-existing-tests-or-proposals).
 
 This snapshot is for review. It does not refresh when you reopen Inbox, establish causal improvement, replace live policy checks, or feed spend admission. It is separate from the later outcome comparison below. Actions reads expose it, and decision receipts preserve it when recorded. [Receipt version and fields](/actions/audit-log#download-an-action-decision-receipt).
 

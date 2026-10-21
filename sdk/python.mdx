@@ -6,15 +6,17 @@ description: "Send consented purchases with the Plainrouter Python SDK, preserve
 
 [`plainrouter`](https://pypi.org/project/plainrouter/) contains the generated Python SDK and the `plainrouter` command-line interface. The SDK exposes synchronous and asynchronous Conversion API operations, with ten convenience imports at the package root. The CLI exposes nine API commands.
 
-The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.10.0` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/python).
+The current [PyPI release](https://pypi.org/project/plainrouter/) is `0.10.1` and targets signed API contract `0.5.0`. The source is in [`plainrouter/sdk`](https://github.com/plainrouter/sdk/tree/main/packages/python).
 
 ## What changes when upgrading?
 
-In `0.10.0`, import `models.DeploymentPlanRead` instead of the removed `models.DeploymentPlan`. Hand-built destination models require `attention_reason`, `held_count` and `notices`; delivery models can require nullable `upload_deadline_at` and `freshness_basis`. Pass `None` explicitly when the declared nullable field has no value.
+Version `0.10.1` includes workspace `404` responses and widens inventory error models. The previous message-only inventory class is now `GetAccountInventoryResponse404Type1`, with `ApiRouteNotFound` as the other branch. Update explicit model checks. The patch also fixes the Launcher import route; product enablement and credential scope still apply.
+
+When upgrading from releases before `0.10.0`, import `models.DeploymentPlanRead` instead of the removed `models.DeploymentPlan`. Hand-built destination models require `attention_reason`, `held_count` and `notices`; delivery models can require nullable `upload_deadline_at` and `freshness_basis`. Pass `None` explicitly when the declared nullable field has no value.
 
 Use the exported clients or `create_client` for the JSON response and redirect policy. API redirects raise `httpx.HTTPStatusError` before response parsing. Closed request objects reject unknown keys, and boolean values cannot stand in for integer inputs. Follow response cursors for incomplete collections.
 
-Review the [published release notes](https://github.com/plainrouter/sdk/blob/python-v0.10.0/packages/python/CHANGELOG.md) and the [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
+Review the [published release notes](https://github.com/plainrouter/sdk/blob/python-v0.10.1/packages/python/CHANGELOG.md) and the [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
 
 ## Requirements
 
@@ -25,7 +27,7 @@ Review the [published release notes](https://github.com/plainrouter/sdk/blob/pyt
 ## Install
 
 ```bash
-python -m pip install plainrouter==0.10.0
+python -m pip install plainrouter==0.10.1
 ```
 
 For terminal commands, follow the [CLI quickstart](/cli/get-started) for an isolated installation, authentication, and configuration. This page covers the Python application client.
@@ -253,5 +255,5 @@ For request and response fields, use the [API reference](/api/conversions).
 
 ## Implementation references
 
-- [Published Python package `0.10.0`](https://pypi.org/project/plainrouter/0.10.0/)
+- [Published Python package `0.10.1`](https://pypi.org/project/plainrouter/0.10.1/)
 - [Plainrouter event request and delivery reference](/api/conversions)

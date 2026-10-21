@@ -1,0 +1,87 @@
+---
+title: "Read conversion journeys and channel costs"
+sidebarTitle: "Journeys and channel costs"
+description: "Read conversion journeys through MCP, compare earned credit with Meta claims, and interpret channel costs, currency and coverage limits."
+---
+
+Use `get_conversion_journeys` to read how Plainrouter splits conversion credit across observed touches. Use `get_cac_by_channel` to compare that earned credit with stored spend. These read-only tools use retained evidence; they do not change ads or make live advertising API calls.
+
+## Before you begin
+
+- Connect your [MCP client](/mcp/setup) with a Read or Write Workspace key authorized for Signals reads. Use the positive integer `workspace_id` returned by `list_workspaces` when the credential covers multiple workspaces.
+- Send eligible conversions and establish permitted identity and touch context. For SaaS users, follow [Stripe app-user setup](/signals/track-events#how-do-i-associate-stripe-customers-with-app-users).
+- Choose a retained reporting window. Stored spend and account claims also require the corresponding authorized accounts and available platform data.
+
+The journey and cost tools accept their own conversion kinds. They do not automatically inherit your [workspace Conversion events selection](/signals/conversions).
+
+## How do I read a conversion journey?
+
+Call `get_conversion_journeys` with these example arguments. Replace the workspace and dates with your own retained window:
+
+```json
+{
+  "workspace_id": 42,
+  "from": "2026-10-01T00:00:00Z",
+  "to": "2026-10-15T23:59:59Z",
+  "model": "position_based",
+  "lookback": 90,
+  "level": "platform",
+  "conversion_kinds": ["subscribed"],
+  "limit": 50
+}
+```
+
+Read `range_used` first: retention can shorten the requested window. The result includes channel summaries, `journeys`, `unattributed`, separate `meta_claims` and `pagination.next_cursor`. Public journey rows contain the conversion time, kind, value/currency when available, and observed touches with credit shares. They omit Plainrouter person and visitor identifiers; UTM labels and ad IDs retain values supplied by your links, so keep personal data out of those labels.
+
+Continue by passing `pagination.next_cursor` as `cursor` with the same workspace, dates, model, lookback, level, kinds and limit. Do not decode the cursor or change filters mid-pagination. Stop when it is null. Channel summaries describe the effective window; do not add the same summaries again for each journey page.
+
+## Which filters and credit models are supported?
+
+| Argument | Supported values and default |
+| --- | --- |
+| `from`, `to` | Inclusive timestamp window; defaults to the last 30 days ending now. Always inspect `range_used`. |
+| `model` | `position_based` (default), `first`, `last`, `linear`. |
+| `lookback` | 7, 30, 60 or 90 days before each conversion; default 90. |
+| `level` | `platform` (default), `campaign_id`, `ad_set_id`, `ad_id`, `utm_source`, `utm_medium`, `utm_campaign`. |
+| `conversion_kinds` | `subscribed`, `purchase`, `trial_started`; default is `subscribed` plus `purchase`. |
+| `limit` | 1–200 journey rows; default 50. |
+
+**Position based** gives one touch all the credit, two touches half each, and three or more touches 40% to the first, 40% to the last and 20% across the middle. **First** or **last** gives all credit to that touch. **Linear** splits it equally. These are rules for allocating observed credit, not causal estimates or proof of incremental revenue.
+
+## Why do earned, appeared-in and Meta counts differ?
+
+**Appeared in** counts every conversion a channel touched. **Earned** is its share of those conversions, so earned can be fractional and is never higher than appeared in. Meta's claimed conversions follow Meta's attribution rules and remain separate. Keep the returned `basis_note` and availability explanations with the numbers.
+
+Journeys are frozen at conversion time with one delayed refresh after about 60 minutes for eligible late context. They are not continuously rebuilt from all future activity. Touch snapshots are bounded, and opt-out, erasure, missing context and retention can limit what is readable. An empty journey remains unattributed; it is not evidence that no marketing influenced the customer.
+
+## How do I read cost per earned conversion?
+
+Call `get_cac_by_channel` using the same dates, model, lookback and level, with singular `conversion_kind`:
+
+```json
+{
+  "workspace_id": 42,
+  "from": "2026-10-01T00:00:00Z",
+  "to": "2026-10-15T23:59:59Z",
+  "model": "position_based",
+  "lookback": 90,
+  "level": "platform",
+  "conversion_kind": "subscribed"
+}
+```
+
+The default kind is `subscribed`; `purchase` and `trial_started` are alternatives. Keep trial cost separate from subscription acquisition cost. The tool name uses CAC, but its result is **cost per earned conversion** for the chosen stage, not a unique-customer or lifetime acquisition metric.
+
+Spend uses stored platform reporting dates in each ad account's timezone; conversions use conversion time. Inspect `conversion_date_basis`, `spend_date_basis`, `date_alignment`, coverage and freshness. Touch time does not move spend to another day. Costs remain per currency, and incomplete coverage or zero earned conversions can make a cost unavailable. Do not turn null into zero or combine currencies into one total. Google platform aliases are grouped as `google_ads` in this cost read; that does not establish Google conversion-delivery enablement.
+
+UTM dimensions and other channel levels can lack supported spend mappings. Use returned reasons instead of assigning unrelated account spend to those rows. Meta's claimed cost stays separately labeled and does not replace cost per Plainrouter-earned conversion.
+
+## Troubleshoot
+
+| Symptom | What to check |
+| --- | --- |
+| Empty journeys | Check the effective dates, conversion kinds, retained eligible snapshots and identity/touch context. |
+| Invalid cursor | Restart the read with one consistent set of filters and use the returned cursor unchanged. |
+| Null cost or spend | Inspect account scope, coverage, supported channel mapping, currency and the earned denominator. |
+| Journey and cost totals differ | Align conversion kinds explicitly; their defaults differ. Then compare `range_used`, credit model and lookback. |
+| Recorded conversions but no delivery acceptance | Use [signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp); credit does not prove destination acceptance. |
