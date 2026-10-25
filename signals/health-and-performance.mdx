@@ -35,6 +35,10 @@ Meta must resolve its dynamic placeholders on a real ad click. A manually opened
 
 Inspect any partial-coverage note: it compares tagged-ad spend with total account spend. Account-level Meta totals include untagged ads, while Plainrouter ad-level measurements cover tagged ads. A missing tag or partial coverage is not evidence that Meta lost the purchase.
 
+## Which read should I use for cohorts or weekly volume?
+
+Use [trial-to-paid cohorts](/signals/trial-to-paid) for retained trial starts followed to first payment, with mature samples and uncertainty. Use [weekly event volume](/signals/event-volume) for distinct logical events and current retained delivery statuses by UTC week. Those tools do not establish Meta learning status or causal performance.
+
 ## Where do workspace conversions and journey costs appear?
 
 Paid performance can show **Conversions** beside **Purchases**, using the selected [workspace event definition](/signals/conversions). Check the effective choices and reporting window before comparing an ad row with a workspace total. Historical Tests and proposal evidence retain the definition captured when created.
@@ -198,7 +202,7 @@ Pending includes queued, sent, and retrying deliveries. Inspect an individual co
 observed gap = gateway-verified accepted conversions - Meta-reported conversions
 ```
 
-A positive gap means the gateway count is higher; a negative gap means Meta's count is higher. Alignment uses the larger total as the denominator and is unavailable when both are zero. This is a conversion-count comparison, separate from arrivals versus clicks.
+A positive gap means the gateway count is higher; a negative gap means Meta's count is higher. Alignment uses the larger total as the denominator and is unavailable when both are zero. This compares Meta dataset events from every sender with non-test observed events Plainrouter sent, Meta accepted and the ledger joined for attribution. Neither side is an ad-attributed conversion count, and the gap does not measure lost conversions. It is separate from arrivals versus clicks and the Purchase comparison. Each report covers a UTC day; the returned period selects those reports using account-timezone dates, except the empty fallback uses UTC dates.
 
 ## Gateway vs Meta chart
 
@@ -239,6 +243,8 @@ You can supply inclusive `from` and `to` timestamps. Read `range_used` before in
 | `latest_emq` | Latest stored Meta EMQ evidence with its availability and scope. |
 | `consent_rates` | Recorded consent decisions in the effective window; missing receipts do not prove a broken CMP. |
 | `unavailable` | Explicit limits, including acceptance latency, historical sent-key coverage, complete deduplication counts and opted-out person counts. |
+
+Consent rates are 0–1 fractions. `refused_before_delivery.consent` counts undelivered events with `consent_basis: "severed_measurement"`, not people rejecting the banner. Other undelivered opt-outs and lifecycle events whose checkout lacked consent can fall under `reason_unknown`.
 
 Keep null values and their reasons. Do not label an unexplained delivery gap as a consent refusal or turn a missing destination into successful acceptance. Trial and subscribed rows labeled **not sent to Google by design** are not missing Google conversions; a Google row does not establish that Google delivery is enabled.
 

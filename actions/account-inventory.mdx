@@ -78,7 +78,7 @@ The response contains `account`, `sync`, `staleness`, `objects` and `next_cursor
 
 When `next_cursor` is non-null, repeat the same request with that value as `after_id`. Stop when it is null. Keep filters unchanged between pages. An object's internal `id` is not its external Meta `external_id`.
 
-Objects include configured/effective status, hierarchy, available budget fields, sync timestamps and related Plainrouter receipt fields. Budget fields ending in `_minor` use integer currency minor units; unavailable values remain null.
+Objects include configured/effective status, hierarchy, available budget fields, sync timestamps and related Plainrouter receipt fields. Budget fields ending in `_minor` use Meta budget units for the account currency; unavailable values remain null. They are not universally ISO currency subunits. [Budget-unit reference](/api/actions#which-units-do-budget-requests-use).
 
 ## Read retained metrics and changes
 
@@ -132,7 +132,7 @@ An arrival can match its campaign, ad set and ad. Do not sum all hierarchy level
 
 To verify a comparison, confirm `account` and `effective_range`, choose one hierarchy level, then inspect dates, object IDs, freshness and nullable fields. Check your [snippet installation and captured URL fields](/signals/install-pixel#which-arrival-fields-are-retained), numeric Meta object IDs in the ad's URL tags, and inventory synchronization when matching counts are missing. An unavailable arrivals store is not a measured zero.
 
-These arrivals count eligible observations, not unique people, purchases or Meta-attributed conversions. Meta clicks and arrivals can differ. This comparison is separate from [Signals reconciliation](/signals/health-and-performance) and does not establish causal lift or admissible quantitative proposal evidence by itself.
+These arrivals count eligible observations, not unique people, purchases or Meta-attributed conversions. `meta.clicks` is all Meta clicks and `meta.inline_link_clicks` is link clicks; neither is the outbound-click figure used by `get_arrivals_comparison`. `meta.spend` is a decimal amount in major units of `account_currency`, and action metrics use Meta’s default attribution. Meta clicks and arrivals can differ. This comparison is separate from [Signals reconciliation](/signals/health-and-performance) and does not establish causal lift or admissible quantitative proposal evidence by itself.
 
 ### Which creative produced an ad?
 
@@ -157,7 +157,7 @@ Follow [Inbox and current disposition](/actions/review-proposals#current-disposi
 ## Troubleshoot access and incomplete results
 
 - **Account not found or outside key binding:** check the internal account ID, workspace access and older key binding. Trying another workspace's ID cannot widen access.
-- **Missing tool or insufficient scope:** inspect discovery and the active grant; replace a credential with the intended permitted scope if necessary. Read-only inventory does not require the separate Write-only Actions record-read grant.
+- **Missing tool or insufficient scope:** inspect discovery and the active grant; replace a credential with the intended permitted scope if necessary. Inventory and Actions record reads can use appropriately scoped Read keys; neither operation gains missing grants from the other.
 - **Only some objects appear:** follow `next_cursor`; remove unintended status/parent filters and check freshness.
 - **Dates return less history:** inspect `effective_range` and the workspace retention limit. Empty retained results are not proof of zero provider activity.
 - **Arrival counts are missing or do not match clicks:** distinguish `null` from `0`, inspect matching tags and freshness, and compare one hierarchy level over the same dates. Do not add the workspace's unmatched count to a filtered ad total.

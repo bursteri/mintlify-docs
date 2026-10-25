@@ -8,6 +8,11 @@ Use Plainrouter MCP to propose a copy of a human-selected Meta ad with a differe
 
 This walkthrough uses an image already in the connected account's library. It covers Plainrouter's governed workflow. For provider selection, see the [Meta Ads MCP comparison](https://plainrouter.com/library/meta-ads-mcp-options).
 
+
+<Note>
+  New governed creative work requires workspace availability as well as the key's permissions. `launcher_unavailable` does not mean your key can enable it. Creative generation/rendering are currently unavailable; uploaded images, vetted URL intake and Meta library reads are separate surfaces. Use only tools advertised for your connection and follow their own checks.
+</Note>
+
 ## Before you begin
 
 You need a [connected agent](/mcp/setup), a **Write** [workspace key](/mcp/workspace-tokens) for the intended workspace, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.
@@ -210,6 +215,7 @@ After a timeout, check the returned or existing proposal in **Inbox** before att
 
 | Symptom | Next step |
 | --- | --- |
+| `launcher_unavailable` or `generation_disabled` | Check workspace availability and the requested surface. A new key or different tool spelling cannot enable a disabled workflow. |
 | Missing creative permission | Check the token tier, active grant, and account scope in [workspace tokens](/mcp/workspace-tokens). |
 | Source ad or asset rejected | Re-read the intended account's library and confirm the human-selected source belongs to that account. Do not substitute a guessed asset ID. |
 | Upload rejected | Check detected JPEG/PNG content, a bare filename, raw base64 without a data URI prefix, byte limit, and reuse of the idempotency key. |

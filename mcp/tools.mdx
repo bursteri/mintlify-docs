@@ -4,7 +4,7 @@ sidebarTitle: "MCP tool reference"
 description: "Use Plainrouter MCP tools for Signals reads, governed proposals, account rules, Actions receipts, workspace grants and synthetic testing."
 ---
 
-Plainrouter MCP server version `0.4.1` provides Signals reads and governed Actions tools. Three additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
+Plainrouter MCP server version `0.4.2` provides Signals reads and governed Actions tools. Three additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
 
 For credentials covering several workspaces, call `list_workspaces` and pass the selected `workspace_id` on each workspace-scoped tool call. The examples below can omit it only for a single-workspace credential. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work) and account selection are separate checks.
 
@@ -44,6 +44,8 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_conversion_journeys` | Read-only, idempotent | Read retained journey credit and separate Meta claims; [guide](/signals/conversion-journeys). |
 | `get_cac_by_channel` | Read-only, idempotent | Compare stored spend with earned conversions by currency; [guide](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). |
 | `get_signal_quality` | Read-only, idempotent | Read scoped delivery outcomes, gaps, retained identity and journey coverage; [guide](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp). |
+| `get_trial_proof` | Read-only, idempotent | Follow Stripe trial cohorts to first payment with mature samples and uncertainty; [guide](/signals/trial-to-paid). |
+| `get_event_volume` | Read-only, idempotent | Read distinct weekly conversion delivery counts, separate from Meta learning status; [guide](/signals/event-volume). |
 | `get_arrivals_comparison` | Read-only, idempotent | Compare workspace arrivals with stored Meta outbound clicks and inspect the separate Purchase comparison. |
 | `get_account_inventory` | Read-only, idempotent | Read retained campaigns, ad sets and ads with freshness and receipt flags. |
 | `get_inventory_metrics` | Read-only, idempotent | Compare stored Meta metrics with counted arrivals; read optional change history. |
@@ -84,6 +86,12 @@ The server version is separate from the MCP protocol revision. For custom client
   Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, admitted changes wait for human approval. In **Full**, admitted unprotected batches can queue automatically; protected batches still require person approval. Both modes keep execution checks; a submitted proposal is not proof of a Meta change.
 </Warning>
 
+## Why is a creative tool unavailable?
+
+Workspace availability is separate from tool discovery and key permissions. A `launcher_unavailable` error means new Launcher or governed creative work is unavailable for the selected workspace. Reissuing a Write key cannot enable it. Existing plan reads can remain available.
+
+Creative generation and rendering are disabled in the current public surface. Removed generation tools are not restored by using an old name; `generation_disabled` is a refusal, not a queued job. Uploaded-file and vetted-URL creative intake, Meta library reads and governed creative proposals retain their own permission, workspace-availability and policy checks. [Creative workflow](/actions/creative-workflow).
+
 ## Account-rule tools
 
 Follow [Meta ad account performance rules](/actions/account-rules) for disabled creation, complete definition inputs, explicit enabling, evaluation windows, pagination and troubleshooting. Rule reads accept Read or Write Workspace keys; writes require Write. The active grant must cover the corresponding `actions.rules.index`, `actions.rules.show`, `actions.rules.store` or `actions.rules.update` operation. These production tools are absent from the synthetic sandbox.
@@ -98,7 +106,7 @@ Read retained Meta campaign, ad-set and ad data without a live Meta request or r
 
 ## `submit_feedback`
 
-Save a bug report or missing-capability request from your authenticated MCP client. This tool writes a feedback record in Plainrouter; it makes no advertising-account change and sends no reply in MCP. Read and Write grants can include it. Check the tool in [published discovery](https://plainrouter.com/.well-known/mcp/server-card.json) and your active grant before calling it.
+Save a bug report or missing-capability request from your authenticated MCP client. This tool writes a feedback record in Plainrouter; it makes no advertising-account change and sends no reply in MCP. Read and Write grants can include it, but the issuer must also retain workspace update permission; a Viewer-issued Read key cannot submit feedback. Check the tool in [published discovery](https://plainrouter.com/.well-known/mcp/server-card.json) and your active grant before calling it.
 
 | Field | Required | Rules |
 | --- | --- | --- |
@@ -227,7 +235,7 @@ Use a Read or Write workspace key with an active grant for `get_install_instruct
 | `cname` | DNS record with `type`, `name`, `target`, and `value` (an alias of `target`), or `null` when unavailable. |
 | `snippet` | Generated browser snippet, or `null` until the managed hostname is active and held by the edge. |
 | `first_arrival` | Whether Plainrouter has stored the workspace's first qualifying arrival. |
-| `saas`, `saas_steps` | Ordered signup/Stripe setup guidance and owner handoffs. A pending browser-identify release is not a runnable command. |
+| `saas`, `saas_steps` | Ordered signup/Stripe setup guidance and owner handoffs. Respect a pending recipe step; current browser command support is documented separately. |
 | `saas_verification` | Separate `setup_ready` and `live_verified` evidence, facts, window and quality gaps. |
 
 For SaaS, follow the returned steps and [separate setup readiness from live Meta verification](/signals/track-events#how-do-i-verify-saas-setup-without-creating-a-paid-conversion). Secrets are entered by the owner in the app, never in chat.
@@ -248,6 +256,15 @@ Read stored delivery states and gaps, separate test sends, retained identity pre
 
 Check scope and null reasons, and preserve the explicit `unavailable` figures rather than inventing latency, historical sent-key coverage or complete dedup counts. See [signal-quality interpretation](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp). This is a read, not an ingestion test or permission to send a conversion.
 
+## `get_trial_proof` and `get_event_volume`
+
+Both are read-only stored-evidence tools. Use a Read or Write Workspace key with an active grant for the existing `get_arrivals_comparison` operation; pass `workspace_id` for a multi-workspace credential. They accept no `account_id`, make no provider calls and do not create proposal evidence or authorize a change.
+
+- [Trial-to-paid cohorts](/signals/trial-to-paid) select trial-start dates and follow later first-positive payments. Defaults are 90 days, `ad_set_id`, `last` and a 90-day lookback.
+- [Weekly event volume](/signals/event-volume) groups event occurrences into UTC weeks. Defaults use the same window, level, model and lookback, but the result is distinct delivery counts, not a cohort conversion rate or Meta learning status.
+
+Each supports `first` or `last` integer assignment, rather than fractional credit. Read `range_used`, retained coverage and unavailable reasons. The guides define their different levels, maturity rules and denominators.
+
 ## `get_arrivals_comparison`
 
 Read the same stored workspace comparison used by Dashboard and Signals: counted arrivals beside Meta outbound clicks. This production-only tool performs no provider write or live Meta read.
@@ -265,11 +282,17 @@ Read the same stored workspace comparison used by Dashboard and Signals: counted
 
 Use a Read or Write workspace key with an active grant for `get_arrivals_comparison`. The tool uses the authorized workspace, with `workspace_id` required for a multi-workspace credential, and does not accept `account_id`. Confirm `workspace_id` and the returned `period` before interpreting the result.
 
-The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
+The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Arrivals cover all site channels; claimed clicks are Meta outbound clicks. A displayed `delta_percent` uses claimed clicks as its denominator, not arrivals, and cannot be calculated when that denominator is absent or zero. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
 
 The response also includes `claimed_clicks_label`, `claimed_clicks_outbound_since`, and `claimed_clicks_caveat`. Keep the caveat with historical data: older days can still contain link clicks or all clicks. The separate `purchases` block includes Meta-attributed and accepted server-side Purchase counts, its completed account-local window, attribution details, and daily read timestamps. See [Purchase comparison limits](/signals/health-and-performance#how-do-i-compare-meta-reported-purchases); it has no purchase gap or status.
 
 If setup or platform data is unavailable, read the returned status and message before calculating a difference. Arrival/click differences do not establish lost conversions, attribution, or a cause. This tool is not an accepted `propose-actions` evidence source; use [`get_performance`](#get_performance) for eligible stored reconciliation evidence.
+
+## How do sandbox responses differ?
+
+The sandbox's `get_account_state`, `get_signal_health` and `get_performance` share production names and argument schemas, with simplified synthetic responses marked `sandbox: true`. Account state omits production authorization metadata; health activity/delivery/match fields differ; performance omits purchases, platform metrics and their notices. A passing sandbox client still needs separate production response handling and credential checks. [Sandbox connection](/mcp/setup#start-in-test-mode).
+
+Production responses are bounded. Missing optional detail or a smaller response is not evidence that no account capability, permission or history exists; inspect explicit status and availability fields instead of assuming the sandbox fixture is exhaustive.
 
 ## `get_account_state`
 
@@ -349,7 +372,7 @@ The result includes the shared scope, status, label, summary, Signal and destina
 - `performance`: stored reconciliation diagnostics. The standalone `get_performance` input remains 1–90 days; the arrival `months` option does not extend that contract.
 - `diagnostics`, `data_sources`, and `generated_at`: explanations, provenance, and response freshness.
 
-Arrival windows use completed days in the account timezone. Requests outside the plan or explicit shorter workspace setting are refused rather than clipped. Use `{"months": 12}` for the 12-calendar-month window, when available. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Arrival totals remain complete when a strict-EU component is withheld: `partial` marks that component, not a reduced total. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
+Arrival windows use completed days in the account timezone. Requests outside the plan or explicit shorter workspace setting are refused rather than clipped. Use `{"months": 12}` for the 12-calendar-month window, when available. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Read the complete arrival total directly; the public response does not expose jurisdiction subtotals or a partial marker. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
 
 This call reads stored measurements. It does not trigger a live Meta Marketing API read.
 
@@ -383,7 +406,7 @@ The response includes:
 - Requested period with `days`, `since`, and `until`.
 - Measurability state.
 - Gateway-verified accepted count.
-- Existing reconciliation `meta_reported` count, separate from the Purchase comparison.
+- Existing reconciliation `meta_reported` count: Meta dataset events from every sender, separate from ad-attributed Purchases. Neither side is an attributed-conversion count.
 - `purchases`: Meta-attributed and accepted server-side Purchase counts with their own completed account-local window and attribution details. A missing Meta count remains `null`.
 - `platform_claimed_clicks`: Meta outbound clicks, with `claimed_clicks_caveat` for historical rows.
 - Observed gap.
@@ -395,6 +418,8 @@ The response includes:
 - `data_source: "stored_reconciliation_reports"`.
 - `marketing_api_called: false`.
 - Response generation time.
+
+Each reconciliation report covers a UTC day. `daily[].date` is that UTC date; the account-timezone period selects which reports are included, except the empty fallback uses UTC dates. `observed_gap` is accepted Plainrouter events minus dataset events; alignment is a 0–100 percentage against the larger count, or null when both are zero. Neither diagnoses lost conversions.
 
 The response also includes stored account-level `platform_claimed_clicks`, `platform_impressions`, `platform_spend`, per-day `platform_daily` read states, and `claimed_clicks_last_read_at` when available. These platform fields are descriptive context, not admissible spend or target-performance evidence for Actions proposals.
 
@@ -429,7 +454,7 @@ The tool writes one idempotent `signal_verification` event and returns:
 
 The event is identity-free, modeled, excluded from enforcement, and never dispatched to Meta. It does not count as real arrival evidence or complete onboarding. A repeated call returns the same event with `duplicate: true`. The tool has no spend capability.
 
-The call fails if the connection lacks `signals.verify` or the authorized workspace has no active Signal.
+The call fails if the connection lacks `signals.verify`, the issuer lacks current workspace update permission, or the authorized workspace has no active Signal. A Viewer-issued Read key cannot run this write-path diagnostic.
 
 ## `revoke_grant`
 

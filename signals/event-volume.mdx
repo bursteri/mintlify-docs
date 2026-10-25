@@ -1,0 +1,67 @@
+---
+title: "Read weekly conversion delivery volume"
+sidebarTitle: "Weekly event volume"
+description: "Use get_event_volume to inspect distinct conversion delivery counts by UTC week, keep event kinds separate, and interpret partial weeks and unknown attribution."
+---
+
+Use `get_event_volume` to read weekly delivery counts for distinct logical conversion events. It reports Plainrouter's retained delivery evidence, **not Meta's learning status**. This read makes no provider request and changes no ads.
+
+## Before you begin
+
+Connect an [MCP client](/mcp/setup) with a Read or Write Workspace key authorized for Signals reporting. Events, destination delivery records and eligible frozen touch context must already exist. Provider figures remain limited by authorized account scope.
+
+The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) defines the inputs. Use [signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp) when you need delivery reasons instead of weekly counts.
+
+## How do I read weekly event volume?
+
+Call `get_event_volume` with these arguments:
+
+```json
+{
+  "workspace_id": 42,
+  "from": "2026-09-01T00:00:00Z",
+  "to": "2026-10-24T23:59:59Z",
+  "level": "ad_set_id",
+  "model": "last",
+  "lookback": 90
+}
+```
+
+Replace the workspace and dates. Defaults are the last 90 days, `ad_set_id`, `last` and a 90-day lookback. `level` also supports `platform` and `campaign_id`; `model` supports `first` or `last`; `lookback` supports 7, 30, 60 or 90 days.
+
+Each event is assigned once to the selected qualifying pre-conversion touch. This is an integer count, not fractional journey credit. At campaign/ad-set level, the selected touch must carry that dimension; a later site touch without it does not replace it.
+
+## What do the weekly rows count?
+
+Read `range_used`, `effective_window` and `rows`. Weeks start Monday in UTC, using event occurrence time. Rows keep `conversion_kind`, channel value and platform separate: a trial start and a subscription are different optimization events.
+
+| Field | Meaning |
+| --- | --- |
+| `recorded` | Distinct logical events in the effective occurrence window, excluding test-only events and Stripe subscription-payment renewals. Observations sharing a canonical purchase merge into one purchase. |
+| `accepted` | At least one eligible retained delivery is currently accepted. It is not a historical acceptance timestamp or Meta-attributed conversion count. |
+| `pending` | At least one eligible delivery is queued, retrying, sent or held. |
+| `failed` | At least one eligible delivery failed or expired. |
+| `unknown_attribution` | No usable frozen assignment; missing or erased context is not reconstructed. |
+| `test_sends_excluded` | Distinct events with test sends, including mixed live/test events; this is not an extra live count. |
+| `partial_week` | Requested dates, retention or the current incomplete week prevent a full-week comparison. |
+
+One logical event can have accepted, pending and failed deliveries across destinations or attempts. Those columns can sum above `recorded`; do not treat them as a partition. Skipped or undelivered events can remain recorded without appearing in a delivery-status count.
+
+Assigned platform rows count that platform's authorized destinations. Unknown-attribution rows count authorized destinations without claiming a platform assignment. Kinds without a retained frozen journey remain unknown.
+
+## Does the benchmark prove that an ad set has left learning?
+
+No. `benchmark.value` is a configurable planning reference, default 50. It is explicitly unverified live and applies only to complete, attributed ad-set weeks for each conversion kind. `weeks_at_or_above_benchmark` is repeated context for that group; do not sum it across weekly rows.
+
+This report cannot establish Meta's learning status, optimization configuration or future performance. Inspect Meta separately for its current delivery state. A missing row is not proof that Meta received no events.
+
+## Troubleshoot
+
+| Symptom | Check and next step |
+| --- | --- |
+| Accepted/pending/failed exceed recorded | Inspect separate deliveries; one logical event can qualify for several status columns. |
+| Counts differ from the dashboard | Compare event kinds, occurrence dates, canonical purchase handling and delivery status. This tool does not inherit workspace conversion choices. |
+| Many rows are unknown | Check retained frozen journeys and the selected dimension. A campaign-only touch cannot establish an ad-set assignment. |
+| No benchmark result | Check `partial_week`, level, unknown attribution and available retained history; do not replace missing evidence with zero. |
+
+For trials followed to first payment, use [trial-to-paid cohorts](/signals/trial-to-paid). For fractional credit and costs, use [conversion journeys](/signals/conversion-journeys).

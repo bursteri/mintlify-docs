@@ -1,0 +1,74 @@
+---
+title: "Read trial-to-paid cohort evidence"
+sidebarTitle: "Trial-to-paid cohorts"
+description: "Follow Stripe trial cohorts to first payment with get_trial_proof, inspect mature samples and uncertainty, and separate cohort rates from channel costs."
+---
+
+Use `get_trial_proof` to follow retained trial starts to their first positive payment after 14, 30 and 60 days. The primary horizon is 30 days. This read uses stored Stripe-linked evidence; it does not query a provider, send a conversion or change an ad.
+
+## Before you begin
+
+- Connect an [MCP client](/mcp/setup) with a Read or Write Workspace key authorized for Signals reporting.
+- Complete [Stripe app-user setup](/signals/track-events#how-do-i-associate-stripe-customers-with-app-users). The current reader needs a retained, unambiguous app-user association, subscription/payment evidence and a joinable frozen trial journey.
+- Choose a trial-start period within retained history. A longer requested window cannot recover expired identity, billing coverage or erased links.
+
+The [published MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) defines the tool's inputs. This tool is separate from the workspace's chosen conversion events and from fractional [journey credit](/signals/conversion-journeys).
+
+## How do I read a trial cohort?
+
+Call `get_trial_proof` with these arguments, replacing the workspace and dates:
+
+```json
+{
+  "workspace_id": 42,
+  "from": "2026-07-01T00:00:00Z",
+  "to": "2026-09-30T23:59:59Z",
+  "level": "ad_set_id",
+  "model": "last",
+  "lookback": 90
+}
+```
+
+`from` and `to` select **trial starts**, not payment dates. Payments are followed forward through the returned `as_of`, including later months. Defaults are the last 90 days, ad-set level, last qualifying touch and a 90-day lookback. Retention can shorten the effective range.
+
+| Input | Supported values |
+| --- | --- |
+| `level` | `platform`, `campaign_id`, `ad_set_id` (default), `ad_id`. |
+| `model` | `last` (default) or `first`; each trial has one integer assignment. |
+| `lookback` | 7, 30, 60 or 90 days before the trial; default 90. |
+
+Default campaign/ad-set membership uses the last pre-trial touch carrying that dimension, rather than the literal last site touch. Ad-level assignment needs an ad ID. Missing or ambiguous frozen journeys stay unknown; the reader does not reconstruct them.
+
+## What establishes a rate?
+
+Read `range_used`, `effective_window`, `workspace_summary`, `channels` and each horizon under `rates`. The reader selects the first retained trial per app user **within the requested cohort**; repeated observations are counted separately as `duplicates`, not extra sample members.
+
+| Field | Meaning |
+| --- | --- |
+| `n` | Mature trials with joinable identity, journey and billing coverage. |
+| `confirmed_paid` | Mature sample members whose first positive payment occurred within that horizon. |
+| `pending` | The trial has not yet reached that horizon; it is excluded from `n`. |
+| `unknown_unjoinable`, `unknown_reasons` | Evidence could not establish eligibility or payment coverage; these are excluded from `n`, not treated as non-payers. |
+| `mature_not_paid` | Mature eligible sample members without a first positive payment within that horizon. |
+| `rate`, `wilson_95` | Reported paid fraction and 95% Wilson interval, or null when the proof status does not permit a rate. |
+
+A rate requires at least 30 mature eligible trials and adequate retained history and billing coverage. Inspect `proof_status`: `ok`, `not_enough_mature_trials`, `no_billing_coverage` and `insufficient_history` are distinct. Null is not a 0% conversion rate. A measured interval describes the retained sample; it does not prove causal ad performance.
+
+## How do I interpret timing, spend and account fallbacks?
+
+`trial_to_payment_days` measures trial start to payment. `observed_touch_to_payment_days` begins at the selected observed site touch, not Meta's click timestamp. Their samples include mature trials confirmed paid within each horizon; do not describe them as timing for every visitor.
+
+Stored spend uses the **trial cohort dates** and account reporting timezone. This differs from the conversion-date denominator in [cost per earned conversion](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). Keep currencies and coverage separate.
+
+`accounts` contains broader account-level fallbacks. A channel can reference one through `account_fallback_id`; do not present that fallback as ad-set proof or add it to the channel sample.
+
+## Troubleshoot
+
+| Symptom | Check and next step |
+| --- | --- |
+| Rate is null | Read `proof_status`, `n`, pending trials, unknown reasons and billing coverage. Do not infer a poor rate from insufficient evidence. |
+| Older cohorts become unknown | Check retained identity and read windows. Frozen journeys do not extend identity retention or restore erased links. |
+| Trials appear under unknown | Confirm stable app-user links and the selected dimension's pre-trial touch; changing the model cannot invent a missing touch. |
+| Cohort rate differs from channel cost | Align definitions and dates: trial-start cohorts and conversion-date cost reads answer different questions. |
+
+For delivery acceptance and gaps, use [signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp). A paid cohort observation does not establish Meta acceptance or attribution.

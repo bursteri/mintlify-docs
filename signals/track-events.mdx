@@ -227,7 +227,7 @@ const identified = await signalq("identify", {
 });
 ```
 
-The browser normalizes and SHA-256 hashes the values before sending them. Plainrouter never sends the raw email or phone in the identity request.
+The browser normalizes and SHA-256 hashes email and phone before sending them. Plainrouter never sends the raw email or phone in the identity request. Current v4 also accepts an opaque `external_id` for an app user; it is not an email/phone field and is sent as supplied over the collection transport.
 
 If consent is withdrawn while `identify` waits for browser configuration, the call resolves to `false` and does not resume after a later grant. Obtain current consent and make a new call only when that new identity use is permitted. The same superseding denial cancels a held `track` call with `null`.
 
@@ -248,9 +248,44 @@ If consent is withdrawn while `identify` waits for browser configuration, the ca
 </script>
 ```
 
+### How do I identify an app user in the browser?
+
+After the installed script has loaded and your current policy permits identity use, identify at signup or login with the same stable internal user ID used by your [Stripe association](/signals/track-events#how-do-i-associate-stripe-customers-with-app-users):
+
+```js
+const identified = await signalq("identify", {
+  external_id: "app_user_1042"
+});
+```
+
+Use an opaque non-empty string of at most 255 characters, or a safe integer. Avoid email addresses, reusable IDs and IDs that can change. The result confirms the identity request's outcome, not an attributed purchase, a Stripe association or Meta acceptance. Preserve denial, withdrawal and opt-out behavior; do not set a grant merely to make identification succeed.
+
+### How do I subscribe to the canonical visitor join key?
+
+For a custom first-party integration, an authorized workspace manager can enable **Connections → Visitor join key** and choose **Save visitor join key**. This optional setting is disabled by default. Register a callback before the existing event that will carry the grant:
+
+```js
+let currentJoinKey = null;
+
+signalq("onJoinKey", result => {
+  currentJoinKey = result;
+  if (result === null) {
+    // Remove any copies held by your integration.
+    return;
+  }
+  // Use visitor_id and captured_at only while this grant remains valid.
+});
+```
+
+The callback receives `visitor_id`, the original full-grant `captured_at` and a local `revision`, or null on re-init, denial, withdrawal or other loss of eligibility. Keep its state temporary, clear downstream copies on null and handle repeated notifications idempotently. Registration itself sends no request; subscribing after an event waits for the next existing event response, with no cached-key replay.
+
+Release requires the workspace opt-in, an identity-serving first-party transport and full grants for all three purposes. Legitimate interest alone, partial consent, GPC or the shared identity-free tier cannot release a key. Collector enqueue acknowledgement is not proof that downstream core persistence or an order join completed.
+
+The loaded API returns an unsubscribe function; the boot queue does not return that handle. Clear your own copies before unsubscribing. This generic callback does not install a Shopify bridge or configure order webhooks.
+
 ## Read the visitor ID
 
-`getVisitorId` returns the current first-party visitor ID after consent is granted. It returns `null` while consent is pending or denied.
+`getVisitorId` returns the current page-local UUID after consent permits it, or `null` while pending or denied. It is not the collector’s canonical visitor join key; use the opt-in [join-key callback](#how-do-i-subscribe-to-the-canonical-visitor-join-key) when that distinction matters.
 
 ```js
 const visitorId = signalq("getVisitorId");
@@ -331,13 +366,13 @@ For a managed-hostname (Path A) workspace, call `get_install_instructions` with 
 
 Inspect each fact's `status`, `value` and `reason`. `observed`, `not_observed`, `test_only` and `unavailable` are distinct. The recent webhook evidence uses the last 24 hours within retention; an ignored webhook, replay or metadata-only update may not leave a new receipt. Missing evidence can also mean erasure or expiry, not faulty setup. Consent receipts are reported separately; neither setup readiness nor missing receipts requires inventing a grant.
 
-Collection evidence can say `browser_snippet` or `server_only`. Keep that distinction: a server observation is not proof that the browser snippet loaded. Browser app-user `identify` remains `pending_release` in the recipe until a production Workers release includes it; use the server-event path above and do not invent a browser command.
+Collection evidence can say `browser_snippet` or `server_only`. Keep that distinction: a server observation is not proof that the browser snippet loaded. The installation recipe can still report `pending_release` for its optional browser-identify step; that field does not prove which browser asset your site loaded. Current released v4 supports the [app-user identify call above](#how-do-i-identify-an-app-user-in-the-browser). The server-event path remains available independently; neither path makes a server observation proof of a browser load.
 
 Ask your assistant to read the returned state and [signal quality](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp), then name the missing evidence and next owner. The workspace owner completes DNS, Stripe secret entry and Meta connection in the app. A setup time estimate is not a deadline for real traffic, billing or live provider acceptance.
 
 ### What do StartTrial and Subscribe delivery mean?
 
-Eligible signed Stripe `trial_started` events map to Meta `StartTrial` without monetary value. An eligible `subscribed` event maps to Meta `Subscribe` only after verified first-positive-invoice evidence supplies its value and currency. A status change alone does not prove a paid subscription. Current delivery uses retained, permitted identity context and remains subject to consent, policy, opt-out, destination and freshness checks.
+Eligible signed Stripe `trial_started` events map to Meta `StartTrial` without monetary value. An eligible `subscribed` event maps to Meta `Subscribe` only after verified first-positive-invoice evidence supplies its value and currency. A status change alone does not prove a paid subscription. Stripe lifecycle delivery uses `action_source: "system_generated"`, not a browser visit, and does not borrow a webhook request’s IP or user agent as customer browser context. Current delivery uses retained, permitted identity context and remains subject to consent, policy, opt-out, destination and freshness checks.
 
 Subscription renewals are not another Meta `Subscribe`, and invoice purchase rows are not sent to Meta as an extra Purchase. `upgraded` and `churned` remain recorded lifecycle facts rather than new Meta delivery promises. Signal quality explicitly labels trial/subscribed Google rows as not sent by design; this does not enable Google delivery.
 

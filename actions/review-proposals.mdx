@@ -109,7 +109,7 @@ Agents and server integrations can follow the same stored action outcomes throug
 
 ## What is the frozen counted evidence?
 
-Supported Meta target proposals capture `counted_evidence` over the last seven completed account-local days at proposal time. Inbox compares Meta-reported clicks and purchase figures with counted arrivals and eligible observed purchases for that target. Inspect the capture time, window, currency and coverage; null means unavailable, not zero. Current evidence can also include `observed_conversions` and a frozen `conversion_definition` with its version and event choices. Later workspace edits do not recalculate that captured definition. See [workspace conversions](/signals/conversions#do-changes-rewrite-existing-tests-or-proposals).
+Supported Meta target proposals capture `counted_evidence` over the last seven completed account-local days at proposal time. Inbox compares Meta inline link clicks and attributed website purchases with Plainrouter arrivals and recorded purchases for that target. Check `coverage.purchases.since` for the purchase cutoff. Money uses major units of the ad account currency; counted values in other currencies are excluded. Inspect the capture time, window, currency and coverage; null means unavailable, not zero. Current evidence can also include `observed_conversions` and a frozen `conversion_definition` with its version and event choices. Later workspace edits do not recalculate that captured definition. See [workspace conversions](/signals/conversions#do-changes-rewrite-existing-tests-or-proposals).
 
 This snapshot is for review. It does not refresh when you reopen Inbox, establish causal improvement, replace live policy checks, or feed spend admission. It is separate from the later outcome comparison below. Actions reads expose it, and decision receipts preserve it when recorded. [Receipt version and fields](/actions/audit-log#download-an-action-decision-receipt).
 
@@ -126,7 +126,7 @@ The comparison uses complete days in the Meta ad account's timezone, with UTC as
 | Resume | The resumed target versus the rest of the ad account over the same three days after the write day. `lost` means the target's cost per counted arrival exceeds the comparison by more than the threshold. |
 | Pause | Not judged for performance (`pause_not_judged`). Verify the status change through its receipt. |
 
-Each compared side needs at least 50 counted arrivals and positive spend. Compared spend must come from retained inventory with coverage for the completed days. Each check reads the arrival count and stored spend again before recording its result.
+The loss threshold uses a percent scale: `25` means 25%, within the policy range 1–999.99. Each compared side needs at least 50 counted arrivals and positive spend. Compared spend must come from retained inventory with coverage for the completed days. Each check reads the arrival count and stored spend again before recording its result.
 
 Compared daily metrics must have been fetched at least ten minutes after that account-local day ended. This is a completed-day requirement, not a promise that every metric is less than ten minutes old. Missing rows count as zero only when fresh account sync coverage establishes that day. Otherwise the check can request a bounded metrics refresh, at most once per account per hour, within the available recent metrics window. Missing or older data can remain unavailable; refresh does not recover unlimited history.
 

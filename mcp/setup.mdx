@@ -67,6 +67,8 @@ The endpoint exposes:
 - `get_performance`
 - `validate_sandbox_event`
 
+The three read tools share production names and argument schemas, but their response contracts are simplified. Account state omits authorization metadata; health uses different activity, delivery and match fields; performance omits purchases, platform metrics and notices. Check production parsing and credentials separately. [Response differences](/mcp/tools#how-do-sandbox-responses-differ).
+
 Every response is synthetic and carries `"sandbox": true`. Test mode reads no
 tenant data, persists nothing, and contacts no advertising provider. It exposes
 no proposal, write, approval, Launcher, or spend-affecting tool.

@@ -1,10 +1,36 @@
 ---
 title: "October 2026"
-description: "Review workspace conversion choices, journey and channel-cost reporting, signal quality, SaaS setup verification and current SDK fixes."
+description: "Review trial-to-paid cohorts, weekly delivery counts, consent location reporting, Viewer access, browser identity options and October product changes."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 25, 2026">
+  ## Follow trials to first payment
+
+  **Added** · Read Stripe trial-start cohorts at 14, 30 and 60 days with mature sample sizes, uncertainty intervals and explicit missing-evidence reasons. [Read trial-to-paid cohorts](/signals/trial-to-paid).
+
+  ## Read weekly conversion delivery counts
+
+  **Added** · Inspect distinct logical events by UTC week, channel and conversion kind with `get_event_volume`. Test sends and incomplete weeks remain explicit; this is not Meta learning status. [Read weekly volume](/signals/event-volume).
+
+  ## Choose banner coverage and inspect recorded locations
+
+  **Improved** · Owners can choose location-based or always-on banner coverage. Consent reports now group locations by country, US state or Canadian province/territory and expose schema version 2. [Configure coverage](/signals/install-pixel#how-do-i-choose-where-the-banner-appears) and [update report consumers](/signals/consent-choices#can-an-ai-assistant-read-consent-choices).
+
+  ## Share read-only workspace access
+
+  **Added** · Invite a Viewer to inspect workspace data without update permissions. Keys remain role-capped, and invited signup can join the existing team without creating another. [Check Viewer access](/mcp/workspace-tokens#how-does-the-viewer-team-role-affect-a-key).
+
+  ## Connect permitted browser identity to your application
+
+  **Added** · Current v4 accepts an opaque app-user `external_id`. An optional workspace setting also enables a canonical visitor join-key callback after full consent; withdrawal clears its availability. [Configure browser identity](/signals/track-events#how-do-i-identify-an-app-user-in-the-browser).
+
+  ## Check creative workflow availability
+
+  **Changed** · New Launcher and governed creative work require workspace availability as well as permissions. Generation and rendering are currently unavailable; uploaded assets and Meta library reads keep their separate checks. [Interpret creative availability errors](/mcp/tools#why-is-a-creative-tool-unavailable).
+</Update>
 
 <Update label="October 21, 2026">
   ## Choose what counts as a workspace conversion

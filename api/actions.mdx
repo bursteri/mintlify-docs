@@ -194,6 +194,14 @@ In Ask mode, send the reviewer to **Inbox**. Use the reads above to follow the r
 
 The [public MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json) publishes the shared proposal schema. A schema-accepted action type alone does not establish that its execution workflow is available.
 
+### Which units do budget requests use?
+
+`new_daily_budget_minor` and policy-result `requested_minor` use **Meta budget units** for the account currency. Use whole currency units for CLP, COP, CRC, HUF, IDR, ISK, JPY, KRW, PYG, TWD and VND; use hundredths for other currencies listed by Meta, including BHD and JOD. They are not a universal ISO-minor-unit representation. The [published contract](https://plainrouter.com/openapi.json) defines the current fields.
+
+For example, a EUR daily budget of 12.34 uses integer `1234`; a JPY budget of 1234 uses integer `1234`. These examples explain encoding, not a spending recommendation. Preserve positive-integer validation and account currency.
+
+Later outcome `spend_minor` and cost fields instead use ISO currency subunits and may be decimal strings. Spend can be null when daily data is unavailable or the currency has no ISO subunit. Inventory `metrics.spend` and frozen `counted_evidence` money use major currency units. Do not reuse one representation as another.
+
 ### What if the same proposal key returns a conflict?
 
 Reuse the saved idempotency key only for an identical proposal from the same proposing principal. Changing action parameters, target, action order, or proposer returns HTTP `409` with a validation-shaped body:
@@ -213,7 +221,7 @@ Read the existing batch before resolving a timeout. Use a new key for a genuinel
 
 ## What does counted_evidence represent?
 
-When available, an action read includes the frozen target comparison captured at proposal time: target, capture time, completed account-local window, currency, Meta-reported figures, counted figures and coverage. It is display evidence, separate from current policy and later `disposition.outcome_payload`. Null means unavailable. [Read the frozen comparison](/actions/review-proposals#what-is-the-frozen-counted-evidence).
+When available, an action read includes the frozen target comparison captured at proposal time: target, capture time, completed account-local window, currency, Meta-reported figures, counted figures and coverage. Meta figures use inline link clicks and attributed website purchases. Counted figures use Plainrouter arrivals and recorded purchases, with purchases available only from `coverage.purchases.since`. Money uses major units of the ad account currency; other counted currencies are excluded. It is display evidence, separate from current policy and later `disposition.outcome_payload`. Null means unavailable. [Read the frozen comparison](/actions/review-proposals#what-is-the-frozen-counted-evidence).
 
 ## Why is a management target refused?
 

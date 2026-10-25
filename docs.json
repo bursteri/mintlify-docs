@@ -60,6 +60,8 @@
               "signals/connect-meta",
               "signals/conversions",
               "signals/conversion-journeys",
+              "signals/trial-to-paid",
+              "signals/event-volume",
               "signals/health-and-performance"
             ]
           },

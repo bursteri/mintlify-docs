@@ -79,6 +79,12 @@ An eligible account for an unbound key must be owned by the key's workspace, act
 
 `get_account_inventory` and `get_inventory_metrics` always require the internal Plainrouter `account_id`. They read retained data for an account available to the workspace, which can include disconnected accounts. Inspect `staleness` and connection status before using the result. Older account-bound keys still cannot select another account. See [account inventory](/actions/account-inventory).
 
+## How does the Viewer team role affect a key?
+
+**Viewer** is read-only workspace membership, separate from a key's requested tier. A Viewer can issue role-capped Read access and inspect authorized data, but cannot edit settings, connect providers, upload creatives or propose advertising changes. Choosing Write does not bypass that role cap.
+
+The Read tier can list operations that also require update permission at call time: ingestion verification and feedback submission are refused for a Viewer issuer. Recheck the issuer's current role as well as the grant when troubleshooting a previously working call.
+
 ## Access tiers
 
 | Tier | Workspace abilities | MCP access |
@@ -100,7 +106,7 @@ Token-management creation responses include a legacy `grant_id` for the primary 
 
 ### Inspect and revoke a grant in the dashboard
 
-Sign in as the team owner or an authorized team administrator and open **Workspace settings → Workspace grants**. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. Inspect the linked grant here; **Settings → Workspace keys** lists the key's status and last use.
+Sign in as the team owner or an authorized team administrator and open **Workspace settings → Workspace grants**. The section is a bounded current view: live grants, qualifying revocations from the last seven days and up to five recent expired grants. Expand **Show … expired** to inspect that sample and its total count; this is not an export of the entire grant history. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. Inspect the linked grant here; **Settings → Workspace keys** lists the key's status and last use.
 
 1. Identify the intended principal and bound token before making a change.
 2. For a live grant, click **Revoke**, then confirm **Revoke grant**.

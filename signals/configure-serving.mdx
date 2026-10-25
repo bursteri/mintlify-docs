@@ -6,7 +6,7 @@ description: "Configure the Signals same-origin proxy, verify browser request pa
 
 Use Plainrouter's generated forwarding block to collect Signals through a route on your own website. This is **Path B — same-origin proxy**. A working setup keeps browser requests on your website origin, passes forwarding verification, and records an authenticated arrival. **Path A — managed hostname** remains the default and uses your collection subdomain.
 
-Plainrouter uses the same managed collector, consent rules, and event contract for both serving paths. Only the route from your website to the collector changes.
+Both paths use the managed collector and event contract. Their visitor-policy resolution differs: same-origin forwarding currently keeps the stricter consent path because visitor location is not passed through. [Banner coverage](/signals/install-pixel#how-do-i-choose-where-the-banner-appears) cannot override that limitation.
 
 ## Before you begin
 
@@ -23,10 +23,10 @@ Plainrouter uses the same managed collector, consent rules, and event contract f
 | Vercel, Netlify, Next.js, Cloudflare, Nginx, or Caddy | A rewrite, origin rule, or reverse-proxy block | **Path B — same-origin proxy** |
 | Webflow, Squarespace, Wix, Shopify, or managed WordPress | The validated CNAME record | **Path A — managed hostname** |
 
-Path A sends collection traffic through your Plainrouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run Plainrouter code in your hosting account and does not change which visitors are eligible for measurement.
+Path A sends collection traffic through your Plainrouter-managed subdomain. Path B transparently forwards a route on your website to the same collector. Path B does not run Plainrouter code in your hosting account or create a consent grant; its stricter visitor-policy fallback still applies.
 
 <Note>
-  Path A is the default and remains fully supported. Path B gives supported stacks a true same-origin route for eligible server-issued browser identifiers under the effective consent and jurisdiction policy. Both paths send identity-free arrivals independently of consent and require full consent for conversion events and advertising identity.
+  Path A is the default and remains fully supported. Path B gives supported stacks a same-origin route for eligible server-issued browser identifiers and currently requires full consent for conversions and advertising identity. Both paths send identity-free arrivals independently of consent; Path A's separate eligible global-policy path follows the [effective policy](/signals/overview#consent-behavior).
 </Note>
 
 ## Generate your setup

@@ -50,7 +50,7 @@ Continue by passing `pagination.next_cursor` as `cursor` with the same workspace
 
 ## Why do earned, appeared-in and Meta counts differ?
 
-**Appeared in** counts every conversion a channel touched. **Earned** is its share of those conversions, so earned can be fractional and is never higher than appeared in. Meta's claimed conversions follow Meta's attribution rules and remain separate. Keep the returned `basis_note` and availability explanations with the numbers.
+**Appeared in** counts every conversion a channel touched. **Earned** is its share of those conversions, so earned can be fractional and is never higher than appeared in. Meta's claims cover **Purchases only**, while earned credit covers your selected conversion kinds. They can also use different currencies. Keep them separate instead of treating the two columns as the same denominator. Keep the returned `basis_note` and availability explanations with the numbers.
 
 Journeys are frozen at conversion time with one delayed refresh after about 60 minutes for eligible late context. They are not continuously rebuilt from all future activity. Touch snapshots are bounded, and opt-out, erasure, missing context and retention can limit what is readable. An empty journey remains unattributed; it is not evidence that no marketing influenced the customer.
 
@@ -72,7 +72,7 @@ Call `get_cac_by_channel` using the same dates, model, lookback and level, with 
 
 The default kind is `subscribed`; `purchase` and `trial_started` are alternatives. Keep trial cost separate from subscription acquisition cost. The tool name uses CAC, but its result is **cost per earned conversion** for the chosen stage, not a unique-customer or lifetime acquisition metric.
 
-Spend uses stored platform reporting dates in each ad account's timezone; conversions use conversion time. Inspect `conversion_date_basis`, `spend_date_basis`, `date_alignment`, coverage and freshness. Touch time does not move spend to another day. Costs remain per currency, and incomplete coverage or zero earned conversions can make a cost unavailable. Do not turn null into zero or combine currencies into one total. Google platform aliases are grouped as `google_ads` in this cost read; that does not establish Google conversion-delivery enablement.
+Spend uses stored platform reporting dates in each ad account's timezone; conversions use conversion time. Inspect `conversion_date_basis`, `spend_date_basis`, `date_alignment`, coverage and freshness. Touch time does not move spend to another day. Costs remain per currency: each currency’s spend is divided by all earned conversions in that row. With several spend currencies, no individual currency result represents the full acquisition cost. Incomplete coverage or zero earned conversions can make a cost unavailable. Do not turn null into zero or combine currencies into one total. Google platform aliases are grouped as `google_ads` in this cost read; that does not establish Google conversion-delivery enablement.
 
 UTM dimensions and other channel levels can lack supported spend mappings. Use returned reasons instead of assigning unrelated account spend to those rows. Meta's claimed cost stays separately labeled and does not replace cost per Plainrouter-earned conversion.
 

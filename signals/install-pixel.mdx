@@ -65,6 +65,27 @@ Open **Signals → Install → Consent banner**. A workspace manager can enable 
 
 The banner does not automatically block unrelated scripts installed by your CMS, plugins or tag manager. Use [Cookie scan and declaration](/signals/cookie-scan) to inspect pre-consent activity and publish the observed inventory.
 
+## How do I choose where the banner appears?
+
+The workspace owner can open **Workspace settings → Consent banner coverage**, select an option and choose **Save consent banner**:
+
+| Option | Behavior |
+| --- | --- |
+| **Only where the law requires it** | The configured visitor-location policy determines where the enabled banner appears. Unknown or restricted location context can keep the stricter path. |
+| **Always show** | Show the enabled banner to every visitor. Saving this choice enables the included surface. |
+
+These are configuration labels, not proof that every script on your website follows that policy. Existing consent choices are kept. Editors can inspect the setting but only the owner can change coverage. Banner text/layout configuration on Install is a separate permission.
+
+Same-origin forwarding (Path B) currently keeps the banner for all visitors because it cannot pass visitor location. Selecting location-based coverage does not bypass that restriction. Verify the actual page's consent behavior and recorded receipts separately.
+
+### What changes for Google and Microsoft UET tags?
+
+Reopen Install and copy the **complete current snippet and consent instructions** when adopting the region-aware setup. Replace the old block once; keep one queued `init` above vendor measurement. Updating the hosted v4 asset alone does not rewrite an older pasted consent block.
+
+When using Plainrouter's banner, follow the supplied `window.plainrouterWhenPolicyReady` wrapper or GTM `plainrouter_policy_ready` trigger for every Google/UET tag and measurement command. Leave the CMP loader unwrapped and keep the existing `dataLayer`. The generated block handles region results, denied fallback, stored choices and later changes; do not replace a missing result with a grant. If the Plainrouter surface is disabled, your selected CMP owns vendor defaults and updates.
+
+Verify fresh, stored-denial and withdrawal cases using [Track events and consent](/signals/track-events#verify-grant-partial-consent-and-withdrawal). Google/UET browser-tag guidance does not establish support for a server-side advertising destination.
+
 ## Can an AI assistant read my installation instructions?
 
 Yes. With a production [Read workspace key](/mcp/workspace-tokens), call [`get_install_instructions`](/mcp/tools#get_install_instructions). A single-workspace key needs no arguments; a multi-workspace key needs `workspace_id`. Confirm the returned workspace, then use its existing CNAME and snippet. The call is read-only and reports stored `first_arrival` state; it does not provision DNS or install code.
