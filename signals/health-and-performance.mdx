@@ -23,6 +23,8 @@ Select the Meta ad account on **Dashboard**. The account view combines retained 
 
 Use the dates and account timezone shown for paid figures. The window can differ from the broader workspace report. Unknown or unavailable figures stay unknown; a dash is not zero.
 
+Dashboard formats money, counts, percentages and multiples using the displayed currency's conventions. EUR figures can use decimal commas; USD figures use decimal points. Formatting does not convert revenue into the ad account's currency or change the API's numeric units. Keep each currency separate when interpreting revenue and ratios.
+
 ### Why do some ads have no arrivals or observed purchases?
 
 Ads need the Plainrouter URL tags. Ads created by Plainrouter carry them; for other ads, add this to their URL parameters:
@@ -84,7 +86,13 @@ The arrival total counts dedicated arrival records sent once per document load. 
 
 Customer-visible arrival totals stay aggregate-only and do not appear in conversion-event lists or detail APIs. Browser collection can carry the [bounded traffic context](/signals/install-pixel#what-happens-on-initialization) described in the installation guide; it does not make the total an individual visitor or channel attribution report. Invalid traffic, synthetic events and legacy exposure rows do not enter the arrival total.
 
-The total remains a complete number, including when it is below five. The dashboard, MCP summary and CSV publish one arrival count for the same workspace and reporting window. They do not expose jurisdiction subtotals or a `partial` marker alongside the total. Compare the workspace, time window and freshness before diagnosing a mismatch; today so far is separate from completed days.
+When available, the total remains a complete number, including when it is below five. The dashboard, MCP summary and CSV publish one arrival count for the same workspace and reporting window. They do not expose jurisdiction subtotals or a `partial` marker alongside the total. Compare the workspace, time window and freshness before diagnosing a mismatch; today so far is separate from completed days.
+
+### What if arrival measurements are unavailable?
+
+**Unavailable**, a dash, or a null arrival value means the required arrival evidence could not be read. It is not a measured zero, proof of no traffic, or an instruction to reinstall the snippet. The daily chart can show **Arrival measurements are unavailable. Try again later.** CSV exports preserve **Unavailable** for missing arrival totals and today-so-far values; a difference requiring the missing total is also unavailable.
+
+Retry the read later and check [collection requests](/signals/install-pixel#verify-the-installation) separately if you suspect an installation issue. Keep nulls and any `availability: "unavailable"` marker in API/MCP consumers; do not substitute zero or build a total from incomplete data. A successful browser arrival response proves edge receipt, while reporting depends on stored evidence.
 
 ### Match quality
 
@@ -178,6 +186,7 @@ Account-scoped health remains available through [`get_signal_health`](/mcp/tools
 | State | Meaning | What to do |
 | --- | --- | --- |
 | **Setup required** | Signals or the collection hostname is not active. | Finish installation or recover the hostname. |
+| **Unavailable** | Arrival evidence could not be read. | Retry the read later; do not infer no traffic or reinstall from this state alone. |
 | **Awaiting data** | Setup is active, but no retained arrival evidence exists. | Visit the installed website and check its arrival request. |
 | **Quiet** | Retained arrivals exist, but none fall in the selected window or today. | Check current traffic and the selected dates before reinstalling. |
 | **Measurement pending** | Arrival activity exists, but delivery, EMQ, or reconciliation evidence is incomplete. | Check eligible conversions and allow scheduled measurements to complete. |

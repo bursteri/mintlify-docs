@@ -26,6 +26,8 @@ The report reads a rolling 180-day receipt window on every plan, separate from y
 
 Use the dimension selector to compare recorded groups. Location, language and banner-version breakdowns and daily series show the top 50 values by recorded choices; they may not represent every recorded value. Policy class is a separate breakdown, rather than a top-50 daily dimension. The recent-receipt table shows the latest 20 receipts, not the entire export.
 
+**Banner version** identifies the consent copy recorded with that decision. Current v4 copy records version `3`; it is separate from the saved-choice cookie format. Older receipt versions remain historical evidence. A copy-version change does not grant consent or reinterpret an older saved choice.
+
 ## How should I read unknown locations?
 
 Use the returned geography labels, including **US (state unknown)**, **CA (province/territory unknown)** and **Location unknown**. Do not assign an unknown state to a known one or backfill older missing policy history. An unknown breakdown is evidence of missing location detail, not a consent refusal or proof that a banner was omitted.

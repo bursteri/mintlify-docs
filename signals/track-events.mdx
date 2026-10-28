@@ -337,7 +337,7 @@ Replace the example return URLs with your application's URLs. Store the returned
 
 Use your application's stable internal user ID consistently across server events and Stripe. This lets Plainrouter record a workspace-scoped customer-to-user association when an eligible signed webhook contains both identifiers. Use an opaque ID that is never reassigned and is distinct from an order ID or browser visitor ID. Use the same exact value throughout; do not substitute an email address.
 
-1. Send the signup through your [server-event integration](/api/conversions) with that ID in `user_data.external_id`, preserving the real consent and event fields. Use server events for this app-user ID; the current browser `identify` flow above handles email and phone.
+1. Send the signup through your [server-event integration](/api/conversions) with that ID in `user_data.external_id`, preserving the real consent and event fields. The [browser `external_id` command](#how-do-i-identify-an-app-user-in-the-browser) can use the same stable app-user ID when policy permits; neither call proves a Stripe association by itself.
 2. When creating Checkout on your server, set `client_reference_id` to the same ID. The signed event must also identify a Stripe Customer. For one-time Checkout that would not otherwise create a Customer, use Stripe's supported `customer` or `customer_creation` option.
 3. If you create Stripe Customers directly, set Customer `metadata.user_id` to the same ID and subscribe your workspace endpoint to `customer.created` and `customer.updated`. A signed subscription snapshot can also supply `metadata.user_id`. Plainrouter uses metadata present in the webhook; it does not fetch missing nested Customer or Subscription data.
 4. Inspect the signed webhook in Stripe: check the workspace endpoint, Customer ID and selected app-user field. Then verify the retained purchase or lifecycle event separately. HTTP `200` alone does not prove a user association, paid revenue or advertising attribution.
@@ -382,7 +382,13 @@ Use the returned event ID and delivery trace. Do not construct subscription life
 
 No. **Connections → Stripe revenue** accepts a restricted read-only Stripe API key and displays its status, live/test mode, account binding and verification reason. The **Stripe** webhook card uses a different endpoint signing secret. [Stripe distinguishes restricted API keys from webhook signing secrets](https://docs.stripe.com/keys). Keep both in their intended app fields and out of MCP prompts, chat, source control and logs.
 
-Saving a revenue key can fail if the account or mode does not match retained signed webhook evidence; a different account or mode requires the app's Signals reset flow. Review the data-removal consequences before resetting. The card states that history import is not available yet. Saving or verifying this key does not import past subscriptions, prove live event delivery or complete the SaaS installation.
+Saving a revenue key can fail if the account or mode does not match retained signed webhook evidence; a different account or mode requires the app's Signals reset flow. Review the data-removal consequences before resetting. If a key or signing-secret update reports **Stripe credentials are busy. Please try again shortly.**, retry the same intended update later; that message does not mean the new credential was saved.
+
+### Is Stripe history import available to every workspace?
+
+No. History import remains disabled by default and limited to selected workspaces. Connections can show **History import is unavailable for this workspace.** Saving or verifying a revenue key does not enable it, import past subscriptions, prove live event delivery or complete the SaaS installation.
+
+Imported history, where explicitly enabled, stays unattributed and does not change CAC or channel credit. An in-progress or partial run does not establish complete coverage; verified coverage is published only after a completed import. Continue using signed webhooks for the supported live settlement flow above.
 
 ### How do I verify a settled purchase?
 

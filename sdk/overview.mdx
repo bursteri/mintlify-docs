@@ -50,6 +50,8 @@ TypeScript, Python and CLI `0.10.1`, Ruby `0.6.1`, PHP `0.4.1`, and Go `v0.7.1` 
 
 The refreshed models include current Actions reads and destination/delivery states. New Actions Read access uses a `read-actions` grant; upgrading a package does not upgrade an older credential. Use a Server secret for Signals and an appropriately scoped Workspace key for [Actions](/api/actions). A generated method or enum does not enable a gated product workflow.
 
+The server's current action schema refuses `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`, even when an installed generated model still includes those names. Update proposal and preview payloads to supported action types and handle field-level validation errors. [Check the current compatibility boundary](/api/actions#which-action-types-are-refused).
+
 ## What should I check before upgrading?
 
 These `0.x` releases include source compatibility changes. Pin one version, update your lockfile and compile or run your integration before rollout. Review the release notes linked from your language guide.

@@ -45,12 +45,12 @@ Use [`dry_run_actions`](/mcp/tools#dry_run_actions) or the [HTTP dry-run endpoin
 
 | Action | Proposal support | Execution support |
 | --- | --- | --- |
-| Upload asset | Image or video staged-asset shape. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
+| Upload asset | Staged image with its frozen manifest. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
 | Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified `PAUSED`; any later resume is a separate action governed by Ask or Full. |
 | `pause`, `resume` | Human-selected campaign, ad set, or ad, with empty `params`. | Supported under Ask or Full, with current policy checks and execution authorization. |
-| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer currency minor units. | Supported under Ask or Full, with provider-state checks. Lifetime-budget changes are not supported. |
-| `adjust_budget` | Typed recommendation with a new daily budget. | This legacy MCP action does not execute. |
-| `set_status` | Typed recommendation with `active` or `paused`. | This legacy MCP action does not execute, including activation. |
+| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer Meta budget units for the account currency. | Supported under Ask or Full, with provider-state checks. Lifetime-budget changes are not supported. |
+
+New proposals and previews refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`. Stored historical actions of these types remain non-executable. Use `pause` or `resume` for a status change, and `increase_budget` or `decrease_budget` for a supported daily-budget change. A generated SDK type does not make a refused action available. [Handle action-type validation](/api/actions#which-action-types-are-refused).
 
 Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/actions/creative-workflow) for the supported creative workflow. The convenience tools create proposals; they do not perform a Meta write inside the MCP request.
 

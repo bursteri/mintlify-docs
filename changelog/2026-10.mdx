@@ -1,10 +1,28 @@
 ---
 title: "October 2026"
-description: "Review trial-to-paid cohorts, weekly delivery counts, consent location reporting, Viewer access, browser identity options and October product changes."
+description: "Review action compatibility changes, clearer Inbox comparisons, arrival availability, consent preferences and October product releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 28, 2026">
+  ## Replace action types that cannot run
+
+  **Changed** · Proposals and previews now refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`. Use supported status or daily-budget actions and inspect validation errors, even if an older SDK model accepts the name. Historical records remain non-executable. [Update action requests](/api/actions#which-action-types-are-refused).
+
+  ## Review changes and amounts more clearly
+
+  **Improved** · Inbox groups batch changes with optional reasons and separates Checks from What happened. Inbox and Dashboard format amounts using each currency's conventions; API units and approval requirements stay the same. [Review the comparison and its source](/actions/review-proposals#what-will-change-and-how-fresh-is-the-comparison).
+
+  ## Distinguish unavailable arrivals from zero traffic
+
+  **Improved** · Dashboard, MCP reads and exports keep unavailable arrival evidence explicit. Missing totals do not become zero or imply a broken installation. [Handle unavailable arrival measurements](/signals/health-and-performance#what-if-arrival-measurements-are-unavailable).
+
+  ## Reach the privacy policy from consent preferences
+
+  **Fixed** · The current v4 consent card includes the configured privacy-policy link in Privacy settings as well as the banner. Saved choices retain their meaning. [Verify the included card](/signals/install-pixel#can-i-enable-the-included-consent-banner).
+</Update>
 
 <Update label="October 25, 2026">
   ## Follow trials to first payment

@@ -40,7 +40,7 @@ Confirm the workspace before paging. Loading history does not repeat a proposal,
 
 ### Batch status and action status
 
-The detail pane shows the selected action's **Status**, its reasoning, policy check and activity. Expand **All details** for **Batch status**, **Action status**, receipt status and later outcome fields. Read both action and batch status, especially in a batch with multiple actions. One verified action does not prove that all actions in its batch completed or that recovery succeeded.
+The detail pane shows **Status**, reasoning, **Checks**, and **What happened**. For a batch, review **The changes** and choose **Show reasons for each change** when available. Expand **All details** for **Batch status**, **Action status**, receipt status and later outcome fields. Read both action and batch status, especially in a batch with multiple actions. One verified action does not prove that all actions in its batch completed or that recovery succeeded.
 
 ### What does a halted batch mean?
 
@@ -56,16 +56,16 @@ Confirm the person intended each source ad and asset selection. If the detail pa
 
 ### What will change, and how fresh is the comparison?
 
-For supported status and daily-budget changes, compare the current value with the proposed value before deciding. Budget amounts use the account currency. A displayed delta is not a performance forecast.
+For supported status and daily-budget changes, read **The change** and compare the current value with the proposed value before deciding. Budget amounts use the account currency's formatting and Meta budget units; a EUR amount can use a decimal comma while USD uses a decimal point. This changes presentation, not the API's integer units or currency conversion. A displayed delta is not a performance forecast.
 
 | Label | What it establishes |
 | --- | --- |
-| **Meta policy read** | The current value was captured when policy evaluated the proposal. Check its read time; it is not a continuously refreshed Meta quote. |
-| **Mirror fallback** | No recorded policy observation was available, so Inbox uses retained inventory. Check **last synced** before relying on it. |
-| **Not recorded** | A value or comparison is unavailable. It does not mean zero budget or a successful change. |
-| **Before execution** and verified fields | Once execution begins, the comparison uses stored execution and verification evidence. A verified field can remain unavailable while work is unsettled. |
-| **New object** | A creation proposal describes a new object, rather than a before-and-after edit to an existing one. |
-| **Execution disabled** | The proposal uses a legacy action type that cannot execute. |
+| **Read from Meta** | The current value was captured when policy evaluated the proposal. Check its read time; it is not a continuously refreshed Meta quote. |
+| **From the last sync** | No recorded policy observation was available, so Inbox uses retained inventory. The sync time can be missing and the value may be out of date. |
+| **Not recorded** or **wasn't recorded** | A value or comparison is unavailable. It does not mean zero budget or a successful change. |
+| **Daily budget before/after** or **Status before/after** | Once execution begins, the comparison uses saved execution state and the confirmed Meta snapshot. **Waiting for Meta to confirm** is still unverified. |
+| **What will be created** | A creation proposal describes a new object, rather than a before-and-after edit to an existing one. |
+| **Can't be applied** | The stored proposal uses a legacy action type that cannot execute. New requests of those types are refused. |
 
 Older proposals can lack a recorded policy observation. A comparison alone does not prove the change landed; check action status and the receipt below.
 
@@ -77,7 +77,7 @@ Expand **All details** to inspect the current disposition. It shows receipt stat
 
 ### Evidence and policy checks
 
-Read **Policy check**, including the decision, reasons, and any unavailable dynamic fields. Executable work fails closed when a required provider or policy field is unknown. Suggest-only recommendations can disclose unavailable state because approval cannot execute them.
+Read **Checks**, including the policy decision, reasons, and any unavailable dynamic fields. Open **Policy history** when available to inspect earlier evaluations. Executable work fails closed when a required provider or policy field is unknown. Historical suggest-only recommendations can disclose unavailable state because approval cannot execute them.
 
 The proposal's evidence must support its claims:
 

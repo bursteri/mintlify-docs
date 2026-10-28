@@ -26,6 +26,7 @@ These labels come from the account-scoped `get_signal_health` diagnostic. The Si
 | API value | UI label | Meaning |
 | --- | --- | --- |
 | `setup_required` | Setup required | Signal collection or hostname activation is incomplete. |
+| `unavailable` | Unavailable | Arrival evidence could not be read. Retry later; this does not establish zero traffic or missing installation. |
 | `awaiting_data` | Awaiting data | Setup is active, but no retained arrival evidence exists. |
 | `quiet` | Quiet | Retained arrival evidence exists, but none falls in the selected window or today. |
 | `active_unmeasured` | Measurement pending | Events exist, but required delivery, EMQ, or reconciliation measurements are incomplete. |

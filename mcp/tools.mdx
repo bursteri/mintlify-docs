@@ -282,7 +282,7 @@ Read the same stored workspace comparison used by Dashboard and Signals: counted
 
 Use a Read or Write workspace key with an active grant for `get_arrivals_comparison`. The tool uses the authorized workspace, with `workspace_id` required for a multi-workspace credential, and does not accept `account_id`. Confirm `workspace_id` and the returned `period` before interpreting the result.
 
-The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Arrivals cover all site channels; claimed clicks are Meta outbound clicks. A displayed `delta_percent` uses claimed clicks as its denominator, not arrivals, and cannot be calculated when that denominator is absent or zero. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform values as unavailable, not zero; a withheld component does not reduce the complete arrival total. Follow the [comparison and platform-read guidance](/signals/health-and-performance#platform-read-state).
+The response includes collection and connection status, the reporting period, `arrivals`, separate `today_so_far` counts, nullable `claimed_clicks`, and the available difference. Arrivals cover all site channels; claimed clicks are Meta outbound clicks. A displayed `delta_percent` uses claimed clicks as its denominator, not arrivals, and cannot be calculated when that denominator is absent or zero. Use either `days` or `months`; for a year request send `{"months": 12}`. A window beyond the plan or shorter workspace setting is refused, not clipped. Check the returned completed-day boundaries. Preserve unavailable platform and arrival values as unavailable, not zero. An available arrival total is complete; a null value or `availability: "unavailable"` means the required evidence could not be read. Follow the [arrival availability](/signals/health-and-performance#what-if-arrival-measurements-are-unavailable) and [platform-read guidance](/signals/health-and-performance#platform-read-state).
 
 The response also includes `claimed_clicks_label`, `claimed_clicks_outbound_since`, and `claimed_clicks_caveat`. Keep the caveat with historical data: older days can still contain link clicks or all clicks. The separate `purchases` block includes Meta-attributed and accepted server-side Purchase counts, its completed account-local window, attribution details, and daily read timestamps. See [Purchase comparison limits](/signals/health-and-performance#how-do-i-compare-meta-reported-purchases); it has no purchase gap or status.
 
@@ -372,7 +372,7 @@ The result includes the shared scope, status, label, summary, Signal and destina
 - `performance`: stored reconciliation diagnostics. The standalone `get_performance` input remains 1–90 days; the arrival `months` option does not extend that contract.
 - `diagnostics`, `data_sources`, and `generated_at`: explanations, provenance, and response freshness.
 
-Arrival windows use completed days in the account timezone. Requests outside the plan or explicit shorter workspace setting are refused rather than clipped. Use `{"months": 12}` for the 12-calendar-month window, when available. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Read the complete arrival total directly; the public response does not expose jurisdiction subtotals or a partial marker. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
+Arrival windows use completed days in the account timezone. Requests outside the plan or explicit shorter workspace setting are refused rather than clipped. Use `{"months": 12}` for the 12-calendar-month window, when available. Do not assume the fixed 24-hour delivery diagnostics cover that same period. Read an available arrival total directly; the public response does not expose jurisdiction subtotals or a partial marker. A null arrival value or health `status: "unavailable"` means arrival evidence could not be read; it is not an awaiting-data or quiet result. Missing platform history is not zero activity. See [Signals measurements and troubleshooting](/signals/health-and-performance).
 
 This call reads stored measurements. It does not trigger a live Meta Marketing API read.
 
@@ -579,7 +579,7 @@ Every field path must exist in a fresh server-side capture. Aggregate sources ca
 
 ### Action object
 
-Every action has this common shape. This example pauses a human-selected campaign; policy, approval and verification still apply. Use the canonical action names for new proposals. Legacy `set_status` and `adjust_budget` do not execute. For creative work, use [Create governed Meta creatives](/actions/creative-workflow).
+Every action has this common shape. This example pauses a human-selected campaign; policy, approval and verification still apply. Use supported canonical action names for new proposals; legacy names are refused. For creative work, use [Create governed Meta creatives](/actions/creative-workflow).
 
 ```json
 {
@@ -603,13 +603,7 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
     Use a human-selected campaign, ad set, or ad and empty `params: {}`. Ask requires person approval. Full can automate admitted unprotected changes; campaign/ad-set resume remains protected. See [approval boundaries](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
   </Accordion>
   <Accordion title="increase_budget and decrease_budget">
-    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's minor unit. Budget increases require person approval in Ask and Full. An admitted decrease can follow Full automation; current policy and provider-state checks still apply.
-  </Accordion>
-  <Accordion title="adjust_budget (legacy recommendation)">
-    Requires `new_daily_budget_minor`, a positive integer in the account currency's minor unit. For example, `4900` means 49.00 for a two-decimal currency.
-  </Accordion>
-  <Accordion title="set_status (legacy recommendation)">
-    Requires `status` equal to `active` or `paused`.
+    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's [Meta budget units](/api/actions#which-units-do-budget-requests-use). Budget increases require person approval in Ask and Full. An admitted decrease can follow Full automation; current policy and provider-state checks still apply.
   </Accordion>
   <Accordion title="duplicate_ad_with_creative">
     Requires `asset_id` and `status: "paused"`. An optional `name_suffix` can identify the duplicate.
@@ -636,7 +630,9 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 | `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. For optional `size_bytes`, use a positive integer byte count. |
 | `duplicate_ad_with_creative` | Supply only `asset_id`, `status: "paused"` and optional `name_suffix`. Use the exact `image:…` or `video:…` library asset ID. `degrees_of_freedom_spec` is server-owned and must be omitted, including on retries. |
 
-Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask; Full queues policy-allowed changes automatically. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes. The legacy `adjust_budget` and `set_status` recommendations remain non-executable. See [supported Actions](/actions/overview#supported-action-types) and the [creative workflow](/actions/creative-workflow).
+Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask; Full queues policy-allowed unprotected changes automatically; budget increases and campaign/ad-set resumes still need person approval. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes.
+
+New `propose-actions` and `dry_run_actions` calls refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback` with a tool validation error. Stored historical actions of these types never execute. Use a supported canonical type and correct the affected `actions.N.type`; a different retry key does not bypass validation. See [action-type refusals](/api/actions#which-action-types-are-refused), [supported Actions](/actions/overview#supported-action-types), and the [creative workflow](/actions/creative-workflow).
 
 HTTP field errors return `422`; MCP exposes a tool validation error. Read the field path and message. `action_request_invalid` identifies list, NUL, or duplicate-key problems; `action_target_id_invalid` identifies the guarded target-ID rule; `action_params_invalid` identifies invalid typed parameters. Correct the payload rather than retrying it unchanged.
 
@@ -661,7 +657,7 @@ Read the reported `actions.N` field so you correct the affected action in a mult
 
 Plainrouter rejects evidence paths that claim campaign, ad set, ad, target, CPA, spend, budget, or learning-phase state from aggregate Signals reads.
 
-`get_signal_health` is diagnostic and cannot support a batch containing `adjust_budget`, `set_status`, or `duplicate_ad_with_creative`. This rule applies to the entire batch: adding an `upload_asset` action does not make a mixed spend-affecting proposal eligible. An upload-only `upload_asset` batch is the current non-spend exception and may retain signal-health context.
+`get_signal_health` is diagnostic and cannot support a batch containing a status change, budget change, or `duplicate_ad_with_creative`. This rule applies to the entire batch: adding an `upload_asset` action does not make a mixed spend-affecting proposal eligible. An upload-only `upload_asset` batch is the current non-spend exception and may retain signal-health context.
 
 Use `get_performance` when a spend-affecting proposal needs stored reconciliation-derived performance evidence. Quantitative citations need at least one ledger-class numeric leaf. Platform-reported or platform-derived values can accompany it as context but cannot satisfy that requirement alone. Descriptive-only citations do not claim measurability. An unclassified leaf is refused, including inside a cited container; narrow the citation to supported fields.
 
