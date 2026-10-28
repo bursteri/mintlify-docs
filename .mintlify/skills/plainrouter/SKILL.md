@@ -1,11 +1,11 @@
 ---
 name: plainrouter
-description: Test Plainrouter MCP without credentials, connect workspace-scoped production clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
+description: Connect workspace-scoped Plainrouter MCP clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
 license: Proprietary
-compatibility: Test mode needs only an MCP client. Production workflows require a Plainrouter workspace and the credential or workspace-token tier required by the selected workflow.
+compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-09-27"
+  documentation_revision: "2026-10-28"
 ---
 
 # Use Plainrouter safely
@@ -14,29 +14,18 @@ Use this skill when a person wants to configure Plainrouter Signals, connect an
 AI client to Plainrouter MCP, inspect Signal or creative state, create a
 governed advertising proposal, or prepare a Launcher draft.
 
-Plainrouter MCP test mode is available at
-`https://plainrouter.com/mcp/sandbox`; production is available at
-`https://plainrouter.com/mcp`. Every account-specific production workflow must begin with
+Plainrouter MCP is available at `https://plainrouter.com/mcp` with workspace authorization for tool calls. Every account-specific production workflow must begin with
 `get_account_state` so the person and agent can confirm the key-scoped
 workspace and selected Meta ad account. Supply `account_id` when multiple
 eligible active accounts exist; use the internal Plainrouter ID, not Meta's external ID.
 
-## Prove an integration without credentials
+## Verify an authenticated connection
 
-Connect to `https://plainrouter.com/mcp/sandbox`. It needs no account,
-credential, or human step and exposes `get_account_state`,
-`get_signal_health`, `get_performance`, and `validate_sandbox_event` with
-synthetic responses marked `"sandbox": true`.
+The unauthenticated MCP and API sandbox is retired. Old sandbox requests return HTTP `410` with `sandbox_retired`; do not call `validate_sandbox_event` or generate sandbox keys. Public protocol discovery and catalog listing do not prove workspace access.
 
-Do not send personal data, customer identifiers, click identifiers, or
-production payloads. Test mode reads no tenant data, persists nothing, contacts
-no advertising provider, and exposes no proposal, write, approval, Launcher,
-or spend-affecting tool. When the client works, move it to the production URL
-and configure a workspace key from **Settings → Workspace keys**.
+Create a Plainrouter account and a Read Workspace key, or use supported OAuth sign-in. Store credentials through protected client configuration, never prompts. Start with `list_workspaces` and a workspace installation read; confirm the returned workspace before account-specific work. A Write-authorized `dry_run_actions` call can preview supported changes against real state without creating a proposal or writing to Meta; it is not an anonymous simulation.
 
-Read [Connect an AI agent](https://plainrouter.com/docs/mcp/setup)
-and the [MCP tool reference](https://plainrouter.com/docs/mcp/tools)
-before moving from test mode to production.
+Read [Connect an AI agent](https://plainrouter.com/docs/mcp/setup), [sandbox migration](https://plainrouter.com/docs/api/sandbox), and the [tool reference](https://plainrouter.com/docs/mcp/tools).
 
 ## Select the correct credential
 

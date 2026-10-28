@@ -1,5 +1,10 @@
 ---
-title: "Discover the zero-auth sandbox"
-description: "Returns a ready-to-run synthetic event example that needs no account or API key and cannot persist data or contact an advertising provider."
-openapi: "GET /sandbox"
+title: "Sandbox discovery retired"
+description: "Handle this retired sandbox operation, recognize HTTP 410, and choose authenticated API or MCP setup for your workspace."
 ---
+
+`GET /api/v1/sandbox` is retired. Requests return HTTP `410` with `error: "sandbox_retired"`; this operation no longer issues credentials or validates synthetic events.
+
+## What should I use instead?
+
+Follow [Sandbox retirement and migration](/api/sandbox) for the response format and supported alternatives. Use [API authentication](/api/authentication) for workspace requests, or [MCP setup](/mcp/setup) for an agent connection. An old SDK method does not restore the removed operation.

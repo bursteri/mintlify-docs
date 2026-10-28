@@ -1,7 +1,7 @@
 ---
 title: "Scan pre-consent cookies and publish a cookie declaration"
 sidebarTitle: "Cookie scan and declaration"
-description: "Find cookies, storage and tracker requests before consent, review fixes, rescan your website, and embed Plainrouter's scan-based cookie declaration."
+description: "Inspect cookie observations and consent-phase coverage, then publish a per-host declaration with freshness and documented Plainrouter entries."
 ---
 
 Open **Signals → Cookie scan** to inspect what your website sets or requests before a visitor chooses consent. The scan and public cookie declaration are available on every plan. A completed scan reports observations from the pages it visited; it does not automatically block other scripts or establish that every page is clear.
@@ -19,7 +19,7 @@ Open **Signals → Cookie scan** to inspect what your website sets or requests b
     Open **Signals → Cookie scan** and find the website hostname. Check its last scan time and status. Use **Rescan** to queue another scan after changing your site. Manual rescans are limited to three per hostname per UTC day.
   </Step>
   <Step title="Wait for completion">
-    Queued or pending means no completed result is available yet. Blocked and failed scans leave findings unknown. A truncated scan can have useful findings while missing other pages or requests.
+    Queued or pending means no completed result is available yet. Blocked and failed scans leave findings unknown. A truncated scan can have useful findings while missing other pages or requests. Where reported, inspect **Before consent** and **After accept** coverage separately. An after-accept pass that was not run is unknown; it does not show that no cookies appear after acceptance.
 
     **Scanned from** reports the scanner browser's measured country. **Unknown** means it could not be established. This is not a list of visitor countries or a test of every regional version of your banner.
   </Step>
@@ -41,16 +41,20 @@ On the same screen, choose **Copy embed code** under **Publish your cookie decla
 
 ```html
 <div data-plainrouter-cookie-declaration="YOUR_PUBLISHABLE_KEY"></div>
-<script async src="https://plainrouter.com/cookie-declaration.v1.js"></script>
+<script async src="https://plainrouter.com/cookie-declaration.v2.js"></script>
 ```
 
 Use the workspace's **Publishable key**, which is intended for browser use. Never substitute a Server secret or Workspace key. Your CMS must allow the container and external script; [MDN describes how external script elements load](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script).
 
-The declaration lists metadata from the workspace's latest completed scan and updates after another scan completes. It does not merge every historical scan or list cookie values. If the workspace has several hostnames, check which hostname the latest completed scan covered before using the declaration as a site-wide inventory.
+The declaration combines the latest completed scan for each hostname with documented Plainrouter cookie and storage entries. Entries distinguish scan observations from the documented inventory, including the conditions under which Plainrouter uses an item. A documented entry is not proof that the scanner observed it or that it is present for every visitor. Cookie and storage values are never included.
+
+Check each hostname's last successful scan, latest attempt and freshness. `current`, `stale`, and `unknown` describe scan evidence; a scan at least one calendar month old, or a newer blocked/failed attempt, can make the retained findings stale. A hostname with no completed scan remains unknown. A newer successful scan of one host does not refresh another host's inventory.
+
+The v2 embed also reports `before_consent` and `after_accept` coverage as `complete`, `incomplete`, or `unknown`. Coverage summarizes the reported passes; it does not certify every page or legal compliance. Documented Plainrouter entries can appear before any successful scan while site-cookie coverage remains unknown. Existing v1 embeds remain available; copy the complete current embed to show the v2 phase and freshness details.
 
 ### How do I verify the embed?
 
-Open the published page in a fresh browser context. Confirm the container renders a scan date and categories matching the completed scan. In the Network panel, check the declaration script and its data request for errors. A blank declaration before any completed scan does not mean the site sets no cookies.
+Open the published page in a fresh browser context. Confirm the container renders per-host scan dates, freshness and phase coverage, and that observed entries match the applicable completed scans. In the Network panel, check the v2 script and its data request for errors. Documented inventory or an unknown-coverage notice before a completed scan does not establish which site cookies were observed.
 
 ## Can an AI assistant read the scan?
 
@@ -63,6 +67,6 @@ Use [`get_cookie_scan`](/mcp/tools#get_cookie_scan) with a Read or Write workspa
 | My hostname is missing | Confirm Signals receives eligible arrivals from that hostname in this workspace. A collection hostname alone is not the website being scanned. |
 | The scan is blocked by bot protection | Allowlist the exact `PlainRouterScanner` user agent in your site's protection, then rescan. A blocked result is unknown, not clean. |
 | Rescan is unavailable or rate-limited | Check your Signals update permission. After three manual rescans for the hostname, wait until the next UTC day. |
-| The declaration is blank or old | Check the latest completed scan, Publishable key, CMS script handling and CSP. A queued, failed or blocked scan does not replace a completed declaration. |
+| The declaration is blank or old | Check per-host successful scans and latest attempts, the Publishable key, v2 embed, CMS script handling and CSP. A queued scan does not establish completion; blocked/failed attempts leave older findings stale. |
 
 For recorded Analytics and Marketing decisions, see [Consent choices and receipts](/signals/consent-choices). Scan findings and consent rates answer different questions: one observes the website; the other reads recorded decisions.

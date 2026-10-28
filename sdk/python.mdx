@@ -61,7 +61,7 @@ response = await get_event.asyncio(
 
 Send a server-side purchase through Plainrouter to your [connected Meta destination](/signals/connect-meta). This is a Plainrouter SDK recipe, not a direct Meta Graph API tutorial. A successful create response confirms ingestion; inspect destination delivery separately.
 
-Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/api/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
+Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Review the [event schema](/api/events/create) before sending, or use a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
 
 ### Send a purchase synchronously
 

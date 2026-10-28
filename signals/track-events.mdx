@@ -29,6 +29,8 @@ window.plainrouter("consent", "open");
 
 This command opens the supported consent surface; it does not itself grant permission. Call it after the snippet loads and wire it to a visitor action. The fallback remains subject to its configured enablement and market policy. Set its banner and floating reopen options in [Signals → Install](/signals/install-pixel#can-i-enable-the-included-consent-banner). Use [Cookie scan](/signals/cookie-scan) to check unrelated pre-consent scripts, and [Consent choices](/signals/consent-choices) to read recorded decisions when available.
 
+If the workspace owner selects **Off — I handle consent myself**, manual opening and the floating Privacy settings button are disabled too. Stored decisions still apply. Follow the [website-snippet and vendor-tag migration steps](/signals/install-pixel#what-must-i-change-when-turning-the-banner-off); your CMP must provide defaults, saved choices, updates and withdrawal.
+
 For verification, use a fresh browser context: test full acceptance, rejection, a partial Customize choice, a returning saved choice and withdrawal. Check actual event requests and [destination delivery](/signals/connect-meta), not just whether a card appeared. A blocked config request or detected CMP without a decision can leave advertising events silent. Do not turn that unknown state into a grant.
 
 ## Set consent
@@ -537,4 +539,4 @@ Use the local checks alongside the relevant troubleshooting guide:
 
 These checks run locally in your browser and do not send events to Plainrouter or Meta. A valid payload or matched event ID does not prove delivery or attribution.
 
-Use the [sandbox](/api/sandbox) for Plainrouter request validation and the [destination checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for actual delivery evidence.
+Review the [Conversion API schema](/api/events/create) before sending and use [destination checks](/signals/connect-meta#how-do-i-verify-meta-delivery) for actual delivery evidence. The [unauthenticated sandbox is retired](/api/sandbox).

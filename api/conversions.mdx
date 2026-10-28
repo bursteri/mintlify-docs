@@ -17,7 +17,7 @@ New to the API? Start with the [API introduction](/api/introduction) for the bas
 
 You need an active Signals workspace, its [server-side secret](/api/authentication#how-do-i-authenticate-the-rest-api), and a recorded consent decision for the conversion. To deliver the event to Meta, [connect the intended dataset](/signals/connect-meta) first.
 
-Start with the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check authentication. Use the [sandbox](/api/sandbox) for synthetic payload validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) to check Meta delivery. The conversion request below can create a real event and destination delivery.
+Start with the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check authentication. Review the [event schema](/api/events/create) before sending, or use a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) to check Meta delivery. The conversion request below can create a real event and destination delivery.
 
 ## Choose an interface
 
@@ -43,7 +43,7 @@ Accept: application/json
 Content-Type: application/json
 ```
 
-The [sandbox operations](/api/sandbox) have separate authentication rules.
+The [unauthenticated sandbox is retired](/api/sandbox); a former sandbox key cannot authenticate production requests.
 
 Keep this secret on your server or in your CLI's secure credential store. Never put it in browser code, source control, prompts, or logs.
 
@@ -132,7 +132,7 @@ The event was accepted; the warning does not mean the request failed. A `202` al
 2. Use a timestamp with seconds and a timezone, such as `2026-09-14T10:30:00Z` or `2026-09-14T13:30:00+03:00`. An optional fractional second may contain one to six digits. Date-only values, timestamps without a timezone, and impossible calendar dates are invalid.
 3. Correct future submissions and inspect the original event's [delivery trace](#how-do-i-confirm-meta-accepted-the-event). Reusing an accepted event ID returns the original duplicate acknowledgement; it does not update that event's consent. Do not create another purchase ID just to remove a warning.
 
-Duplicate HTTP `200` acknowledgements keep their existing response shape and do not include this new array. Browser/publishable-key and sandbox acknowledgements are unchanged. An empty array is not proof of fresh consent: a parseable but stale capture time can still fail the existing identity freshness checks. The warning does not broaden consent, identity, or destination eligibility.
+Duplicate HTTP `200` acknowledgements keep their existing response shape and do not include this new array. Browser/publishable-key acknowledgements are unchanged. An empty array is not proof of fresh consent: a parseable but stale capture time can still fail the existing identity freshness checks. The warning does not broaden consent, identity, or destination eligibility.
 
 For a server implementation that retains the original consent timestamp, use the [Plainrouter SDK purchase recipe](/sdk/recipes/meta-conversions). The [published OpenAPI contract](https://plainrouter.com/openapi.json) defines the acknowledgement fields; older generated SDK models may not expose newly added fields.
 

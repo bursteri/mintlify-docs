@@ -5,7 +5,7 @@ rss: true
 ---
 
 <Note>
-  These entries describe August releases. For current behavior, use the linked guides: [ingestion verification](/signals/verify-ingestion) does not complete onboarding, [arrival totals](/signals/health-and-performance#events-received) remain complete when a small component is withheld, and [legacy Launcher](/launcher/connect-drive) is disabled by default.
+  These entries describe August releases. The [unauthenticated sandbox is now retired](/api/sandbox). For current behavior, use the linked guides: [ingestion verification](/signals/verify-ingestion) does not complete onboarding, [arrival totals](/signals/health-and-performance#events-received) remain complete when a small component is withheld, and [legacy Launcher](/launcher/connect-drive) is disabled by default.
 </Note>
 
 Plainrouter ships continuously. This page collects the customer-facing changes from August and leaves out formatting, CI, and internal draft work.
@@ -70,7 +70,7 @@ Plainrouter ships continuously. This page collects the customer-facing changes f
 
   ## Test MCP integrations without an account
 
-  **New** · `https://plainrouter.com/mcp/sandbox` exposes synthetic `get_account_state`, `get_signal_health`, `get_performance`, and `validate_sandbox_event` calls without a credential or human step. The endpoint is separate from account-bound production MCP, exposes no proposal or spend tools, stores nothing, and contacts no advertising provider. [Start in MCP test mode](/mcp/setup#start-in-test-mode).
+  **New** · `https://plainrouter.com/mcp/sandbox` exposes synthetic `get_account_state`, `get_signal_health`, `get_performance`, and `validate_sandbox_event` calls without a credential or human step. The endpoint is separate from account-bound production MCP, exposes no proposal or spend tools, stores nothing, and contacts no advertising provider. [Current sandbox status](/api/sandbox).
 </Update>
 
 <Update label="August 25, 2026">

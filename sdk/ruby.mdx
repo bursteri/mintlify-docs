@@ -128,7 +128,6 @@ Inspect validation details in a controlled development environment. Do not log t
 | --- | --- |
 | `client.events` | Create or retrieve an event and verify Signal ingestion. |
 | `client.operations` | List events, control destination testing, replay deliveries, read reports, or delete user data. |
-| `client.sandbox` | Discover and validate identity-free synthetic requests without a production credential. |
 
 Generated models, API errors, configuration, response metadata, and every generated operation remain available under `PlainRouter::OpenAPI`.
 
@@ -140,16 +139,9 @@ result = client.events.verify_signal_ingestion
 
 The operation is idempotent. A repeated verification returns the existing event with `duplicate: true`. The event confirms ledger receipt but is not real arrival evidence and does not complete onboarding.
 
-## Try the zero-auth sandbox
+## What happened to sandbox methods?
 
-Create a client without a token for sandbox discovery:
-
-```ruby
-sandbox = PlainRouter::Client.new
-example = sandbox.sandbox.get_sandbox
-```
-
-Sandbox operations accept only identity-free synthetic data. They do not read or write the production Signal ledger and do not contact an advertising provider. Read [Try the API without an account](/api/sandbox) before submitting a synthetic request.
+The unauthenticated sandbox is retired. An installed `client.sandbox` facade does not establish availability; its calls return HTTP `410` with `sandbox_retired`. Use the matching workspace credential for supported operations. [Migration guidance](/api/sandbox).
 
 ## Configure another API origin or timeout
 

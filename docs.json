@@ -204,7 +204,6 @@
               "api/introduction",
               "api/authentication",
               "GET /agent/context",
-              "api/sandbox",
               "api/conversions"
             ]
           },
@@ -212,17 +211,6 @@
             "group": "Endpoints",
             "icon": "braces",
             "pages": [
-              {
-                "group": "Sandbox",
-                "icon": "flask-conical",
-                "pages": [
-                  "api/sandbox/discover",
-                  "api/sandbox/get-key",
-                  "api/sandbox/create-key",
-                  "api/sandbox/validate-event",
-                  "api/sandbox/validate-keyed-event"
-                ]
-              },
               {
                 "group": "Actions",
                 "icon": "workflow",
@@ -294,6 +282,18 @@
             "pages": [
               "api/resources",
               "api/catalog"
+            ]
+          },
+          {
+            "group": "Sandbox retirement",
+            "icon": "history",
+            "pages": [
+              "api/sandbox",
+              "api/sandbox/discover",
+              "api/sandbox/get-key",
+              "api/sandbox/create-key",
+              "api/sandbox/validate-event",
+              "api/sandbox/validate-keyed-event"
             ]
           }
         ]

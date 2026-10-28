@@ -144,13 +144,15 @@ Treat null fields as unknown. A Meta ad without a related Plainrouter creative r
 
 | Field or state | Interpretation and next step |
 | --- | --- |
-| `fresh` | Stored timestamps meet the applicable freshness threshold; this is not a live Meta read. |
+| `fresh` | Stored structure and applicable per-day metrics coverage meet their freshness checks; this is not a live Meta read. |
 | `behind` | Stored structure or applicable metrics are behind. Check timestamps and last error before relying on them. |
 | `never_synced` | No structure sync is recorded. An empty response does not prove the account has no campaigns. |
 | `reconnect_needed`, `disconnected` | Retained data may be present, but the connection is not ready for current provider work. Review [Meta connection setup](/signals/connect-meta). |
 | `created_by_plainrouter` and receipt fields | A related Plainrouter creation receipt is available; inspect its exact status and verification result. |
 | `undone_but_active` | A compensated receipt exists, but the stored object's effective status is `ACTIVE`. Investigate the conflicting evidence. |
 | `undo_failed` / **Undo failed** | The deciding receipt records compensation failure and the stored object is not `ARCHIVED`. Do not report successful undo. |
+
+Metrics refresh uses the Meta ad account's local dates. Recent days are revisited more frequently than older retained days so late reporting changes can be read. A successful read covering a date with no Meta row is different from a date that has not been read. Unchanged metric values can keep an older row `fetched_at`; check the returned freshness state and reporting dates rather than interpreting every older row timestamp as a failed sync. These refresh checks do not extend plan history or make a missing value zero.
 
 Follow [Inbox and current disposition](/actions/review-proposals#current-disposition-and-late-restoration) and [Audit](/actions/audit-log) before retrying uncertain or failed recovery. Reading this inventory never performs an undo.
 

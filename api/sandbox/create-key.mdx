@@ -1,5 +1,10 @@
 ---
-title: "Create a sandbox API key"
-description: "Issue a short-lived sandbox-only bearer key to validate synthetic requests without an account or production access."
-openapi: "POST /sandbox/keys"
+title: "Sandbox key creation retired"
+description: "Handle this retired sandbox operation, recognize HTTP 410, and choose authenticated API or MCP setup for your workspace."
 ---
+
+`POST /api/v1/sandbox/keys` is retired. Requests return HTTP `410` with `error: "sandbox_retired"`; this operation no longer issues credentials or validates synthetic events.
+
+## What should I use instead?
+
+Follow [Sandbox retirement and migration](/api/sandbox) for the response format and supported alternatives. Use [API authentication](/api/authentication) for workspace requests, or [MCP setup](/mcp/setup) for an agent connection. An old SDK method does not restore the removed operation.

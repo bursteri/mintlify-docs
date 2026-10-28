@@ -7,7 +7,7 @@ description: "Choose the correct Plainrouter credential and authenticate REST, T
 Plainrouter uses a per-workspace Server secret for the Signals Conversion API, a
 Workspace key for production MCP tool calls and the Actions API, a Management key for developer
 management operations, and a separate OAuth management credential for account discovery. Public MCP
-discovery and the synthetic MCP sandbox require no credential. Retrieving a production prompt requires a workspace key.
+discovery requires no credential. The [unauthenticated sandbox is retired](/api/sandbox). Retrieving a production prompt requires a workspace key.
 
 The Signals REST endpoints, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same
 Conversion API and all use the same Server secret.
@@ -17,7 +17,6 @@ Conversion API and all use the same Server secret.
 | Goal | Interface | Credential | Scope |
 | --- | --- | --- | --- |
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Server secret | One workspace and its Signals resources |
-| Test an MCP integration with synthetic data | `https://plainrouter.com/mcp/sandbox` | None | Four sandbox-only tools; no tenant data or provider access |
 | Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | Fixed selected workspace set, role-capped tier per workspace, and an eligible account selected per account-scoped call |
 | Submit or inspect Actions | [Actions API](/api/actions) and [MCP Actions reads](/mcp/tools#read-actions-and-policy) | Read or Write Workspace key: `read-actions` for reads, `propose-actions` for previews/proposals | One authorized workspace per call and selected eligible account |
 | List accessible workspaces and manage your workspace keys | [Management API](#how-do-i-use-the-management-api) | Management key | Limited by its owner's current access and role; not an MCP credential |
@@ -155,21 +154,11 @@ For CI or an ephemeral shell, inject `PLAINROUTER_TOKEN` through the job's secre
 manager before running the command. The CLI does not expose a `--token` option.
 An environment token takes precedence over the locally stored token.
 
-## How do I try MCP without a credential?
+## What can I discover without a credential?
 
-Connect an MCP client to the synthetic test endpoint:
+`https://plainrouter.com/mcp` permits public protocol discovery, tool/resource/prompt listing and reads of static `ui://` app shells. Retrieving a prompt with `prompts/get`, calling a tool, and reading account data require workspace authorization. Account-scoped reads additionally require access to the selected account.
 
-```text
-https://plainrouter.com/mcp/sandbox
-```
-
-It exposes `get_account_state`, `get_signal_health`, `get_performance`, and
-`validate_sandbox_event`. Every response is synthetic and marked with
-`"sandbox": true`. The endpoint reads no tenant data, persists nothing, and
-contacts no advertising provider.
-
-The production endpoint also permits anonymous protocol discovery, tool and
-resource and prompt listing, and reads of static `ui://` app shells. Retrieving a prompt with `prompts/get` and calling a production tool require a valid workspace key. Account-scoped reads also require access to the selected account.
+The old unauthenticated MCP and API sandbox returns HTTP `410` with `sandbox_retired`. [Move existing integrations to authenticated access](/api/sandbox); anonymous discovery is not a substitute for a successful workspace read.
 
 ## How do I authenticate Plainrouter MCP?
 
@@ -328,7 +317,6 @@ If an automation receives `401` on a dashboard URL, check the requested interfac
 | [PHP setup](/sdk/php) | `plainrouter/sdk` | `0.4.1` | Server secret passed to `Plainrouter\Client` |
 | [Go setup](/sdk/go) | `github.com/plainrouter/sdk-go` | `v0.7.1` | Server secret passed to `plainrouter.New` |
 | [CLI setup](/cli/get-started) | `plainrouter`, `@plainrouter/cli`, or `plainrouter/tap/plainrouter` | PyPI `0.10.1`; npm `0.10.1` | Stored compatibility-labeled tracker token or `PLAINROUTER_TOKEN` |
-| MCP sandbox | `https://plainrouter.com/mcp/sandbox` | Server `0.4.2` | None |
 | MCP production | `https://plainrouter.com/mcp` | Server `0.4.2` | Workspace key for tool calls and account data |
 
 The REST contract and all five SDKs expose the signed Conversion API operations. The

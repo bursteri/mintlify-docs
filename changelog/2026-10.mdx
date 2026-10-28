@@ -1,12 +1,28 @@
 ---
 title: "October 2026"
-description: "Review action compatibility changes, clearer Inbox comparisons, arrival availability, consent preferences and October product releases."
+description: "Review sandbox retirement, consent banner controls, cookie declaration coverage, report compatibility and October product releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
 
 <Update label="October 28, 2026">
+  ## Move integrations off the retired sandbox
+
+  **Changed** · The unauthenticated API and MCP sandbox now returns HTTP `410` with `sandbox_retired`. Configure authenticated workspace access; old SDK sandbox methods do not restore service. Authorized `dry_run_actions` previews supported changes against real state without creating a proposal or writing to Meta. [Migrate your connection](/api/sandbox).
+
+  ## Turn off the included consent UI
+
+  **Added** · Workspace owners can choose **Off — I handle consent myself** to disable the automatic banner, floating button and manual reopening. Your CMP must own consent defaults and changes; replace the pasted Install block and vendor-tag triggers when switching. [Follow the migration steps](/signals/install-pixel#what-must-i-change-when-turning-the-banner-off).
+
+  ## Publish a fuller cookie declaration
+
+  **Improved** · The v2 embed combines per-host scan findings with conditional, documented Plainrouter inventory and shows freshness and consent-phase coverage. Unknown or incomplete scans remain explicit. [Update the embed](/signals/cookie-scan#how-do-i-publish-a-cookie-declaration).
+
+  ## Update consent-report chart dimensions
+
+  **Changed** · Consent reports retain location, language and policy breakdowns. Banner-version charts and dimension rows are removed while schema version remains `2`; individual receipt and CSV metadata stay available. [Update report consumers](/signals/consent-choices#can-an-ai-assistant-read-consent-choices).
+
   ## Replace action types that cannot run
 
   **Changed** · Proposals and previews now refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`. Use supported status or daily-budget actions and inspect validation errors, even if an older SDK model accepts the name. Historical records remain non-executable. [Update action requests](/api/actions#which-action-types-are-refused).

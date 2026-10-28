@@ -1,43 +1,20 @@
 ---
 title: "Connect Cursor to Plainrouter"
 sidebarTitle: "Cursor"
-description: "Connect Cursor to Plainrouter MCP with a sandbox first, configure a workspace key securely, and verify workspace access."
+description: "Connect Cursor to Plainrouter MCP with a workspace key, configure a workspace key securely, and verify workspace access."
 ---
 
 Use Cursor Agent with Plainrouter over Streamable HTTP. You need Cursor with remote MCP support and an enabled Agent chat.
 
-## 1. Try the sandbox
+You need a Plainrouter account and access to the intended workspace. The [unauthenticated sandbox is retired](/api/sandbox); start with a Read key and verify the workspace result.
 
-Merge this entry into your user-level `~/.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "plainrouter-test": {
-      "url": "https://plainrouter.com/mcp/sandbox"
-    }
-  }
-}
-```
-
-Enable the server in Cursor's MCP settings.
-
-The sandbox needs no Plainrouter account or key, returns synthetic data, and never contacts Meta. Ask:
-
-```text
-Use plainrouter-test to call get_account_state, then get_signal_health.
-Show the tool results and stop. Do not call other tools.
-```
-
-Both calls should succeed and include `sandbox: true`. This checks the connection, not production data or ad execution.
-
-## 2. Create a workspace key
+## 1. Create a workspace key
 
 In Plainrouter, select your workspace and open **Settings → Workspace keys**. Create a **Read** key for analysis; use **Write** for Actions previews and proposals. A new Read key can also inspect Actions records and policy. Copy it once into your protected credential configuration. Select the intended workspace under **Workspaces**. A key can cover a fixed set of workspaces; for more than one, call `list_workspaces` and pass `workspace_id` on later tool calls. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work). Never put keys in prompts or source control. [Key permissions and replacement](/mcp/workspace-tokens).
 
-## 3. Add Plainrouter to the client
+## 2. Add Plainrouter to the client
 
-Add a separate production entry to the same `mcpServers` object:
+Merge this entry into the `mcpServers` object in your user-level `~/.cursor/mcp.json`, preserving existing entries:
 
 ```json
 {
@@ -52,7 +29,7 @@ Add a separate production entry to the same `mcpServers` object:
 
 Supply the variable to Cursor through your system environment or secret manager, then restart Cursor. This snippet is an entry inside `mcpServers`, not a replacement for the whole file.
 
-## 4. Verify the connection
+## 3. Verify the connection
 
 Start with this read-only request:
 
@@ -64,9 +41,9 @@ Show the workspace and installation status, then stop. Do not change anything.
 
 Check the tool result, not just the assistant's summary: the workspace must be yours and the call must succeed. This workspace-only read works before connecting Meta. For account diagnostics, connect Meta and [verify the selected account](/mcp/setup#confirm-a-read-only-production-connection).
 
-Agent replies can vary. In **Ask**, changes wait for approval; in **Full**, policy-allowed changes run automatically. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
+Agent replies can vary. In **Ask**, changes wait for approval. **Full** can run admitted unprotected changes automatically; protected batches still need person approval. Rule violations are blocked in either mode. A client's tool confirmation is separate from [Plainrouter's execution controls](/actions/policies-and-safety).
 
-## 5. Troubleshooting
+## 4. Troubleshooting
 
 - **401 on tool calls:** confirm Cursor inherited the key environment variable. A terminal variable does not necessarily reach an already-running desktop app.
 - **Invalid config:** preserve the outer `mcpServers` object and existing entries.

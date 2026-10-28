@@ -4,11 +4,11 @@ sidebarTitle: "Introduction"
 description: "Connect your AI assistant for Signals installation, arrival comparisons, Meta account diagnostics, creative reads, and governed proposals."
 ---
 
-Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to inspect workspace Signals setup, compare arrivals, read an authorized Meta ad account, and request creative changes governed by Ask or Full. Start with synthetic data or connect your workspace.
+Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to inspect workspace Signals setup, compare arrivals, read an authorized Meta ad account, and request creative changes governed by Ask or Full. Start with an authenticated read from your workspace.
 
 <CardGroup cols={2}>
   <Card title="Set up your connection" icon="plug" href="/mcp/clients">
-    Choose your client, try the sandbox, and verify workspace access.
+    Choose your client, configure authorization and verify workspace access.
   </Card>
   <Card title="Explore the tools" icon="wrench" href="/mcp/tools">
     Check tool inputs, outputs, permissions, and side effects.
@@ -45,7 +45,7 @@ Creative generation is currently unavailable. Uploaded creatives and governed pr
 
 <Steps>
   <Step title="Connect a client">
-    Use the sandbox without an account, or configure the production endpoint with a Workspace key or OAuth sign-in. Follow [Setup](/mcp/setup).
+    Create a Plainrouter account and configure the endpoint with a Workspace key or supported OAuth sign-in. Follow [Setup](/mcp/setup).
   </Step>
   <Step title="Verify the account">
     For account-specific work, call `get_account_state` and confirm the returned workspace and Meta ad account. For workspace installation, call `get_install_instructions` and confirm its workspace; no Meta account is required.
@@ -60,11 +60,9 @@ Creative generation is currently unavailable. Uploaded creatives and governed pr
 | Setting | Value |
 | --- | --- |
 | Production URL | `https://plainrouter.com/mcp` |
-| Sandbox URL | `https://plainrouter.com/mcp/sandbox` |
 | Transport | Streamable HTTP; each request is processed independently |
 | Protocol | `2026-07-28` discovery; legacy `initialize` clients remain supported |
 | Production credential | Workspace key sent as a bearer credential, or workspace-scoped OAuth execution token from client sign-in |
-| Sandbox credential | None; all four sandbox tools return synthetic data |
 | Account scope | A fixed set of selected workspaces per key, one workspace per call; use `workspace_id` for multi-workspace access. Signals reads use the selected workspace's Meta destination binding, while Actions and creative tools select an eligible owned account. Older bound keys retain their account restriction. |
 
 ### Which clients can connect?
@@ -79,7 +77,7 @@ On a paid ChatGPT plan with [developer mode](https://developers.openai.com/api/d
 
 1. Enable developer mode and add `https://plainrouter.com/mcp` with **OAuth**.
 2. Sign in to Plainrouter and choose an active Meta ad account and **Read** or **Write** access.
-3. For an account-free trial first, connect `https://plainrouter.com/mcp/sandbox` with **No Authentication**.
+3. Verify an authenticated read and confirm the returned workspace and selected Meta ad account. The [unauthenticated sandbox is retired](/api/sandbox).
 
 ## Access and approval
 
@@ -95,7 +93,7 @@ Policy checks, the selected Ask/Full mode, and provider verification govern supp
 
 ## Continue with your task
 
-- [Try the sandbox](/mcp/setup#start-in-test-mode) without accessing production data.
+- [Connect your client](/mcp/setup) and verify a read before requesting changes.
 - [Connect your Meta ad account](/mcp/setup#connect-with-a-workspace-token) and verify the first read.
 - [Create a paused creative variant](/actions/creative-workflow) in Ask for an explicit approval step.
 - [Troubleshoot a connection](/mcp/setup#troubleshoot) or [rotate and revoke access](/mcp/workspace-tokens#rotate-or-revoke-a-token).

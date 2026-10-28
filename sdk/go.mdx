@@ -55,7 +55,7 @@ func main() {
 }
 ```
 
-Generated request and response models live in the [`openapi`](https://pkg.go.dev/github.com/plainrouter/sdk-go/openapi) subpackage. `client.OpenAPI()` returns the complete generated client for operations outside `Events`, `Operations` and `Sandbox`. Code written for `v0.5` keeps compiling with the deprecated `NewConfiguration`, `NewAPIClient` and `ContextAccessToken` helpers, but generated type names now need the `openapi` qualifier.
+Generated request and response models live in the [`openapi`](https://pkg.go.dev/github.com/plainrouter/sdk-go/openapi) subpackage. `client.OpenAPI()` returns the generated client for operations outside `Events` and `Operations`. An installed `Sandbox` facade does not restore the [retired server endpoints](/api/sandbox). Code written for `v0.5` keeps compiling with the deprecated `NewConfiguration`, `NewAPIClient` and `ContextAccessToken` helpers, but generated type names now need the `openapi` qualifier.
 
 Load the secret from your environment or secret manager rather than writing it in source code. The Go SDK does not accept an MCP workspace execution token or OAuth management credential.
 
@@ -63,7 +63,7 @@ Load the secret from your environment or secret manager rather than writing it i
 
 Send a server-side purchase through Plainrouter to your [connected Meta destination](/signals/connect-meta). This recipe uses Plainrouter's SDK and credentials, not the direct Meta Graph API. A successful create response confirms ingestion; inspect destination delivery separately.
 
-Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Use the [sandbox](/api/sandbox) for synthetic validation or a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
+Before sending, confirm settlement on your server, load the order's recorded advertising consent, and select the backend as the purchase owner. This request can create a real conversion. Review the [event schema](/api/events/create) before sending, or use a [controlled destination test](/signals/connect-meta#test-without-sending-a-real-purchase) during setup.
 
 ### Create and send a purchase
 

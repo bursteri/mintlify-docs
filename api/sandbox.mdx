@@ -1,175 +1,30 @@
 ---
-title: "Try the API without an account"
-description: "Make a successful synthetic event request, then test bearer authentication with a short-lived sandbox key."
+title: "Move from the retired sandbox"
+sidebarTitle: "Sandbox retirement"
+description: "Handle sandbox_retired responses and move API or MCP integrations to authenticated workspace access."
 ---
 
-The Plainrouter sandbox validates identity-free synthetic events without an account. It does not write production events or contact Meta. You need only an HTTP client; short-lived sandbox keys let you also test bearer authentication.
+Plainrouter's unauthenticated API and MCP sandbox is retired. Old sandbox requests return HTTP `410` with `error: "sandbox_retired"`. Create a Plainrouter account and configure the credential for the interface you need.
 
-## Make your first request
+## Which requests are retired?
 
-Call the sandbox discovery endpoint. You do not need an account or a credential.
+The retired paths include `/mcp/sandbox`, `/api/v1/sandbox`, `/api/v1/sandbox/keys`, `/api/v1/sandbox/events`, `/api/v1/sandbox/keyed-events`, the old sandbox Markdown discovery paths, and `/n8n-plainrouter-sandbox.json`. GET and POST requests return the retirement response; issuing another sandbox key or changing a retry ID cannot restore service.
 
-```bash
-curl --request GET \
-  --url https://plainrouter.com/api/v1/sandbox \
-  --header "Accept: application/json"
-```
+The response includes `error`, `message`, `signup_url`, and `mcp_url`. The `error` field is the string `sandbox_retired`, rather than an `error.code` object. No synthetic tool or event result is returned.
 
-An HTTP `200` response confirms that the sandbox is ready. The response includes:
+## How do I connect MCP now?
 
-- A ready-to-run synthetic event request under `try`.
-- A live sandbox key under `self_serve_key.issued_key`.
+1. [Create your account and workspace](/quickstart). Connect Meta for account-scoped reads; workspace installation reads can be used before connecting Meta.
+2. Configure `https://plainrouter.com/mcp` with a [Read Workspace key](/mcp/workspace-tokens) or supported OAuth sign-in. Keep credentials in the client's protected settings.
+3. [Verify an authenticated read](/mcp/setup#confirm-a-read-only-production-connection) and confirm the returned workspace and account. Public discovery alone does not prove tool access.
+4. When authorized to preview a change, use [`dry_run_actions`](/mcp/tools#dry_run_actions) with the required Write key and complete supported proposal. It can read real provider state, but creates no proposal and makes no Meta change. It is not an unauthenticated simulation or a promise that execution is available.
 
-One read-only request therefore gives you both a successful API response and working sandbox credentials.
+## How do I use the API now?
 
-<Note>
-  Building an MCP client instead of a REST client? Connect directly to
-  `https://plainrouter.com/mcp/sandbox`. It needs no account or credential and
-  exposes four synthetic tools. The three read tools share production names and inputs but have simplified responses; a sandbox pass does not validate production parsing or credentials. [Start in MCP test mode](/mcp/setup#start-in-test-mode).
-</Note>
+Use a Server secret for Signals and an appropriately scoped Workspace key for Actions. Follow [API setup](/api/introduction) and [authentication](/api/authentication); changing only the old sandbox URL is insufficient.
 
-## Test an authenticated client
+The [ingestion diagnostic](/signals/verify-ingestion) writes one authenticated identity-free verification event. It does not verify real browser arrivals or Meta delivery. [Controlled destination tests](/signals/connect-meta#test-without-sending-a-real-purchase) are separate authenticated operations that can contact Meta. Neither replaces the retired sandbox's discard-only behavior.
 
-Read the key from `self_serve_key.issued_key.api_key`, store it in a protected local environment variable, and send it as a bearer token:
+## What if my SDK still has sandbox methods?
 
-```bash
-curl --request POST \
-  --url https://plainrouter.com/api/v1/sandbox/keyed-events \
-  --header "Accept: application/json" \
-  --header "Authorization: Bearer ${PLAINROUTER_SANDBOX_KEY}" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "event_id": "sandbox-order-123",
-    "event_name": "Purchase",
-    "action_source": "website",
-    "value_data": {
-      "value": "49.90",
-      "currency": "EUR",
-      "order_id": "sandbox-order-123"
-    }
-  }'
-```
-
-You can also issue a sandbox key directly. `GET /api/v1/sandbox/keys` returns HTTP `200`, while `POST /api/v1/sandbox/keys` returns HTTP `201`. Issuance writes nothing, so both operations are safe to repeat.
-
-Every issued key has this shape:
-
-| Field | Value |
-| --- | --- |
-| `api_key` | Starts with `pr_sandbox_` |
-| `token_type` | `Bearer` |
-| `expires_in` | `900` seconds (15 minutes) |
-| `scope` | `sandbox:event.validate` |
-| `production_access` | `false` |
-
-Plainrouter never persists a sandbox key.
-
-<Warning>
-  A **Sandbox key** is not a Signals **Server secret** or a **Workspace key**. It authenticates only the synthetic sandbox, has no workspace or Meta ad-account binding, and grants no production access.
-</Warning>
-
-## Validate without a credential
-
-Use `POST /api/v1/sandbox/events` when you want to validate a synthetic event without testing bearer authentication:
-
-```bash
-curl --request POST \
-  --url https://plainrouter.com/api/v1/sandbox/events \
-  --header "Accept: application/json" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "event_name": "Purchase",
-    "action_source": "website",
-    "value_data": {
-      "value": "49.90",
-      "currency": "EUR"
-    }
-  }'
-```
-
-An HTTP `200` response has `accepted: true`, `status: "simulated"`, `persisted: false`, and `provider_delivery: false`.
-
-## Try the sandbox from n8n
-
-Use the [n8n sandbox starter](https://plainrouter.com/n8n-plainrouter-sandbox.json) to check an HTTP workflow without an account or credentials. You need an n8n instance that can import a workflow JSON file.
-
-1. Download and import the starter. It contains a manual trigger and one HTTP Request node, starts inactive, and contains only a fictional purchase.
-2. Run it manually. In the HTTP node output, confirm `statusCode` is `200` and `body` contains the simulated-response fields shown above.
-3. Keep real customer data out of the workflow. Repeating its stable event ID checks request construction; the sandbox discards requests and cannot prove production deduplication or Meta delivery.
-
-If the request fails, inspect the HTTP status and response body before retrying. Use the [field restrictions](#use-identity-free-synthetic-fields) below to diagnose HTTP `422`.
-
-For production, follow the [automation setup and consent checks](https://plainrouter.com/library/meta-capi-without-gtm#adapt-an-automation-workflow-for-a-real-website-event). Changing only the URL is insufficient: production needs the correct Signals credential, real consent and visitor context, stable event identity, and a separate destination-delivery check. This starter uses Plainrouter's HTTP API; it is not a native n8n connector or a direct Meta API workflow.
-
-## Use identity-free synthetic fields
-
-The public sandbox accepts these documented fields:
-
-| Field | Requirement |
-| --- | --- |
-| `event_name` | Required string, maximum 100 characters |
-| `event_id` | Optional string, maximum 128 characters |
-| `action_source` | Optional; `website`, `app`, or `other` |
-| `value_data.value` | Optional non-negative decimal string with up to two decimal places |
-| `value_data.currency` | Optional string of exactly three uppercase letters |
-| `value_data.order_id` | Optional string, maximum 128 characters |
-
-The sandbox rejects `user_data`, `visitor_id`, `click_ids`, `event_source`, `consent`, `consent_mode`, and `tcf`. A request containing one of these fields returns HTTP `422` with this validation message:
-
-```text
-The public sandbox accepts synthetic, identity-free fields only.
-```
-
-Do not send personal data, customer identifiers, click identifiers, or production event payloads to the sandbox.
-
-## Understand what the sandbox does
-
-The sandbox validates each request in memory and immediately discards it. A sandbox request:
-
-- Does not write to the Signal ledger or any other database table.
-- Does not enqueue work.
-- Does not contact Meta or another provider.
-- Does not read production data.
-
-The keyed and keyless validation endpoints apply the same synthetic-event rules.
-
-## Handle sandbox key errors
-
-The keyed endpoint returns HTTP `401` when its bearer credential is missing, invalid, or expired.
-
-| `error.code` | Meaning |
-| --- | --- |
-| `missing_sandbox_key` | The request has no bearer key. |
-| `invalid_sandbox_key` | The value is not a valid sandbox key or does not carry the sandbox validation scope. |
-| `expired_sandbox_key` | The 15-minute key lifetime has ended. |
-
-Each error includes an `error.resolution` field that tells you to supply or issue a replacement sandbox key. The response also includes `WWW-Authenticate: Bearer`.
-
-## Sandbox endpoint reference
-
-| Operation | Reference |
-| --- | --- |
-| Discover the request contract | [GET sandbox](https://plainrouter.com/docs/api/sandbox/discover) |
-| Issue a key with GET | [GET sandbox key](https://plainrouter.com/docs/api/sandbox/get-key) |
-| Issue a key with POST | [POST sandbox key](https://plainrouter.com/docs/api/sandbox/create-key) |
-| Validate without a key | [Synthetic event](https://plainrouter.com/docs/api/sandbox/validate-event) |
-| Validate bearer authentication | [Keyed synthetic event](https://plainrouter.com/docs/api/sandbox/validate-keyed-event) |
-
-## Stay within the rate limits
-
-Sandbox limits are per client IP address:
-
-| Operation | Limit |
-| --- | --- |
-| `GET` or `POST /api/v1/sandbox/keys` | 10 key issuances per minute |
-| `POST /api/v1/sandbox/keyed-events` | 60 validations per minute |
-
-Key issuance and keyed validation use independent budgets. Validation traffic cannot exhaust the issuance budget.
-
-## Move to production
-
-Registration is self-serve. Review the current EUR spend bands and free arrival counting in [Pricing and billing](/billing/overview). A current workspace owner or team member can issue role-capped [Workspace keys](/mcp/workspace-tokens) from the dashboard.
-
-Keep the production credential types separate. A Server secret authenticates the Signals Conversion API for one workspace. A Workspace key authenticates MCP and authorized workspace routes for a fixed set of workspaces, one per call, and an eligible selected advertising account. Older account-bound keys retain their binding. Neither credential is a sandbox key.
-
-[Follow the Quickstart](/quickstart) to create a workspace, configure a Signal, and verify the production ingestion path.
+Published SDKs can retain sandbox classes or methods generated before retirement. Those methods do not establish server availability and receive the retired response when called. Keep the supported event, operation and Actions integrations; remove sandbox calls from connection checks and automation. [Check current client compatibility](/sdk/overview#what-changed-in-the-current-releases).

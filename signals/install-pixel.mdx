@@ -75,10 +75,17 @@ The workspace owner can open **Workspace settings → Consent banner coverage**,
 | --- | --- |
 | **Only where the law requires it** | The configured visitor-location policy determines where the enabled banner appears. Unknown or restricted location context can keep the stricter path. |
 | **Always show** | Show the enabled banner to every visitor. Saving this choice enables the included surface. |
+| **Off — I handle consent myself** | Disable the automatic Plainrouter banner, floating Privacy settings button and manual banner opening. Your consent integration owns defaults and updates. |
 
 These are configuration labels, not proof that every script on your website follows that policy. Existing consent choices are kept. Editors can inspect the setting but only the owner can change coverage. Banner text/layout configuration on Install is a separate permission.
 
-Same-origin forwarding (Path B) currently keeps the banner for all visitors because it cannot pass visitor location. Selecting location-based coverage does not bypass that restriction. Verify the actual page's consent behavior and recorded receipts separately.
+When the banner is enabled, same-origin forwarding (Path B) keeps it for all visitors because it cannot pass visitor location. **Off** disables the Plainrouter surface on Path B too. Existing stored visitor decisions still apply; turning the UI off does not grant consent. Verify the actual page's consent behavior and recorded receipts separately.
+
+### What must I change when turning the banner off?
+
+After saving **Off — I handle consent myself**, replace any pasted consent-hook block with the current **Install** page version. Remove `window.plainrouterWhenPolicyReady` wrappers and restore normal GTM triggers in place of `plainrouter_policy_ready`. The Off installation block supplies no Google/UET defaults; your CMP or consent integration must own defaults, saved choices, updates and withdrawal. Do not replace an unknown decision with a grant.
+
+The current v4 asset respects Off for automatic display, the floating reopen button and `window.plainrouter("consent", "open")`. Test fresh, stored-choice and withdrawal cases after replacing the website code. Changing the workspace setting cannot rewrite an older pasted snippet or configure unrelated tags for you.
 
 ### What changes for Google and Microsoft UET tags?
 

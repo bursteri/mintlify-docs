@@ -1,10 +1,10 @@
 ---
 title: "PHP SDK: send and verify Meta conversions"
 sidebarTitle: "PHP"
-description: "Install the released Plainrouter PHP SDK with Composer, test the sandbox, send consented purchases, retry safely, and inspect delivery."
+description: "Install the released Plainrouter PHP SDK with Composer, configure authentication, send consented purchases, retry safely, and inspect delivery."
 ---
 
-Use [`plainrouter/sdk`](https://packagist.org/packages/plainrouter/sdk) to call the Plainrouter Conversion API from PHP. Published version `0.4.1` targets signed API contract `0.5.0`; it provides event, operations and sandbox groups. The generated client does not call Meta's Graph API directly.
+Use [`plainrouter/sdk`](https://packagist.org/packages/plainrouter/sdk) to call the Plainrouter Conversion API from PHP. Published version `0.4.1` targets signed API contract `0.5.0`; it provides event and operations groups. Its generated sandbox methods target [retired endpoints](/api/sandbox) and must not be used for connection checks. The generated client does not call Meta's Graph API directly.
 
 ## Requirements and installation
 
@@ -28,16 +28,9 @@ Use named arguments when calling generated methods whose pagination or content-t
 
 The curated client defaults to JSON responses and rejects redirects with `Plainrouter\OpenAPI\ApiException`, retaining status and response headers. Follow returned cursors for incomplete collections. Review the [published release notes](https://github.com/plainrouter/sdk/blob/php-v0.4.1/packages/php/CHANGELOG.md) and [shared upgrade checks](/sdk/overview#what-should-i-check-before-upgrading).
 
-## Try the sandbox first
+## What happened to sandbox methods?
 
-```php
-<?php
-require 'vendor/autoload.php';
-
-$example = (new Plainrouter\Client())->sandbox->getSandbox();
-```
-
-This credential-free discovery read describes the synthetic sandbox; it sends no production conversion and contacts no advertising provider. Follow the [API sandbox guide](/api/sandbox) to validate a synthetic event.
+The unauthenticated sandbox is retired. A generated sandbox method can remain in the installed package, but calling it returns HTTP `410` with `sandbox_retired`. Configure your Server secret for supported Signals operations below. [Migration guidance](/api/sandbox).
 
 ## Configure production access
 

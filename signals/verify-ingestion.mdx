@@ -16,7 +16,7 @@ Use the server-side verification event when you want to confirm that a Signals w
 | --- | --- | --- |
 | Does the installed website send arrivals? | [Load the site and inspect `/v1/arrival`](/signals/install-pixel#verify-the-installation). | `202` confirms arrival receipt; setup completes after a qualifying arrival is stored. |
 | Can my server credential or MCP token write to Signals? | Use the verification request below. | Plainrouter accepted one identity-free diagnostic for the authorized workspace. |
-| Is my conversion payload valid? | [Validate a synthetic event in the sandbox](/api/sandbox). | The sandbox accepts the synthetic shape; no production event or Meta delivery is created. |
+| Is my conversion payload valid? | Review the [current event schema](/api/events/create) before sending. | Schema review checks the documented shape; it does not execute a request or prove delivery. The unauthenticated sandbox is retired. |
 | Did a conversion reach Meta? | [Verify destination delivery](/signals/connect-meta#how-do-i-verify-meta-delivery). | An accepted destination delivery or controlled test response; attribution remains separate. |
 
 ## Before you begin

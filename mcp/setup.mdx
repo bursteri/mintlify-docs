@@ -1,16 +1,16 @@
 ---
 title: "Connect your agent to Plainrouter MCP"
 sidebarTitle: "Setup"
-description: "Try the Plainrouter MCP sandbox, connect Claude with OAuth or a Workspace key, verify your workspace and account, and troubleshoot authentication."
+description: "Connect Claude with OAuth or a Workspace key, verify authenticated workspace access, and troubleshoot MCP authentication."
 ---
 
-Try Plainrouter MCP with synthetic data, then connect Claude through OAuth or configure a Workspace key for your client. A successful production read returns the intended workspace and selected Meta ad account. For installation before connecting Meta, use the workspace-only read below.
+Connect Claude through OAuth or configure a Workspace key for your client. A successful production read returns the intended workspace and selected Meta ad account. For installation before connecting Meta, use the workspace-only read below.
 
 For supported tasks, client requirements, and approval boundaries, start with the [MCP introduction](/mcp/overview). For a summary of supported clients, account scope and pricing, see the [Meta Ads MCP server overview](https://plainrouter.com/solutions/meta-ads-mcp).
 
 <CardGroup cols={2}>
-  <Card title="Try synthetic data" icon="flask-conical" href="#start-in-test-mode">
-    Check the client connection without a Plainrouter account or token.
+  <Card title="Create a workspace key" icon="key-round" href="/mcp/workspace-tokens">
+    Choose a Read key for the first authenticated workspace check.
   </Card>
   <Card title="Connect Claude" icon="key-round" href="#connect-claude-with-oauth">
     Sign in with OAuth and confirm the first account read.
@@ -23,7 +23,6 @@ Find your tool in the [client setup directory](/mcp/clients), including Gemini C
 
 | Endpoint | Use | Credential |
 | --- | --- | --- |
-| `https://plainrouter.com/mcp/sandbox` | Prove a client against four synthetic tools. | None |
 | `https://plainrouter.com/mcp` | Inspect workspace Signals, read an approved account, and submit governed proposals. | Workspace key or workspace-scoped OAuth execution credential |
 
 Plainrouter MCP uses workspace execution tokens issued by a current owner or member. New workspace keys authorize a fixed set of selected workspaces, with role-capped Read or Write access in each. Calls act on one workspace at a time. Use `list_workspaces` and include `workspace_id` when multiple workspaces are authorized. [Workspace selection](/mcp/workspace-tokens#how-does-workspace-selection-work). Account-scoped tools select an eligible account inside that workspace; older account-bound keys keep their original restriction.
@@ -40,7 +39,7 @@ clients](/api/authentication).
 
 ## Before you begin
 
-For the sandbox, you only need a client with remote HTTP MCP support. For production, you also need:
+You need:
 
 - A Plainrouter account with access to the intended workspace.
 - An active Meta ad account connection for account-scoped reads and creative workflows. Workspace installation reads do not require one.
@@ -50,71 +49,20 @@ For the sandbox, you only need a client with remote HTTP MCP support. For produc
 
 For creative-library reads, the Meta connection needs `ads_read` or `ads_management`. Governed creative execution needs `ads_management`.
 
-## Start in test mode
+## What happened to test mode?
 
-In a terminal with [Claude Code](https://code.claude.com/docs/en/mcp) installed, add the test server:
+The unauthenticated sandbox is retired. Old `/mcp/sandbox` requests return HTTP `410` with `error: "sandbox_retired"`; `validate_sandbox_event` is no longer available. Configure `/mcp` with workspace authorization and verify a read. [Migration and SDK compatibility](/api/sandbox).
 
-```bash
-claude mcp add --transport http plainrouter-test https://plainrouter.com/mcp/sandbox
-```
-
-Open Claude Code in the same directory and run `/mcp` to check the connection. No Plainrouter account or credential is required. Other MCP clients can use the same URL with HTTP transport.
-
-The endpoint exposes:
-
-- `get_account_state`
-- `get_signal_health`
-- `get_performance`
-- `validate_sandbox_event`
-
-The three read tools share production names and argument schemas, but their response contracts are simplified. Account state omits authorization metadata; health uses different activity, delivery and match fields; performance omits purchases, platform metrics and notices. Check production parsing and credentials separately. [Response differences](/mcp/tools#how-do-sandbox-responses-differ).
-
-Every response is synthetic and carries `"sandbox": true`. Test mode reads no
-tenant data, persists nothing, and contacts no advertising provider. It exposes
-no proposal, write, approval, Launcher, or spend-affecting tool.
-
-Ask the agent:
-
-```text
-Use plainrouter-test to call get_account_state, then get_signal_health.
-Summarize the synthetic account and signal health. Do not call other tools.
-```
-
-A successful account response includes the following fields. This is an excerpt from the synthetic response, not a real advertising account:
-
-```json
-{
-  "sandbox": true,
-  "workspace": { "id": 0, "name": "Sandbox Workspace" },
-  "ad_account": {
-    "id": 0,
-    "external_id": "act_SANDBOX",
-    "name": "Sandbox Ad Account"
-  }
-}
-```
-
-Both calls should return without a tool error. This proves the test connection works; it does not verify your production account or event collection.
-
-When the client can discover or initialize the server, list tools, and call a sandbox tool, change its
-server URL to `https://plainrouter.com/mcp` and configure a workspace execution
-token. The three read-tool names and their argument shapes match production.
-
-<Note>
-  The production endpoint exposes its protocol handshake, tool and resource
-  catalogs, and static `ui://` app shells without a credential. Tool calls and
-  account-data reads remain workspace-authorized and return HTTP `401` without a valid
-  workspace execution token.
-</Note>
+The production endpoint exposes protocol discovery, catalogs and static `ui://` app shells without a credential. Tool calls and account-data reads require workspace authorization. Discovery alone does not verify your credential, workspace or account.
 
 ## Which MCP protocol should my client use?
 
 Plainrouter supports `2026-07-28` through `server/discover`. Existing clients using `initialize` can negotiate `2025-11-25` or `2025-06-18`. Let your MCP client handle the protocol; the Claude Code configuration below does not need manual protocol fields.
 
-For a custom HTTP client, start with this credential-free sandbox discovery request:
+For a custom HTTP client, start with this public protocol-discovery request. It does not authorize a tool call:
 
 ```bash
-curl https://plainrouter.com/mcp/sandbox \
+curl https://plainrouter.com/mcp \
   --header 'Content-Type: application/json' \
   --header 'Accept: application/json, text/event-stream' \
   --header 'MCP-Protocol-Version: 2026-07-28' \
@@ -132,7 +80,7 @@ curl https://plainrouter.com/mcp/sandbox \
   }'
 ```
 
-Check that `result.supportedVersions` includes `2026-07-28` and `result._meta["io.modelcontextprotocol/serverInfo"].name` is `Plainrouter Sandbox`. Discovery confirms protocol compatibility; it does not read your account or verify a tool call.
+Check that `result.supportedVersions` includes `2026-07-28` and `result._meta["io.modelcontextprotocol/serverInfo"].name` identifies Plainrouter. Discovery confirms protocol compatibility; it does not read your account or verify a tool call.
 
 For subsequent `2026-07-28` requests:
 
@@ -154,7 +102,7 @@ OAuth sign-in creates a workspace-scoped execution credential without copying a 
 
 ### Claude Code
 
-After trying the sandbox, add the production server:
+Add the workspace-authorized server:
 
 ```bash
 claude mcp add --transport http plainrouter https://plainrouter.com/mcp
@@ -172,7 +120,7 @@ If a server named `plainrouter` is already configured at that scope, inspect it 
 4. Add and connect the connector. Sign in to Plainrouter, select the intended workspace and account, and authorize the access tier you need.
 5. Enable Plainrouter for the conversation through **Connectors**, then use the [first read prompt](#confirm-a-read-only-production-connection).
 
-Claude's controls depend on your plan and organization settings. Follow [Anthropic's custom connector instructions](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) if the controls differ. To try synthetic data in this interface first, use `https://plainrouter.com/mcp/sandbox` with **No sign in**.
+Claude's controls depend on your plan and organization settings. Follow [Anthropic's custom connector instructions](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) if the controls differ.
 
 ## Connect with a workspace token
 
@@ -246,13 +194,13 @@ Do not change DNS or install anything.
 
 The tool returns existing managed-hostname material. A null snippet means setup is not ready; same-origin forwarding is unsupported by this tool. After deploying the generated snippet yourself, repeat the read to check `first_arrival`. This is separate from the synthetic ingestion diagnostic.
 
-For reporting, call `get_arrivals_comparison` with `{"days": 7}`. Check its workspace, period, status, and unavailable values before comparing arrivals and clicks. Neither of these tools requires `account_id`, and neither is included in the sandbox. See the [installation and arrivals tool reference](/mcp/tools#get_install_instructions).
+For reporting, call `get_arrivals_comparison` with `{"days": 7}`. Check its workspace, period, status, and unavailable values before comparing arrivals and clicks. Neither of these tools requires `account_id`. See the [installation and arrivals tool reference](/mcp/tools#get_install_instructions).
 
 ### Use a built-in Signals prompt
 
 On the production connection, open your client's prompt selector and choose **Install the count on my site**, **Compare claimed clicks with counted arrivals**, or **Is my count healthy**. The [prompt reference](/mcp/tools#built-in-signals-prompts) lists their names, intended tool calls, and limits.
 
-Listing prompts needs no credential, but retrieving one requires your workspace key. Loading a prompt returns instructions; it does not run a tool or complete setup. Let the client call the referenced tool with the same workspace authorization and check the actual result. If your client has no prompt selector, use the direct tool examples above. The sandbox does not provide these prompts.
+Listing prompts needs no credential, but retrieving one requires your workspace key. Loading a prompt returns instructions; it does not run a tool or complete setup. Let the client call the referenced tool with the same workspace authorization and check the actual result. If your client has no prompt selector, use the direct tool examples above.
 
 ## Permissions
 

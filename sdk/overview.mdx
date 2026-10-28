@@ -21,7 +21,7 @@ Each language guide covers installation, authentication, requests, and verificat
     A client facade for sending events and reading delivery results.
   </Card>
   <Card title="PHP" icon="code" href="/sdk/php">
-    Composer client for sandbox checks, consented events and delivery reads.
+    Composer client for consented events and delivery reads.
   </Card>
   <Card title="Go" icon="code" href="/sdk/go">
     Typed requests with context-based authentication and error handling.
@@ -42,9 +42,11 @@ For a terminal workflow, start with the [CLI quickstart](/cli/get-started), then
 
 Production Conversion API requests require a **Server secret** stored on your server. Published clients retain names such as `signalTrackerSecret` and "tracker token" for this credential. An MCP Workspace key is a separate credential and cannot authenticate Conversion API requests. See [Authentication](/api/authentication).
 
-To deliver conversions to Meta, [connect the intended dataset](/signals/connect-meta) and capture the required [event consent](/signals/track-events). Without production setup, you can explore the request contract in the [synthetic API sandbox](/api/sandbox).
+To deliver conversions to Meta, [connect the intended dataset](/signals/connect-meta) and capture the required [event consent](/signals/track-events). Review the [published event schema](/api/events/create) before sending; the [unauthenticated sandbox is retired](/api/sandbox).
 
 ## What changed in the current releases?
+
+The server has retired the unauthenticated API and MCP sandbox. Published SDKs can still contain generated sandbox methods, but calling them returns HTTP `410` with `sandbox_retired`. Remove those calls from setup checks and use the matching workspace credential for supported operations. No new package release is implied. [Migration guidance](/api/sandbox).
 
 TypeScript, Python and CLI `0.10.1`, Ruby `0.6.1`, PHP `0.4.1`, and Go `v0.7.1` are published. The patch releases correct workspace and inventory error models and the Launcher import route. Ruby also fixes standalone multipart loading, and PHP improves asynchronous error decoding. The preceding minor releases introduced the bounded response models and request-validation changes below. The API contract still reports version `0.5.0`; package versions have their own release sequence.
 

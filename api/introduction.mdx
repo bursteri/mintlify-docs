@@ -1,14 +1,14 @@
 ---
 title: "Plainrouter API"
 sidebarTitle: "Introduction"
-description: "Make your first synthetic API request, choose authentication, and find endpoints for conversions, Actions, delivery, and reports."
+description: "Make an authenticated API read, choose credentials, and find endpoints for conversions, Actions, delivery and reports."
 ---
 
-Use the Plainrouter REST API to send consented conversion events, inspect delivery, read stored reports, and submit or track governed action proposals. Start with the synthetic sandbox before connecting a production workspace. To compare this API with Meta's own Marketing API, see the [Meta Ads API guide](https://plainrouter.com/library/meta-ads-api).
+Use the Plainrouter REST API to send consented conversion events, inspect delivery, read stored reports, and submit or track governed action proposals. Start with an authenticated read from your workspace. The [unauthenticated sandbox is retired](/api/sandbox). To compare this API with Meta's own Marketing API, see the [Meta Ads API guide](https://plainrouter.com/library/meta-ads-api).
 
 <CardGroup cols={2}>
   <Card title="Make your first request" icon="terminal" href="#make-your-first-request">
-    Send an identity-free test event without an account or API key.
+    Read retained events with your workspace Server secret.
   </Card>
   <Card title="Authenticate production requests" icon="key-round" href="/api/authentication#which-credential-should-i-use">
     Choose a Server secret, Workspace key, or Management key for the interface.
@@ -24,7 +24,6 @@ Use the Plainrouter REST API to send consented conversion events, inspect delive
 | Signals authentication | Bearer Server secret for the workspace |
 | Actions authentication | Bearer Workspace key with the operation grant: Read for supported reads, Write for previews and proposals; see [Actions API](/api/actions) |
 | Management authentication | Bearer Management key; see [management operations](/api/authentication#how-do-i-use-the-management-api) |
-| Synthetic sandbox | No credential for `/sandbox/events`; a short-lived sandbox key for `/sandbox/keyed-events` |
 | API schema | [Published OpenAPI contract](https://plainrouter.com/openapi.json) |
 | Official clients | [TypeScript, Python, Ruby, PHP, Go, and CLI](/sdk/overview) |
 
@@ -32,43 +31,20 @@ This is Plainrouter's API, not Meta's Graph API. Workspace keys used for [MCP](/
 
 ## Make your first request
 
-You need an HTTP client such as cURL. This request validates an invented event without writing a production conversion or contacting Meta. Use only synthetic values; omit personal data and customer identifiers.
+You need an active Signals workspace, its Server secret and an HTTP client such as cURL. Store `PLAINROUTER_TOKEN` in a protected server environment; do not paste the secret into chat or commit it.
 
 ```bash
-curl --include https://plainrouter.com/api/v1/sandbox/events \
-  --request POST \
-  --header "Accept: application/json" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "event_id": "sandbox-order-123",
-    "event_name": "Purchase",
-    "action_source": "website",
-    "value_data": {
-      "value": "49.90",
-      "currency": "EUR"
-    }
-  }'
+curl https://plainrouter.com/api/v1/dashboard/events \
+  --header "Authorization: Bearer $PLAINROUTER_TOKEN" \
+  --header "Accept: application/json"
 ```
 
-Expect HTTP `200`. The response includes these fields; this is an excerpt:
-
-```json
-{
-  "sandbox": true,
-  "accepted": true,
-  "status": "simulated",
-  "persisted": false,
-  "provider_delivery": false
-}
-```
-
-`accepted: true` confirms synthetic validation. It does not test your production credential, store an event, or verify Meta delivery. Continue with the [sandbox quickstart](/api/sandbox) to test bearer authentication, check allowed fields, or troubleshoot sandbox keys.
+HTTP `200` confirms that the authenticated list request succeeded. Inspect the returned data and pagination before treating it as complete. An empty list is valid; it does not verify browser collection or destination delivery. This read creates no conversion. For an account-bound Actions read, use the separate [Actions API](/api/actions).
 
 ## Choose an endpoint group
 
 | Group | Operations | Use it to |
 | --- | --- | --- |
-| Sandbox | Discover, issue a sandbox key, validate a synthetic event | Test request shape and client authentication. |
 | Events | Submit, verify ingestion, retrieve, or list events | Send conversions and inspect event and delivery state. |
 | [Actions](/api/actions) | Dry-run or submit a proposal; read actions, batches, policy, and decision receipts | Preview policy, then follow a governed change through human review and its stored outcome. |
 | Destination testing | Set test mode and send a controlled test purchase | Check the connected Meta destination. These operations can change state or contact Meta. |
@@ -78,7 +54,7 @@ Expect HTTP `200`. The response includes these fields; this is an excerpt:
 
 Expand a group in the sidebar for its request fields, responses, and examples. Production operations use real workspace data; check each endpoint's side effects before sending a request.
 
-## Move to production
+## Set up collection and delivery
 
 1. [Set up Signals](/quickstart), then configure your server with its [Server secret](/api/authentication#how-do-i-authenticate-the-rest-api). Keep credentials out of browser code, prompts, and source control.
 2. Use the [identity-free ingestion diagnostic](/signals/verify-ingestion) if you only need to check the authenticated write path. It does not verify a real website arrival.
@@ -93,10 +69,11 @@ If a client receives HTML or a sign-in redirect, inspect the original status, `C
 
 | Result | Next step |
 | --- | --- |
-| `401` | Check the credential type, scope, and validity. Sandbox keys and production secrets are not interchangeable. |
+| `401` | Check the credential type, scope and validity for the selected interface. |
+| `410` with `sandbox_retired` | Remove old sandbox calls and follow the [migration guidance](/api/sandbox). |
 | `422` | Read the field errors and correct the payload before retrying. |
 | New production event: `202` | Read `warnings` and inspect delivery separately. |
 | Duplicate production event: `200` | Keep the original ID. The response does not replay failed delivery. |
 | Uncertain production write after a timeout | Retry the original event ID and payload, subject to continued consent eligibility. |
 
-See [conversion errors](/api/conversions#handle-errors), [consent warnings](/api/conversions#why-is-the-consent-capture-time-invalid), and [sandbox rate limits](/api/sandbox#stay-within-the-rate-limits) for the applicable details. Prefer an [official SDK](/sdk/overview) when you want typed operations in application code.
+See [conversion errors](/api/conversions#handle-errors), [consent warnings](/api/conversions#why-is-the-consent-capture-time-invalid) for the applicable details. Prefer an [official SDK](/sdk/overview) when you want typed operations in application code.

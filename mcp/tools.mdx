@@ -1,7 +1,7 @@
 ---
 title: "Meta Ads MCP tools: inputs and limits"
 sidebarTitle: "MCP tool reference"
-description: "Use Plainrouter MCP tools for Signals reads, governed proposals, account rules, Actions receipts, workspace grants and synthetic testing."
+description: "Use Plainrouter MCP tools for Signals reads, governed proposals, account rules, Actions receipts, workspace grants and authenticated diagnostics."
 ---
 
 Plainrouter MCP server version `0.4.2` provides Signals reads and governed Actions tools. Three additional legacy `launcher.*` tools are available only when Launcher is explicitly enabled. Use MCP discovery to check the tools available on your connection. Account-scoped tools use an eligible account in the workspace key's scope. Older account-bound keys retain their binding.
@@ -94,7 +94,7 @@ Creative generation and rendering are disabled in the current public surface. Re
 
 ## Account-rule tools
 
-Follow [Meta ad account performance rules](/actions/account-rules) for disabled creation, complete definition inputs, explicit enabling, evaluation windows, pagination and troubleshooting. Rule reads accept Read or Write Workspace keys; writes require Write. The active grant must cover the corresponding `actions.rules.index`, `actions.rules.show`, `actions.rules.store` or `actions.rules.update` operation. These production tools are absent from the synthetic sandbox.
+Follow [Meta ad account performance rules](/actions/account-rules) for disabled creation, complete definition inputs, explicit enabling, evaluation windows, pagination and troubleshooting. Rule reads accept Read or Write Workspace keys; writes require Write. The active grant must cover the corresponding `actions.rules.index`, `actions.rules.show`, `actions.rules.store` or `actions.rules.update` operation.
 
 Rules use `platform_ad_account_id` on creation and the returned `rule_id` for show/update. Saving or enabling does not execute a change during the request. Scheduled evaluation creates separate governed proposals, whose receipts must be followed in Inbox. Creating a rule does not change Ask/Full or the loss threshold.
 
@@ -124,27 +124,11 @@ Example tool arguments:
 
 Success returns `id` and `status: "received"`. Save the ID; received means the report was stored, not that someone has read it or that a fix or response is guaranteed. This tool has no idempotency key: repeating a successful call creates another report. Do not include credentials or unnecessary customer data. For validation errors, correct `kind` or message length; for missing authorization, check the workspace key and grant.
 
-## Test mode and production boundaries
+## Authentication and the retired sandbox
 
-Use `https://plainrouter.com/mcp/sandbox` to prove an integration without an
-account or credential. It exposes four tools:
+Use `https://plainrouter.com/mcp` with workspace authorization for tool calls. Public protocol discovery, catalogs and static `ui://` app shells do not prove permission to inspect workspace data or request a proposal. Account-scoped tools also require access to the selected account; workspace installation and arrival tools do not accept `account_id`.
 
-| Tool | Purpose |
-| --- | --- |
-| `get_account_state` | Return an invented account, workspace, connection, and Signal destination. |
-| `get_signal_health` | Return synthetic event flow, delivery, and match-quality diagnostics. |
-| `get_performance` | Return synthetic reconciliation evidence for a requested 1–90 day window. |
-| `validate_sandbox_event` | Validate an identity-free synthetic conversion event. |
-
-Every result is marked with `"sandbox": true`. The endpoint reads no tenant
-data, writes nothing, and contacts no advertising provider. It does not expose
-production proposal, creative, approval, Launcher, or spend-affecting tools.
-
-The production endpoint is `https://plainrouter.com/mcp`. Its handshake, tool
-and resource catalogs, and static `ui://` MCP App shells are publicly
-discoverable. Every tool call requires an authorized workspace key. Account-scoped reads additionally require access to the selected account. The two workspace-scoped installation and arrivals tools do not accept `account_id`.
-
-The inventory reads and `submit_feedback` are production tools and are absent from this sandbox. Use their production credential and scope requirements; a successful synthetic read does not authorize them.
+The unauthenticated sandbox and `validate_sandbox_event` are retired. Old sandbox requests return HTTP `410` with `error: "sandbox_retired"`. [Migrate existing clients](/api/sandbox). A Write-authorized [`dry_run_actions`](#dry_run_actions) call previews supported changes against real state; it does not recreate synthetic test mode.
 
 ## Built-in Signals prompts
 
@@ -164,7 +148,7 @@ Choose a prompt from your MCP client's prompt selector, where supported. Custom 
 }
 ```
 
-Use the normal [protocol headers and request metadata](/mcp/setup#which-mcp-protocol-should-my-client-use). Prompt listing is public; production `prompts/get` requires a valid workspace key. The response contains one user-role text message. The sandbox has no registered prompts.
+Use the normal [protocol headers and request metadata](/mcp/setup#which-mcp-protocol-should-my-client-use). Prompt listing is public; production `prompts/get` requires a valid workspace key. The response contains one user-role text message.
 
 After loading a prompt, the tool call still needs its own active grant and permissions. `install_the_count` inherits the managed-hostname-only limitation; it cannot supply same-origin forwarding material. `signal_health` needs the eligible account selection required by `get_signal_health`. The [published server card](https://plainrouter.com/.well-known/mcp/server-card.json) lists the prompt names and titles.
 
@@ -288,11 +272,9 @@ The response also includes `claimed_clicks_label`, `claimed_clicks_outbound_sinc
 
 If setup or platform data is unavailable, read the returned status and message before calculating a difference. Arrival/click differences do not establish lost conversions, attribution, or a cause. This tool is not an accepted `propose-actions` evidence source; use [`get_performance`](#get_performance) for eligible stored reconciliation evidence.
 
-## How do sandbox responses differ?
+## How should I handle bounded responses?
 
-The sandbox's `get_account_state`, `get_signal_health` and `get_performance` share production names and argument schemas, with simplified synthetic responses marked `sandbox: true`. Account state omits production authorization metadata; health activity/delivery/match fields differ; performance omits purchases, platform metrics and their notices. A passing sandbox client still needs separate production response handling and credential checks. [Sandbox connection](/mcp/setup#start-in-test-mode).
-
-Production responses are bounded. Missing optional detail or a smaller response is not evidence that no account capability, permission or history exists; inspect explicit status and availability fields instead of assuming the sandbox fixture is exhaustive.
+Responses are bounded. Missing optional detail or a smaller response is not evidence that no account capability, permission or history exists. Inspect explicit status, availability and pagination fields. Historical synthetic fixtures do not define the current response contract; use the published schema and authenticated result.
 
 ## `get_account_state`
 
@@ -323,7 +305,7 @@ Call this first to confirm the workspace's Signals-bound Meta account. Omit `acc
 
 The health values are `not_connected`, `revoked`, `attention_needed`, and `connected`. Use the [provider connection status reference](/reference/statuses-and-terms#provider-connection-health) to choose the next step. An active record alone does not establish healthy credentials or a successful latest read. Conversely, `connected` does not prove fresh platform data or conversion delivery. The tool reads stored state; it does not make a live provider check.
 
-The synthetic sandbox account returns `connection.health: "connected"`; that value describes its fixture, not your workspace.
+Confirm the health returned for your authorized workspace; public discovery does not establish connection health.
 
 ### What do the capability flags mean?
 
@@ -349,7 +331,7 @@ A Page or Signals dataset is not required merely to report existing-object manag
 
 ## `get_signal_health`
 
-Use this diagnostic for collection, delivery, and stored account health. Both production and sandbox accept the same optional reporting window:
+Use this diagnostic for collection, delivery, and stored account health. The diagnostic accepts this optional reporting window:
 
 | Field | Type | Required | Rules |
 | --- | --- | --- | --- |
@@ -474,7 +456,7 @@ Invalid grant-ID input fails validation. Missing or inactive caller authorizatio
 
 ## Read Actions and policy
 
-Use these five production tools to follow a proposal without visiting the dashboard. They read stored Plainrouter records, make no provider calls, and do not change ads, action decisions, or policy. They are absent from the synthetic sandbox.
+Use these five production tools to follow a proposal without visiting the dashboard. They read stored Plainrouter records, make no provider calls, and do not change ads, action decisions, or policy.
 
 All five require `ad-account.read` and an active workspace grant covering `read-actions`. Newly issued **Read** and **Write** keys include it. Existing `propose-actions` grants remain compatible for reads. Older Read credentials without either operation need replacement or fresh authorization; current workspace role and account scope still apply.
 
@@ -536,7 +518,7 @@ Use the [Actions HTTP API](/api/actions) for the same scoped reads from a server
 
 ## `dry_run_actions`
 
-Preview a proposed batch's policy decisions and execution diffs without creating the proposal or changing Meta. This tool can read real provider state; it is not the synthetic MCP sandbox.
+Preview a proposed batch's policy decisions and execution diffs without creating the proposal or changing Meta. This tool requires workspace authorization and can read real provider state.
 
 Use a **Write Workspace key**, an active `propose-actions` grant, `actions.propose`, and the same complete [input](#propose-actions) as `propose-actions`. Creative upload and duplication also require `creative.write`. The required rationale, retry key, human-selected targets, and evidence rules still apply.
 

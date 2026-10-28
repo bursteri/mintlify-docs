@@ -21,12 +21,12 @@ The report reads a rolling 180-day receipt window on every plan, separate from y
 | Decisions | Recorded decisions in the selected reporting scope, deduplicated by receipt ID. A later choice can be another decision. |
 | Analytics rate | Recorded Analytics grants divided by recorded decisions. |
 | Marketing rate | Recorded Marketing grants divided by recorded decisions. |
-| Location, Language, Banner version | Breakdowns of recorded choices, not inferred preferences for visitors without a receipt. Location groups countries, US states and Canadian provinces/territories. |
+| Location, Language | Breakdowns of recorded choices, not inferred preferences for visitors without a receipt. Location groups countries, US states and Canadian provinces/territories. |
 | Policy class | Independent recorded policy breakdown; **Policy not recorded** preserves older null history. A policy label is not a visitor grant. |
 
-Use the dimension selector to compare recorded groups. Location, language and banner-version breakdowns and daily series show the top 50 values by recorded choices; they may not represent every recorded value. Policy class is a separate breakdown, rather than a top-50 daily dimension. The recent-receipt table shows the latest 20 receipts, not the entire export.
+Use the dimension selector to compare recorded groups. Location and language breakdowns and daily series show the top 50 values by recorded choices; they may not represent every recorded value. Policy class is a separate breakdown, rather than a top-50 daily dimension. The recent-receipt table shows the latest 20 receipts, not the entire export.
 
-**Banner version** identifies the consent copy recorded with that decision. Current v4 copy records version `3`; it is separate from the saved-choice cookie format. Older receipt versions remain historical evidence. A copy-version change does not grant consent or reinterpret an older saved choice.
+Banner-version charts and dimension selection are retired. The `banner_version` field remains on individual receipts and in CSV exports as historical metadata. Current v4 copy records version `3`, separately from the saved-choice cookie format. A copy-version change does not grant consent or reinterpret an older saved choice.
 
 ## How should I read unknown locations?
 
@@ -35,7 +35,7 @@ Use the returned geography labels, including **US (state unknown)**, **CA (provi
 ## How do I inspect or export a receipt?
 
 1. Select the intended workspace and open **Dashboard**.
-2. Find **Consent choices**. Compare the overall rates with the daily trend and a location, language or banner-version breakdown.
+2. Find **Consent choices**. Compare the overall rates with the daily trend and a location or language breakdown.
 3. Inspect the recent receipts or use the panel's CSV download for retained records in the reporting window. Export requires workspace access, independently of MCP credentials.
 
 The CSV includes receipt ID, received and client timestamps, action, Analytics and Marketing choices, banner version, language, page hostname, country, nullable region, geography code/label and nullable policy class. It does not include visitor IDs, IP addresses, full page URLs or cookie values. Keep the exported records in your own controlled storage if you need them beyond the reporting window.
@@ -51,6 +51,8 @@ Call [`get_consent_rates`](/mcp/tools#get_consent_rates) with a Read or Write wo
 ```
 
 The read returns `schema_version: 2`, the reporting window, summary, daily rates, breakdowns and recent receipts. In version 2, `breakdowns.geography` and the `geography` daily dimension replace the former country breakdown/dimension; consumers must update that field selection. Geography rows include `value`, `label`, `country` and nullable `region`; raw country is still available on recent receipts. `breakdowns.policy_class` is independent. It does not change consent or configure a banner. Confirm `workspace_id` and `status` before interpreting the result.
+
+Current schema-version-2 responses no longer include `breakdowns.banner_version` or banner-version rows in `daily_by_dimension`. Remove those chart selections from consumers; use individual receipt metadata when a recorded copy version matters. Do not treat the missing dimension as zero choices.
 
 ## Troubleshoot
 
