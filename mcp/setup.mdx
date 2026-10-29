@@ -1,10 +1,10 @@
 ---
 title: "Connect your agent to Plainrouter MCP"
 sidebarTitle: "Setup"
-description: "Connect Claude with OAuth or a Workspace key, verify authenticated workspace access, and troubleshoot MCP authentication."
+description: "Connect Codex, Claude or Cursor with OAuth or a Workspace key, verify workspace access, and troubleshoot MCP authentication."
 ---
 
-Connect Claude through OAuth or configure a Workspace key for your client. A successful production read returns the intended workspace and selected Meta ad account. For installation before connecting Meta, use the workspace-only read below.
+Connect Codex or Claude through OAuth, follow the [Cursor guide](/mcp/clients/cursor) for OAuth or key setup, or configure a Workspace key for another client. A successful production read returns the intended workspace and selected Meta ad account. For installation before connecting Meta, use the workspace-only read below.
 
 For supported tasks, client requirements, and approval boundaries, start with the [MCP introduction](/mcp/overview). For a summary of supported clients, account scope and pricing, see the [Meta Ads MCP server overview](https://plainrouter.com/solutions/meta-ads-mcp).
 
@@ -14,6 +14,12 @@ For supported tasks, client requirements, and approval boundaries, start with th
   </Card>
   <Card title="Connect Claude" icon="key-round" href="#connect-claude-with-oauth">
     Sign in with OAuth and confirm the first account read.
+  </Card>
+  <Card title="Connect Codex" icon="terminal" href="#connect-codex-with-oauth">
+    Add the remote server and sign in through Plainrouter.
+  </Card>
+  <Card title="Connect Cursor" icon="code" href="/mcp/clients/cursor">
+    Choose OAuth sign-in or a protected Workspace key.
   </Card>
 </CardGroup>
 
@@ -121,6 +127,21 @@ If a server named `plainrouter` is already configured at that scope, inspect it 
 5. Enable Plainrouter for the conversation through **Connectors**, then use the [first read prompt](#confirm-a-read-only-production-connection).
 
 Claude's controls depend on your plan and organization settings. Follow [Anthropic's custom connector instructions](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp) if the controls differ.
+
+## Connect Codex with OAuth
+
+With Codex CLI installed, add Plainrouter as a remote Streamable HTTP server and start OAuth sign-in:
+
+```bash
+codex mcp add plainrouter --url https://plainrouter.com/mcp
+codex mcp login plainrouter
+```
+
+Follow the Plainrouter sign-in and consent prompts. Confirm the workspace, Meta ad account and requested access; choose **Read** for analysis or **Write** for previews and proposals. If adding the server already completed sign-in, a second login is unnecessary.
+
+Open Codex and use `/mcp` to inspect the server, then [confirm a read-only production connection](#confirm-a-read-only-production-connection). Tool discovery alone does not prove workspace access.
+
+If `plainrouter` already exists, inspect its entry in `~/.codex/config.toml` before changing it. When switching from key authentication, remove its explicit bearer-token setting or `Authorization` header so OAuth can be used. Preserve other server entries and never paste credentials into a prompt. See the [official OpenAI MCP instructions](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
 
 ## Connect with a workspace token
 
