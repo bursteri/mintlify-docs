@@ -52,6 +52,14 @@ Check each hostname's last successful scan, latest attempt and freshness. `curre
 
 The v2 embed also reports `before_consent` and `after_accept` coverage as `complete`, `incomplete`, or `unknown`. Coverage summarizes the reported passes; it does not certify every page or legal compliance. Documented Plainrouter entries can appear before any successful scan while site-cookie coverage remains unknown. Existing v1 embeds remain available; copy the complete current embed to show the v2 phase and freshness details.
 
+### How do I request a declaration for one hostname?
+
+For a custom integration, the public `GET /api/v1/cookie-declarations/{publishableKey}` endpoint accepts `hostname` and `result_version=2`. Supply a bare hostname such as `www.example.com`, without a scheme, port or path. The server normalizes case and trailing dots, then independently checks that the hostname is authorized for the workspace. Use only the Publishable key; no bearer secret is required. The [published OpenAPI contract](https://plainrouter.com/openapi.json) defines this operation.
+
+The response contains only that host's latest completed scan and documented Plainrouter inventory. A host without a completed scan stays unknown. The host-scoped request uses a current or pending Publishable key for a configured active or pending workspace; it does not grant access to another workspace's hosts. Invalid hostnames return `422`, unknown keys or unauthorized hosts return `404`, and a declaration larger than 192 KiB returns `503` without a partial inventory. Host-scoped responses use `no-store`. The endpoint allows 300 requests per minute per Publishable key; honor `Retry-After` on `429`.
+
+Omit `hostname` for the workspace-wide inventory used by the current embed above, which retains its 60-second public cache. Adding the API filter does not automatically change the embed or provide a collection-host cache endpoint.
+
 ### How do I verify the embed?
 
 Open the published page in a fresh browser context. Confirm the container renders per-host scan dates, freshness and phase coverage, and that observed entries match the applicable completed scans. In the Network panel, check the v2 script and its data request for errors. Documented inventory or an unknown-coverage notice before a completed scan does not establish which site cookies were observed.

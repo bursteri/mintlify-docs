@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-10-28"
+  documentation_revision: "2026-10-30"
 ---
 
 # Use Plainrouter safely
@@ -21,7 +21,7 @@ eligible active accounts exist; use the internal Plainrouter ID, not Meta's exte
 
 ## Verify an authenticated connection
 
-The unauthenticated MCP and API sandbox is retired. Old sandbox requests return HTTP `410` with `sandbox_retired`; do not call `validate_sandbox_event` or generate sandbox keys. Public protocol discovery and catalog listing do not prove workspace access.
+The unauthenticated MCP and API sandbox is retired. API and MCP protocol requests return HTTP `410` with `sandbox_retired`; do not call `validate_sandbox_event` or generate sandbox keys. An HTML browser redirect from `/mcp/sandbox` to the product overview is not a tool connection. Public protocol discovery and catalog listing do not prove workspace access.
 
 Create a Plainrouter account and a Read Workspace key, or use supported OAuth sign-in. Store credentials through protected client configuration, never prompts. Start with `list_workspaces` and a workspace installation read; confirm the returned workspace before account-specific work. A Write-authorized `dry_run_actions` call can preview supported changes against real state without creating a proposal or writing to Meta; it is not an anonymous simulation.
 

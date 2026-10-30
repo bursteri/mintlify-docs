@@ -4,13 +4,15 @@ sidebarTitle: "Sandbox retirement"
 description: "Handle sandbox_retired responses and move API or MCP integrations to authenticated workspace access."
 ---
 
-Plainrouter's unauthenticated API and MCP sandbox is retired. Old sandbox requests return HTTP `410` with `error: "sandbox_retired"`. Create a Plainrouter account and configure the credential for the interface you need.
+Plainrouter's unauthenticated API and MCP sandbox is retired. API and MCP protocol requests return HTTP `410` with `error: "sandbox_retired"`. Create a Plainrouter account and configure the credential for the interface you need.
 
 ## Which requests are retired?
 
-The retired paths include `/mcp/sandbox`, `/api/v1/sandbox`, `/api/v1/sandbox/keys`, `/api/v1/sandbox/events`, `/api/v1/sandbox/keyed-events`, the old sandbox Markdown discovery paths, and `/n8n-plainrouter-sandbox.json`. GET and POST requests return the retirement response; issuing another sandbox key or changing a retry ID cannot restore service.
+The retired paths include `/mcp/sandbox`, `/api/v1/sandbox`, `/api/v1/sandbox/keys`, `/api/v1/sandbox/events`, `/api/v1/sandbox/keyed-events`, the old sandbox Markdown discovery paths, and `/n8n-plainrouter-sandbox.json`. API GET and POST requests return the retirement response; issuing another sandbox key or changing a retry ID cannot restore service.
 
 The response includes `error`, `message`, `signup_url`, and `mcp_url`. The `error` field is the string `sandbox_retired`, rather than an `error.code` object. No synthetic tool or event result is returned.
+
+A normal HTML browser visit to `/mcp/sandbox` redirects permanently with HTTP `308` to the [Meta Ads MCP overview](https://plainrouter.com/solutions/meta-ads-mcp). This browser exception does not reconnect an MCP client. POST requests, JSON or event-stream requests, and requests carrying MCP protocol headers still receive `410`.
 
 ## How do I connect MCP now?
 

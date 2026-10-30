@@ -10,7 +10,7 @@ This walkthrough uses an image already in the connected account's library. It co
 
 
 <Note>
-  New governed creative work requires workspace availability as well as the key's permissions. `launcher_unavailable` does not mean your key can enable it. Creative generation/rendering are currently unavailable; uploaded images, vetted URL intake and Meta library reads are separate surfaces. Use only tools advertised for your connection and follow their own checks.
+  New governed creative work requires workspace availability as well as the key's permissions. `launcher_unavailable` does not mean your key can enable it. Built-in creative generation and rendering have been retired; uploaded images, vetted URL intake and Meta library reads are separate surfaces. Use only tools advertised for your connection and follow their own checks.
 </Note>
 
 ## Before you begin
@@ -215,7 +215,8 @@ After a timeout, check the returned or existing proposal in **Inbox** before att
 
 | Symptom | Next step |
 | --- | --- |
-| `launcher_unavailable` or `generation_disabled` | Check workspace availability and the requested surface. A new key or different tool spelling cannot enable a disabled workflow. |
+| `launcher_unavailable` | Check workspace availability. A new key cannot enable a workflow that is unavailable for the workspace. |
+| An old generation or rendering tool is missing | The built-in generation, template-rendering and creative-preview tools are retired. Use the advertised uploaded-creative tools; changing a key or retrying an old tool name cannot restore generation. |
 | Missing creative permission | Check the token tier, active grant, and account scope in [workspace tokens](/mcp/workspace-tokens). |
 | Source ad or asset rejected | Re-read the intended account's library and confirm the human-selected source belongs to that account. Do not substitute a guessed asset ID. |
 | Upload rejected | Check detected JPEG/PNG content, a bare filename, raw base64 without a data URI prefix, byte limit, and reuse of the idempotency key. |

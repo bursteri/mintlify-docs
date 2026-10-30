@@ -158,7 +158,7 @@ An environment token takes precedence over the locally stored token.
 
 `https://plainrouter.com/mcp` permits public protocol discovery, tool/resource/prompt listing and reads of static `ui://` app shells. Retrieving a prompt with `prompts/get`, calling a tool, and reading account data require workspace authorization. Account-scoped reads additionally require access to the selected account.
 
-The old unauthenticated MCP and API sandbox returns HTTP `410` with `sandbox_retired`. [Move existing integrations to authenticated access](/api/sandbox); anonymous discovery is not a substitute for a successful workspace read.
+The old unauthenticated sandbox returns HTTP `410` with `sandbox_retired` for API and MCP protocol requests. [Move existing integrations to authenticated access](/api/sandbox); anonymous discovery or a browser redirect is not a substitute for a successful workspace read.
 
 ## How do I authenticate Plainrouter MCP?
 

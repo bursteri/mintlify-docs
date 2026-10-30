@@ -1,10 +1,28 @@
 ---
 title: "October 2026"
-description: "Review sandbox retirement, consent banner controls, cookie declaration coverage, report compatibility and October product releases."
+description: "Review Purchase availability, refund corrections, host-scoped cookie declarations, retired generation workflows and October product releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 30, 2026">
+  ## Keep unavailable Purchase counts distinct from zero
+
+  **Fixed** · Dashboard, MCP and exports preserve unavailable accepted-Purchase counts when timezone, destination or retained delivery evidence is missing. A measured zero stays zero, including at the oldest delivery-history boundary. [Check Purchase availability](/signals/health-and-performance#how-do-i-compare-meta-reported-purchases).
+
+  ## Exclude failed and canceled Stripe refunds
+
+  **Fixed** · A refund that fails or is canceled no longer remains counted as successful through an earlier charge summary. Other successful refunds and repeated notifications keep their separate handling. [Review refund status](/signals/track-events#how-are-renewals-and-refund-status-checked).
+
+  ## Read a cookie declaration for one hostname
+
+  **Added** · Custom integrations can request a host-filtered public declaration with a Publishable key. Host authorization, unknown scan evidence and response-size failures remain explicit; the existing embed keeps its workspace-wide behavior. [Use the hostname filter](/signals/cookie-scan#how-do-i-request-a-declaration-for-one-hostname).
+
+  ## Replace retired creative-generation workflows
+
+  **Changed** · Built-in generation, template rendering and their MCP preview tools are retired. Old tool names or grant operations cannot re-enable them. Uploaded creatives, Meta library reads and governed proposals retain their own availability and approval checks. [Check the supported creative surfaces](/mcp/tools#why-is-a-creative-tool-unavailable).
+</Update>
 
 <Update label="October 28, 2026">
   ## Move integrations off the retired sandbox

@@ -452,6 +452,8 @@ For an eligible renewal, inspect the signed `invoice.paid` event: the invoice mu
 
 Subscribe to all three refund events above. A succeeded refund can adjust verified revenue; pending, failed or canceled states must not be treated as settled refunds. The **Refund status is unverified** notice means only charge-summary fallback evidence has been observed. Follow its subscription guidance rather than assuming status is confirmed. [Stripe's refund statuses and events](https://docs.stripe.com/refunds) explain the provider side.
 
+When a pending or action-required refund later fails or is canceled, it does not remain counted as a successful refund through an earlier charge summary. Other successful refunds on the same charge remain separate; repeated notifications must not subtract the same refund twice.
+
 Revenue adjustments and downstream advertising delivery remain separate. Inspect the purchase/refund lineage and destination trace; a refund row or a connected Stripe card alone does not prove a platform correction.
 
 ### Why is the Stripe purchase missing?

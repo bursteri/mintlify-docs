@@ -150,6 +150,8 @@ Connect the intended [Meta destination](/signals/connect-meta) and check the acc
 
 A dash or `null` Meta total means evidence is unavailable or incomplete, not zero. Inspect `daily[].read_at` and the daily values to distinguish missing reads from reported zero. Missing account timezone makes this comparison unavailable. Opening Signals or requesting an MCP read does not refresh Meta data.
 
+The accepted server-side count has its own availability check. `purchases.plainrouter_accepted_purchases` and its daily values are `null` when the account timezone is missing or invalid, no suitable workspace destination is available, no complete retained day remains, or part of the purchase window is outside retained delivery evidence. This includes an oldest day whose delivery records have begun retiring. A measured zero remains `0`; never replace a null with zero or add available days into a supposedly complete total. Dashboard shows unavailable values as a dash, and CSV exports label them **Unavailable** or **Not connected** as applicable.
+
 The comparison supplies no purchase gap, alignment score, or health verdict. The two counts have different measurement rules; their difference does not establish missed purchases, attribution accuracy, or incremental revenue. Stripe verified revenue remains a separate measurement. The existing reconciliation `meta_reported` field is not renamed or replaced by `purchases.meta_reported_purchases`.
 
 ## Why numbers differ

@@ -90,7 +90,9 @@ The server version is separate from the MCP protocol revision. For custom client
 
 Workspace availability is separate from tool discovery and key permissions. A `launcher_unavailable` error means new Launcher or governed creative work is unavailable for the selected workspace. Reissuing a Write key cannot enable it. Existing plan reads can remain available.
 
-Creative generation and rendering are disabled in the current public surface. Removed generation tools are not restored by using an old name; `generation_disabled` is a refusal, not a queued job. Uploaded-file and vetted-URL creative intake, Meta library reads and governed creative proposals retain their own permission, workspace-availability and policy checks. [Creative workflow](/actions/creative-workflow).
+Built-in creative generation and rendering are retired. `list_templates`, `render_ad`, `get_render`, `resume_render`, `list_creatives` and `preview_creatives`, plus the creative-preview MCP App, are removed. These are separate from the advertised `launch.creatives.*` operations for uploaded assets. Retired generation/render grant operations are no longer issued; OAuth refresh retains only supported operations. An older SDK type or stored grant cannot restore a removed tool.
+
+Uploaded-file and vetted-URL creative intake, Meta library reads and governed creative proposals retain their own permission, workspace-availability and policy checks. [Creative workflow](/actions/creative-workflow).
 
 ## Account-rule tools
 
@@ -389,7 +391,7 @@ The response includes:
 - Measurability state.
 - Gateway-verified accepted count.
 - Existing reconciliation `meta_reported` count: Meta dataset events from every sender, separate from ad-attributed Purchases. Neither side is an attributed-conversion count.
-- `purchases`: Meta-attributed and accepted server-side Purchase counts with their own completed account-local window and attribution details. A missing Meta count remains `null`.
+- `purchases`: Meta-attributed and accepted server-side Purchase counts with their own completed account-local window and attribution details. Missing or unmeasured counts remain `null`; `0` is a measured zero. [Check Purchase availability](/signals/health-and-performance#how-do-i-compare-meta-reported-purchases).
 - `platform_claimed_clicks`: Meta outbound clicks, with `claimed_clicks_caveat` for historical rows.
 - Observed gap.
 - Alignment percentage.

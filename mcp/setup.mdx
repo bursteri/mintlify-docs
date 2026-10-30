@@ -57,7 +57,7 @@ For creative-library reads, the Meta connection needs `ads_read` or `ads_managem
 
 ## What happened to test mode?
 
-The unauthenticated sandbox is retired. Old `/mcp/sandbox` requests return HTTP `410` with `error: "sandbox_retired"`; `validate_sandbox_event` is no longer available. Configure `/mcp` with workspace authorization and verify a read. [Migration and SDK compatibility](/api/sandbox).
+The unauthenticated sandbox is retired. Old `/mcp/sandbox` protocol requests return HTTP `410` with `error: "sandbox_retired"`; `validate_sandbox_event` is no longer available. A normal HTML browser visit redirects to the product overview instead. Configure `/mcp` with workspace authorization and verify a read. [Migration and SDK compatibility](/api/sandbox).
 
 The production endpoint exposes protocol discovery, catalogs and static `ui://` app shells without a credential. Tool calls and account-data reads require workspace authorization. Discovery alone does not verify your credential, workspace or account.
 
