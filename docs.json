@@ -55,14 +55,21 @@
               "signals/configure-serving",
               "signals/verify-ingestion",
               "signals/track-events",
-              "signals/cookie-scan",
-              "signals/consent-choices",
               "signals/connect-meta",
               "signals/conversions",
               "signals/conversion-journeys",
               "signals/trial-to-paid",
               "signals/event-volume",
               "signals/health-and-performance"
+            ]
+          },
+          {
+            "group": "Consent management",
+            "icon": "shield-check",
+            "pages": [
+              "consent/overview",
+              "signals/consent-choices",
+              "signals/cookie-scan"
             ]
           },
           {

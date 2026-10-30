@@ -1,0 +1,59 @@
+---
+title: "Plainrouter CMP: consent management"
+sidebarTitle: "Overview"
+description: "Set up Plainrouter's consent banner, saved preferences and tag controls, then inspect consent receipts, cookie scans and public declarations."
+---
+
+Use Plainrouter's consent management platform (CMP) to give visitors a choice, apply their decisions to supported browser tags, and inspect the choices your banner records. Bring together banner controls, saved preferences, consent receipts and cookie declarations in one workspace.
+
+You can use the included Plainrouter banner or connect a supported external CMP. Setup uses the workspace's generated browser snippet; the banner controls are currently under **Signals → Install → Consent banner**. A Meta ad account connection is needed only for workflows that use Meta, such as advertising delivery.
+
+<CardGroup cols={2}>
+  <Card title="Set up the banner" icon="panel-bottom" href="/signals/install-pixel#can-i-enable-the-included-consent-banner">
+    Enable the included consent card, configure reopening and choose coverage.
+  </Card>
+  <Card title="Read choices and receipts" icon="clipboard-check" href="/signals/consent-choices">
+    Inspect recorded decisions by location, language and policy, or export receipts.
+  </Card>
+  <Card title="Scan cookies and publish a declaration" icon="scan-search" href="/signals/cookie-scan">
+    Review observed cookie and storage metadata, freshness and consent-phase coverage.
+  </Card>
+  <Card title="Connect an existing CMP" icon="plug" href="/signals/track-events#how-does-the-snippet-choose-a-consent-source">
+    Pass supported consent signals and verify changes, rejection and withdrawal.
+  </Card>
+</CardGroup>
+
+## What does the CMP include?
+
+| Capability | What you can configure or inspect |
+| --- | --- |
+| Visitor choices | **Accept all**, **Reject all** and **Customize**, with separate Analytics and Marketing choices. Analytics alone does not grant advertising permissions. |
+| Saved preferences and reopening | Restore the saved Plainrouter choice and offer a floating Privacy settings control or your own preferences button when the surface is enabled. A configured HTTPS privacy-policy link appears in the banner and preferences. |
+| Banner coverage | The workspace owner can choose location-based coverage, **Always show**, or **Off — I handle consent myself**. Off disables automatic display, floating controls and manual opening while keeping stored decisions. |
+| Browser-tag coordination | Use the generated Google Consent Mode and Microsoft UET instructions to apply defaults, saved choices and later updates. Other supported vendor updates depend on their browser APIs being present. |
+| Consent reporting | Inspect recorded Analytics and Marketing choices, location/language/policy breakdowns, recent receipts and CSV exports. The reporting window is 180 days on every plan. |
+| Cookie inventory and declarations | Scan website cookie and storage metadata, inspect before-consent and after-accept coverage, and publish the declaration with per-host freshness. Cookie scans and the public declaration are available on every plan. |
+
+The included banner's Marketing choice maps to `ad_storage`, `ad_user_data` and `ad_personalization`; Analytics maps to `analytics_storage`. On the consent-based advertising path, all three advertising permissions must be granted. Missing or unknown choices stay unknown. Follow the [consent-state reference](/signals/track-events#set-consent) when connecting your own interface.
+
+## How do I get started?
+
+1. Create the intended workspace and complete the [shared browser installation](/signals/install-pixel). Use its generated key, collection domain and complete snippet once.
+2. Open **Signals → Install → Consent banner** to enable the included card and choose whether to show the floating reopen control. The workspace owner manages [banner coverage](/signals/install-pixel#how-do-i-choose-where-the-banner-appears) separately.
+3. Copy the complete current installation and consent instructions. Follow the supplied [Google and UET tag controls](/signals/install-pixel#what-changes-for-google-and-microsoft-uet-tags); the banner cannot configure unrelated CMS plugins or tag-manager triggers for you.
+4. Test acceptance, rejection, partial choices, returning saved choices and withdrawal with the [browser verification guide](/signals/track-events#verify-grant-partial-consent-and-withdrawal).
+5. Read the recorded [consent choices](/signals/consent-choices), then [scan the website and publish its declaration](/signals/cookie-scan).
+
+For a same-origin installation, the enabled banner appears for all visitors because that serving path cannot pass visitor location. **Off** still disables the Plainrouter surface. Verify the installed page after changing coverage; saving a workspace setting cannot rewrite an older pasted snippet.
+
+## Can I keep my existing CMP?
+
+Yes, when you connect its decisions through a supported signal or explicit adapter. The snippet checks explicit consent, TCF and Consent Mode inputs before using its fallback card. A detected supported CMP without a usable decision suppresses that fallback and leaves advertising consent unresolved. A later valid external decision dismisses the Plainrouter card.
+
+Use the [external-CMP integration guide](/signals/track-events#how-does-the-snippet-choose-a-consent-source). If you turn the included banner off, follow the [Off migration steps](/signals/install-pixel#what-must-i-change-when-turning-the-banner-off) so your CMP owns defaults, saved choices, updates and withdrawal. External CMP records remain separate from receipts generated by the Plainrouter card.
+
+## How do I check the result?
+
+Verify the visitor interface and the resulting requests separately. A visible card establishes that the interface loaded; inspect the recorded choice and subsequent browser behavior to check that the decision reached the integration. Withdrawal stops consent-dependent work, while requests already received by a destination cannot be recalled.
+
+Use [Consent choices](/signals/consent-choices) for recorded decisions and exportable receipt metadata. Use [Cookie scan and declaration](/signals/cookie-scan) for observations about the pages the scanner visited. Read each host's freshness and phase coverage; incomplete or unknown scans keep their limits visible.
