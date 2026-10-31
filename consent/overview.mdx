@@ -32,6 +32,7 @@ You can use the included Plainrouter banner or connect a supported external CMP.
 | Banner coverage | The workspace owner can choose location-based coverage, **Always show**, or **Off — I handle consent myself**. Off disables automatic display, floating controls and manual opening while keeping stored decisions. |
 | Browser-tag coordination | Use the generated Google Consent Mode and Microsoft UET instructions to apply defaults, saved choices and later updates. Other supported vendor updates depend on their browser APIs being present. |
 | Consent reporting | Inspect recorded Analytics and Marketing choices, location/language/policy breakdowns, recent receipts and CSV exports. The reporting window is 180 days on every plan. |
+| Cookie details in Customize | The English preferences view can show host-scoped cookie and storage entries grouped by category and provider. It loads on opening Customize and keeps consent choices usable if the optional list fails. |
 | Cookie inventory and declarations | Scan website cookie and storage metadata, inspect before-consent and after-accept coverage, and publish the declaration with per-host freshness. Cookie scans and the public declaration are available on every plan. |
 
 The included banner's Marketing choice maps to `ad_storage`, `ad_user_data` and `ad_personalization`; Analytics maps to `analytics_storage`. On the consent-based advertising path, all three advertising permissions must be granted. Missing or unknown choices stay unknown. Follow the [consent-state reference](/signals/track-events#set-consent) when connecting your own interface.
@@ -45,6 +46,12 @@ The included banner's Marketing choice maps to `ad_storage`, `ad_user_data` and 
 5. Read the recorded [consent choices](/signals/consent-choices), then [scan the website and publish its declaration](/signals/cookie-scan).
 
 For a same-origin installation, the enabled banner appears for all visitors because that serving path cannot pass visitor location. **Off** still disables the Plainrouter surface. Verify the installed page after changing coverage; saving a workspace setting cannot rewrite an older pasted snippet.
+
+## Can visitors inspect cookies before choosing?
+
+In the current English banner, **Customize** can show cookie and storage names, providers and available retention details for the website host. Analytics and Marketing keep their separate choices; Functional and Unclassified groups are informational. The optional list does not load on the initial banner, on notice-only surfaces, when the banner is Off, or in other banner languages.
+
+The list combines scan evidence with conditional documented Plainrouter entries. Unknown scans do not mean zero cookies, and the list does not automatically block other scripts or establish compliance. [Read freshness, loading and scan limits](/signals/cookie-scan#what-do-visitors-see-in-customize).
 
 ## Can I keep my existing CMP?
 

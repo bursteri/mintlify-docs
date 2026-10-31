@@ -78,7 +78,7 @@ The JSON export retains the hash and predecessor fields. The current Audit page 
 
 | Stage | Representative events | Meaning |
 | --- | --- | --- |
-| Drive ownership | `folder.claim`, `folder.verification_failed`, `folder.verified` | A workspace owner claimed a Drive folder, ownership verification failed, or ownership was verified before inventory sync. |
+| Historical Drive ownership | `folder.claim`, `folder.verification_failed`, `folder.verified` | A workspace owner claimed a Drive folder, ownership verification failed, or ownership was verified before inventory sync. |
 | Policy | `policy.updated` | An authorized person changed action-policy settings. The event records the complete before-and-after policy and is not tied to a batch or action. |
 | Token lifecycle | `token.issued`, `token.revoked` | A scoped workspace key was issued or revoked, including historical token rotations. The event records durable token metadata but never the plaintext credential. |
 | Server secret | `signal.server_secret.rotate`, `signal.server_secret.confirm`, `signal.server_secret.revoke`, `signal.server_secret.discard` | A successful secret-lifecycle change, with actor, workspace, and time; no secret value or fragment. |
@@ -110,6 +110,8 @@ Recovery events can include `payload.compensation_recovery_disposition`. Read th
 | `contradictory` | Observed state contradicts the expected recovery result. |
 | `irreversible` | The change cannot be undone through this recovery path. |
 | `uncertain` | Recovery could not establish the result. Provider observation and proof may be absent. |
+
+Interrupted restoration first checks the exact receipt-addressed provider state. Eligible non-Launch duplicates can resume restoration only after proof that they remain unrestored; Launch-origin recovery and explicitly read-only recovery remain read-only. Uncertain or contradictory evidence does not authorize another provider write.
 
 Older events may omit this field. Missing evidence means unknown, not restored. Investigate `rollback_incomplete` rather than repeating a provider write to try to clear the status.
 
@@ -144,4 +146,4 @@ The deleted identity cannot sign in or continue using its credentials. Registeri
 
 ## Related workflow
 
-Use [Inbox](/actions/review-proposals) for the human decision and [action policy](/actions/policies-and-safety) to interpret blocks. If access must end, [revoke the workspace token](/mcp/workspace-tokens). Drive ownership events apply only to [legacy Launcher](/launcher/connect-drive) where enabled.
+Use [Inbox](/actions/review-proposals) for the human decision and [action policy](/actions/policies-and-safety) to interpret blocks. If access must end, [revoke the workspace token](/mcp/workspace-tokens). Drive ownership events are historical; [legacy Drive connection and sync](/launcher/connect-drive) are retired.

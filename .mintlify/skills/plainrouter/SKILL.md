@@ -1,18 +1,18 @@
 ---
 name: plainrouter
-description: Connect workspace-scoped Plainrouter MCP clients, inspect admissible evidence, and create governed Actions or Launcher drafts without widening authority.
+description: Connect workspace-scoped Plainrouter MCP clients, inspect admissible evidence, and create governed Actions without widening authority.
 license: Proprietary
 compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-10-30"
+  documentation_revision: "2026-10-31"
 ---
 
 # Use Plainrouter safely
 
 Use this skill when a person wants to configure Plainrouter Signals, connect an
 AI client to Plainrouter MCP, inspect Signal or creative state, create a
-governed advertising proposal, or prepare a Launcher draft.
+governed advertising proposal.
 
 Plainrouter MCP is available at `https://plainrouter.com/mcp` with workspace authorization for tool calls. Every account-specific production workflow must begin with
 `get_account_state` so the person and agent can confirm the key-scoped
@@ -78,8 +78,8 @@ Revoking a Management key does not revoke workspace keys it issued.
 - A creative duplicate is always proposed and created as `PAUSED`.
 - A proposal is not Landed until every exact receipt target passes provider
   verification. Pending verification is Not Landed.
-- Legacy Launcher has draft, status and preview tools only. A successful
-  preview does not authorize or execute a Meta change.
+- Actions Tests and legacy Launcher Drive, import and `launcher.*` tools are
+  retired. An older SDK method or stored grant cannot restore them.
 - Reuse the same idempotency key when retrying the same intent after a timeout.
 
 ## Inspect installation and arrivals without selecting an account
@@ -172,28 +172,19 @@ HTTP routes, pagination, response fields, and failure handling.
    stable idempotency key. This stages a private asset and creates a proposal.
 4. Call `duplicate-ad-with-creative` with a human-selected source ad and an
    asset ID returned by Plainrouter. The normalized status remains `paused`.
-5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, changes run automatically without a per-change approval. Every change gets a receipt, and the kill switch stops all changes. Do not claim that the MCP request changed Meta.
+5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, admitted unprotected changes can queue automatically; protected batches still require person approval. Every change gets a receipt, and the kill switch stops all changes. Do not claim that the MCP request changed Meta.
 
 Read
 [Create governed Meta creatives](https://plainrouter.com/docs/actions/creative-workflow)
 for upload, verification, retry, and compensation behavior.
 
-## Prepare and inspect a Launcher draft
+## Avoid retired test and Launcher operations
 
-1. Confirm that Google Drive ownership is verified and the required assets have
-   completed read-only inventory sync.
-2. Call `launcher.draft_batch` with a Write key, human-selected
-   source IDs, one supported mode, and already-synced Drive links.
-3. Treat rejected items and `not_evaluated` advisory gates as draft output, not
-   execution authorization.
-4. Call `launcher.batch_status` to read stored status without evaluating the
-   gate or contacting a provider.
-5. Call `launcher.preview_batch` to re-evaluate the authoritative preflight gate
-   without provider work. A successful preview is not execution authorization.
-6. Do not invent a Launcher execution call; use only tools returned by discovery.
+Do not call `actions.tests.list`, `actions.tests.show`, `actions.tests.create`,
+`launcher.draft_batch`, `launcher.batch_status` or `launcher.preview_batch`.
+Actions Tests, Legacy Launcher Drive sync and CSV/XLSX draft import are removed.
+Refresh discovery and use the supported creative and Actions workflows with
+current account scope, permissions, policy and protected approvals.
 
-Read
-[Connect Google Drive](https://plainrouter.com/docs/launcher/connect-drive),
-[Import a Launcher draft batch](https://plainrouter.com/docs/launcher/import-draft-batch),
-and the [MCP tool reference](https://plainrouter.com/docs/mcp/tools)
-for current limits and refusal codes.
+Read the [retirement guide](https://plainrouter.com/docs/launcher/import-draft-batch)
+and [current tools](https://plainrouter.com/docs/mcp/tools#which-test-and-legacy-tools-are-retired).

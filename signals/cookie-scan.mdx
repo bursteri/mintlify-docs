@@ -29,11 +29,25 @@ Open **Signals → Cookie scan** to inspect what your website sets or requests b
     Categories include necessary, functional, analytics, marketing and uncategorized. Review unknown classifications against the service's own documentation. No findings from a complete, untruncated scan means none were observed in that scan; it is not a guarantee about unvisited pages.
   </Step>
   <Step title="Change the responsible script and rescan">
-    Follow the fix guidance attached to a finding where available. Check the script's site-wide template, plugin or tag-manager trigger. Keep scripts that require consent from running before the relevant choice.
+    Follow the fix guidance attached to a finding where available. Unknown vendors receive category-based guidance: first identify the purpose of an unclassified tag, then use a matching consent gate or remove it. Necessary Plainrouter consent and privacy storage remains in inventory without being presented as a pre-consent violation. Check the script's site-wide template, plugin or tag-manager trigger. Keep scripts that require consent from running before the relevant choice.
 
     Enabling the Plainrouter banner does not automatically intercept every third-party script on your site. Test rejection, partial acceptance and withdrawal with the [consent checks](/signals/track-events#verify-grant-partial-consent-and-withdrawal), then rescan.
   </Step>
 </Steps>
+
+## When do automatic scans run?
+
+Monthly scan discovery considers workspaces with eligible observed arrivals in the last 30 days and an included consent surface that is not explicitly Off. A dormant workspace or one with the Plainrouter banner Off is skipped by that automatic discovery. Manual **Rescan** remains a separate operation with its permission and daily limit. A scheduled or queued scan does not refresh the declaration until it completes successfully.
+
+## What do visitors see in Customize?
+
+The current English Plainrouter banner can show a host-scoped cookie and storage list when a visitor opens **Customize**. Entries are grouped by category and provider, with names, available retention details and a storage label for local/session storage. Functional and Unclassified are informational; Analytics and Marketing retain their separate switches.
+
+The list loads only on opening Customize, through the installed collection path. It is absent from the initial banner, notice-only surfaces, banner-Off installations and other banner languages. Existing banner translations remain available without this optional list.
+
+The inventory combines the host's completed scan with conditional documented Plainrouter entries. Stale data can remain visible; a host without a completed scan shows returned documented entries without category counts. Unknown coverage does not mean no site cookies. If the request or lazy-loaded module fails, is blocked or returns invalid data, the optional list stays hidden while Reject, Accept and Save remain usable.
+
+Successful inventory can be reused briefly, so a fresh scan may not appear immediately. The copy release records `banner_version: "4"` on new consent receipts; that version does not identify the inventory viewed or prove it was opened, and does not force returning visitors to consent again.
 
 ## How do I publish a cookie declaration?
 
@@ -58,7 +72,15 @@ For a custom integration, the public `GET /api/v1/cookie-declarations/{publishab
 
 The response contains only that host's latest completed scan and documented Plainrouter inventory. A host without a completed scan stays unknown. The host-scoped request uses a current or pending Publishable key for a configured active or pending workspace; it does not grant access to another workspace's hosts. Invalid hostnames return `422`, unknown keys or unauthorized hosts return `404`, and a declaration larger than 192 KiB returns `503` without a partial inventory. Host-scoped responses use `no-store`. The endpoint allows 300 requests per minute per Publishable key; honor `Retry-After` on `429`.
 
-Omit `hostname` for the workspace-wide inventory used by the current embed above, which retains its 60-second public cache. Adding the API filter does not automatically change the embed or provide a collection-host cache endpoint.
+Host-filtered items also include nullable `provider_name` and `duration`, plus `type`: `cookie`, `local_storage` or `session_storage`. Use `provider_domain` when the provider name is unknown. Duration describes retention where known; `expiry` remains the observed date or legacy description. An observed session cookie stays Session; a persistent cookie does not inherit a session-only catalog duration.
+
+Omit `hostname` for the workspace-wide inventory used by the embed above, which retains its 60-second public cache and existing item shape.
+
+### How does the collection-host declaration route work?
+
+The banner uses the read-only `POST /v1/cookie-declaration` route on its installed collection host, or the equivalent route under the generated same-origin prefix. Its `text/plain` JSON body contains the Publishable key. It does not accept a caller-selected workspace or hostname: the collector derives the website host from the authorized Origin, or authenticated forwarding facts for Path B. Host and key authorization still run on cache hits. Keep the generated forwarding configuration; never put its secret in browser code.
+
+This route returns the host-scoped v2 inventory without cookie or storage values. Responses to the browser use `no-store`, while internal caches can retain current or stale inventory for 300 seconds, unknown inventory for 60 seconds and a failure for 15 seconds. The banner can reuse successful results in memory for the same bounded periods. Updates are not an immediate global purge. An unavailable or invalid upstream inventory returns `503` with `cookie_declaration_unavailable`; consent controls keep working without the optional list.
 
 ### How do I verify the embed?
 

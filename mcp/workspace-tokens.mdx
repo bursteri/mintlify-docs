@@ -89,14 +89,14 @@ The Read tier can list operations that also require update permission at call ti
 
 | Tier | Workspace abilities | MCP access |
 | --- | --- | --- |
-| **Read** | `workspace:read` | Account, Signals, inventory, creative, Actions status/policy/receipt reads; feedback submission; the consent-safe ingestion diagnostic; legacy Launcher batch status where enabled. |
-| **Write** | `workspace:read`, `workspace:write` | Read access plus governed action previews, action proposals and creative proposals; legacy Launcher drafting and preview where enabled. |
+| **Read** | `workspace:read` | Account, Signals, inventory, creative, Actions status/policy/receipt reads; feedback submission; the consent-safe ingestion diagnostic. |
+| **Write** | `workspace:read`, `workspace:write` | Read access plus governed action previews, action proposals and creative proposals. |
 
 The five [Actions read tools](/mcp/tools#read-actions-and-policy) and corresponding HTTP endpoints accept an active `read-actions` grant, included in newly issued Read and Write keys. Existing grants containing `propose-actions` remain compatible for reads. Older Read credentials without either operation need replacement or fresh authorization; scopes are not silently expanded.
 
 New keys expose Read and Write, not Admin. Older Admin-tier credentials may still appear in compatibility responses; their tier does not bypass policy, the selected approval mode, provider verification, or account restrictions. A workspace key is not a management key or browser session.
 
-Plainrouter rechecks the issuer's current workspace role and the linked grant on requests. An expired or revoked grant cannot authorize operations even when the key's own expiry has not passed. If the issuer loses the required role, requests are refused even when the key has not expired. Disconnecting a bound connection revokes its associated agent credentials; reconnecting does not restore a revoked credential. Issue replacement access after reconnection when needed. Feature enablement remains separate from key permissions: a key does not enable [legacy Launcher](/launcher/connect-drive).
+Plainrouter rechecks the issuer's current workspace role and the linked grant on requests. An expired or revoked grant cannot authorize operations even when the key's own expiry has not passed. If the issuer loses the required role, requests are refused even when the key has not expired. Disconnecting a bound connection revokes its associated agent credentials; reconnecting does not restore a revoked credential. Issue replacement access after reconnection when needed. Feature availability remains separate from key permissions. A key cannot restore [retired legacy Launcher operations](/launcher/connect-drive).
 
 ## Workspace grants
 

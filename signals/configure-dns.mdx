@@ -70,7 +70,7 @@ You can identify the active DNS provider by checking where your domain's nameser
   <Step title="Save and validate">
     Save the CNAME and return to Plainrouter.
 
-    DNS propagation and HTTPS validation can take several minutes. Keep the CNAME in place and return to **Install** to check progress. DNS visibility alone does not prove that the collection hostname is active.
+    DNS propagation and HTTPS validation can take several minutes. Keep the CNAME in place, return to **Install**, and click **Check status** to retrieve the current result. DNS visibility alone does not prove that the collection hostname is active.
   </Step>
 </Steps>
 
@@ -93,7 +93,7 @@ Some providers automatically append your root domain to the **Name** field. If e
 
 ## Continue setup
 
-Plainrouter validates ownership and HTTPS automatically after the CNAME points to Plainrouter. Keep the setup screen open, or return later through **Signals**.
+Cloudflare validates ownership and HTTPS after the CNAME points to Plainrouter. Plainrouter no longer polls the collection hostname in the background. On **Install**, click **Check status** after saving or correcting DNS; keeping the page open alone does not request a provider status check.
 
 When the collection hostname is active, **2. Add the browser snippet** provides the generated code. Keep the CNAME in place after setup completes.
 
@@ -122,7 +122,7 @@ If Plainrouter reports a CAA conflict, review the CAA records on your domain and
 
 ### Setup is still pending
 
-DNS updates can take longer than the provider's dashboard suggests. Leave the CNAME in place and retry after several minutes. Changing the value repeatedly restarts the validation process.
+DNS updates can take longer than the provider's dashboard suggests. Leave the CNAME in place and click **Check status** again after several minutes. Changing the value repeatedly restarts the validation process.
 
 ### Cloudflare removed the collection hostname
 

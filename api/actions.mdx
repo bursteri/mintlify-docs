@@ -10,6 +10,10 @@ The Actions API covers a focused set of governed Meta changes, not the full Meta
 
 For current Read access and protected approvals, see [Workspace keys](/mcp/workspace-tokens#access-tiers) and [Action policy](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
 
+## Are Actions Tests still available?
+
+No. Actions Tests and the former `/tests` and `/tests/{ad_test}` routes beneath the workspace API base are removed, along with `actions.tests.*` MCP tools. Published SDKs can retain those methods or generated type names; use the current contract and [supported Actions rules](/actions/account-rules), previews, proposals and receipts. A removed Test route is not restored by a new key or grant.
+
 ## Before you start
 
 - Use a **Read or Write Workspace key** for record/policy reads with `read-actions`; older grants with `propose-actions` remain compatible for reads. Previews and proposals require **Write** and `propose-actions`. Older Read keys without either operation need replacement or fresh authorization. Current workspace role and account scope still apply.

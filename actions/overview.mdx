@@ -37,6 +37,10 @@ Actions is Plainrouter's governed workflow for advertising changes. An authorize
   </Step>
 </Steps>
 
+## What happened to Actions Tests?
+
+Actions Tests and its dashboard, API routes and `actions.tests.*` MCP tools are retired. Older SDK methods cannot restore them. [Actions rules](/actions/account-rules), governed proposals and receipt inspection remain separate workflows.
+
 ## Preview before creating a proposal
 
 Use [`dry_run_actions`](/mcp/tools#dry_run_actions) or the [HTTP dry-run endpoint](/api/actions#preview-a-proposal-without-submitting-it) to inspect current policy decisions and diffs. Supply the complete proposal and a properly scoped Write Workspace key. The preview may read provider state but creates no proposal and makes no Meta change. Unavailable evaluations and policy reasons need review; a preview is not approval or execution.

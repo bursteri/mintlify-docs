@@ -6,6 +6,10 @@ description: "Choose an official Plainrouter SDK, check runtime requirements, au
 
 Use an official Plainrouter SDK to send consented conversions from your server and inspect their delivery. The SDKs call the Plainrouter Conversion API; they do not call Meta's Graph API directly.
 
+## Do generated methods establish availability?
+
+No. Current published packages can still contain models or methods for retired Actions Tests, Legacy Launcher import and the sandbox. Those operations are removed from the current service; an SDK type or method cannot restore them. Check the [current tool availability](/mcp/tools#which-test-and-legacy-tools-are-retired), [Launcher migration](/launcher/import-draft-batch) and [sandbox migration](/api/sandbox) before reusing an older integration.
+
 ## Choose your language
 
 Each language guide covers installation, authentication, requests, and verification.

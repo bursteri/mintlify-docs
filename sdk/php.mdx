@@ -22,7 +22,7 @@ The [release source](https://github.com/plainrouter/sdk-php/tree/v0.4.1) is auth
 
 Version `0.4.1` adds curated `agentContext` and `fileImports` handling, corrects the Launcher import route, and decodes asynchronous documented errors through their generated models while retaining status and raw body. Inventory `404` can contain `ApiRouteNotFound` or an account error; inspect the branch instead of assuming a message-only response.
 
-The `0.4.x` series exposes more operation groups through the curated client, including `actionReads`, `actionRules`, `adTests`, `cookieDeclarations`, `creatives` and `inventory`. Use an appropriately scoped Workspace key for Actions operations; the Server secret in the conversion example does not grant Actions access.
+The `0.4.x` series exposes more operation groups through the curated client, including `actionReads`, `actionRules`, `adTests`, `cookieDeclarations`, `creatives` and `inventory`. `adTests` and legacy import methods can remain in the package although the service routes are retired. Use an appropriately scoped Workspace key for supported Actions operations; the Server secret in the conversion example does not grant Actions access.
 
 Use named arguments when calling generated methods whose pagination or content-type parameters changed. For example, `launchPlansIndex(1, 50)` can now mean page 50 rather than a page size of 50; use `launchPlansIndex(workspace: 1, per_page: 50)`. Replace the removed `Plainrouter\OpenAPI\Model\DeploymentPlan` with `DeploymentPlanRead`.
 

@@ -1,7 +1,7 @@
 ---
 title: "Choose workspace conversion events"
 sidebarTitle: "Conversions"
-description: "Select the events counted as workspace conversions, interpret purchases and subscription payments, and understand frozen Test and proposal definitions."
+description: "Select the events counted as workspace conversions, interpret purchases and subscription payments, and understand frozen proposal evidence and retired Tests."
 ---
 
 Use **Workspace settings → Conversion events** to choose what the **Conversions** metric counts. The default is **Purchase**. You can select purchases, subscriptions, trial starts and leads; the count is not a count of unique customers or proof of advertising delivery.
@@ -36,7 +36,7 @@ Meta reports conversions under its own attribution window and rules. Keep return
 
 ## Do changes rewrite existing Tests or proposals?
 
-No. A new judging Test can use `conversion_mode: "workspace_default"` to freeze the current selection. With `conversion_mode: "explicit"`, supply the supported `event_name` instead. Later workspace edits do not change that Test's captured definition. A judging Test records a verdict; it does not itself create an advertising proposal or write to Meta.
+Actions Tests and its creation API are retired. Do not create a new Test with `conversion_mode`; an older SDK model cannot restore the feature. [Check retired operations](/mcp/tools#which-test-and-legacy-tools-are-retired).
 
 Supported proposal evidence also freezes its `conversion_definition`, including the version and event choices, beside the counted metrics. Inspect that captured definition when reviewing older proposals rather than applying today's settings to their evidence. See [frozen counted evidence](/actions/review-proposals#what-is-the-frozen-counted-evidence).
 
@@ -47,5 +47,5 @@ Supported proposal evidence also freezes its `conversion_definition`, including 
 | Save is unavailable | Confirm current workspace update permission and select at least one event. |
 | Count changes after editing choices | Recheck `effective_choices` and the retained reporting period; the setting applies to retained history. |
 | A renewal adds revenue but not a Purchase conversion | Check whether **Subscribed** is selected and whether the payment belongs to a subscription. |
-| An older Test differs from today's dashboard | Read the Test's frozen conversion events and window. Do not silently replace its definition. |
+| An older proposal differs from today's dashboard | Read its frozen conversion definition and evidence window. Do not silently replace them with current settings. |
 | Workspace count exists but a channel has no credit | Inspect retained [conversion journeys](/signals/conversion-journeys); a counted event does not establish an observed advertising touch. |

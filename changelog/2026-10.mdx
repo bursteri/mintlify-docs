@@ -1,10 +1,28 @@
 ---
 title: "October 2026"
-description: "Review Purchase availability, refund corrections, host-scoped cookie declarations, retired generation workflows and October product releases."
+description: "Review cookie details in consent preferences, retired test and Launcher workflows, hostname checks and October product releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
+
+<Update label="October 31, 2026">
+  ## Inspect cookie details in Customize
+
+  **Added** · The English consent preferences can show host-scoped cookie and storage entries grouped by category and provider. The optional list loads on opening Customize; failed or unknown inventory never turns into a clean scan or disables consent controls. [Read the list and its limits](/signals/cookie-scan#what-do-visitors-see-in-customize).
+
+  ## Get clearer cookie-scan guidance
+
+  **Fixed** · Necessary Plainrouter privacy keys stay visible in inventory without being flagged as pre-consent violations. Unknown vendors receive category-based guidance to help you find and gate the responsible script. [Review scan findings](/signals/cookie-scan#how-do-i-run-and-read-a-scan).
+
+  ## Migrate retired test and Launcher integrations
+
+  **Changed** · Actions Tests, Legacy Launcher Drive connection and sync, CSV/XLSX draft import and their MCP tools are removed. Old SDK methods and grants cannot restore them. Supported creative intake, Actions rules, governed proposals and receipts retain their own checks. [Check removed tools](/mcp/tools#which-test-and-legacy-tools-are-retired).
+
+  ## Recheck a collection hostname after DNS changes
+
+  **Changed** · Use **Check status** on Install to refresh collection-hostname validation. Plainrouter no longer polls these hostnames in the background. [Continue DNS setup](/signals/configure-dns#continue-setup).
+</Update>
 
 <Update label="October 30, 2026">
   ## Keep unavailable Purchase counts distinct from zero
