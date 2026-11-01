@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-10-31"
+  documentation_revision: "2026-11-01"
 ---
 
 # Use Plainrouter safely
@@ -23,9 +23,15 @@ eligible active accounts exist; use the internal Plainrouter ID, not Meta's exte
 
 The unauthenticated MCP and API sandbox is retired. API and MCP protocol requests return HTTP `410` with `sandbox_retired`; do not call `validate_sandbox_event` or generate sandbox keys. An HTML browser redirect from `/mcp/sandbox` to the product overview is not a tool connection. Public protocol discovery and catalog listing do not prove workspace access.
 
-Create a Plainrouter account and a Read Workspace key, or use supported OAuth sign-in. Store credentials through protected client configuration, never prompts. Start with `list_workspaces` and a workspace installation read; confirm the returned workspace before account-specific work. A Write-authorized `dry_run_actions` call can preview supported changes against real state without creating a proposal or writing to Meta; it is not an anonymous simulation.
+Create a Plainrouter account and a Read Workspace key, or use supported OAuth sign-in. Store credentials through protected client configuration, never prompts. The issuing person must have a verified email; after an email change, pause protected account/agent work until the new address is verified. Start with `list_workspaces` and a workspace installation read; confirm the returned workspace before account-specific work. A Write-authorized `dry_run_actions` call can preview supported changes against real state without creating a proposal or writing to Meta; it is not an anonymous simulation.
 
 Read [Connect an AI agent](https://plainrouter.com/docs/mcp/setup), [sandbox migration](https://plainrouter.com/docs/api/sandbox), and the [tool reference](https://plainrouter.com/docs/mcp/tools).
+
+Custom OAuth authorization-code clients require S256 PKCE. Serialize refreshes,
+store replacement refresh tokens atomically and do not replay a consumed token;
+a refused refresh can require fresh sign-in. Read
+[account security](https://plainrouter.com/docs/reference/account-security) and
+[OAuth troubleshooting](https://plainrouter.com/docs/mcp/setup#oauth-does-not-complete-or-new-tools-are-refused).
 
 ## Select the correct credential
 
@@ -81,6 +87,9 @@ Revoking a Management key does not revoke workspace keys it issued.
 - Actions Tests and legacy Launcher Drive, import and `launcher.*` tools are
   retired. An older SDK method or stored grant cannot restore them.
 - Reuse the same idempotency key when retrying the same intent after a timeout.
+- An approved batch can still be blocked before its first Meta write if the
+  approving person loses permission. Inspect `approver_permission_revoked` and
+  the receipt; do not replay an old approval as current authority.
 
 ## Inspect installation and arrivals without selecting an account
 

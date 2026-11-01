@@ -1,12 +1,36 @@
 ---
 title: "October 2026"
-description: "Review cookie details in consent preferences, retired test and Launcher workflows, hostname checks and October product releases."
+description: "Review account security, OAuth and approval checks, Path B forwarding, consent preferences and October product releases."
 rss: true
 ---
 
 Customer-facing changes available in October. Read linked guides for prerequisites and verification.
 
 <Update label="October 31, 2026">
+  ## Add two-factor sign-in
+
+  **Added** · Enable optional authenticator-based two-factor sign-in from Profile, including for Google and GitHub web sign-in. Confirm setup and save recovery codes privately; accounts without a password set one first. [Set up account security](/reference/account-security#how-do-i-enable-two-factor-sign-in).
+
+  ## Verify email before continuing protected access
+
+  **Changed** · Protected account, Workspace key, Management key and agent access require the issuing person's verified email. Changing the address pauses that access until the new address is verified. Verification resends are limited to six per hour per account. [Restore access](/reference/account-security#why-is-access-paused-until-i-verify-my-email).
+
+  ## Update custom MCP OAuth clients
+
+  **Changed** · Authorization-code sign-in requires S256 PKCE. Consumed refresh tokens cannot be replayed, and later reuse can revoke their token family. Store replacement tokens safely and sign in again after a refused refresh. [Check OAuth troubleshooting](/mcp/setup#oauth-does-not-complete-or-new-tools-are-refused).
+
+  ## Keep approval permission current until execution
+
+  **Improved** · An approved batch is blocked before its first Meta write if the approving person has lost permission. Inbox and receipts explain `approver_permission_revoked` and how to propose the intended change again. [Review the refusal](/actions/review-proposals#why-was-an-approved-batch-blocked).
+
+  ## Keep forwarding secrets in server-side headers
+
+  **Changed** · Current Path B blocks for supported header-capable stacks send the forwarding secret in an upstream request header. Replace the complete generated block; Next.js URL-only rewrites retain the supported legacy path form. [Migrate forwarding configuration](/signals/configure-serving#how-do-i-migrate-to-header-based-forwarding).
+
+  ## Wait before repeating CSV downloads
+
+  **Changed** · Consent-receipt and arrival-comparison exports share per-person and per-workspace request limits, plus one active export per workspace. A busy export returns a retryable `429`. [Read export limits](/signals/consent-choices#how-do-i-inspect-or-export-a-receipt).
+
   ## Inspect cookie details in Customize
 
   **Added** · The English consent preferences can show host-scoped cookie and storage entries grouped by category and provider. The optional list loads on opening Customize; failed or unknown inventory never turns into a clean scan or disables consent controls. [Read the list and its limits](/signals/cookie-scan#what-do-visitors-see-in-customize).

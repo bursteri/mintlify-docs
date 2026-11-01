@@ -1,0 +1,53 @@
+---
+title: "Verify your email and secure account sign-in"
+sidebarTitle: "Account security"
+description: "Restore account access by verifying your email, enable authenticator-based two-factor sign-in, and keep recovery codes private."
+---
+
+Verify the email address on your Plainrouter account to use protected account access. You can also enable optional two-factor sign-in from **Settings → Profile**. Two-factor sign-in adds an authenticator code to password, Google and GitHub web sign-ins; it is separate from workspace roles and API credentials.
+
+## Why is access paused until I verify my email?
+
+An unverified email pauses protected web access, new mobile sign-in, MCP/agent access issued by that person, Management keys and Workspace keys. Changing your account email clears its verification, so verify the new address before continuing those workflows. A valid key string does not bypass the issuing person's verification or current role.
+
+On **Verify your email**:
+
+1. Open the verification message sent to the displayed address and follow its link while signed in to the intended account.
+2. If the address is wrong, choose **Change email**, enter the right address and choose **Save email**.
+3. For an expired or mismatched link, choose **Resend verification email** and use the new message for your current address. Resends are limited to six per hour per account; wait if the screen reports too many emails.
+4. Return to the intended page or retry the authorized client operation. Verification restores eligibility; it cannot restore an expired or revoked key or grant.
+
+Email verification does not grant access to another workspace or Meta ad account. A Signals **Server secret** remains a separate Conversion API credential; do not replace it with a Workspace key. [Choose the right credential](/api/authentication).
+
+## How do I enable two-factor sign-in?
+
+Before starting, use an authenticator app and a private place to save recovery codes. Never send a setup key, QR code, authentication code or recovery code to an AI assistant, support conversation or public repository.
+
+<Steps>
+  <Step title="Open your profile">
+    Open **Settings → Profile** and find **Two-factor sign-in**. If your account has no password, set one in the profile first. Confirm your password to unlock two-factor management.
+  </Step>
+  <Step title="Enable and confirm">
+    Choose **Enable two-factor sign-in**. Scan the QR code or enter the setup key in your authenticator app, then enter the app's **Authentication code** and confirm setup.
+
+    Setup is not complete while the screen says **Finish setup by confirming an authentication code**. Confirm that it says **Two-factor sign-in is enabled**.
+  </Step>
+  <Step title="Keep recovery access">
+    Save the recovery codes privately. **Show recovery codes**, **Regenerate recovery codes** and **Hide recovery codes** let you manage the displayed set after password confirmation.
+  </Step>
+  <Step title="Check the next web sign-in">
+    At the two-factor challenge, enter your authenticator code. If you need a saved recovery code instead, choose **Use a recovery code**. Google and GitHub web sign-in also require this challenge once two-factor sign-in is enabled.
+  </Step>
+</Steps>
+
+When two-factor sign-in is enabled, use web sign-in. The current mobile sign-in endpoint cannot complete the challenge and refuses sign-in for that account.
+
+## How do I change or disable two-factor sign-in?
+
+Return to **Settings → Profile → Two-factor sign-in** and confirm your password. Choose **Cancel setup** for unfinished setup or **Disable two-factor sign-in** for an enabled setup. If the page asks you to confirm your password again, unlock management before retrying. Keep recovery codes private when reviewing or regenerating them.
+
+A browser sign-in and an [MCP Workspace key or OAuth connection](/mcp/setup) are different credentials. Do not put an authenticator code into an API bearer header. Workspace permissions, protected Actions approvals and provider verification still apply after sign-in.
+
+## Where can I read the security policy or report a concern?
+
+Read the [public security policy](https://plainrouter.com/security) and its [security contact record](https://plainrouter.com/.well-known/security.txt). Follow that policy for reporting a concern; never include account credentials or recovery material. The workspace's [Actions audit history](/actions/audit-log) records advertising decisions and receipts; it is not a general account-security event export.

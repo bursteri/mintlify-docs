@@ -78,7 +78,7 @@ Install the entire generated block. Transparent forwarding must preserve:
 Arrival collection uses the snippet's `POST /v1/arrival` through the generated prefix. Loading the website document alone is not the arrival transport. The snippet omits cookies from its arrival request, and the collector does not set visitor cookies in its arrival response. Cookie forwarding remains necessary for the separate consented event and identity routes.
 
 <Warning>
-  Path B's generated destination contains a low-privilege forwarding secret. Only members with workspace management permission can view or copy it. Do not publish it in documentation, logs, or a public repository.
+  Path B's generated configuration contains a low-privilege forwarding secret. Only members with workspace management permission can view or copy it. The preferred blocks inject `X-Plainrouter-Forwarding-Secret` on the server; the browser must never send this header or hold the secret. Do not publish it in documentation, logs, or a public repository.
 </Warning>
 
 ## Exact site domains
@@ -86,6 +86,18 @@ Arrival collection uses the snippet's `POST /v1/arrival` through the generated p
 Configure the HTTPS origin visitors actually use. `https://example.com` and `https://www.example.com` are different origins. The forwarding probe requires an exact domain; a wildcard-only configuration does not provide a probe target. Add the apex domain explicitly when you need apex coverage.
 
 Managed-hostname browser collection also requires an exact origin for credentialed CORS. Wildcards do not grant that coverage. Correctly configured Path B stays on the website origin and does not need a CORS preflight. If an `OPTIONS` request or CORS error appears, inspect whether an old script URL, explicit `endpoint` override, or redirect moved collection to another origin. Do not add `Access-Control-Allow-Origin: *` to fix credentialed requests; see [MDN's credentialed CORS guidance](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS#requests_with_credentials).
+
+## How do I migrate to header-based forwarding?
+
+Reopen **Signals → Install → Advanced: same-origin proxy**, copy the complete current block and replace the deployed block for that hosting stack. The current Vercel, Netlify, Cloudflare, Nginx and Caddy blocks keep the secret in the server-side `X-Plainrouter-Forwarding-Secret` header and use an upstream `/in/{prefix}/{path}` route. The visitor-facing script and collection URLs still contain only your public prefix.
+
+Next.js's generated URL-only rewrite retains the legacy `/in/{prefix}/{secret}/{path}` upstream form because that rewrite cannot set an upstream request header. Legacy path authentication remains supported. Do not shorten its destination by hand or invent a browser header as a substitute. Where a legacy destination override is still configured, use the block Plainrouter actually generates.
+
+For Netlify, use the complete `netlify.toml` block in place of the old Path B `_redirects` entry. An existing `_redirects` catch-all runs first; move that catch-all into `netlify.toml` below the Path B rule so it does not intercept collection.
+
+Install the generated block as supplied. Do not add or change `Host` or `X-Forwarded-Host` beyond its generated settings, rewrite the body or alter the response. Preserve visitor path, `Cookie`, `Set-Cookie`, `Sec-Fetch-*` and `Accept`. Deploy the rule before running **Run verification** and checking a real arrival. Copying a new block does not rotate the secret by itself.
+
+The collector gives a supplied secret header precedence. A missing or invalid header on a header-based route can return `404`; an invalid header does not fall back to a valid secret in a legacy path. Check the server-side configuration without printing its secret.
 
 ## Rotate a Path B secret
 
@@ -160,6 +172,12 @@ If the browser receives the cookie but later consented requests do not retain it
 Check the browser console for the blocked URL and directive. The same-origin script needs permission under your site's `script-src`; collector requests need permission under `connect-src`. Allowing `'self'` in the applicable directive covers the same-origin route, subject to your complete policy. Keep your existing nonce or hash treatment for the inline initialization block.
 
 Do not replace the entire policy with an example allowlist or disable CSP. Follow the [pixel CSP instructions](/signals/install-pixel#content-security-policy) and [MDN's `connect-src` reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src). Meta's external script remains a separate permission after you connect a dataset.
+
+### A collector request shows a rate limit or CORS error
+
+The collector has an ingress rate limit before workspace lookup, shared by requests from the same connecting IP. A refusal returns `429` with `Retry-After: 60` before workspace-authorized CORS headers are available, so a direct browser request can appear as a CORS failure. Inspect the Network status and wait; do not widen allowed origins or remove consent checks to bypass it. Same-origin proxies can share an egress IP. The edge limit is approximate and local, not a plan allowance or guaranteed capacity.
+
+`POST /v1/config` also has its own per-key limit. Configuration, arrival and event receipts remain separate; a failed configuration request does not establish a successful event or installation.
 
 ### A deployment or secret rotation still uses old configuration
 

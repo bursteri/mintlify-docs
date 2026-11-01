@@ -42,6 +42,7 @@
             "pages": [
               "index",
               "quickstart",
+              "reference/account-security",
               "billing/overview"
             ]
           },

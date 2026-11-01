@@ -38,7 +38,7 @@ Use the returned geography labels, including **US (state unknown)**, **CA (provi
 2. Find **Consent choices**. Compare the overall rates with the daily trend and a location or language breakdown.
 3. Inspect the recent receipts or use the panel's CSV download for retained records in the reporting window. Export requires workspace access, independently of MCP credentials.
 
-The CSV includes receipt ID, received and client timestamps, action, Analytics and Marketing choices, banner version, language, page hostname, country, nullable region, geography code/label and nullable policy class. It does not include visitor IDs, IP addresses, full page URLs or cookie values. Keep the exported records in your own controlled storage if you need them beyond the reporting window.
+The CSV includes receipt ID, received and client timestamps, action, Analytics and Marketing choices, banner version, language, page hostname, country, nullable region, geography code/label and nullable policy class. It does not include visitor IDs, IP addresses, full page URLs or cookie values. Keep the exported records in your own controlled storage if you need them beyond the reporting window. Consent-receipt and arrival-comparison CSV downloads share limits of six requests per minute per person and six per workspace, with one active export per workspace. A concurrent export returns `429` with `Retry-After: 5`; honor the returned retry delay for rate limits too. Wait for the running download to finish before retrying. These are browser-session exports, not MCP export operations.
 
 ## Can an AI assistant read consent choices?
 

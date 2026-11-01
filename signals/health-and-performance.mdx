@@ -131,7 +131,7 @@ A completed read with no reported row is different from a missing read. Missing 
 
 Channel details read consented, attributed conversion-event data separately from arrival totals. They include eligible global-policy rows and full-consent strict-EU rows. Portfolio-scoped, legitimate-interest, severed-measurement, and source-less rows do not appear in the channel view. Because arrival records carry no channel identity, channel rows do not allocate or sum to the arrival total.
 
-Choose **Export** to download the stored comparison as CSV with its reporting period and complete arrival total. The export preserves the distinction between unavailable data and zero.
+Choose **Export** to download the stored comparison as CSV with its reporting period and complete arrival total. The export preserves the distinction between unavailable data and zero. Arrival-comparison and consent-receipt CSV downloads share limits of six requests per minute per person and six per workspace, with one active export per workspace. A concurrent export returns `429` with `Retry-After: 5`; wait for completion and honor the response's retry delay before trying again.
 
 ### Verified revenue
 

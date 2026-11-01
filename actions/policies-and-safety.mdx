@@ -37,6 +37,12 @@ Executable Meta work passes policy twice:
 
 Changing policy does not promote or rewrite an existing proposal. A missing driver, unavailable critical provider field, revoked authorization, or other non-`allow` result blocks the queued batch before provider execution.
 
+## What if the approver loses permission before execution?
+
+Before the first Meta write for an approved batch, Plainrouter rechecks the approving person's current permission. If the person was removed, downgraded or is otherwise no longer authorized to approve, the batch is blocked with `approver_permission_revoked` and nothing is sent to Meta. Ask an authorized person to propose and approve the intended change again. For a Launch plan, copy it to a new draft, validate and submit it.
+
+This check does not undo provider work that already started. Inspect the existing [receipt and batch status](/actions/review-proposals#why-was-an-approved-batch-blocked) before proposing remaining work; an old approval is not proof of current authority.
+
 ## Outcome safety
 
 ### Outcome check after

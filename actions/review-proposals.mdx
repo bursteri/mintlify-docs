@@ -48,6 +48,12 @@ A Meta execution kill switch can stop a batch with `execution_kill_switch`. If e
 
 A halted batch cannot be approved again or resumed by retrying its old approval. Inspect each action, receipt, and current provider state before proposing any remaining work; do not resend the entire batch with a new key.
 
+### Why was an approved batch blocked?
+
+`approver_permission_revoked` means the approving person no longer had permission when Plainrouter checked before the first Meta write. Nothing was sent to Meta by that blocked batch. Ask someone with permission to propose and approve the intended change again. For a Launch plan, copy the plan to a new draft, validate it and submit it.
+
+The check does not undo a write that already started. Inspect the receipt before retrying any work. A blocked batch is separate from a completed or compensated action, and an old approval cannot restore the person's permission.
+
 ### Proposer, target, and reasoning
 
 Read **Proposed by**, **Object** or **Objects**, and **Why**. System proposals can show **PlainRouter’s reasoning** instead. Expand **All details** for identifiers and authorization fields. Compare the complete proposal with the intended Meta ad account and platform-native target IDs. For creative duplication, `target_entity.id` identifies the source ad; the new ad ID exists only in the execution receipt after a provider write.

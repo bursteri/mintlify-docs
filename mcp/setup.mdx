@@ -286,13 +286,17 @@ Confirm `PLAINROUTER_WORKSPACE_TOKEN` is set in the environment that starts Clau
 
 ### The client receives `401 Unauthorized`
 
-Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. Also confirm its issuing person still holds a workspace role that covers the token tier.
+Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. The issuing person must also have a verified email address; an email change pauses protected account and agent access until the new address is verified. [Restore verified account access](/reference/account-security#why-is-access-paused-until-i-verify-my-email). Also confirm its issuing person still holds a workspace role that covers the token tier.
 
 If the client is sending an OAuth management credential, the rejection is expected. Create a workspace key, then configure the MCP client to use it as the bearer credential.
 
 ### OAuth does not complete or new tools are refused
 
 For Claude web or Desktop, check **Register automatically**. For Claude Code, check that the server entry has no stale `Authorization` header when you intend OAuth. Restart sign-in from `/mcp` if a localhost callback fails; review the displayed callback host rather than changing redirect URLs manually. Plainrouter permits changing the port of a registered HTTP `localhost` callback, while its other URI components must still match.
+
+Custom authorization-code clients must use PKCE with `code_challenge_method: "S256"`; plain or missing PKCE is refused. Use the [public OAuth metadata](https://plainrouter.com/.well-known/oauth-authorization-server) for the current endpoints and supported methods.
+
+Store each replacement refresh token atomically and serialize refreshes for one connection. Replaying a consumed refresh token is refused; later reuse can revoke its token family. If refresh is refused, start a fresh sign-in rather than repeatedly replaying the old token. A new connection still requires the correct workspace approval and scopes.
 
 A connector created before a new operation shipped may need a new grant. Disconnect and reconnect, review the requested access, and verify the selected workspace and account again. Successful catalog discovery alone does not prove permission to call a tool.
 

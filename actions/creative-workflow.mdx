@@ -13,6 +13,10 @@ This walkthrough uses an image already in the connected account's library. It co
   New governed creative work requires workspace availability as well as the key's permissions. `launcher_unavailable` does not mean your key can enable it. Built-in creative generation and rendering have been retired; uploaded images, vetted URL intake and Meta library reads are separate surfaces. Use only tools advertised for your connection and follow their own checks.
 </Note>
 
+## Why can a creative URL be rejected?
+
+Vetted URL intake requires a public HTTPS target. Its media response must be unencoded: `Content-Encoding` must be absent or `identity`. A compressed response is refused even when its URL or file extension looks valid. Serve the original media bytes and keep the existing URL, size, type and workspace-availability checks; a supported URL does not authorize a Meta write.
+
 ## Before you begin
 
 You need a [connected agent](/mcp/setup), a **Write** [workspace key](/mcp/workspace-tokens) for the intended workspace, and the required creative and proposal permissions. Read `get_account_state` to confirm scope. A person must select the source ad; obtain the selected asset ID from the account's creative library.

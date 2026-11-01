@@ -12,6 +12,10 @@ discovery requires no credential. The [unauthenticated sandbox is retired](/api/
 The Signals REST endpoints, TypeScript, Python, Ruby, Go, and the CLI are six interfaces to the same
 Conversion API and all use the same Server secret.
 
+## Does email verification affect my keys?
+
+Yes. Workspace and Management key authentication checks the issuing person's verified email as well as current access. An email change pauses that person's protected account and agent access until the new address is verified. Verify the current address before replacing a seemingly valid key; verification cannot restore expired or revoked credentials. [Manage verification and optional two-factor sign-in](/reference/account-security).
+
 ## Which credential should I use?
 
 | Goal | Interface | Credential | Scope |
