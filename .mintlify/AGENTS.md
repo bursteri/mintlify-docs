@@ -31,8 +31,9 @@ after the customer-visible implementation is merged and shipped.
 
 ## Preserve product boundaries
 
-- Spell the brand **Plainrouter**. Keep `PlainRouter` only where it is a code
-  identifier, such as the Ruby `PlainRouter::Client` module, or an exact UI label.
+- Always spell the brand **Plainrouter** in prose, titles and UI labels.
+  Use `PlainRouter` only inside code where a published API requires it, such as
+  the Ruby SDK modules `PlainRouter::Client` and `PlainRouter::OpenAPI`.
 - Use **workspace** for the Plainrouter tenant boundary. Do not substitute
   project, organization, or account.
 - Use **Meta ad account** for the advertising account selected under a workspace
