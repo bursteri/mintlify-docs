@@ -95,7 +95,7 @@ Use [`get_cookie_scan`](/mcp/tools#get_cookie_scan) with a Read or Write workspa
 | Symptom | Check and next step |
 | --- | --- |
 | My hostname is missing | Confirm Signals receives eligible arrivals from that hostname in this workspace. A collection hostname alone is not the website being scanned. |
-| The scan is blocked by bot protection | Allowlist the exact `PlainRouterScanner` user agent in your site's protection, then rescan. A blocked result is unknown, not clean. |
+| The scan is blocked by bot protection | Allowlist the Plainrouter scanner in your site's protection by matching user agents that contain `plainrouterscanner`, without case sensitivity, then rescan. A blocked result is unknown, not clean. |
 | Rescan is unavailable or rate-limited | Check your Signals update permission. After three manual rescans for the hostname, wait until the next UTC day. |
 | The declaration is blank or old | Check per-host successful scans and latest attempts, the Publishable key, v2 embed, CMS script handling and CSP. A queued scan does not establish completion; blocked/failed attempts leave older findings stale. |
 
