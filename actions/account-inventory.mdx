@@ -14,12 +14,12 @@ Both tools require `account_id`: the internal Plainrouter account ID, not Meta's
 
 ## Browse Campaigns
 
-1. Open **Campaigns** and select the intended account.
-2. Check the connection indicator, structure-sync time, metrics-sync time and any last-read issue.
-3. Expand a campaign to inspect its ad sets and ads. Use **Load more campaigns** and the child load-more control when available; the first visible page is not the complete inventory.
-4. Inspect object status and any undo warning before deciding what needs attention.
+1. Open **Campaigns** and select the intended account. Read any connection, access, import-progress or stale-data notice first.
+2. Choose **Campaigns**, **Ad sets** or **Ads**. Open a parent’s ad sets or ads when you need that scope, and use the table’s **Previous page** / **Next page** controls to continue through rows.
+3. Open **Date range** to choose Today, Yesterday, Last 7 days, Last 14 days, Last 30 days or This month. Enable **Compare to previous period** when needed, then inspect the actual dates and account timezone. Today is incomplete, and retained coverage can shorten a requested window.
+4. Inspect delivery, budgets and pending proposals before deciding what needs attention. Read-only access and unavailable currency or provider state can disable changes.
 
-The page shows retained recent metrics. Missing rows or displayed zero totals do not prove zero provider activity when synchronization is incomplete.
+The page reads retained metrics. A displayed value can change while a fresh read or a submitted change is pending; the temporary display is not proof of a verified Meta result. Missing rows or displayed zero totals do not prove zero provider activity when synchronization is incomplete.
 
 ## Check Plainrouter ad-tag coverage
 
@@ -31,33 +31,25 @@ Inspect the reported reasons and completeness before interpreting a coverage rat
 
 You need a signed-in browser session, workspace membership, and an eligible active Meta account and connection. Check [Meta access](/signals/connect-meta#how-do-i-interpret-the-meta-grant) and [workspace policy](/actions/policies-and-safety) first. Retained access to a disconnected account does not authorize changes.
 
-1. Select the intended account in **Campaigns** and expand the hierarchy to the exact object.
-2. Choose **Pause** on an active object or **Resume** on a paused object when the control is available. Resume opens a review dialog: check the retained budget and mirror-sync time, then choose **Confirm Resume**. Missing budget data remains unavailable rather than being shown as zero.
-3. Read the result and follow **View in Inbox**. The click submits a governed proposal. If you have human approval permission, it also attempts approval; a separate Inbox approval is not always required in Ask. Otherwise, a policy-allowed Ask proposal waits for an authorized reviewer. Full runs admitted changes automatically without a per-change approval.
-4. Follow progress and **View receipt** when available. A submission or approval message does not prove that Meta changed the object.
+1. Select the intended account and object level in **Campaigns**, then find the exact row.
+2. Use the row’s on/off switch, or its **Pause** / **Turn on** menu action. Selected rows also support bulk Pause or Turn on. A person’s submitted change follows the authorized human decision path; it does not necessarily wait for a second Inbox approval in Ask.
+3. Watch the saving/result state and inspect any refusal or unconfirmed response. A switch can move while saving; that display alone is not provider verification.
+4. Follow the associated batch and receipt in [Inbox](/actions/review-proposals) or [Actions reads](/api/actions). Required policy, provider-state and execution checks still apply.
 
-The control uses the selected inventory object as the target. It does not bypass policy, provider-state checks, execution authorization, or verification. Use an available daily-budget control or the [proposal workflow](/api/actions#submit-a-governed-proposal) for budget changes.
+When a successful status change offers **Undo**, that submits the opposite change through current checks. It is not a guarantee of restoration. Existing agent proposals can also appear on the row for an authorized person to decide; their stored mode and actual policy result remain relevant.
 
 ### How do I change a daily budget?
 
-1. Open **Edit budget** on an eligible campaign or ad set that owns a daily budget. Ads and objects using a lifetime or parent-owned budget do not expose this control. The account currency and retained daily budget must be available.
-2. Enter a different positive amount in the displayed account currency, using your locale's decimal separator. Plainrouter converts it using Meta's currency offset; do not multiply every currency by 100.
-3. Review **Current mirror budget**, **New budget**, the absolute and percentage change, and **Mirror sync**. These are retained values; execution rechecks Meta.
-4. Choose **Confirm budget change**, then follow the batch and receipt in Inbox.
+1. Click the displayed daily-budget amount on an eligible campaign or ad set. The **Daily budget** editor requires an available account currency and an editable owned daily budget. Lifetime and parent-owned budgets remain read-only here.
+2. Enter a different positive amount in the displayed currency. Plainrouter applies Meta’s currency offset; do not multiply every currency by 100.
+3. Review the amount and choose **Save** to submit the change. **Cancel**, Escape or closing the editor leaves the budget unchanged.
+4. Follow the saving state, response and receipt. An unconfirmed change is not success; a refusal restores the prior display and gives a reason.
 
-Unknown currency precision, malformed amounts and unchanged budgets cannot be submitted. Spending and revenue displays are different quantities: Meta budget minor units must not be reused for Signals decimal-string revenue. See [Actions inputs](/api/actions#submit-a-governed-proposal).
+The current editor does not use the former **Confirm budget change** dialog. Unknown currency precision, malformed amounts and unchanged budgets cannot be submitted. Meta budget units must not be reused for Signals decimal-string revenue. [Read Actions inputs and receipts](/api/actions).
 
 ### How do I verify a Pause or Resume?
 
-| Display | Meaning and next step |
-| --- | --- |
-| **Awaiting approval** or **Queued** | A proposal exists, but a verified provider change is not established. Follow it in Inbox. |
-| **Executing** or **Undoing** | Work is in progress. Do not submit another change to bypass it. |
-| **Done** | The related execution receipt records a verified result and verification time. Inspect the receipt for the exact outcome. |
-| **Inventory awaiting refresh** | The action is verified, but retained inventory has not yet caught up with the expected status. The control stays unavailable until retained inventory shows the expected status or budget, or a sync completed after verification replaces the older observation. A newer conflicting observation settles the old refresh wait; check the displayed current value before another change. |
-| **Blocked**, **Failed**, or **Undone** | Inspect the reason and receipt. These states do not mean the original requested change succeeded. |
-
-Plainrouter does not optimistically rewrite retained inventory when you click a control. Another unsettled management proposal can also keep the same target unavailable. Follow that batch to its outcome; review or reject it only when a pending decision is still allowed. See [proposal conflicts](/api/actions#why-is-a-management-target-refused) and [recovery evidence](/actions/audit-log).
+Check the stored action and receipt, rather than the switch position or toast alone. Saving means work is in progress. A pending approval, refusal, provider uncertainty or failed result requires its own next step; only exact durable provider verification establishes Landed. Review an unsettled batch before submitting another change to the same target. [Interpret execution and recovery](/actions/audit-log).
 
 ## Read objects with MCP
 
@@ -101,9 +93,9 @@ Call `get_inventory_metrics`:
 
 Use dates appropriate to your account's available history. Optional `campaign_id`, `adset_id` and `ad_id` filters use external Meta IDs. Dates use `YYYY-MM-DD`; the end cannot precede the start.
 
-The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `effective_range`, account details, freshness and pagination. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
+The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `activities`, `activity_history`, `effective_range`, account details, freshness and pagination. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
 
-Set `limit` from 1–100 (default 25) for each of `metrics`, `object_metrics` and `changes`. Inspect each collection's `total`, `next_cursor` and `truncated` under `pagination`. Repeat with the opaque top-level `next_cursor` as `cursor`, preserving the account, dates, filters and `include_changes`; stop when the top-level cursor is null. One collection can finish before another. A short or empty collection on a page does not establish that the complete window has no activity.
+Set `limit` from 1–100 (default 25) for each of `metrics`, `object_metrics`, `changes` and `activities`. Inspect each collection's `total`, `next_cursor` and `truncated` under `pagination`. Repeat with the opaque top-level `next_cursor` as `cursor`, preserving the account, dates, filters and `include_changes`; stop when the top-level cursor is null. One collection can finish before another. A short or empty collection on a page does not establish that the complete window has no activity.
 
 Date bounds are inclusive in the account timezone, with UTC as the fallback. Plainrouter clips the requested range to the workspace's customer-visible retention cutoff and today. Inspect `effective_range` rather than assuming the full request was returned. If no range remains, it is null and `metrics`, `object_metrics` and `changes` are empty. `changes` is populated only when `include_changes` is true; it records observed field changes, not a complete causal audit of every Meta edit.
 
@@ -139,6 +131,12 @@ An arrival can match its campaign, ad set and ad. Do not sum all hierarchy level
 To verify a comparison, confirm `account` and `effective_range`, choose one hierarchy level, then inspect dates, object IDs, freshness and nullable fields. Check your [snippet installation and captured URL fields](/signals/install-pixel#which-arrival-fields-are-retained), numeric Meta object IDs in the ad's URL tags, and inventory synchronization when matching counts are missing. An unavailable arrivals store is not a measured zero.
 
 These arrivals count eligible observations, not unique people, purchases or Meta-attributed conversions. `meta.clicks` is all Meta clicks and `meta.inline_link_clicks` is link clicks; neither is the outbound-click figure used by `get_arrivals_comparison`. `meta.spend` is a decimal amount in major units of `account_currency`, and action metrics use Meta’s default attribution. Meta clicks and arrivals can differ. This comparison is separate from [Signals reconciliation](/signals/health-and-performance) and does not establish causal lift or admissible quantitative proposal evidence by itself.
+
+### Read Meta account activity
+
+With `include_changes: true`, `get_inventory_metrics` and its [REST equivalent](#read-the-same-metrics-over-rest) can return `activities` alongside object diffs. Each activity can identify its event time and object, provider event type, source, application or actor, available old/new summary, and a related Plainrouter receipt. Read `receipt_missing` and null fields instead of inventing an actor or before/after state.
+
+`activity_history` reports read errors and a possible gap window. Activities have their own pagination inside the shared continuation cursor; preserve the same account, dates, filters and `include_changes` when continuing. A missing activity is not proof that nobody changed Meta. These are retained provider observations, separate from Plainrouter’s [workspace audit chain](/actions/audit-log); they do not establish a complete external edit history or independent receipt verification.
 
 ### Which creative produced an ad?
 
