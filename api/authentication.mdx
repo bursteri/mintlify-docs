@@ -14,7 +14,7 @@ Conversion API and all use the same Server secret.
 
 ## Does email verification affect my keys?
 
-Yes. Workspace and Management key authentication checks the issuing person's verified email as well as current access. An email change pauses that person's protected account and agent access until the new address is verified. Verify the current address before replacing a seemingly valid key; verification cannot restore expired or revoked credentials. [Manage verification and optional two-factor sign-in](/reference/account-security).
+Yes. Workspace and Management key authentication checks the issuing person's verified email as well as current access. A pending email change keeps the current address and access active until confirmation completes; an unverified current address still blocks protected access. Verify the current address before replacing a seemingly valid key; verification cannot restore expired or revoked credentials. [Manage verification and optional two-factor sign-in](/reference/account-security).
 
 ## Which credential should I use?
 
@@ -53,7 +53,7 @@ For action proposals, status, policy, and decision receipts, use the separate [A
 
 ## Where do I manage the Signals API secret?
 
-Sign in as the workspace owner, select the intended workspace, and open **Settings → Workspace → Server secret** after Signals is configured. This secret authenticates Signals REST, SDK, and CLI calls; [workspace keys](/mcp/workspace-tokens) have their own **Settings → Workspace keys** page.
+Sign in as the workspace owner, select the intended workspace, and open **Signals → Delivery and verification → Server secret** after Signals is configured. This secret authenticates Signals REST, SDK, and CLI calls; [workspace keys](/mcp/workspace-tokens) have their own **Settings → Workspace keys** page.
 
 ### Rotate without interrupting your integration
 
@@ -174,7 +174,7 @@ Configure an MCP-compatible client with these exact connection values:
 | Server URL | `https://plainrouter.com/mcp` |
 | Authorization | `Bearer <workspace-execution-token>` |
 
-A workspace owner or member creates a key in **Settings → Workspace keys** for one or more selected workspaces, a requested Read or Write tier capped by their role in each workspace, and a 30, 90, or 365 day expiry. The selected set is fixed at creation.
+A workspace owner or member creates a key in **Settings → Workspace keys** for one or more selected workspaces, a requested Read or Write tier capped by their role in each workspace, and a 30, 90 or 365 day expiry or **Never**. The selected set is fixed at creation.
 
 Call `list_workspaces` to inspect the authorized set and effective tiers. Include `workspace_id` on subsequent MCP calls when more than one workspace is available. For account-scoped work, call `get_account_state` first. Confirm the returned workspace and Meta ad
 account before continuing. For installation before connecting Meta, use [`get_install_instructions`](/mcp/tools#get_install_instructions) and confirm its workspace. Signals reads use the workspace's bound Meta destination; Actions and creative calls require `account_id` when eligible-account selection is ambiguous. Older
@@ -188,7 +188,7 @@ account-bound keys cannot override their binding. See [account selection](/mcp/w
 
 ## Where do I create a Management key?
 
-Open **Settings → Management keys**, enter a name, select a 30, 90, or 365 day expiry, and choose **Create key**. Copy it once into developer-side secret storage. Use **Delete** to remove an obsolete key. The table shows creation, last use, expiry, status, and **Created by**; a team owner can manage team members' keys where permitted.
+Open **Settings → Management keys**, enter a name, choose **Create key**, then select a 30, 90 or 365 day expiry or **Never** and confirm with **Create**. Copy it once into developer-side secret storage. Use **Delete** to remove an obsolete key. The table shows creation, last use, expiry, status, and **Created by**; a team owner can manage team members' keys where permitted.
 
 Management keys authenticate the four management operations below under the key owner's current membership and role. Give agents a workspace key for MCP instead. A Management key is not the OAuth management credential described below and cannot authenticate the agent-context route, Signals Conversion API, or human approval pages.
 
@@ -231,7 +231,7 @@ curl --fail-with-body https://plainrouter.com/api/v1/workspaces/42/tokens \
 | --- | --- |
 | `name` | Required string, up to 255 characters. |
 | `tier` | Requested `read` or `write`. Each workspace's effective grant is capped by the issuer's current role. |
-| `expires_in_days` | `30`, `90`, or `365`. |
+| `expires_in_days` | `30`, `90`, `365`, or the string `"never"` for no scheduled expiry. |
 | `workspace_ids` | Optional nonempty array of distinct accessible workspace IDs. Omit it to use the workspace in the URL. Each grant is capped to your current role. |
 
 The new key is scoped to the submitted workspace set and has no fixed ad-account binding. For example, add `"workspace_ids":[42,43]` to authorize those two workspaces. Both must be accessible to the issuer. Do not send an account ID when issuing it; follow [account selection](/mcp/workspace-tokens#how-does-account-selection-work) when using it.
@@ -326,6 +326,10 @@ If an automation receives `401` on a dashboard URL, check the requested interfac
 The REST contract and all five SDKs expose the signed Conversion API operations. The
 PyPI and npm CLI distributions expose nine commands and do not include an ingestion-verification
 command. Use REST, an SDK, or MCP for ingestion verification.
+
+## Can a non-expiring key stop working?
+
+Yes. **Never** means no scheduled expiry. Current role, grant, workspace/account binding and explicit revocation checks still apply. Workspace Write and legacy Admin-tier keys unused for 90 days are revoked on their next authentication; Read and Management keys are outside that inactivity rule. [Review key lifecycle and replacement](/mcp/workspace-tokens#does-never-prevent-every-kind-of-revocation).
 
 ## Which credentials must not be confused?
 

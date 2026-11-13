@@ -307,7 +307,7 @@ The supported settlement flow uses Checkout Session events. Eligible `invoice.pa
 
 ### Configure the webhook
 
-1. Open **Connections → Revenue sources → Stripe**.
+1. Open **Connections → Stripe**.
 2. Copy the workspace's **Webhook endpoint** and add it as an endpoint in the intended Stripe account.
 3. Use Stripe snapshot events and subscribe to the required list shown in Plainrouter: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `refund.created`, `refund.updated`, `refund.failed`, `customer.created` and `customer.updated`. You can also keep `checkout.session.async_payment_failed` for failure notifications. [Stripe's webhook guide](https://docs.stripe.com/webhooks) explains event formats and endpoint setup.
 4. Copy that endpoint's signing secret into **Endpoint signing secret** in Plainrouter and choose **Save secret**. This is the webhook signing secret, not your Stripe API key.
@@ -382,15 +382,21 @@ Use the returned event ID and delivery trace. Do not construct subscription life
 
 ### Is the restricted Stripe revenue key the webhook signing secret?
 
-No. **Connections → Stripe revenue** accepts a restricted read-only Stripe API key and displays its status, live/test mode, account binding and verification reason. The **Stripe** webhook card uses a different endpoint signing secret. [Stripe distinguishes restricted API keys from webhook signing secrets](https://docs.stripe.com/keys). Keep both in their intended app fields and out of MCP prompts, chat, source control and logs.
+No. **Connections → Stripe → Stripe revenue** accepts a restricted read-only Stripe API key and displays its status, live/test mode, account binding and verification reason. The **Stripe** webhook card uses a different endpoint signing secret. [Stripe distinguishes restricted API keys from webhook signing secrets](https://docs.stripe.com/keys). Keep both in their intended app fields and out of MCP prompts, chat, source control and logs.
 
 Saving a revenue key can fail if the account or mode does not match retained signed webhook evidence; a different account or mode requires the app's Signals reset flow. Review the data-removal consequences before resetting. If a key or signing-secret update reports **Stripe credentials are busy. Please try again shortly.**, retry the same intended update later; that message does not mean the new credential was saved.
 
+### Read current subscription revenue
+
+A team administrator can open **Connections → Stripe → Stripe revenue** and save a restricted Stripe API key (`rk_live_…` or `rk_test_…`). Grant **Subscriptions: Read** and **Accounts: Read**, with **all other permissions: None**. The API key is separate from the webhook signing secret. Check the key’s live/test mode, account binding and verification status.
+
+**Current subscriptions** shows its snapshot timestamp, per-currency monthly recurring revenue (MRR), active customers, trials, past-due subscriptions and unknown amounts. Known active and past-due recurring amounts contribute to MRR; trials do not. Supported recurring intervals and quantities are normalized to a monthly amount. Metered, tiered, incomplete or otherwise unsupported amounts remain unknown. Keep currencies separate and inspect the unknown count before treating the total as complete.
+
+Signed subscription webhooks keep the retained snapshot current. A snapshot is not historical revenue, acquisition attribution, a backfilled conversion or proof of Meta delivery.
+
 ### Is Stripe history import available to every workspace?
 
-No. History import remains disabled by default and limited to selected workspaces. Connections can show **History import is unavailable for this workspace.** Saving or verifying a revenue key does not enable it, import past subscriptions, prove live event delivery or complete the SaaS installation.
-
-Imported history, where explicitly enabled, stays unattributed and does not change CAC or channel credit. An in-progress or partial run does not establish complete coverage; verified coverage is published only after a completed import. Continue using signed webhooks for the supported live settlement flow above.
+The former history-import workflow has been removed. Saving a restricted key supports the current subscription snapshot; it does not import historical attributed conversions. Continue using signed webhooks for supported settlement and lifecycle events.
 
 ### How do I verify a settled purchase?
 

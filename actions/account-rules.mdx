@@ -1,10 +1,10 @@
 ---
 title: "Meta ad account performance rules"
 sidebarTitle: "Account rules"
-description: "Configure Meta account rules in the dashboard, MCP or REST API; verify evaluation, approval and counted-arrival outcomes."
+description: "Configure Meta account rules through MCP or REST API; verify evaluation, approval and counted-arrival outcomes."
 ---
 
-Account rules propose a pause or daily-budget change when a target meets your counted-arrival and cost conditions. Create a rule under **Settings → Action policy → Account rules**, through MCP, or through the REST API. New rules start **disabled**; enabling is a separate decision.
+Account rules propose a pause or daily-budget change when a target meets your counted-arrival and cost conditions. Create a rule through MCP or the REST API. The current **Settings → Agent rules** page no longer includes the former Account rules editor. New rules start **disabled**; enabling is a separate decision.
 
 In **Ask**, every proposed change waits for approval. In **Full**, admitted pauses and budget decreases can run automatically, but **rule-generated budget increases always require human approval**. Creating or editing a rule never changes Meta during that request.
 
@@ -12,7 +12,7 @@ In **Ask**, every proposed change waits for approval. In **Full**, admitted paus
 
 - Connect the intended [Meta ad account](/signals/connect-meta) and check its [retained inventory and metrics](/actions/account-inventory).
 - Install Signals and verify [counted arrivals](/signals/install-pixel). Rule comparisons use counted arrivals, not purchases, unique visitors or Meta-attributed conversions.
-- Review the workspace's [Action policy](/actions/policies-and-safety). Changing rules in the dashboard requires current team update permission; workspace viewers can review them.
+- Review the workspace's [Agent rules and execution safety](/actions/policies-and-safety). API and MCP operations retain their own scope and grant checks.
 - For MCP, use the production server and an authorized [Workspace key](/mcp/workspace-tokens). Read keys can list and inspect rules; creating, editing or enabling requires Write and an active grant for that operation. Older account-bound keys keep their restriction. Never put a key in a prompt or source control.
 
 The rule tools require workspace authorization. Their names and inputs appear in the [published MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json).
@@ -36,12 +36,7 @@ The account also needs at least 50 counted arrivals. The ratio must be 0.10–10
 
 ## Create and enable a rule in the dashboard
 
-1. Open **Settings → Action policy**, then **Account rules**. Confirm the workspace and account.
-2. Enter a **Name**, choose the **Account**, **Action** and **Level**, and set the arrival threshold and cost ratio. Budget actions also need **Budget change (%)**.
-3. Click **Create rule**. Confirm the saved rule says **Disabled**, and review its complete condition.
-4. Click **Enable rule** only when you intend scheduled evaluation to propose matching changes under the approval behavior above. Use **Disable rule** to stop future evaluation.
-
-Use **Edit rule → Save rule** to change its name or complete definition. The account cannot be changed after creation. **Revision history** preserves earlier definitions and their author type; editing does not rewrite a stored evaluation's revision. Disabling a rule does not cancel proposals already created; review those separately in [Inbox](/actions/review-proposals).
+The former dashboard Account rules editor has been removed from Agent rules. Use the supported MCP or REST operations below to create a disabled rule and explicitly enable it. Editing preserves immutable revisions; disabling a rule does not cancel proposals already created. Review those separately in [Inbox](/actions/review-proposals).
 
 ## Configure the same rule through MCP
 
@@ -104,19 +99,11 @@ curl --include --get \
 
 Expect `200` and inspect `rules`, including continuation fields, before treating the list as complete. Keep the same filters when following `rules.next_cursor` as the `cursor` query parameter. An account-bound key retains its account restriction. For these REST routes, an unbound key requires exactly one eligible active account; multiple active accounts return `422` even if `account_id` is supplied. Check the [published contract](https://plainrouter.com/openapi.json) before assuming MCP account-selection behavior applies.
 
-Creation accepts `name` and the complete `definition` shown above; omit `enabled`. Verify the `201` response has `rule.enabled: false`. Enabling requires a separate PATCH with `{"enabled": true}`. Editing cannot change the account, and neither request performs a Meta change. A `403` calls for checking the key's workspace, tier and operation grant; `422` requires correcting the input or resolving account ambiguity. Use the dashboard's [Resume rule](#how-do-i-resume-a-suspended-rule) action to clear a suspension.
+Creation accepts `name` and the complete `definition` shown above; omit `enabled`. Verify the `201` response has `rule.enabled: false`. Enabling requires a separate PATCH with `{"enabled": true}`. Editing cannot change the account, and neither request performs a Meta change. A `403` calls for checking the key's workspace, tier and operation grant; `422` requires correcting the input or resolving account ambiguity. A suspended rule has no current self-serve resume control on Agent rules; [inspect the suspension](#how-do-i-resume-a-suspended-rule) before changing its definition.
 
 ## How do I verify evaluation and execution?
 
 Evaluation is scheduled hourly. It reads retained metrics and arrivals, records a window and revision, then proposes eligible matches through normal Actions admission. Saving a rule is not an evaluation or proof of a Meta change.
-
-In **Settings → Action policy → Account rules**, open the rule's **Recent runs**:
-
-1. Check the window dates and timezone. The displayed end date is excluded from the comparison.
-2. Read account spend, counted arrivals and the run's status or waiting reason. Unavailable data does not mean zero.
-3. Inspect each target's decision and reason. Use **View proposal**, when available, to open the resulting action in Inbox.
-
-The dashboard shows the latest five runs and at most 100 decisions per run. A notice identifies a truncated decision list. **No runs yet** means there is no recorded evaluation to inspect.
 
 Call `actions.rules.show` with `rule_id`. Inspect `enabled`, `suspended_at`, `suspended_reason`, `current_revision` and `runs`. Each run records its window, timezone, status, reason, account totals and per-target decisions. The read returns recent runs and bounded decision pages; do not assume the first response contains the complete history.
 
@@ -134,14 +121,9 @@ A decision marked `proposed` includes `action_batch_id`. Follow that batch in In
 
 ## How do I resume a suspended rule?
 
-A rule is suspended when its two most recent judged actions are both `lost`. A person with current team update permission can clear the suspension in the dashboard:
+A rule is suspended when its two most recent judged actions are both `lost`. Inspect those actions’ [outcome comparisons and inverse proposals](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal), together with the rule definition and recorded runs.
 
-1. Inspect those actions' [outcome comparisons and any inverse proposals](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal). Review the rule conditions before restarting it.
-2. Open the suspended rule under **Settings → Action policy → Account rules** and click **Resume rule**.
-3. Confirm the suspension clears. If you disabled the rule during review, use **Enable rule** separately; resuming does not change its enabled setting.
-4. Follow **Recent runs** for the next window. Resuming does not repeat an already evaluated window or change Meta during the request.
-
-Only actions judged after resumption count toward a new suspension; this can include an earlier action whose outcome is checked later. Historical runs, revisions and outcomes remain recorded. Editing or toggling `enabled` through MCP cannot clear suspension; there is no MCP resume tool.
+The current Agent rules page no longer shows the former **Resume rule** control. There is no MCP resume tool, and editing the definition or toggling `enabled` does not clear suspension. Keep the recorded reason visible rather than claiming the rule resumed. Historical runs, revisions and outcomes remain evidence of what happened.
 
 ## Why did a rule not produce another change?
 
@@ -152,6 +134,6 @@ Only actions judged after resumption count toward a new suspension; this can inc
 | `conflict` / `different_actions_match` | Different actions match the same target. Resolve the overlapping rules. For the same action, the oldest matching rule is selected and others are `superseded`. |
 | `target_held`, `outcome_pending` or `target_cooling` | An outstanding management proposal or later outcome holds the target. After an outcome check, cooldown lasts until the start of the fourth following account-local day. Follow the existing batch. |
 | `skipped` with a policy or provider reason | Read the recorded reason. Enabling a rule cannot bypass admission, unavailable provider state or the execution kill switch. |
-| `suspended_reason: "two_lost_actions"` | Inspect the two lost outcomes and rule conditions, then use the authorized person's [Resume rule workflow](#how-do-i-resume-a-suspended-rule) when ready. Toggling `enabled` alone does not clear suspension. |
+| `suspended_reason: "two_lost_actions"` | Inspect the two lost outcomes and rule conditions, then [check the current suspension boundary](#how-do-i-resume-a-suspended-rule). Toggling `enabled` alone does not clear suspension. |
 
 An eligible lost rule-made daily-budget change can create a separate inverse proposal to the recorded prior budget. A rule-made pause is not judged for performance and cannot trigger that response. An inverse proposal does not create another inverse chain. Follow [what happens after a lost outcome](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal).

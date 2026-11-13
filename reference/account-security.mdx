@@ -8,7 +8,7 @@ Verify the email address on your Plainrouter account to use protected account ac
 
 ## Why is access paused until I verify my email?
 
-An unverified email pauses protected web access, new mobile sign-in, MCP/agent access issued by that person, Management keys and Workspace keys. Changing your account email clears its verification, so verify the new address before continuing those workflows. A valid key string does not bypass the issuing person's verification or current role.
+An unverified email pauses protected web access, new mobile sign-in, MCP/agent access issued by that person, Management keys and Workspace keys. A pending email change keeps your current address and access active until the new address is confirmed. Unverified current addresses still require verification. A valid key string does not bypass the issuing person's verification or current role.
 
 On **Verify your email**:
 
@@ -18,6 +18,16 @@ On **Verify your email**:
 4. Return to the intended page or retry the authorized client operation. Verification restores eligibility; it cannot restore an expired or revoked key or grant.
 
 Email verification does not grant access to another workspace or Meta ad account. A Signals **Server secret** remains a separate Conversion API credential; do not replace it with a Workspace key. [Choose the right credential](/api/authentication).
+
+## How do I change my email without losing access?
+
+Open **Settings → Profile**, choose **Edit** beside your email, and enter the new address. If your account has a password, confirm the **Current password** before sending the request. Your current email remains active while confirmation is pending.
+
+For a social-only account without a password, first approve the change from the message sent to your current mailbox. Then verify the new address using the separate message sent there. A link opens a confirmation page; use its confirmation action to complete the step. Opening a link alone is not confirmation.
+
+The profile shows **Confirm your email change request** or **Confirm your new email** for the stage still pending. Use the displayed resend or cancel control when needed. A canceled or superseded link cannot finish a later request. Keep account links private and use the intended signed-in account when the page requests sign-in.
+
+To set your first password, use **Set password → Send password link** and open the message sent to your current email. Complete the password form reached from that message before managing features that require password confirmation.
 
 ## How do I enable two-factor sign-in?
 
@@ -40,13 +50,13 @@ Before starting, use an authenticator app and a private place to save recovery c
   </Step>
 </Steps>
 
-When two-factor sign-in is enabled, use web sign-in. The current mobile sign-in endpoint cannot complete the challenge and refuses sign-in for that account.
+When two-factor sign-in is enabled, use web sign-in. The current mobile sign-in endpoint cannot complete the challenge and refuses sign-in for that account. Confirming two-factor setup also revokes existing mobile sign-in credentials; use web sign-in afterward. Failed challenge attempts are limited across the account, so switching browser sessions does not reset the limit.
 
 ## How do I change or disable two-factor sign-in?
 
 Return to **Settings → Profile → Two-factor sign-in** and confirm your password. Choose **Cancel setup** for unfinished setup or **Disable two-factor sign-in** for an enabled setup. If the page asks you to confirm your password again, unlock management before retrying. Keep recovery codes private when reviewing or regenerating them.
 
-A browser sign-in and an [MCP Workspace key or OAuth connection](/mcp/setup) are different credentials. Do not put an authenticator code into an API bearer header. Workspace permissions, protected Actions approvals and provider verification still apply after sign-in.
+A browser sign-in and an [MCP Workspace key or OAuth connection](/mcp/setup) are different credentials. Do not put an authenticator code into an API bearer header. Workspace permissions, required Actions approvals and provider verification still apply after sign-in.
 
 ## Where can I read the security policy or report a concern?
 

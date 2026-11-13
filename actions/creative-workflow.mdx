@@ -205,7 +205,7 @@ Video assets can be read from the Meta creative library and used for ad duplicat
 
 ## Paused-copy invariant
 
-A duplicate must be created and verified with both configured and effective status equal to `PAUSED`. Creating a copy never activates it. A later governed `resume` action is a separate proposal that uses Ask or Full and its own policy checks.
+A duplicate must be created and verified with both configured and effective status equal to `PAUSED`. Creating a copy never activates it. A later governed `resume` action is a separate proposal that uses the selected agent mode and its own policy checks.
 
 If Meta reports `IN_PROCESS`, the batch moves to **Executed pending verification** and remains **Not Landed**. Plainrouter performs scheduled reads for up to 48 hours. Contradictory state, rejection, or expiry triggers verified compensation, which archives the receipt-addressed copy.
 

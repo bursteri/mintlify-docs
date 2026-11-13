@@ -76,6 +76,10 @@ Spend uses stored platform reporting dates in each ad account's timezone; conver
 
 UTM dimensions and other channel levels can lack supported spend mappings. Use returned reasons instead of assigning unrelated account spend to those rows. Meta's claimed cost stays separately labeled and does not replace cost per Plainrouter-earned conversion.
 
+## Can I export these reads through REST?
+
+Use `GET /api/v1/workspaces/{workspace}/admin/conversion-journeys` or `/cac-by-channel` with the corresponding read grant on a Workspace key. The same scope, filters, continuation, coverage and currency boundaries apply. Preserve `basis_note` and returned reasons alongside the values. [Authentication and reporting export contract](/api/report-exports).
+
 ## Troubleshoot
 
 | Symptom | What to check |

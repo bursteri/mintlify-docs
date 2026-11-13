@@ -4,7 +4,7 @@ sidebarTitle: "Conversions"
 description: "Select the events counted as workspace conversions, interpret purchases and subscription payments, and understand frozen proposal evidence and retired Tests."
 ---
 
-Use **Workspace settings → Conversion events** to choose what the **Conversions** metric counts. The default is **Purchase**. You can select purchases, subscriptions, trial starts and leads; the count is not a count of unique customers or proof of advertising delivery.
+Use **Workspace settings → Conversion events** to choose the event that the **Conversions** metric counts. The default is **Purchase**. Choose one of purchases, subscriptions, trial starts, leads, signups or booked demos; the count is not a count of unique customers or proof of advertising delivery.
 
 ## Before you begin
 
@@ -12,10 +12,10 @@ You need access to the workspace and permission to update its settings. Events m
 
 ## How do I choose conversion events?
 
-1. Select the intended workspace and open **Workspace settings**.
-2. Find **Conversion events** and select at least one supported event.
-3. Choose **Save conversion events**.
-4. Open **Dashboard** and check **Conversions**, its reporting period and the effective choices. The selection applies to retained history; a new selection can change historical totals.
+1. Select the intended workspace and open **Workspace settings → Conversion event**.
+2. Choose **Change**, then select exactly one supported event in **Change conversion event**.
+3. Read and acknowledge that this changes past and future reporting. Enter your current password and choose **Change event**. Accounts without a password must set one first.
+4. Open **Dashboard** and check **Conversions**, its reporting period and the effective choice. Changing the definition can change retained historical totals.
 
 | Choice | What it includes |
 | --- | --- |
@@ -23,8 +23,10 @@ You need access to the workspace and permission to update its settings. Events m
 | **Subscribed** | Eligible `subscribed` lifecycle events. Selecting this also excludes subscription payments from the Purchase conversion count. |
 | **Trial started** | Eligible `trial_started` lifecycle events. A trial start is not paid revenue. |
 | **Lead** | Eligible `Lead` events. A lead is not necessarily a paying customer. |
+| **Sign up** | Eligible `CompleteRegistration` events; not proof of a paid subscription. |
+| **Demo booked** | Eligible `Schedule` events; not proof of a purchase. |
 
-Use the choices that match your business outcome. Selecting both a trial and a subscription can count two different stages for the same customer. Subscription payments can add revenue without adding another Purchase conversion when **Subscribed** is selected.
+Choose the event that matches your business outcome. The current control selects one event, so trial and subscription stages are not selected together. Subscription payments can add revenue without adding another Purchase conversion when **Subscribed** is selected.
 
 ## Why does Conversions differ from Purchases or Meta?
 
@@ -44,7 +46,7 @@ Supported proposal evidence also freezes its `conversion_definition`, including 
 
 | Symptom | What to check |
 | --- | --- |
-| Save is unavailable | Confirm current workspace update permission and select at least one event. |
+| Save is unavailable | Confirm current workspace update permission and select one event, acknowledge the reporting change and confirm your current password. |
 | Count changes after editing choices | Recheck `effective_choices` and the retained reporting period; the setting applies to retained history. |
 | A renewal adds revenue but not a Purchase conversion | Check whether **Subscribed** is selected and whether the payment belongs to a subscription. |
 | An older proposal differs from today's dashboard | Read its frozen conversion definition and evidence window. Do not silently replace them with current settings. |

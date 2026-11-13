@@ -1,0 +1,55 @@
+---
+title: "November 2026"
+description: "Review Agent rules, subscription snapshots, reporting exports, account security and Dashboard improvements released in November."
+rss: true
+---
+
+Customer-facing changes available in November. Read linked guides for prerequisites and verification.
+
+<Update label="November 11, 2026">
+  ## Choose how agents may act
+
+  **Changed** · Agent rules now offers Ask, Auto and Full. Ask waits for a person; Auto permits selected agent action types; Full permits admitted agent changes without individual approval, including supported budget raises and activation. Authorization, policy blocks and provider verification still apply. [Configure Agent rules](/actions/policies-and-safety).
+
+  ## Export and verify audit evidence through REST
+
+  **Added** · Scoped Read Workspace keys can page through redacted audit events and check the current stored hash chain. Save prior heads separately when comparing snapshots: a valid current chain is not independent proof against tail deletion. [Read export and verification limits](/api/report-exports).
+
+  ## Confirm email changes before switching access
+
+  **Changed** · Your current address and access stay active while a new address is pending. Password accounts confirm with their current password; accounts without one first approve the change from their current mailbox. Confirm the new address to finish. [Change your email](/reference/account-security#how-do-i-change-my-email-without-losing-access).
+
+  ## Replace idle write credentials
+
+  **Changed** · Workspace Write and legacy Admin keys unused for 90 days are revoked on their next authentication, including keys set to Never expire. Read and Management keys are outside this idle rule. [Check key lifecycle](/mcp/workspace-tokens#does-never-prevent-every-kind-of-revocation).
+</Update>
+
+<Update label="November 10, 2026">
+  ## Read Stripe subscription revenue
+
+  **Added** · Connect a restricted read-only Stripe key to inspect a timestamped current-subscription snapshot, per-currency MRR, trials, past-due subscriptions and unknown amounts. Signed webhooks keep it current; this is separate from payment attribution and historical conversion import. The former history importer has been removed. [Configure and interpret the snapshot](/signals/track-events#read-current-subscription-revenue).
+
+  ## Export journeys, channel costs and arrivals
+
+  **Added** · Read the existing scoped reporting evidence through JSON REST endpoints with a Read Workspace key. Preserve coverage, basis notes and missing values with the export. [Use reporting exports](/api/report-exports).
+</Update>
+
+<Update label="November 9, 2026">
+  ## Inspect ad-tag coverage
+
+  **Added** · Inventory reads expose Plainrouter tag states and retained seven-day spend coverage, with incomplete evidence kept unavailable. The checker does not modify ads or tags. [Interpret coverage](/actions/account-inventory#check-plainrouter-ad-tag-coverage).
+</Update>
+
+<Update label="November 4, 2026">
+  ## Save Dashboard views
+
+  **Added** · Create personal or shared Dashboard views and configure widgets when your role permits editing. Today keeps partial-day measurements visible; Meta Purchase cards use their separate daily comparison. Older Performance and Operations links redirect to Dashboard or Signals. [Use saved views](/signals/health-and-performance#save-a-dashboard-view).
+
+  ## Choose one business conversion
+
+  **Changed** · Select one workspace conversion event, including Sign up or Demo booked. Changes require acknowledgment and password confirmation because they affect past and future reporting. Site installation, consent controls and the Server secret now live with Signals. [Choose the conversion event](/signals/conversions).
+
+  ## Create keys without a calendar expiry
+
+  **Added** · Workspace and Management key creation supports **Never** under Expires. Revocation, role changes and other lifecycle checks still apply. [Choose a key expiry](/mcp/workspace-tokens).
+</Update>

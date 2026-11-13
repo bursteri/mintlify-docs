@@ -25,6 +25,12 @@ Use the dates and account timezone shown for paid figures. The window can differ
 
 Dashboard formats money, counts, percentages and multiples using the displayed currency's conventions. EUR figures can use decimal commas; USD figures use decimal points. Formatting does not convert revenue into the ad account's currency or change the API's numeric units. Keep each currency separate when interpreting revenue and ratios.
 
+### Save a Dashboard view
+
+Dashboard supports saved views and configurable widgets. When your role permits editing, use the dashboard controls to create, copy, rename or delete a view, configure its widgets and share it with the workspace. A personal view and a shared view have separate visibility; saving a view does not widen access to its underlying data.
+
+The **Today** view shows partial-day figures. Arrival charts can show hourly or running totals; Meta Purchase cards compare Today with Yesterday because those purchase reports are daily. Keep their dates and freshness separate. Older Performance and Operations page links redirect to Dashboard, or to Signals for a legacy month-based report. Use **Campaigns** for the ad-object hierarchy.
+
 ### Why do some ads have no arrivals or observed purchases?
 
 Ads need the Plainrouter URL tags. Ads created by Plainrouter carry them; for other ads, add this to their URL parameters:
@@ -49,7 +55,7 @@ For model-based credit across observed touches and cost per earned conversion, u
 
 ## Why is the available history shorter than my selected range?
 
-Check **Workspace settings → Read window** for the effective number of days. **Identity retention** is shown separately. Choose a shorter range and check the actual report dates; the label does not guarantee N complete days of source data.
+Check the report’s effective period and any explicit shorter workspace retention setting. Visitor identity retention is a separate policy. Choose a shorter range and check the actual report dates; the label does not guarantee N complete days of source data.
 
 Plan history allows 30 days on Free and 12 calendar months on paid plans. An explicit shorter workspace retention setting can reduce that window. A newly created workspace has no shorter event-read setting; the separate default for visitor identity retention does not impose a fixed 90-day event-read limit. Available source data can still be incomplete. [Billing and history](/billing/overview#how-does-history-affect-reports) explains the distinction.
 
@@ -135,7 +141,11 @@ Choose **Export** to download the stored comparison as CSV with its reporting pe
 
 ### Verified revenue
 
-**Verified revenue** shows eligible settled revenue grouped by currency. Connect [Stripe verified revenue](/signals/track-events#verify-stripe-checkout-settlement) from **Connections → Revenue sources → Stripe**. Revenue, arrivals, and platform spend are different measurements; do not combine currencies or infer attribution from their proximity on the page.
+**Verified revenue** shows eligible settled revenue grouped by currency. Connect [Stripe verified revenue](/signals/track-events#verify-stripe-checkout-settlement) from **Connections → Stripe**. Revenue, arrivals, and platform spend are different measurements; do not combine currencies or infer attribution from their proximity on the page.
+
+## Can I export arrivals through REST?
+
+Use `GET /api/v1/workspaces/{workspace}/admin/arrivals-comparison` with a Workspace key and `get_arrivals_comparison` grant. It returns the same scoped reporting read as MCP, including basis and unavailable-data reasons. A JSON export does not refresh Meta or make missing measurements zero. [Read the reporting export contract](/api/report-exports).
 
 ## How do I compare Meta-reported purchases?
 
@@ -304,4 +314,4 @@ The Signals overview no longer has the old health-header delete control. During 
 
 **Signals data cleanup is still in progress for this workspace. Try setting up Signals again after cleanup finishes.** means the previous cleanup has not completed. Wait, then retry setup in the same workspace. Reloading, changing the collection domain or submitting setup repeatedly does not complete cleanup. Do not interpret a temporary setup refusal as a DNS error.
 
-Deleting the entire workspace is a separate permanent action in workspace settings. It can be refused while Signals cleanup is pending or when retained Actions or Launch evidence prevents deletion. Read the displayed reason and resolve it before retrying; a refused request does not mean the workspace was deleted.
+Deleting the entire workspace is a separate permanent action in workspace settings. It requires current authorization and password confirmation and can be refused while Signals cleanup is pending. Completed deletion removes the workspace’s retained Actions and Launch evidence chains as well as its other workspace data. Read the displayed consequences and result; a refused request does not mean the workspace was deleted, and deletion does not retract provider changes.

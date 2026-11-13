@@ -1,41 +1,41 @@
 ---
-title: "Action policy and safety"
-description: "Choose Ask or Full, configure loss checks, and understand account-rule approval, lost-outcome inverse proposals and verified recovery."
+title: "Agent rules and execution safety"
+description: "Choose Ask, Auto or Full for agent proposals, configure action permissions, and understand approval, budget and provider-verification boundaries."
 ---
 
-Open **Settings** → **Action policy** to choose Ask or Full and configure outcome checks. Agents can supply reasoning and proposals, but they cannot edit these settings or bypass provider verification.
+Open **Settings → Agent rules** to choose how agents may act in the selected workspace. **Ask** waits for approval, **Auto** permits the actions you turn on, and **Full** permits admitted agent actions without a separate person approval for each change. Every mode keeps policy, authorization and provider-verification checks.
 
-The same page has [Account rules](/actions/account-rules). Authorized Write keys can create or edit those rules through MCP; this permission does not change the workspace's execution mode or loss threshold.
-
-Saving policy changes requires current team update permission. Workspace members with view access can review the settings; a Workspace key cannot edit them.
-
-When an authorized person changes a policy setting, Plainrouter appends a workspace-scoped `policy.updated` event to the v2 audit chain. The event identifies the person and records the complete policy before and after the change. Saving the same values again does not add a duplicate event.
-
-Policy changes are saved atomically with their audit event. If the audit event cannot be recorded, the change is not saved. Recheck the displayed policy after an error; do not assume a mode switch succeeded.
+Changing these settings requires current permission to update the workspace. Members with view access can inspect them. A Workspace key cannot change the workspace's agent mode. A listed permission does not enable an unavailable product operation.
 
 ## Execution mode
 
-| Mode | Behavior in this release |
+| Mode | Agent proposals |
 | --- | --- |
-| **Ask** (`ask`) | A person approves every change first. Approval queues supported execution after a fresh admission check. |
-| **Full** (`full`) | Admitted unprotected changes can run automatically. Protected batches still require person approval. Every change gets a receipt, and the kill switch stops all changes. |
+| **Ask** (`ask`) | Every admitted change waits for a person to approve it in Inbox. |
+| **Auto** (`auto`) | Only action types enabled under **What agents can do on their own** can proceed without individual approval. Other admitted changes wait for a person. |
+| **Full** (`full`) | Admitted agent changes can proceed without individual approval, including supported budget raises and campaign/ad-set activation. Explicit policy blocks still prevent execution. |
 
-New workspaces default to **Ask**. Existing workspace policies were migrated to Ask; selecting Full is an explicit owner decision. The selected mode is copied into each proposal as an immutable snapshot. Changing the current mode does not rewrite an older proposal.
+New workspaces default to Ask. Select a mode and choose **Save**. Auto's switches cover pauses, uploads, paused ad creation, activation, campaign/ad-set creation, budget changes and automation permissions. Every required permission in a mixed batch must allow the action before that batch can run unattended.
 
-Older batches can retain `suggest_only`, `auto_with_limits`, or `full_auto` snapshots. A historical `suggest_only` approval still ends without execution. These are historical values, not choices for a new policy.
+The agent-mode decision does not expand the key's workspace, Meta ad account, scopes or grant. It does not make an unsupported action available. Older `suggest_only`, `auto_with_limits` and `full_auto` values belong to historical batch snapshots; they are not additional current choices.
 
-<Warning>
-  Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` actions, JPEG/PNG uploads, and paused ad copies follow Ask or Full before execution. Both modes enforce admission checks; a refused change cannot be approved. New proposals and previews refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`; stored historical actions of those types never execute. Video upload execution remains disabled.
-</Warning>
+## Which changes still need a person in Full?
+
+Full no longer applies the former blanket person-approval rule to agent budget increases, campaign/ad-set resumes or creation permissions. Use Ask when you want every agent proposal to wait. Use Auto when you want to allow only selected action types without individual approval.
+
+Full still cannot approve a refused change, widen a credential or manufacture missing provider evidence. Human decisions and system-generated account rules have their own authorization paths; the agent permission switches do not replace those checks. [Read a batch's actual policy result](/actions/review-proposals) before representing it as approved or executed.
+
+## How are unattended budget changes limited?
+
+In Auto, enabled agent budget raises remain subject to the configured agent budget limits. A large raise, unavailable budget/currency evidence or unverifiable recent raises can require person approval. If a limit is exceeded when execution rechecks the queued work, the write can be blocked; inspect the reason and propose the intended change again for review. Full does not use the Auto-specific multiplier hold.
 
 ## Two policy gates
 
-Executable Meta work passes policy twice:
+Proposal-time admission checks the requested actions, scope, evidence, permissions and selected mode. Execution rechecks current authorization and authoritative provider state before a write. A proposal or earlier preview is not an execution reservation.
 
-1. Proposal-time admission checks validate scope, authorization, evidence and supported actions. Ask requires a person for every admitted change; Full can queue admitted unprotected changes automatically. Protected batches still need person approval.
-2. At dispatch, execution-time policy re-reads authoritative provider state and must return `allow` before any write.
+The proposal keeps its recorded `execution_mode_snapshot`; changing current settings does not rewrite that history. Read the snapshot together with current policy and the batch's actual decision. Revoked access, unavailable critical state and other blocking results remain blocks in every mode.
 
-Changing policy does not promote or rewrite an existing proposal. A missing driver, unavailable critical provider field, revoked authorization, or other non-`allow` result blocks the queued batch before provider execution.
+An execution stop can prevent further writes. It does not undo a change already sent or verified. Use [Inbox and receipts](/actions/review-proposals) to determine what actually happened.
 
 ## What if the approver loses permission before execution?
 
@@ -45,63 +45,22 @@ This check does not undo provider work that already started. Inspect the existin
 
 ## Outcome safety
 
-### Outcome check after
+### Stored outcome check delay
 
-Sets the delay before checking a verified creative action's provider outcome. The accepted range is 1–168 hours. Resume and daily-budget changes use a separate window of three complete account-local days after the provider-write day, with the first check scheduled one hour after that window ends. See [outcome windows and prerequisites](/actions/review-proposals#how-are-later-performance-outcomes-checked).
+Stored proposals can carry a delay before checking a verified creative action's provider outcome. The accepted range is 1–168 hours. Resume and daily-budget changes use a separate window of three complete account-local days after the provider-write day, with the first check scheduled one hour after that window ends. See [outcome windows and prerequisites](/actions/review-proposals#how-are-later-performance-outcomes-checked).
 
-### Loss threshold
+### Stored loss threshold
 
-Sets the percentage used to classify a measurable management outcome as `held` or `lost`. The accepted range is 1–999.99%; the API retains the field name `anomaly_threshold_percent`. Inbox records the threshold used with the comparison.
+The stored percentage classifies a measurable management outcome as `held` or `lost`. The accepted range is 1–999.99%; the API retains the field name `anomaly_threshold_percent`. Inbox records the threshold used with the comparison.
 
 The comparison uses eligible counted arrivals and retained Meta spend, not purchase CPA or aggregate Signals reconciliation. A `lost` verdict can create a separate [inverse proposal](/actions/review-proposals#does-a-lost-outcome-create-an-inverse-proposal), with current-state checks and Ask/Full approval behavior. It does not directly compensate the original action. Check the recorded proposal before submitting another change; neither verdict guarantees future performance.
 
-## Which changes still need a person in Full?
+## What happened to the older policy controls?
 
-**Ask** requires a person for every admitted change. **Full** can automatically execute admitted changes that do not require person approval. The following remain protected in Full, regardless of whether a person, agent, account rule or inverse proposed them:
+The current Agent rules page focuses on mode and agent permissions. The former Account rules and outcome-setting sections are no longer shown below that card. Existing [account-rule APIs](/actions/account-rules), recorded policy parameters, outcome checks and audit history remain separate contracts; do not infer that an older API field is an editable control on this page.
 
-| Change | Approval requirement |
-| --- | --- |
-| Increase a daily budget | A person approves the batch. |
-| Resume a campaign or ad set | A person approves the batch. Ad-level resume still follows current policy and parent-state checks. |
-| Create a campaign or ad set, where the workflow is enabled | A person approves the batch. |
-| A paused creation carrying budget fields | A person approves the batch. Being paused does not waive the budget boundary. |
+## Execution boundaries
 
-If any action is protected, the containing batch needs a recorded person approval. Automatically approved state is insufficient; dispatch can refuse it with `dispatch_approval_missing`. Inspect the existing batch in [Inbox](/actions/review-proposals) instead of trying to bypass that result. Rule violations remain blocked in both modes.
+A supported MCP proposal writes a Plainrouter proposal and can read provider state; it does not itself perform the final Meta mutation. Created ad copies remain paused until a separate admitted activation action. Video upload execution remains unavailable. New requests refuse retired action types even when an older SDK enum contains them. [Supported actions and refusals](/actions/overview#supported-action-types).
 
-
-## Verification and compensation
-
-Plainrouter does not treat a successful provider response as proof that an action Landed. It persists an execution receipt and re-reads the exact object.
-
-- Image upload verification matches the receipt asset, frozen content hash, and provider readiness.
-- Ad-copy verification matches the receipt ad, authorized account, selected creative, and `PAUSED` state at creation.
-- An `IN_PROCESS` copy can enter durable asynchronous verification for up to 48 hours.
-- Execution or verification failures can require compensation; check the exact receipt and recovery result.
-- Compensation is itself verified: an uploaded image must be absent after deletion, and a copied ad must be `ARCHIVED` after rollback.
-
-If commit state is unknown, Plainrouter reconciles before retrying. It does not issue unsafe compensation without a trustworthy receipt target.
-
-Later outcome measurement is separate from this recovery process. Insufficient arrival volume, unavailable spend, or an exhausted outcome check does not by itself undo a verified action.
-
-## Current enforcement boundary
-
-| Check or action | Current result |
-| --- | --- |
-| Human approval | Ask requires it for every admitted change. Protected changes require it in Full too; see the table above. |
-| Account rules | Start disabled; scheduled matches produce governed proposals, not inline Meta writes. |
-| Lost-outcome inverse | A separate governed proposal for an eligible Resume or budget change; cannot overwrite an intervening target change. |
-| Proposal-time and execution-time policy | Enforced. |
-| Provider account, source, and asset readiness | Re-read and fail-closed. |
-| Image upload and paused ad duplication | Executable with receipts, verification, outcome reads, and compensation. |
-| Canonical pause, resume, and daily-budget changes | Executable under Ask or Full with current authorization and policy checks. |
-| Activation during ad duplication | Never; a later resume requires a separate proposal governed by Ask or Full. |
-| Execution kill switch | Stops all changes without undoing earlier changes. |
-| `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, `rollback` | New proposals and previews refused; historical execution disabled. |
-| Video upload execution | Disabled. |
-| Unknown provider commit | Reconciled before any retry or compensation. |
-
-Approval is not proof of execution. Confirm the receipt and verification result for the specific target in Inbox and Audit.
-
-## Related workflow
-
-Next, [review a proposal](/actions/review-proposals) against its frozen mode and current constraints. Find policy changes and execution-time refusals in the [audit log](/actions/audit-log).
+Landed still requires a durable provider receipt and exact verification for every action in the batch. Full mode, an approval or a successful write response alone does not establish Landed or a performance improvement.

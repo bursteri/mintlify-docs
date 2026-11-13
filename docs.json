@@ -242,6 +242,22 @@
                 ]
               },
               {
+                "group": "Reporting exports",
+                "icon": "download",
+                "openapi": {
+                  "source": "https://plainrouter.com/openapi.json",
+                  "directory": "api/reporting"
+                },
+                "pages": [
+                  "api/report-exports",
+                  "GET /workspaces/{workspace}/admin/conversion-journeys",
+                  "GET /workspaces/{workspace}/admin/cac-by-channel",
+                  "GET /workspaces/{workspace}/admin/arrivals-comparison",
+                  "GET /workspaces/{workspace}/admin/audit-events",
+                  "GET /workspaces/{workspace}/admin/audit-events/verify"
+                ]
+              },
+              {
                 "group": "Events",
                 "icon": "send",
                 "pages": [
@@ -314,6 +330,7 @@
             "group": "2026",
             "icon": "calendar-days",
             "pages": [
+              "changelog/2026-11",
               "changelog/2026-10",
               "changelog/2026-09",
               "changelog/2026-08"

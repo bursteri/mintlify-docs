@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-11-01"
+  documentation_revision: "2026-11-13"
 ---
 
 # Use Plainrouter safely
@@ -23,7 +23,7 @@ eligible active accounts exist; use the internal Plainrouter ID, not Meta's exte
 
 The unauthenticated MCP and API sandbox is retired. API and MCP protocol requests return HTTP `410` with `sandbox_retired`; do not call `validate_sandbox_event` or generate sandbox keys. An HTML browser redirect from `/mcp/sandbox` to the product overview is not a tool connection. Public protocol discovery and catalog listing do not prove workspace access.
 
-Create a Plainrouter account and a Read Workspace key, or use supported OAuth sign-in. Store credentials through protected client configuration, never prompts. The issuing person must have a verified email; after an email change, pause protected account/agent work until the new address is verified. Start with `list_workspaces` and a workspace installation read; confirm the returned workspace before account-specific work. A Write-authorized `dry_run_actions` call can preview supported changes against real state without creating a proposal or writing to Meta; it is not an anonymous simulation.
+Create a Plainrouter account and a Read Workspace key, or use supported OAuth sign-in. Store credentials through protected client configuration, never prompts. The issuing person must have a verified email; a pending email change keeps the current verified address and access until confirmation completes. Start with `list_workspaces` and a workspace installation read; confirm the returned workspace before account-specific work. A Write-authorized `dry_run_actions` call can preview supported changes against real state without creating a proposal or writing to Meta; it is not an anonymous simulation.
 
 Read [Connect an AI agent](https://plainrouter.com/docs/mcp/setup), [sandbox migration](https://plainrouter.com/docs/api/sandbox), and the [tool reference](https://plainrouter.com/docs/mcp/tools).
 
@@ -60,7 +60,7 @@ Never request or expose a credential in a prompt, log, URL, screenshot, or
 repository. A workspace owner or member creates role-capped Read or Write keys in
 **Settings → Workspace keys**. To replace one, create and verify the new key,
 then **Delete** the old key. Signals credentials are managed separately in
-**Workspace settings → Server secret**. Management keys list accessible workspaces
+**Signals → Delivery and verification → Server secret**. Management keys list accessible workspaces
 and manage only the issuer's workspace keys through the four documented
 [management API operations](https://plainrouter.com/docs/api/authentication#how-do-i-use-the-management-api).
 Revoking a Management key does not revoke workspace keys it issued.
@@ -181,7 +181,7 @@ HTTP routes, pagination, response fields, and failure handling.
    stable idempotency key. This stages a private asset and creates a proposal.
 4. Call `duplicate-ad-with-creative` with a human-selected source ad and an
    asset ID returned by Plainrouter. The normalized status remains `paused`.
-5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, admitted unprotected changes can queue automatically; protected batches still require person approval. Every change gets a receipt, and the kill switch stops all changes. Do not claim that the MCP request changed Meta.
+5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, admitted agent changes can queue without individual approval; Auto permits only enabled action types. Follow each change through its stored status and receipt. Do not claim that the MCP request changed Meta.
 
 Read
 [Create governed Meta creatives](https://plainrouter.com/docs/actions/creative-workflow)
@@ -193,7 +193,7 @@ Do not call `actions.tests.list`, `actions.tests.show`, `actions.tests.create`,
 `launcher.draft_batch`, `launcher.batch_status` or `launcher.preview_batch`.
 Actions Tests, Legacy Launcher Drive sync and CSV/XLSX draft import are removed.
 Refresh discovery and use the supported creative and Actions workflows with
-current account scope, permissions, policy and protected approvals.
+current account scope, permissions, policy and required approvals.
 
 Read the [retirement guide](https://plainrouter.com/docs/launcher/import-draft-batch)
 and [current tools](https://plainrouter.com/docs/mcp/tools#which-test-and-legacy-tools-are-retired).

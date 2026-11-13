@@ -1,0 +1,52 @@
+---
+title: "Export reporting and audit evidence through REST"
+sidebarTitle: "Reporting exports"
+description: "Read scoped journeys, channel costs, arrivals and audit events with a Read Workspace key, and verify the current audit chain."
+---
+
+Use a **Read or Write Workspace key** to export stored reporting evidence through JSON REST reads. These routes use the same scoped reporting readers as the corresponding MCP tools. They do not refresh Meta, change ads or create a new conversion. Keep the returned `basis_note`, coverage, currency and missing-data reasons with the exported values.
+
+## Authentication and scope
+
+Send the Workspace key as `Authorization: Bearer <workspace-key>` and `Accept: application/json`. The key needs an active grant for each requested operation. Older keys do not automatically gain newly introduced export operations; issue a replacement or authorize fresh access when an operation is missing. A Server secret or Management key cannot replace this credential.
+
+The workspace in the URL must belong to the key's authorized set. Account selection, when provided, must remain inside that workspace and any older account-bound restriction. Use Plainrouter's internal `account_id`, not the external Meta ad account ID. The `/admin/` path segment does not change these reads into Management-key operations.
+
+## Available reporting reads
+
+All paths below follow `https://plainrouter.com/api/v1`.
+
+| Method and path | Required operation | Read guidance |
+| --- | --- | --- |
+| `GET /workspaces/{workspace}/admin/conversion-journeys` | `get_conversion_journeys` | [Journey filters, credit models and pagination](/signals/conversion-journeys). |
+| `GET /workspaces/{workspace}/admin/cac-by-channel` | `get_cac_by_channel` | [Cost per earned conversion and currency limits](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). |
+| `GET /workspaces/{workspace}/admin/arrivals-comparison` | `get_arrivals_comparison` | [Reporting windows, claims and unavailable evidence](/signals/health-and-performance). |
+| `GET /workspaces/{workspace}/admin/audit-events` | `get_audit_events` | Paged workspace audit-event JSON. |
+| `GET /workspaces/{workspace}/admin/audit-events/verify` | `verify_audit_events` | Checks continuity and supported hashes in the current stored audit snapshot. |
+
+An illustrative read for workspace `42` is:
+
+```http
+GET /api/v1/workspaces/42/admin/arrivals-comparison?days=30 HTTP/1.1
+Host: plainrouter.com
+Authorization: Bearer <workspace-key>
+Accept: application/json
+```
+
+Replace the workspace with one authorized for your key. Arrivals comparison accepts the same supported days/months window choices as its MCP read. Journey and cost requests accept their documented dates, attribution model, lookback and conversion-kind filters. Preserve returned continuation cursors and keep the same scope and filters while paging. Unknown values remain unknown; do not replace them with zero.
+
+These JSON reads are separate from the signed-in browser CSV downloads and their concurrency limits. An SDK's generated method inventory may lag the current service contract. Use the [published OpenAPI contract](https://plainrouter.com/openapi.json) for current operation parameters and responses rather than inventing an SDK method.
+
+## How do I page audit events?
+
+The audit read defaults to 100 events per page; `limit` accepts 1–500. Optional `from` and `to` dates bound the event time. Results are ordered by `sequence` and contain `data`, `next_cursor` and `note`. Continue with the returned `next_cursor` as `cursor`, preserving the workspace and time bounds; stop when it is null.
+
+Exports include actor and event details and can contain visitor-linked or merchant-supplied identifiers. Keep them in controlled storage. Recognized credential assignments are redacted, and a changed event includes `redacted: true`. Redaction does not guarantee removal of every possible secret encoding or personal identifier.
+
+## What does audit verification establish?
+
+The verify response includes `valid`, `issues`, `row_count`, `first_sequence`, `last_sequence`, `head_hash` and a `verification` breakdown. It checks the current database snapshot: v2 event hashes, predecessor continuity and the legacy checkpoint where applicable. Legacy original hashes cannot be fully recomputed. Preserve the returned `note` and inspect issues even when some segments can be verified.
+
+A redacted export can differ from the original bytes used for hashing, so clients cannot always recompute `event_hash` from its downloaded payload. The verify operation checks the stored originals. It does not create an external signature or independently prove that the tail was never deleted. Save a previously observed head hash and sequence separately if you need to compare a later snapshot for tail changes.
+
+Verification is limited to six requests per minute per credential and six per workspace. Honor `Retry-After` on `429`. It does not verify that an advertising change performed well or replace the exact provider receipt needed for Landed. [Interpret action and audit evidence](/actions/audit-log).

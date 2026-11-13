@@ -11,6 +11,6 @@ Legacy Launcher's CSV and XLSX draft-file import is retired. The file-import rou
 1. Remove calls to the retired import route and `launcher.*` tools from your integration. Refresh MCP discovery instead of retrying an old tool name.
 2. Use the supported [creative workflow](/actions/creative-workflow) for Meta library reads, image staging and governed paused ad-copy proposals. Uploaded-file and vetted-URL creative intake have their own availability and permissions; they are not a replacement spreadsheet adapter.
 3. Confirm the workspace and selected Meta ad account before proposing a change. Keep a human-selected target and a stable idempotency key for the same operation.
-4. Review the returned [Inbox status and receipt](/actions/review-proposals). Ask requires person approval; Full still requires person approval for protected batches. A proposal or provider write alone is not Landed.
+4. Review the returned [Inbox status and receipt](/actions/review-proposals). Ask requires person approval. Auto follows enabled agent permissions; Full can queue admitted agent proposals without individual approval. A proposal or provider write alone is not Landed.
 
 [Google Drive connection and sync](/launcher/connect-drive) are retired too. Historical drafts or audit records do not authorize a new provider operation.

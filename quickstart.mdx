@@ -25,7 +25,7 @@ An arrival confirms website collection. Add your consent integration and connect
 
 Before you begin, you need:
 
-- An email address you can access. [Verify it](/reference/account-security#why-is-access-paused-until-i-verify-my-email) before continuing protected account access; changing it requires verification again.
+- An email address you can access. [Verify it](/reference/account-security#why-is-access-paused-until-i-verify-my-email) before continuing protected account access; a later email change uses a separate confirmation flow while the current address remains active.
 - Access to the DNS provider for your website domain.
 - Access to your website's shared `<head>` template or site-wide code injection setting.
 - A consent integration for conversion events and advertising delivery. The identity-free arrival check does not wait for a consent grant.
@@ -59,9 +59,9 @@ Signals collects first-party conversion events from your website through a colle
 
 <Steps>
   <Step title="Enter your website address">
-    Open **Signals** and continue setup. In **Website address**, enter the website where you will install Signals, such as `www.example.com`.
+    Open **Signals** and choose **Set up Signals**. On the **Site snippet** page, in **Website address**, enter the full HTTPS website address, such as `https://www.example.com`, then choose **Set up site snippet**.
 
-    The form supplies `https://`. Use the exact website host, without a page path, query string, or fragment. The website address identifies the site allowed to send events; it is separate from your collection subdomain, such as `collect.example.com`.
+    Use the exact website host, without a page path, query string, or fragment. The website address identifies the site allowed to send events; it is separate from your collection subdomain, such as `collect.example.com`.
   </Step>
   <Step title="Confirm your collection hostname on Install">
     Saving your website address opens **Install** directly. Meta authorization and dataset selection are optional and do not gate installation or arrival collection.
@@ -86,7 +86,7 @@ Signals collects first-party conversion events from your website through a colle
   </Step>
 </Steps>
 
-For server-side API, SDK, or CLI access, the workspace owner manages the Signals secret under **Settings → Workspace → Server secret**. Follow [API secret rotation](/api/authentication#where-do-i-manage-the-signals-api-secret) to install and verify a replacement before confirming it. The secret is shown once. The browser snippet uses the publishable key and must never contain this secret.
+For server-side API, SDK, or CLI access, the workspace owner manages the Signals secret under **Signals → Delivery and verification → Server secret**. Follow [API secret rotation](/api/authentication#where-do-i-manage-the-signals-api-secret) to install and verify a replacement before confirming it. The secret is shown once. The browser snippet uses the publishable key and must never contain this secret.
 
 Managed-hostname setup can also recognize qualifying verified server revenue. The identity-free `POST /api/v1/verification-events` operation remains available as a server-side diagnostic, but it does not count as real arrival or revenue evidence and does not complete onboarding. See [Test Signal ingestion](/signals/verify-ingestion).
 

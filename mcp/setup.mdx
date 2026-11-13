@@ -286,7 +286,7 @@ Confirm `PLAINROUTER_WORKSPACE_TOKEN` is set in the environment that starts Clau
 
 ### The client receives `401 Unauthorized`
 
-Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. The issuing person must also have a verified email address; an email change pauses protected account and agent access until the new address is verified. [Restore verified account access](/reference/account-security#why-is-access-paused-until-i-verify-my-email). Also confirm its issuing person still holds a workspace role that covers the token tier.
+Confirm the client sends the complete workspace token as a bearer credential and that it has not expired or been revoked. The issuing person must also have a verified email address; a pending email change keeps the current verified address active until confirmation completes. [Restore verified account access](/reference/account-security#why-is-access-paused-until-i-verify-my-email). Also confirm its issuing person still holds a workspace role that covers the token tier.
 
 If the client is sending an OAuth management credential, the rejection is expected. Create a workspace key, then configure the MCP client to use it as the bearer credential.
 

@@ -6,7 +6,7 @@ description: "Understand how agents propose, approve, execute, verify, and audit
 Actions is Plainrouter's governed workflow for advertising changes. An authorized agent works within one approved account, cites the evidence behind a proposal, and submits every action through workspace policy. People can also [pause or resume campaigns, ad sets, and ads from Campaigns](/actions/account-inventory#pause-or-resume-a-campaign-ad-set-or-ad) through the same policy and verification checks.
 
 <Info>
-  New workspaces start in **Ask**, where admitted changes wait for human approval. In **Full**, admitted unprotected changes can run automatically; budget increases and campaign/ad-set resumes still require person approval. Every change gets a receipt, and the kill switch stops all changes. Both modes recheck policy before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target under the selected policy mode; creating a copy never activates it.
+  New workspaces start in **Ask**, where admitted changes wait for human approval. In **Auto**, enabled agent action types can run without individual approval; **Full** permits admitted agent actions without individual approval, including supported budget increases and campaign/ad-set resumes. Follow each change through its stored status and receipt. Every mode rechecks policy before execution. New ad copies are created and verified as `PAUSED`. A separate governed `resume` proposal can unpause an eligible target under the selected policy mode; creating a copy never activates it.
 </Info>
 
 [Account rules](/actions/account-rules) can propose pauses or daily-budget changes from counted-arrival cost conditions. They start disabled and keep immutable revisions for later review.
@@ -27,7 +27,7 @@ Actions is Plainrouter's governed workflow for advertising changes. An authorize
     Admission checks evaluate scope, authorization, evidence, provider state, supported actions, and the selected execution mode. Unknown execution-critical state blocks execution.
   </Step>
   <Step title="The selected mode controls approval">
-    In Ask, a person approves every change first. Full can queue admitted unprotected changes automatically. Budget increases and campaign/ad-set resumes still need person approval; a protected action protects its whole batch. Admission refusals remain blocked and cannot be approved. Historical suggest-only approvals record agreement without execution.
+    In Ask, a person approves every change first. Auto can queue agent batches only when every required permission allows it; Full can queue admitted agent changes without individual approval. Admission refusals remain blocked and cannot be approved. Historical suggest-only approvals record agreement without execution.
   </Step>
   <Step title="Plainrouter executes and verifies">
     The execution worker rechecks current policy before any provider write. It records a durable receipt, reads the exact provider object back, and marks the action verified only when the receipt-addressed state matches.
@@ -50,9 +50,9 @@ Use [`dry_run_actions`](/mcp/tools#dry_run_actions) or the [HTTP dry-run endpoin
 | Action | Proposal support | Execution support |
 | --- | --- | --- |
 | Upload asset | Staged image with its frozen manifest. | JPEG and PNG images submitted through `upload-asset`. Video upload execution remains blocked. |
-| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified `PAUSED`; any later resume is a separate action governed by Ask or Full. |
-| `pause`, `resume` | Human-selected campaign, ad set, or ad, with empty `params`. | Supported under Ask or Full, with current policy checks and execution authorization. |
-| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer Meta budget units for the account currency. | Supported under Ask or Full, with provider-state checks. Lifetime-budget changes are not supported. |
+| Duplicate ad with creative | Copy a human-selected source ad with an account-bound image or video asset. | Supported. The copy is created and verified `PAUSED`; any later resume is a separate action governed by the selected Ask, Auto or Full mode. |
+| `pause`, `resume` | Human-selected campaign, ad set, or ad, with empty `params`. | Supported under the selected mode, with current policy checks and execution authorization. |
+| `increase_budget`, `decrease_budget` | Campaign or ad set daily budget, expressed in integer Meta budget units for the account currency. | Supported under the selected mode, with provider-state checks. Lifetime-budget changes are not supported. |
 
 New proposals and previews refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`. Stored historical actions of these types remain non-executable. Use `pause` or `resume` for a status change, and `increase_budget` or `decrease_budget` for a supported daily-budget change. A generated SDK type does not make a refused action available. [Handle action-type validation](/api/actions#which-action-types-are-refused).
 
@@ -63,11 +63,12 @@ Use [`get-creative-library`, `upload-asset`, and `duplicate-ad-with-creative`](/
 | Mode | Passing proposal |
 | --- | --- |
 | **Ask** | A person approves every change first. Approval queues supported execution after current checks. |
-| **Full** | Admitted unprotected changes can run automatically. Protected batches still require person approval. Every change gets a receipt. |
+| **Auto** | Enabled agent action types can proceed without individual approval; other admitted changes wait for a person. |
+| **Full** | Admitted agent changes can proceed without individual approval. Every change gets a receipt. |
 
 Ask is the default. For a human-submitted Pause or Resume from Campaigns, the click can include approval when the person has the required permission. Older `suggest_only` snapshots still end without execution when approved. The mode is frozen into each proposal. Before execution, Plainrouter also evaluates the current policy. Revoked authorization or unavailable critical provider state blocks the queued action before a write.
 
-The execution kill switch stops all changes, including queued batches. It does not undo a change that already landed. Inspect [Inbox and receipts](/actions/review-proposals) before retrying a refused or interrupted operation.
+An execution stop can prevent further writes, including queued work. It does not undo a change that already landed. Inspect [Inbox and receipts](/actions/review-proposals) before retrying a refused or interrupted operation.
 
 ## Verification and Landed
 
@@ -108,7 +109,7 @@ Creative-library evidence proves the selected asset's identity, approved-account
     Read evidence, policy results, and execution state before deciding.
   </Card>
   <Card title="Configure policy" icon="shield-check" href="/actions/policies-and-safety">
-    Choose Ask or Full and configure outcome checks.
+    Choose Ask, Auto or Full and configure agent permissions.
   </Card>
 </CardGroup>
 

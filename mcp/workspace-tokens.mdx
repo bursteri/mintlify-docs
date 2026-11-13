@@ -10,13 +10,13 @@ The interface calls these credentials workspace keys; API fields and older integ
 
 ## Issue a token
 
-Sign in as the workspace owner or a current team member and select the workspace your agent should use. The effective tier is capped by your current role in each selected workspace; a requested Write key can have Read access in a workspace where you lack update permission. The page lists and revokes only your own keys. A key can be created before connecting an ad account. The workspace-scoped [installation and arrivals tools](/mcp/tools#get_install_instructions) work without account selection; account reads need an eligible account and active provider connection.
+Sign in as the workspace owner or a current team member and select the workspace your agent should use. The effective tier is capped by your current role in each selected workspace; a requested Write key can have Read access in a workspace where you lack update permission. The page lists your keys and, when you have grant-revocation permission, other workspace access with an Owner column. A key can be created before connecting an ad account. The workspace-scoped [installation and arrivals tools](/mcp/tools#get_install_instructions) work without account selection; account reads need an eligible account and active provider connection.
 
 1. Open **Settings → Workspace keys**.
-2. Enter a **Name** and check **Tier**: **Write** is preselected. Choose **Read** explicitly for supported reporting or diagnostic tools; Actions previews and proposals require **Write**; new Read keys also cover Actions record reads. Select a 30, 90, or 365 day expiry.
+2. Enter a **Name** and check **Tier**: **Write** is preselected. Choose **Read** explicitly for supported reporting or diagnostic tools; Actions previews and proposals require **Write**; new Read keys also cover Actions record reads. Select a 30, 90 or 365 day expiry, or **Never** for no scheduled expiry.
 3. Under **Workspaces**, select one or more workspaces. The current workspace is selected by default; this set stays fixed for the key.
-4. Choose **Create key**, then **Copy** the revealed key. It is shown once.
-5. Configure your MCP client with `https://plainrouter.com/mcp` and the key as its bearer credential. The reveal dialog includes Claude Desktop and Claude Code configuration examples.
+4. Choose **Create key**, complete the dialog with **Create**, then **Copy key**. It is shown once.
+5. Configure your MCP client with `https://plainrouter.com/mcp` and the key as its bearer credential. Follow your [client-specific configuration guide](/mcp/clients) to store it securely.
 6. Call `list_workspaces` to inspect authorized workspaces and their effective tiers. If more than one is available, include `workspace_id` on subsequent tool calls. Confirm the returned workspace and intended account with `get_account_state` before account-scoped work.
 
 ```http
@@ -26,6 +26,12 @@ Authorization: Bearer <workspace-key>
 Store the key in your client's protected configuration or a secret manager. Keep it out of source control, logs, URLs, screenshots, and agent prompts.
 
 For developer automation, the [management API](/api/authentication#how-do-i-use-the-management-api) provides the same role-capped issuance and revocation using a separate Management key. Revoking that Management key does not revoke workspace keys it issued.
+
+## Does Never prevent every kind of revocation?
+
+No. **Never** removes the scheduled expiry; role checks, grants, revocation and account restrictions still apply. Workspace Write keys and older Admin-tier keys unused for 90 days are revoked when next authenticated. The idle window uses last use, or creation time if never used. Create a replacement key after an idle revocation. This inactivity rule does not apply to Read keys or Management keys.
+
+Management keys also offer **Never** on their separate **Settings → Management keys** page. The shared page design does not combine these credential classes or make them interchangeable.
 
 ## How does workspace selection work?
 
@@ -96,29 +102,25 @@ The five [Actions read tools](/mcp/tools#read-actions-and-policy) and correspond
 
 New keys expose Read and Write, not Admin. Older Admin-tier credentials may still appear in compatibility responses; their tier does not bypass policy, the selected approval mode, provider verification, or account restrictions. A workspace key is not a management key or browser session.
 
-Plainrouter rechecks the issuer's verified email, current workspace role and the linked grant on requests. An email change pauses that person's protected access until the new address is verified; [verify the account email](/reference/account-security) before troubleshooting a still-valid key. An expired or revoked grant cannot authorize operations even when the key's own expiry has not passed. If the issuer loses the required role, requests are refused even when the key has not expired. Disconnecting a bound connection revokes its associated agent credentials; reconnecting does not restore a revoked credential. Issue replacement access after reconnection when needed. Feature availability remains separate from key permissions. A key cannot restore [retired legacy Launcher operations](/launcher/connect-drive).
+Plainrouter rechecks the issuer's verified email, current workspace role and the linked grant on requests. A pending email change retains the current verified address and access; [complete the account confirmation flow](/reference/account-security#how-do-i-change-my-email-without-losing-access) without treating it as credential rotation. An expired or revoked grant cannot authorize operations even when the key's own expiry has not passed. If the issuer loses the required role, requests are refused even when the key has not expired. Disconnecting a bound connection revokes its associated agent credentials; reconnecting does not restore a revoked credential. Issue replacement access after reconnection when needed. Feature availability remains separate from key permissions. A key cannot restore [retired legacy Launcher operations](/launcher/connect-drive).
 
 ## Workspace grants
 
 Each selected workspace has its own grant identifying the credential's principal, allowed operations and expiry in that workspace. Plainrouter checks that the grant is active and covers the requested operation, in addition to the credential's existing account and role restrictions.
 
-Token-management creation responses include a legacy `grant_id` for the primary workspace. It is not a grant shared by every workspace. Inspect the selected workspace's **Grants** section for its own grant; `list_workspaces` reports effective tiers, not grant IDs. An authorized administrator can use [`revoke_grant`](/mcp/tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
+Token-management creation responses include a legacy `grant_id` for the primary workspace. It is not a grant shared by every workspace. Inspect the selected workspace’s access and grant records for its own grant; `list_workspaces` reports effective tiers, not grant IDs. An authorized administrator can use [`revoke_grant`](/mcp/tools#revoke_grant) to stop operations backed by that grant. A human delegator can also revoke their agent's grant. Revocation is scoped to the workspace and recorded as `grant.revoked`; it does not undo earlier provider actions.
 
 ### Inspect and revoke a grant in the dashboard
 
-Sign in as the team owner or an authorized team administrator and open **Workspace settings → Workspace grants**. The section is a bounded current view: live grants, qualifying revocations from the last seven days and up to five recent expired grants. Expand **Show … expired** to inspect that sample and its total count; this is not an export of the entire grant history. Each grant shows its principal, tier, **Live**, **Expired**, or **Revoked** status, bound token name, and expiry. Expand **Exact operations** to inspect what it authorizes. Inspect the linked grant here; **Settings → Workspace keys** lists the key's status and last use.
+Open **Workspace settings → Workspace access** for a summary of people and agents with live keys, then use **Manage in Workspace keys**. In **Settings → Workspace keys**, authorized owners or administrators can inspect other workspace access alongside their own keys. Check **Owner**, **Workspaces**, **Tier**, last use and expiry. The bounded list is not a complete audit-history export.
 
-1. Identify the intended principal and bound token before making a change.
-2. For a live grant, click **Revoke**, then confirm **Revoke grant**.
-3. Confirm the grant now shows **Revoked**. Expand its **Receipt** to inspect the audit entry, sequence, and hash prefix.
+For another person’s live workspace grant, use its **Delete** control and confirm the workspace-scoped deletion. This revokes access to that workspace; it does not undo earlier advertising actions. Deleting your own multi-workspace key revokes that key across its selected workspaces. Deleting an OAuth connection has its own confirmation and can stop that connection in every workspace it covers. Read the displayed scope before confirming.
 
-The receipt records authorization revocation; it is not a Meta execution receipt. Revocation prevents subsequent operations under the grant and does not reverse earlier advertising actions. Grants cannot be edited to add operations; issue a replacement credential when the authorized scope must change.
-
-If no grants appear, confirm the workspace and whether a credential has been issued. If the section is unavailable, check that you are signed in as the owner or an authorized team administrator. An expired or already revoked grant has no live-grant **Revoke** action. If confirmation fails, keep the error and recheck the grant's displayed status before assuming access has stopped.
+The current table no longer exposes the former **Exact operations** and **Receipt** expanders. Use the appropriate API/MCP scope evidence and [audit export](/actions/audit-log) when you need operation or revocation history. Grants cannot be edited to add operations; issue replacement access when scope must change. If a deletion fails, inspect the displayed error and current status before assuming access stopped.
 
 ## Rotate or revoke a token
 
-Open **Settings → Workspace keys** to inspect names, creation time, last use, expiry, and **Active**, **Expired**, or **Revoked** status.
+Open **Settings → Workspace keys** to inspect names, owner where available, selected workspaces, tier, creation time, last use and expiry. The current table can identify expiry without exposing every historical revocation.
 
 To replace a key, create a new one, install it in the client, and verify `get_account_state` with the intended account. Then use **Delete** on the old key and confirm. The current page does not have a Rotate button. If a key is exposed, delete it immediately before preparing its replacement.
 

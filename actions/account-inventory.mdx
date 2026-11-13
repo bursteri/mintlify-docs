@@ -21,6 +21,12 @@ Both tools require `account_id`: the internal Plainrouter account ID, not Meta's
 
 The page shows retained recent metrics. Missing rows or displayed zero totals do not prove zero provider activity when synchronization is incomplete.
 
+## Check Plainrouter ad-tag coverage
+
+`get_account_inventory` and `GET /api/v1/workspaces/{workspace}/admin/ad-accounts/{account_id}/inventory` expose `tag_coverage` for the bound inventory projection. Use a Read or Write Workspace key with `get_account_inventory`. This read combines tag states for currently visible mirrored ads with retained spend over the last seven complete account-local days, including metric ads no longer visible in that inventory.
+
+Inspect the reported reasons and completeness before interpreting a coverage ratio. A checked date with no spend rows can mean zero; a missing or too-early provider read is incomplete. Unusable currency, amount or date evidence can leave totals unavailable, and the ratio is unavailable unless the window is complete and total spend is positive. This is retained mirrored evidence, not proof of exhaustive live account coverage. The check does not add tags or change ads.
+
 ## Pause or resume a campaign, ad set, or ad
 
 You need a signed-in browser session, workspace membership, and an eligible active Meta account and connection. Check [Meta access](/signals/connect-meta#how-do-i-interpret-the-meta-grant) and [workspace policy](/actions/policies-and-safety) first. Retained access to a disconnected account does not authorize changes.
