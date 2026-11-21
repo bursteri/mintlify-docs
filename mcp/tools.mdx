@@ -126,6 +126,10 @@ Use `https://plainrouter.com/mcp` with workspace authorization for tool calls. P
 
 The unauthenticated sandbox and `validate_sandbox_event` are retired. Old sandbox requests return HTTP `410` with `error: "sandbox_retired"`. [Migrate existing clients](/api/sandbox). A Write-authorized [`dry_run_actions`](#dry_run_actions) call previews supported changes against real state; it does not recreate synthetic test mode.
 
+## Attribution coverage across reads
+
+`get_conversion_journeys`, `get_cac_by_channel`, `get_arrivals_comparison` and `get_inventory_metrics` return a shared [`coverage` block](/signals/conversion-journeys#how-do-i-read-attribution-coverage). Read its kept boundary, start markers, named Meta account, unread/revisable dates and separate untagged-spend window before summarizing the answer. Preserve unknowns and reasons; this is retained-evidence coverage, not an accuracy or performance score. The same block is available through the corresponding REST reads.
+
 ## Built-in Signals prompts
 
 The production server publishes three reusable prompts. They have no arguments and return static instructions for the client to follow; retrieving a prompt does not run its tool, inspect your workspace data, install code, or change an ad.

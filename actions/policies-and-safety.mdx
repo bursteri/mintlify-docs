@@ -15,6 +15,8 @@ Changing these settings requires current permission to update the workspace. Mem
 | **Auto** (`auto`) | Only action types enabled under **What agents can do on their own** can proceed without individual approval. Other admitted changes wait for a person. |
 | **Full** (`full`) | Admitted agent changes can proceed without individual approval, including supported budget raises and campaign/ad-set activation. Explicit policy blocks still prevent execution. |
 
+Some public and agent copy calls the permission-based mode **Custom**. The current **Agent rules** selector labels it **Auto**, and API fields still use `auto`. These names describe the same permission-based mode; they do not add another execution mode.
+
 New workspaces default to Ask. Select a mode and choose **Save**. Auto's switches cover pauses, uploads, paused ad creation, activation, campaign/ad-set creation, budget changes and automation permissions. Every required permission in a mixed batch must allow the action before that batch can run unattended.
 
 The agent-mode decision does not expand the key's workspace, Meta ad account, scopes or grant. It does not make an unsupported action available. Older `suggest_only`, `auto_with_limits` and `full_auto` values belong to historical batch snapshots; they are not additional current choices.
@@ -28,6 +30,18 @@ Full still cannot approve a refused change, widen a credential or manufacture mi
 ## How are unattended budget changes limited?
 
 In Auto, enabled agent budget raises remain subject to the configured agent budget limits. A large raise, unavailable budget/currency evidence or unverifiable recent raises can require person approval. If a limit is exceeded when execution rechecks the queued work, the write can be blocked; inspect the reason and propose the intended change again for review. Full does not use the Auto-specific multiplier hold.
+
+### What happens when an agent turns on a new campaign or ad set?
+
+In Auto, the enabled launch-budget safeguard also checks the first activation of a campaign or ad set created paused by Plainrouter. It compares the budget that would start spending with a comparable running budget. A large first launch, missing comparable budget or uncertain currency/state can require a person to approve it. A change that exceeds the limit at execution can be blocked and needs a new proposal for review.
+
+This is separate from approving the paused creation. Creating an object does not authorize turning it on. Full does not use this Auto-specific approval hold. The current Agent rules page does not expose an editor for these budget-limit values; do not infer a setup control from a stored policy field.
+
+## Why is a change blocked by workspace pause?
+
+`workspace_paused` means the workspace is paused for forward ad changes. The proposal can be saved as blocked; switching to Full or repeating approval does not bypass the pause. `workspace_pause_state_unavailable` means the pause state could not be established. `workspace_pause_requires_review` means the batch predates a pause and needs fresh review after resumption.
+
+Pausing turns off mutating automations and enabled account rules. Resuming the workspace does not turn them back on, reauthorize old batches or undo provider changes already made. Inspect each stored status and receipt before proposing remaining work. These response semantics do not imply that this page has a customer pause-switch control.
 
 ## Two policy gates
 

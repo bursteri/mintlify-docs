@@ -4,7 +4,7 @@ sidebarTitle: "Account security"
 description: "Restore account access by verifying your email, enable authenticator-based two-factor sign-in, and keep recovery codes private."
 ---
 
-Verify the email address on your Plainrouter account to use protected account access. You can also enable optional two-factor sign-in from **Settings → Profile**. Two-factor sign-in adds an authenticator code to password, Google and GitHub web sign-ins; it is separate from workspace roles and API credentials.
+Verify the email address on your Plainrouter account to use protected account access. You can also enable optional two-factor sign-in from **Settings → Profile**. Plainrouter uses an emailed sign-in link/code or Google. Optional two-factor sign-in adds an authenticator challenge to web sign-in; it is separate from workspace roles and API credentials.
 
 ## Why is access paused until I verify my email?
 
@@ -21,13 +21,15 @@ Email verification does not grant access to another workspace or Meta ad account
 
 ## How do I change my email without losing access?
 
-Open **Settings → Profile**, choose **Edit** beside your email, and enter the new address. If your account has a password, confirm the **Current password** before sending the request. Your current email remains active while confirmation is pending.
+Open **Settings → Profile**, choose **Edit** beside your email, and enter the new address. Approve the change from the message sent to your current mailbox, then verify the new address using the separate message sent there. Your current email and access remain active while confirmation is pending. If two-factor sign-in is enabled, complete **Confirm it's you** when asked.
 
-For a social-only account without a password, first approve the change from the message sent to your current mailbox. Then verify the new address using the separate message sent there. A link opens a confirmation page; use its confirmation action to complete the step. Opening a link alone is not confirmation.
+A link opens a confirmation page; use its confirmation action to complete the step. Opening a link alone is not confirmation. The profile identifies the pending stage and offers resend or cancel controls. A canceled or superseded link cannot finish a later request. Keep account links private and use the intended signed-in account when the page requests sign-in.
 
-The profile shows **Confirm your email change request** or **Confirm your new email** for the stage still pending. Use the displayed resend or cancel control when needed. A canceled or superseded link cannot finish a later request. Keep account links private and use the intended signed-in account when the page requests sign-in.
+## How do I sign in or confirm a sensitive action?
 
-To set your first password, use **Set password → Send password link** and open the message sent to your current email. Complete the password form reached from that message before managing features that require password confirmation.
+Use **Continue with Google** or **Continue with email**. The email flow sends a sign-in link and code that work in the requesting browser for ten minutes. Follow the message or choose **Enter code manually**. Request a fresh message when it expires; do not send a sign-in code to an agent or put it in an API bearer header.
+
+Plainrouter no longer asks for an account password. For a sensitive action, **Confirm it's you** uses a fresh emailed code or, when two-factor sign-in is enabled, an authenticator code or recovery code. Follow the displayed method; the email sign-in code and authenticator code are different credentials.
 
 ## How do I enable two-factor sign-in?
 
@@ -35,7 +37,7 @@ Before starting, use an authenticator app and a private place to save recovery c
 
 <Steps>
   <Step title="Open your profile">
-    Open **Settings → Profile** and find **Two-factor sign-in**. If your account has no password, set one in the profile first. Confirm your password to unlock two-factor management.
+    Open **Settings → Profile** and find **Two-factor sign-in**. Choose **Confirm it's you** and complete the displayed verification to unlock two-factor management.
   </Step>
   <Step title="Enable and confirm">
     Choose **Enable two-factor sign-in**. Scan the QR code or enter the setup key in your authenticator app, then enter the app's **Authentication code** and confirm setup.
@@ -43,18 +45,18 @@ Before starting, use an authenticator app and a private place to save recovery c
     Setup is not complete while the screen says **Finish setup by confirming an authentication code**. Confirm that it says **Two-factor sign-in is enabled**.
   </Step>
   <Step title="Keep recovery access">
-    Save the recovery codes privately. **Show recovery codes**, **Regenerate recovery codes** and **Hide recovery codes** let you manage the displayed set after password confirmation.
+    Save the recovery codes privately. **Show recovery codes**, **Regenerate recovery codes** and **Hide recovery codes** let you manage the displayed set after identity confirmation.
   </Step>
   <Step title="Check the next web sign-in">
-    At the two-factor challenge, enter your authenticator code. If you need a saved recovery code instead, choose **Use a recovery code**. Google and GitHub web sign-in also require this challenge once two-factor sign-in is enabled.
+    At the two-factor challenge, enter your authenticator code. If you need a saved recovery code instead, choose **Use a recovery code**. Google web sign-in also requires this challenge once two-factor sign-in is enabled.
   </Step>
 </Steps>
 
-When two-factor sign-in is enabled, use web sign-in. The current mobile sign-in endpoint cannot complete the challenge and refuses sign-in for that account. Confirming two-factor setup also revokes existing mobile sign-in credentials; use web sign-in afterward. Failed challenge attempts are limited across the account, so switching browser sessions does not reset the limit.
+Use web sign-in for the setup steps above. Confirming two-factor setup also revokes existing mobile sign-in credentials. Failed challenge attempts are limited across the account, so switching browser sessions does not reset the limit.
 
 ## How do I change or disable two-factor sign-in?
 
-Return to **Settings → Profile → Two-factor sign-in** and confirm your password. Choose **Cancel setup** for unfinished setup or **Disable two-factor sign-in** for an enabled setup. If the page asks you to confirm your password again, unlock management before retrying. Keep recovery codes private when reviewing or regenerating them.
+Return to **Settings → Profile → Two-factor sign-in** and complete **Confirm it's you** when asked. Choose **Cancel setup** for unfinished setup or **Disable two-factor sign-in** for an enabled setup. If confirmation has expired, unlock management again before retrying. Keep recovery codes private when reviewing or regenerating them.
 
 A browser sign-in and an [MCP Workspace key or OAuth connection](/mcp/setup) are different credentials. Do not put an authenticator code into an API bearer header. Workspace permissions, required Actions approvals and provider verification still apply after sign-in.
 

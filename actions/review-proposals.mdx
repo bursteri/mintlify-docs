@@ -175,6 +175,10 @@ Inbox shows **Approve** and **Reject** only when your current human permission a
 
 A pending proposal made under a retired execution mode cannot be approved. Inspect and reject it where permitted, then prepare a new proposal under the selected mode if the intent is still needed. Changing the current workspace mode does not promote the old snapshot. For `dispatch_approval_missing`, verify a recorded person approval for the batch's protected actions before expecting execution.
 
+## Why does workspace pause block an old batch?
+
+A `workspace_paused` result blocks forward ad changes in every mode. After resumption, an older batch can remain blocked with `workspace_pause_requires_review`; prepare a fresh proposal for the remaining intent after inspecting existing receipts. Resumption does not restart disabled rules or automations. Missing pause state also blocks execution. [Read workspace pause and execution boundaries](/actions/policies-and-safety#why-is-a-change-blocked-by-workspace-pause).
+
 ## What if an approved batch stalls?
 
 **Approved. Execution could not start yet and will be retried automatically.** means the approval was saved, but its execution handoff failed. Keep following that batch and its receipts; do not approve a replacement or change the retry key to force another write. Current execution checks still apply when recovery runs.

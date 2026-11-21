@@ -93,7 +93,7 @@ Call `get_inventory_metrics`:
 
 Use dates appropriate to your account's available history. Optional `campaign_id`, `adset_id` and `ad_id` filters use external Meta IDs. Dates use `YYYY-MM-DD`; the end cannot precede the start.
 
-The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `activities`, `activity_history`, `effective_range`, account details, freshness and pagination. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
+Read the returned [`coverage` block](/signals/conversion-journeys#how-do-i-read-attribution-coverage), including retained starts, unread dates and the separate untagged-spend window. The response contains `metrics`, `object_metrics`, `unmatched_arrivals`, `changes`, `activities`, `activity_history`, `effective_range`, account details, freshness and pagination. Daily `metrics` rows include currency, spend, impressions, clicks, inline link clicks, Meta action data, fetch time and counted arrivals. Spend is a decimal string in the account currency; do not interpret it as an integer minor-unit budget field.
 
 Set `limit` from 1–100 (default 25) for each of `metrics`, `object_metrics`, `changes` and `activities`. Inspect each collection's `total`, `next_cursor` and `truncated` under `pagination`. Repeat with the opaque top-level `next_cursor` as `cursor`, preserving the account, dates, filters and `include_changes`; stop when the top-level cursor is null. One collection can finish before another. A short or empty collection on a page does not establish that the complete window has no activity.
 
@@ -133,6 +133,8 @@ To verify a comparison, confirm `account` and `effective_range`, choose one hier
 These arrivals count eligible observations, not unique people, purchases or Meta-attributed conversions. `meta.clicks` is all Meta clicks and `meta.inline_link_clicks` is link clicks; neither is the outbound-click figure used by `get_arrivals_comparison`. `meta.spend` is a decimal amount in major units of `account_currency`, and action metrics use Meta’s default attribution. Meta clicks and arrivals can differ. This comparison is separate from [Signals reconciliation](/signals/health-and-performance) and does not establish causal lift or admissible quantitative proposal evidence by itself.
 
 ### Read Meta account activity
+
+For the signed-in view, open [Audit log → Meta account changes](/actions/audit-log#inspect-meta-account-changes). Its provider activity is separate from Plainrouter action receipts.
 
 With `include_changes: true`, `get_inventory_metrics` and its [REST equivalent](#read-the-same-metrics-over-rest) can return `activities` alongside object diffs. Each activity can identify its event time and object, provider event type, source, application or actor, available old/new summary, and a related Plainrouter receipt. Read `receipt_missing` and null fields instead of inventing an actor or before/after state.
 

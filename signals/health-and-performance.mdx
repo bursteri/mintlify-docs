@@ -67,6 +67,10 @@ Dashboard offers **Last 7 days**, **Last 30 days**, **Last 90 days**, and **Last
 
 Requests beyond the available window are refused rather than silently shortened. A stale Signals page link returns to the default window with a refusal message; CSV and MCP callers receive an error. Choose an offered window and retry. A refusal saying **this workspace plan keeps** points to the plan allowance; **this workspace is set to keep** points to a shorter workspace setting. Check the named limit before changing the request. This window policy does not extend [`get_performance`](/mcp/tools#get_performance), whose reconciliation range remains 1–90 days.
 
+## What does the attribution coverage block tell me?
+
+Arrivals-comparison reads return [`coverage`](/signals/conversion-journeys#how-do-i-read-attribution-coverage) alongside the measurements. Check retained start markers, the named Meta account, unread and revisable dates, activity gaps and the separate seven-day untagged-spend share. A null value remains unknown; a retained start marker does not prove uninterrupted history. Preserve these limits with REST exports and comparisons.
+
 ## Can I read the arrival comparison through MCP?
 
 Use [`get_arrivals_comparison`](/mcp/tools#get_arrivals_comparison) with a production Read workspace key. Pass `days` as `7`, `30`, or `90`, or use `months: 12` instead when the workspace allows it. With neither input, the default is `7` days. This reads the workspace's stored comparison without selecting an ad account or triggering a live provider read. Check the returned workspace, period, status, and data availability, and keep **Today so far** separate from completed days.
@@ -314,4 +318,4 @@ The Signals overview no longer has the old health-header delete control. During 
 
 **Signals data cleanup is still in progress for this workspace. Try setting up Signals again after cleanup finishes.** means the previous cleanup has not completed. Wait, then retry setup in the same workspace. Reloading, changing the collection domain or submitting setup repeatedly does not complete cleanup. Do not interpret a temporary setup refusal as a DNS error.
 
-Deleting the entire workspace is a separate permanent action in workspace settings. It requires current authorization and password confirmation and can be refused while Signals cleanup is pending. Completed deletion removes the workspace’s retained Actions and Launch evidence chains as well as its other workspace data. Read the displayed consequences and result; a refused request does not mean the workspace was deleted, and deletion does not retract provider changes.
+Deleting the entire workspace is a separate permanent action in workspace settings. It requires current authorization and the displayed identity confirmation and can be refused while Signals cleanup is pending. Completed deletion removes the workspace’s retained Actions and Launch evidence chains as well as its other workspace data. Read the displayed consequences and result; a refused request does not mean the workspace was deleted, and deletion does not retract provider changes.

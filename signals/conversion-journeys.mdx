@@ -76,6 +76,25 @@ Spend uses stored platform reporting dates in each ad account's timezone; conver
 
 UTM dimensions and other channel levels can lack supported spend mappings. Use returned reasons instead of assigning unrelated account spend to those rows. Meta's claimed cost stays separately labeled and does not replace cost per Plainrouter-earned conversion.
 
+## How do I read attribution coverage?
+
+Journey, channel-cost, arrivals-comparison and inventory-metrics reads include a `coverage` block describing the limits of the answer. Read it beside the numbers and keep it when exporting through REST. It does not widen workspace/account scope or turn missing evidence into zero.
+
+| Field | How to use it |
+| --- | --- |
+| `kept_from`, `timezone` | Identify the retained-history boundary and calendar used by this coverage block. Inventory uses its first fully retained local day. |
+| `record_starts` | Inspect separate counted, Meta-spend, Meta-change and applicable revenue start markers. A null date has a reason; a marker is not proof of continuous complete history. Counted and revenue dates use UTC; Meta dates use the account timezone. |
+| `meta.account_id`, `other_account_ids` | Apply the Meta block only to its named account. Other accounts included in the answer are not covered by that one block. |
+| `meta.revisable` | Recent local dates can still change after another Meta read. Preserve the returned bounds rather than treating a current total as final. |
+| `meta.unread_days` | These dates lack a completed read after the next local midnight plus ten minutes. `dates` lists at most 31, while `count` gives the full number and `capped` identifies truncation. |
+| `meta.activity` | Inspect the activity-read error and gap window before concluding no changes occurred. |
+| `meta.untagged_spend` | This share uses a separate seven-complete-local-day window, independently of the answer’s requested range. Basis points run from 0–10000; null means unknown, including incomplete, unreadable or non-positive-total evidence. |
+| `meta_reason`, `not_recorded`, `note` | Preserve unavailable-account explanations and read-specific limitations alongside the result. |
+
+When `meta` is null, inspect `meta_reason` rather than inventing account coverage. Revenue-bearing reads can identify stored Stripe connection/webhook starts and state that earlier history is not imported, disputes are not recorded, and webhooks missed while Plainrouter was down are not re-fetched. A subscription snapshot or stored start date does not close those gaps.
+
+For example, if a seven-day answer lists an unread date, keep that gap visible in a comparison. If untagged spend is null, label it unavailable; do not report 0% untagged or 100% covered. Coverage describes retained observations, not attribution accuracy or incremental performance.
+
 ## Can I export these reads through REST?
 
 Use `GET /api/v1/workspaces/{workspace}/admin/conversion-journeys` or `/cac-by-channel` with the corresponding read grant on a Workspace key. The same scope, filters, continuation, coverage and currency boundaries apply. Preserve `basis_note` and returned reasons alongside the values. [Authentication and reporting export contract](/api/report-exports).

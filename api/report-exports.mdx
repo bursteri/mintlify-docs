@@ -37,6 +37,10 @@ Replace the workspace with one authorized for your key. Arrivals comparison acce
 
 These JSON reads are separate from the signed-in browser CSV downloads and their concurrency limits. An SDK's generated method inventory may lag the current service contract. Use the [published OpenAPI contract](https://plainrouter.com/openapi.json) for current operation parameters and responses rather than inventing an SDK method.
 
+## What does coverage mean in a reporting export?
+
+Journey, channel-cost and arrivals exports carry the shared [`coverage` block](/signals/conversion-journeys#how-do-i-read-attribution-coverage). Preserve its retained boundary, separate record starts, named Meta account, unread/revisable days, activity gaps and untagged-spend window. Those limits can differ from the requested reporting dates. Missing coverage and missing measurements are unknown, not zero or complete. Audit verification is a separate contract below.
+
 ## How do I page audit events?
 
 The audit read defaults to 100 events per page; `limit` accepts 1–500. Optional `from` and `to` dates bound the event time. Results are ordered by `sequence` and contain `data`, `next_cursor` and `note`. Continue with the returned `next_cursor` as `cursor`, preserving the workspace and time bounds; stop when it is null.

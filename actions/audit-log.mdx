@@ -4,7 +4,7 @@ sidebarTitle: "Audit log"
 description: "Page and inspect workspace action history, export audit evidence, and distinguish receipt hashes from current audit-chain verification."
 ---
 
-Open **Audit log** from the Plainrouter sidebar to read action history for the current workspace. Use **Proposed by** and **Status** to filter action rows, select a row for its detail sheet, or choose **Export** for the underlying workspace audit events.
+Open **Audit log** from the Plainrouter sidebar to read action history for the current workspace. Choose **Actions** for Plainrouter action history or **Meta account changes** for retained provider activity. On Actions, use **Proposed by** and **Status** to filter rows, open a row for its detail sheet, or choose **Export** for the underlying workspace audit events.
 
 You need a signed-in browser session with access to the workspace. Select the intended workspace before investigating a proposal or exporting its history.
 
@@ -14,9 +14,17 @@ Action rows summarize the action, decision and result. Filter by **Proposed by**
 
 If the list is empty, clear the filters and confirm the workspace. Token, grant, and policy events may exist in the export even when there are no matching action rows.
 
+## Inspect Meta account changes
+
+Open **Audit log → Meta account changes**. Use **Source** to select **Outside Plainrouter**, **Plainrouter** or **Meta**, and **Level** to narrow campaigns, ad sets or ads. Links from Campaigns can also carry dates and selected objects; inspect or clear those filters before treating the result as the whole available history. Page through the returned results and read the retention window and account timezone.
+
+Select a row to inspect the observed event, object, actor/application and available old/new values. A Plainrouter-origin row can link to **View receipt**. **No receipt** means Meta identifies Plainrouter as the source but no matching receipt exists in this workspace. An outside change has no Plainrouter approval or execution receipt; do not invent one or treat an unknown actor as a known person.
+
+A gap notice means Meta’s activity log could not be read for that interval and changes may be missing. Empty filtered results and null values are not proof that nothing changed. These retained Meta observations remain separate from Plainrouter’s versioned audit-event chain. The **Actions → Export** file and audit verification endpoint do not establish a complete provider activity history. For programmatic activity reads, use [inventory metrics](/actions/account-inventory#read-meta-account-activity); for answer limits, inspect [attribution coverage](/signals/conversion-journeys#how-do-i-read-attribution-coverage).
+
 ## Download workspace audit events
 
-Choose **Export**. The response contains a `data` array of workspace audit events ordered by `sequence`. This export includes the workspace's event history; the on-screen action filters do **not** restrict this workspace event export.
+On **Actions**, choose **Export**. The response contains a `data` array of workspace audit events ordered by `sequence`. This export includes the workspace's event history; the on-screen action filters do **not** restrict this workspace event export.
 
 Each exported event includes:
 

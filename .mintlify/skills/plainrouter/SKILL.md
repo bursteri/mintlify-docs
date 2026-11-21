@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-11-13"
+  documentation_revision: "2026-11-21"
 ---
 
 # Use Plainrouter safely
@@ -112,6 +112,8 @@ requires a workspace key; it does not run the referenced tool. Preserve tool
 scope and approval requirements after loading a prompt.
 
 ## Inspect Signals safely
+
+For journey, channel-cost, arrivals-comparison and inventory-metrics answers, read the returned `coverage` block before summarizing numbers. Preserve retained start markers, the named Meta account, unread/revisable dates, activity gaps and the separate untagged-spend window. Null coverage is unknown, not zero or complete. [Interpret coverage](https://plainrouter.com/docs/signals/conversion-journeys#how-do-i-read-attribution-coverage).
 
 1. Call `get_account_state` and confirm the workspace and Meta ad account. Read
    `connection.health` for the workspace provider status; raw `status: active`
