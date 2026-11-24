@@ -137,3 +137,12 @@ The finite Worker map now covers 40 Markdown aliases. Deployment of this
 follow-up is recorded in the private content workspace under
 `seo/research/2026-09-15-docs-cli-tab/`; it requires the separate docs Worker
 release alongside the Mintlify publication.
+
+## Legacy Meta CAPI guide Markdown aliases
+
+The five legacy `/docs/guides/meta-capi/*.md` aliases that redirect to
+`/library/*.md` (`without-gtm`, `event-id-deduplication`, `fbp-fbc`,
+`event-match-quality`, and `server-side-consent`) are added to `docs.json` and
+`markdownRedirects` in `worker.mjs`, bringing the finite Worker map to 45
+Markdown aliases. Deploying these redirects live requires a separate
+`mintlify-plainrouter` Cloudflare Worker release alongside the Mintlify build.

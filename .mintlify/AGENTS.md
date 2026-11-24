@@ -54,7 +54,7 @@ after the customer-visible implementation is merged and shipped.
   reference. Inbox uses **Done** and **Approved, not sent** as separate groups;
   do not substitute those display labels for technical receipt evidence.
 - New Read keys include `read-actions` for Actions record/policy/receipt reads; previews and proposals remain Write. Older grants do not silently gain operations; `propose-actions` retains read compatibility.
-- Agent proposals follow Ask, permission-based Auto, or Full. Full allows mapped agent actions without individual approval; explicit policy blocks remain blocks. Auto-specific budget holds, human/system proposal rules and scoped availability checks remain separate. Verify the current decision instead of reusing older blanket Full-mode approval claims.
+- Agent proposals follow Ask, permission-based Custom (API value `auto`), or Full. Full allows mapped agent actions without individual approval; explicit policy blocks remain blocks. Custom-specific budget holds, human/system proposal rules and scoped availability checks remain separate. Verify the current decision instead of reusing older blanket Full-mode approval claims.
 - Never imply that a token can widen its workspace or Meta ad-account binding.
 - Never imply that a proposal, approval, queued action, provider write, or
   pending verification is Landed. Landed requires exact provider verification.

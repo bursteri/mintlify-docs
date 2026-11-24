@@ -2,6 +2,11 @@
 // Mintlify's reserved Markdown handler currently ignores these docs.json rules.
 // Keep this finite map in sync with those authored permanent redirects.
 const markdownRedirects = new Map([
+  ["/docs/guides/meta-capi/without-gtm.md", "/library/meta-capi-without-gtm.md"],
+  ["/docs/guides/meta-capi/event-id-deduplication.md", "/library/meta-event-id-deduplication.md"],
+  ["/docs/guides/meta-capi/fbp-fbc.md", "/library/fbp-fbc.md"],
+  ["/docs/guides/meta-capi/event-match-quality.md", "/library/meta-event-match-quality.md"],
+  ["/docs/guides/meta-capi/server-side-consent.md", "/library/server-side-consent.md"],
   ["/docs/signals/why-numbers-differ-meta.md", "/docs/signals/health-and-performance.md#meta-clicks"],
   ["/docs/signals/compare-meta-clicks.md", "/docs/signals/health-and-performance.md#meta-clicks"],
   ["/docs/signals/why-numbers-differ-ga4.md", "/docs/signals/health-and-performance.md#ga4"],

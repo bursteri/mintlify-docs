@@ -75,6 +75,7 @@ def source_inventory(root=ROOT):
             if not match:
                 raise ValueError(f"Missing {key}: {path}")
             fields[key] = match[1].strip().strip('"\'')
+        fields["noindex"] = bool(re.search(r"^noindex:\s*true\s*$", frontmatter, re.M))
         pages[public_url(path)] = fields
     return config, pages, operations
 
@@ -181,7 +182,10 @@ def validate(task, response, pages, operation_count, warnings=None):
         require(page.canonicals == [url], f"Wrong/duplicate canonical: {page.canonicals}")
         require(page.h1 == 1, f"Expected one H1, got {page.h1}")
         directives = " ".join(page.robots + [headers.get("x-robots-tag", "")]).lower()
-        require(not re.search(r"\b(noindex|none)\b", directives), "HTML disallows indexing")
+        if pages.get(url, {}).get("noindex"):
+            require(bool(re.search(r"\bnoindex\b", directives)), "Expected noindex on HTML page")
+        else:
+            require(not re.search(r"\b(noindex|none)\b", directives), "HTML disallows indexing")
         require(bool(page.title.strip()) and len(page.descriptions) == 1 and bool(page.descriptions[0]),
                 "Missing/duplicate title or description")
         if url in pages:
@@ -203,9 +207,12 @@ def validate(task, response, pages, operation_count, warnings=None):
     elif kind == "sitemap":
         document = ET.fromstring(body)
         urls = [node.text for node in document.findall("{*}url/{*}loc")]
+        indexable_pages = {u for u, meta in pages.items() if not meta.get("noindex")}
+        noindexed_pages = {u for u, meta in pages.items() if meta.get("noindex")}
         require(len(urls) == len(set(urls)), "Duplicate sitemap URLs")
-        require(set(pages).issubset(urls), "Authored pages missing from sitemap: " + str(sorted(set(pages) - set(urls))))
-        generated = set(urls) - set(pages)
+        require(indexable_pages.issubset(urls), "Authored pages missing from sitemap: " + str(sorted(indexable_pages - set(urls))))
+        require(not (noindexed_pages & set(urls)), "Noindex pages present in sitemap: " + str(sorted(noindexed_pages & set(urls))))
+        generated = set(urls) - indexable_pages
         require(len(generated) == operation_count, f"Expected {operation_count} generated API pages, got {len(generated)}")
         require(all(safe_url(item) and item.startswith(DOCS + "/api/") for item in generated),
                 "Unexpected sitemap URL outside API docs")
@@ -219,15 +226,18 @@ def validate(task, response, pages, operation_count, warnings=None):
             require(all(robots.can_fetch(agent, page) for page in pages), f"robots.txt blocks docs for {agent}")
     elif kind == "llms":
         require("text/plain" in content_type or "text/markdown" in content_type, "Expected text discovery content")
-        for page in pages:
+        for page, meta in pages.items():
+            if meta.get("noindex"):
+                continue
             markdown = DOCS + "/index.md" if page == DOCS else page + ".md"
             require(markdown in body, f"Missing llms index entry: {markdown}")
     elif kind == "llms-full":
         require("text/plain" in content_type or "text/markdown" in content_type, "Expected full Markdown content")
+        indexable_pages = {u: meta for u, meta in pages.items() if not meta.get("noindex")}
         sources = set(re.findall(r"^Source: (\S+)", body, re.M))
         sources = {DOCS if item == DOCS + "/index" else item for item in sources}
-        require(set(pages).issubset(sources), "Full docs missing authored page Source entries")
-        missing = [url for url, meta in pages.items() if meta["title"] not in body]
+        require(set(indexable_pages).issubset(sources), "Full docs missing authored page Source entries")
+        missing = [url for url, meta in indexable_pages.items() if meta["title"] not in body]
         if missing:
             warnings.append("Aggregate docs titles differ from source for " + ", ".join(missing) +
                             "; inspect cached freshness separately from HTML/Markdown twins.")

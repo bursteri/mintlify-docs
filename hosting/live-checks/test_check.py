@@ -40,10 +40,14 @@ class LiveChecks(unittest.TestCase):
     def test_inventory_distinguishes_wrapped_and_generated_operations(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "docs.json").write_text(json.dumps({"navigation": {"pages": ["event", "GET /events"]}}))
+            (root / "docs.json").write_text(json.dumps({"navigation": {"pages": ["event", "retired", "GET /events"]}}))
             (root / "event.mdx").write_text('---\ntitle: "Send event"\ndescription: "Submit a conversion."\nopenapi: "POST /events"\n---\n')
+            (root / "retired.mdx").write_text('---\ntitle: "Retired"\ndescription: "Retired stub."\nnoindex: true\n---\n')
             _, pages, operations = check.source_inventory(root)
-            self.assertEqual(pages, {check.DOCS + "/event": {"title": "Send event", "description": "Submit a conversion."}})
+            self.assertEqual(pages, {
+                check.DOCS + "/event": {"title": "Send event", "description": "Submit a conversion.", "noindex": False},
+                check.DOCS + "/retired": {"title": "Retired", "description": "Retired stub.", "noindex": True},
+            })
             self.assertEqual(operations, ["GET /events"])
 
     def test_html_control_and_mutations(self):
@@ -96,13 +100,34 @@ class LiveChecks(unittest.TestCase):
 
     def test_sitemap_missing_duplicate_and_unsafe_pages(self):
         generated = check.DOCS + "/api/send-event"
+        retired = check.DOCS + "/api/sandbox/discover"
+        pages = {
+            **PAGES,
+            retired: {"title": "Sandbox discovery retired", "description": "Retired stub.", "noindex": True},
+        }
         def sitemap(urls):
             return '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{url}</loc></url>' for url in urls) + '</urlset>'
         task = {"kind": "sitemap", "url": check.DOCS + "/sitemap.xml"}
-        self.assertEqual(check.validate(task, response(sitemap([URL, generated])), PAGES, 1), [generated])
-        for urls in ([generated], [URL, URL, generated], [URL], [URL, check.ORIGIN + "/events"]):
+        self.assertEqual(check.validate(task, response(sitemap([URL, generated])), pages, 1), [generated])
+        for urls in ([generated], [URL, URL, generated], [URL], [URL, check.ORIGIN + "/events"], [URL, retired, generated]):
             with self.subTest(urls=urls), self.assertRaises(ValueError):
-                check.validate(task, response(sitemap(urls)), PAGES, 1)
+                check.validate(task, response(sitemap(urls)), pages, 1)
+
+    def test_noindex_page_requires_noindex_html_and_skips_llms_requirement(self):
+        retired = check.DOCS + "/api/sandbox/discover"
+        pages = {
+            **PAGES,
+            retired: {"title": "Sandbox discovery retired", "description": "Retired stub.", "noindex": True},
+        }
+        retired_html = ('<html><head><title>Sandbox discovery retired - Plainrouter</title>'
+                        '<meta name="description" content="Retired stub.">'
+                        '<meta name="robots" content="noindex">'
+                        f'<link rel="canonical" href="{retired}"></head><body><h1>Sandbox discovery retired</h1></body></html>')
+        check.validate({"kind": "html", "url": retired}, response(retired_html), pages, 0)
+        with self.assertRaises(ValueError):
+            check.validate({"kind": "html", "url": retired}, response(retired_html.replace('<meta name="robots" content="noindex">', '')), pages, 0)
+        check.validate({"kind": "llms", "url": check.DOCS + "/llms.txt"}, response(f"- [Quickstart]({URL}.md)\n", "text/plain"), pages, 0)
+        check.validate({"kind": "llms-full", "url": check.DOCS + "/llms-full.txt"}, response(f"# Quickstart\nSource: {URL}\n", "text/plain"), pages, 0)
 
     def test_robots_crawler_block_and_missing_sitemap(self):
         task = {"kind": "robots", "url": check.ORIGIN + "/robots.txt"}

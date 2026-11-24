@@ -1,6 +1,7 @@
 ---
 title: "Sandbox key retrieval retired"
 description: "Handle this retired sandbox operation, recognize HTTP 410, and choose authenticated API or MCP setup for your workspace."
+noindex: true
 ---
 
 `GET /api/v1/sandbox/keys` is retired. Requests return HTTP `410` with `error: "sandbox_retired"`; this operation no longer issues credentials or validates synthetic events.

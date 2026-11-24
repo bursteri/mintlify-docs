@@ -20,7 +20,7 @@ You can place `--json` on any API command. Authentication commands also support 
 
 | Command | Purpose |
 | --- | --- |
-| `plainrouter auth login` | Prompt for and store the Signals workspace secret. The `0.5.x` prompt calls it a tracker token. |
+| `plainrouter auth login` | Prompt for and store the Signals workspace secret. The interactive prompt labels it a tracker token for compatibility. |
 | `plainrouter auth status` | Show the masked credential source and API base URL. |
 | `plainrouter auth logout` | Remove the stored local configuration. |
 
@@ -108,7 +108,7 @@ plainrouter user-data delete \
 
 The identifier type is `email`, `phone`, or `external_id`. The command asks for confirmation before sending the deletion request.
 
-The `0.5.x` CLI exposes the legacy SHA-256 form through `--hash`. Use direct REST or an SDK when you need to submit a verified raw identifier; both forms remain body-only and workspace-scoped.
+The CLI exposes the legacy SHA-256 form through `--hash`. Use direct REST or an SDK when you need to submit a verified raw identifier; both forms remain body-only and workspace-scoped.
 
 Use `--yes` only in an automation that has already applied an equivalent confirmation gate:
 
