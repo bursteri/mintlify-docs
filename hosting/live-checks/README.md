@@ -33,15 +33,17 @@ There is no timed monitoring schedule.
 
 - Every authored navigation page: HTML 200, one H1, one self-canonical, nonempty
   metadata, current source title/description, no indexing prohibition in HTML
-  robots metadata or `X-Robots-Tag`, and all six expected discovery `Link` values.
+  robots metadata or `X-Robots-Tag` (or required `noindex` for pages with
+  `noindex: true` frontmatter), and all six expected discovery `Link` values.
 - Every generated API page found in the sitemap: the same HTML checks except
   source metadata comparison. The generated page count must match API operations
   in navigation. Operation descriptors such as `POST /events` are never fetched.
 - Every page's Markdown twin, plus `/docs.md`: 200, Markdown content type and a
   heading; authored titles must match source. Markdown `noindex` is expected.
-- Sitemap: all authored canonicals, unique URLs, expected generated API count,
-  and no unexpected URL outside the documentation API namespace. This checks
-  the count, not a one-to-one operation-to-generated-slug mapping.
+- Sitemap: all indexable authored canonicals (and no `noindex: true` pages),
+  unique URLs, expected generated API count, and no unexpected URL outside the
+  documentation API namespace. This checks the count, not a one-to-one
+  operation-to-generated-slug mapping.
 - Every configured redirect: permanent status and exact destination including
   fragments, with the narrowly enumerated legacy exceptions below. Redirects
   are not followed; external marketing targets are not crawled by this tool.

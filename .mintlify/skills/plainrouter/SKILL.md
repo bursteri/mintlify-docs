@@ -183,7 +183,7 @@ HTTP routes, pagination, response fields, and failure handling.
    stable idempotency key. This stages a private asset and creates a proposal.
 4. Call `duplicate-ad-with-creative` with a human-selected source ad and an
    asset ID returned by Plainrouter. The normalized status remains `paused`.
-5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, admitted agent changes can queue without individual approval; Auto permits only enabled action types. Follow each change through its stored status and receipt. Do not claim that the MCP request changed Meta.
+5. In Ask mode, send the person to the returned `inbox_url` (or legacy `approval_queue_url`) for Inbox; a person approves every change first. In Full mode, admitted agent changes can queue without individual approval; Custom permits only enabled action types. Follow each change through its stored status and receipt. Do not claim that the MCP request changed Meta.
 
 Read
 [Create governed Meta creatives](https://plainrouter.com/docs/actions/creative-workflow)

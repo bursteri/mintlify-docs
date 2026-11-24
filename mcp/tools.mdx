@@ -60,7 +60,7 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_action_decision_receipt` | Read-only, idempotent | Retrieve a stored decision receipt and chain reference. |
 | `get_action_policy` | Read-only, idempotent | Read current policy or effective defaults without creating it. |
 | `dry_run_actions` | Policy preview; may read provider state | Evaluate a proposed batch without saving or executing it. Requires Write access. |
-| `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed proposal governed by the selected Ask, Auto or Full mode. |
+| `propose-actions` | Idempotent write to Plainrouter | Submit an evidence-backed proposal governed by the selected Ask, Custom or Full mode. |
 | `actions.rules.list` | Read-only | List stored account rules and recent evaluation results. |
 | `actions.rules.show` | Read-only | Inspect one rule, immutable revisions and recent runs. |
 | `actions.rules.create` | Configuration write | Store a disabled performance rule; no inline evaluation or Meta write. |
@@ -77,7 +77,7 @@ Actions Tests is removed from the dashboard, HTTP API and MCP. `actions.tests.li
 Legacy Drive connection, inventory sync and file import are also retired. `launcher.draft_batch`, `launcher.batch_status` and `launcher.preview_batch` are removed, rather than conditionally available. An old SDK model, stored grant or feature flag cannot restore these operations. [Migrate from draft-file import](/launcher/import-draft-batch).
 
 <Warning>
-  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, admitted changes wait for human approval. In **Full**, admitted agent batches can queue without individual approval; Auto permits only enabled action types. Every mode keeps execution checks; a submitted proposal is not proof of a Meta change.
+  Proposal-producing tools do not write to Meta during the MCP request. In **Ask**, admitted changes wait for human approval. In **Full**, admitted agent batches can queue without individual approval; **Custom** permits only enabled action types. Every mode keeps execution checks; a submitted proposal is not proof of a Meta change.
 </Warning>
 
 ## Why is a creative tool unavailable?
@@ -508,7 +508,7 @@ When available, `disposition.outcome_payload` provides the stored comparison sid
 
 ### Verify the result and handle failures
 
-Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. In Ask mode, a person approves every change in [Inbox](/actions/review-proposals) first. Auto can run enabled agent action types without individual approval; Full can run admitted agent actions without individual approval. See [protected changes](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
+Confirm the returned workspace/account scope and follow action status through receipt evidence. `approved_without_execution` means no provider write occurred. In Ask mode, a person approves every change in [Inbox](/actions/review-proposals) first. Custom can run enabled agent action types without individual approval; Full can run admitted agent actions without individual approval. See [protected changes](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
 
 If a read is refused, check the key's current role and `read-actions` grant (or compatible `propose-actions`), then account selection. A missing or out-of-scope action, batch, or decision receipt returns a `not_found` tool error; a receipt may not exist yet. Correct invalid status, page, or ID arguments before retrying. An empty list can reflect a filter or the selected account.
 
@@ -580,10 +580,10 @@ Supported target types are `ad_account`, `campaign`, `ad_set`, and `ad`.
 
 <AccordionGroup>
   <Accordion title="pause and resume">
-    Use a human-selected campaign, ad set, or ad and empty `params: {}`. Ask requires person approval. Auto follows the enabled agent permissions; Full can queue admitted agent pauses and resumes without individual approval. See [approval boundaries](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
+    Use a human-selected campaign, ad set, or ad and empty `params: {}`. Ask requires person approval. Custom follows the enabled agent permissions; Full can queue admitted agent pauses and resumes without individual approval. See [approval boundaries](/actions/policies-and-safety#which-changes-still-need-a-person-in-full).
   </Accordion>
   <Accordion title="increase_budget and decrease_budget">
-    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's [Meta budget units](/api/actions#which-units-do-budget-requests-use). Ask requires person approval. Auto follows its enabled budget permissions and budget limits; Full can queue admitted agent budget changes without individual approval. Current policy and provider-state checks still apply.
+    Use a campaign or ad set and `new_daily_budget_minor`, a positive integer in the account currency's [Meta budget units](/api/actions#which-units-do-budget-requests-use). Ask requires person approval. Custom follows its enabled budget permissions and budget limits; Full can queue admitted agent budget changes without individual approval. Current policy and provider-state checks still apply.
   </Accordion>
   <Accordion title="duplicate_ad_with_creative">
     Requires `asset_id` and `status: "paused"`. An optional `name_suffix` can identify the duplicate.
@@ -610,7 +610,7 @@ These rules apply to both `propose-actions` and `dry_run_actions`:
 | `upload_asset` | `staged_asset_id` is `stage_` followed by 40 lowercase hex characters. `asset_type` is `image`; the content hash is exactly 64 lowercase hex characters. For optional `size_bytes`, use a positive integer byte count. |
 | `duplicate_ad_with_creative` | Supply only `asset_id`, `status: "paused"` and optional `name_suffix`. Use the exact `image:…` or `video:…` library asset ID. `degrees_of_freedom_spec` is server-owned and must be omitted, including on retries. |
 
-Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask. Auto follows every required agent permission; Full can queue admitted agent changes without individual approval. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes.
+Canonical `pause` and `resume` support campaign, ad set, and ad targets. `increase_budget` and `decrease_budget` support campaign and ad set daily budgets. These types require human approval in Ask. Custom follows every required agent permission; Full can queue admitted agent changes without individual approval. Current policy and execution authorization still apply. Historical **Suggest only** batches never execute. A kill switch can stop further writes without undoing prior changes.
 
 New `propose-actions` and `dry_run_actions` calls refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback` with a tool validation error. Stored historical actions of these types never execute. Use a supported canonical type and correct the affected `actions.N.type`; a different retry key does not bypass validation. See [action-type refusals](/api/actions#which-action-types-are-refused), [supported Actions](/actions/overview#supported-action-types), and the [creative workflow](/actions/creative-workflow).
 

@@ -4,7 +4,7 @@ sidebarTitle: "Introduction"
 description: "Connect your AI assistant for Signals installation, arrival comparisons, Meta account diagnostics, creative reads, and governed proposals."
 ---
 
-Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to inspect workspace Signals setup, compare arrivals, read an authorized Meta ad account, and request creative changes governed by the selected Ask, Auto or Full mode. Start with an authenticated read from your workspace.
+Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server to inspect workspace Signals setup, compare arrivals, read an authorized Meta ad account, and request creative changes governed by the selected Ask, Custom or Full mode. Start with an authenticated read from your workspace.
 
 <CardGroup cols={2}>
   <Card title="Set up your connection" icon="plug" href="/mcp/clients">
@@ -33,7 +33,7 @@ Use Plainrouter's [Model Context Protocol (MCP)](https://modelcontextprotocol.io
 | Review creatives | `get-creative-library` | Account images and videos with associated ads and recent performance history. |
 | Request a creative change | `upload-asset` or `duplicate-ad-with-creative` | A governed proposal for review; a supported ad copy is created paused only after the execution gates pass. |
 
-In Ask mode, a person approves every change first. Auto permits enabled agent action types without individual approval; Full permits admitted agent actions without individual approval. Follow each change through its stored status and receipt. Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals follow the selected mode. Every mode applies current execution checks. New proposals and previews refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`; stored historical actions of those types never execute. [Use supported action types](/api/actions#which-action-types-are-refused). Historical **Suggest only** batches record approvals without executing them.
+In Ask mode, a person approves every change first. Custom permits enabled agent action types without individual approval; Full permits admitted agent actions without individual approval. Follow each change through its stored status and receipt. Canonical `pause`, `resume`, `increase_budget`, and `decrease_budget` proposals follow the selected mode. Every mode applies current execution checks. New proposals and previews refuse `set_status`, `adjust_budget`, `replace_creative`, `shift_spend`, and `rollback`; stored historical actions of those types never execute. [Use supported action types](/api/actions#which-action-types-are-refused). Historical **Suggest only** batches record approvals without executing them.
 
 For repeatable Signals tasks, the server also supplies three [built-in prompts](/mcp/tools#built-in-signals-prompts): installation, claimed-versus-counted comparison, and signal health. They return instructions; the client still needs authorization to run the referenced tools.
 

@@ -90,15 +90,15 @@
             "group": "Reference",
             "icon": "library",
             "pages": [
-              "reference/statuses-and-terms"
-            ]
-          },
-          {
-            "group": "Legacy Launcher",
-            "icon": "archive",
-            "pages": [
-              "launcher/connect-drive",
-              "launcher/import-draft-batch"
+              "reference/statuses-and-terms",
+              {
+                "group": "Legacy Launcher",
+                "hidden": true,
+                "pages": [
+                  "launcher/connect-drive",
+                  "launcher/import-draft-batch"
+                ]
+              }
             ]
           }
         ]
@@ -313,11 +313,17 @@
             "icon": "history",
             "pages": [
               "api/sandbox",
-              "api/sandbox/discover",
-              "api/sandbox/get-key",
-              "api/sandbox/create-key",
-              "api/sandbox/validate-event",
-              "api/sandbox/validate-keyed-event"
+              {
+                "group": "Retired sandbox endpoints",
+                "hidden": true,
+                "pages": [
+                  "api/sandbox/discover",
+                  "api/sandbox/get-key",
+                  "api/sandbox/create-key",
+                  "api/sandbox/validate-event",
+                  "api/sandbox/validate-keyed-event"
+                ]
+              }
             ]
           }
         ]
@@ -382,23 +388,53 @@
     },
     {
       "source": "/guides/meta-capi/without-gtm",
-      "destination": "https://plainrouter.com/library/meta-capi-without-gtm"
+      "destination": "https://plainrouter.com/library/meta-capi-without-gtm",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/without-gtm.md",
+      "destination": "https://plainrouter.com/library/meta-capi-without-gtm.md",
+      "permanent": true
     },
     {
       "source": "/guides/meta-capi/event-id-deduplication",
-      "destination": "https://plainrouter.com/library/meta-event-id-deduplication"
+      "destination": "https://plainrouter.com/library/meta-event-id-deduplication",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/event-id-deduplication.md",
+      "destination": "https://plainrouter.com/library/meta-event-id-deduplication.md",
+      "permanent": true
     },
     {
       "source": "/guides/meta-capi/fbp-fbc",
-      "destination": "https://plainrouter.com/library/fbp-fbc"
+      "destination": "https://plainrouter.com/library/fbp-fbc",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/fbp-fbc.md",
+      "destination": "https://plainrouter.com/library/fbp-fbc.md",
+      "permanent": true
     },
     {
       "source": "/guides/meta-capi/event-match-quality",
-      "destination": "https://plainrouter.com/library/meta-event-match-quality"
+      "destination": "https://plainrouter.com/library/meta-event-match-quality",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/event-match-quality.md",
+      "destination": "https://plainrouter.com/library/meta-event-match-quality.md",
+      "permanent": true
     },
     {
       "source": "/guides/meta-capi/server-side-consent",
-      "destination": "https://plainrouter.com/library/server-side-consent"
+      "destination": "https://plainrouter.com/library/server-side-consent",
+      "permanent": true
+    },
+    {
+      "source": "/guides/meta-capi/server-side-consent.md",
+      "destination": "https://plainrouter.com/library/server-side-consent.md",
+      "permanent": true
     },
     {
       "source": "/signals/why-numbers-differ-meta",

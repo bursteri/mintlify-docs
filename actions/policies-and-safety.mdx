@@ -1,9 +1,9 @@
 ---
 title: "Agent rules and execution safety"
-description: "Choose Ask, Auto or Full for agent proposals, configure action permissions, and understand approval, budget and provider-verification boundaries."
+description: "Choose Ask, Custom or Full for agent proposals, configure action permissions, and understand approval, budget and provider-verification boundaries."
 ---
 
-Open **Settings → Agent rules** to choose how agents may act in the selected workspace. **Ask** waits for approval, **Auto** permits the actions you turn on, and **Full** permits admitted agent actions without a separate person approval for each change. Every mode keeps policy, authorization and provider-verification checks.
+Open **Settings → Agent rules** to choose how agents may act in the selected workspace. **Ask** waits for approval, **Custom** permits the actions you turn on, and **Full** permits admitted agent actions without a separate person approval for each change. Every mode keeps policy, authorization and provider-verification checks.
 
 Changing these settings requires current permission to update the workspace. Members with view access can inspect them. A Workspace key cannot change the workspace's agent mode. A listed permission does not enable an unavailable product operation.
 
@@ -12,30 +12,28 @@ Changing these settings requires current permission to update the workspace. Mem
 | Mode | Agent proposals |
 | --- | --- |
 | **Ask** (`ask`) | Every admitted change waits for a person to approve it in Inbox. |
-| **Auto** (`auto`) | Only action types enabled under **What agents can do on their own** can proceed without individual approval. Other admitted changes wait for a person. |
+| **Custom** (`auto`) | Only action types enabled under **What agents can do on their own** can proceed without individual approval. Other admitted changes wait for a person. |
 | **Full** (`full`) | Admitted agent changes can proceed without individual approval, including supported budget raises and campaign/ad-set activation. Explicit policy blocks still prevent execution. |
 
-Some public and agent copy calls the permission-based mode **Custom**. The current **Agent rules** selector labels it **Auto**, and API fields still use `auto`. These names describe the same permission-based mode; they do not add another execution mode.
-
-New workspaces default to Ask. Select a mode and choose **Save**. Auto's switches cover pauses, uploads, paused ad creation, activation, campaign/ad-set creation, budget changes and automation permissions. Every required permission in a mixed batch must allow the action before that batch can run unattended.
+New workspaces default to Ask. Select a mode and choose **Save**. Custom's switches cover pauses, uploads, paused ad creation, activation, campaign/ad-set creation, budget changes and automation permissions. Every required permission in a mixed batch must allow the action before that batch can run unattended.
 
 The agent-mode decision does not expand the key's workspace, Meta ad account, scopes or grant. It does not make an unsupported action available. Older `suggest_only`, `auto_with_limits` and `full_auto` values belong to historical batch snapshots; they are not additional current choices.
 
 ## Which changes still need a person in Full?
 
-Full no longer applies the former blanket person-approval rule to agent budget increases, campaign/ad-set resumes or creation permissions. Use Ask when you want every agent proposal to wait. Use Auto when you want to allow only selected action types without individual approval.
+Full no longer applies the former blanket person-approval rule to agent budget increases, campaign/ad-set resumes or creation permissions. Use Ask when you want every agent proposal to wait. Use Custom when you want to allow only selected action types without individual approval.
 
 Full still cannot approve a refused change, widen a credential or manufacture missing provider evidence. Human decisions and system-generated account rules have their own authorization paths; the agent permission switches do not replace those checks. [Read a batch's actual policy result](/actions/review-proposals) before representing it as approved or executed.
 
 ## How are unattended budget changes limited?
 
-In Auto, enabled agent budget raises remain subject to the configured agent budget limits. A large raise, unavailable budget/currency evidence or unverifiable recent raises can require person approval. If a limit is exceeded when execution rechecks the queued work, the write can be blocked; inspect the reason and propose the intended change again for review. Full does not use the Auto-specific multiplier hold.
+In Custom, enabled agent budget raises remain subject to the configured agent budget limits. A large raise, unavailable budget/currency evidence or unverifiable recent raises can require person approval. If a limit is exceeded when execution rechecks the queued work, the write can be blocked; inspect the reason and propose the intended change again for review. Full does not use the Custom-specific multiplier hold.
 
 ### What happens when an agent turns on a new campaign or ad set?
 
-In Auto, the enabled launch-budget safeguard also checks the first activation of a campaign or ad set created paused by Plainrouter. It compares the budget that would start spending with a comparable running budget. A large first launch, missing comparable budget or uncertain currency/state can require a person to approve it. A change that exceeds the limit at execution can be blocked and needs a new proposal for review.
+In Custom, the enabled launch-budget safeguard also checks the first activation of a campaign or ad set created paused by Plainrouter. It compares the budget that would start spending with a comparable running budget. A large first launch, missing comparable budget or uncertain currency/state can require a person to approve it. A change that exceeds the limit at execution can be blocked and needs a new proposal for review.
 
-This is separate from approving the paused creation. Creating an object does not authorize turning it on. Full does not use this Auto-specific approval hold. The current Agent rules page does not expose an editor for these budget-limit values; do not infer a setup control from a stored policy field.
+This is separate from approving the paused creation. Creating an object does not authorize turning it on. Full does not use this Custom-specific approval hold. The current Agent rules page does not expose an editor for these budget-limit values; do not infer a setup control from a stored policy field.
 
 ## Why is a change blocked by workspace pause?
 
