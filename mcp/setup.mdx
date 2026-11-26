@@ -315,3 +315,7 @@ Check `account_id` and the key's workspace. Signals reads require the workspace'
 ### Signals tools show setup required
 
 The account may be authorized correctly while its workspace has no active Signal or destination. Complete [Signals setup](/signals/overview) and call the tools again.
+
+## Why did reauthorizing OAuth remove old access?
+
+A fresh approval replaces the client's earlier authorization with the newly approved workspace set and tier. Old access and refresh credentials cannot retain broader access by refreshing or continuing an older session. Confirm the intended workspaces and access when approving again, then use the replacement connection. Refreshing an existing grant does not add new operations.

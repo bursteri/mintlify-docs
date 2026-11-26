@@ -5,7 +5,7 @@ license: Proprietary
 compatibility: Requires a Plainrouter workspace and the credential or workspace-key tier required by the selected workflow. Public discovery does not authorize tool calls.
 metadata:
   product: Plainrouter
-  documentation_revision: "2026-11-21"
+  documentation_revision: "2026-11-26"
 ---
 
 # Use Plainrouter safely
@@ -199,3 +199,9 @@ current account scope, permissions, policy and required approvals.
 
 Read the [retirement guide](https://plainrouter.com/docs/launcher/import-draft-batch)
 and [current tools](https://plainrouter.com/docs/mcp/tools#which-test-and-legacy-tools-are-retired).
+
+## Reporting records and Automations
+
+Use a [Reporting key](https://plainrouter.com/docs/api/reporting) for its narrow report/inventory subset, not feedback or diagnostic writes. General Read keys are not exclusively read-only. Reporting keys can call permitted MCP report tools, including `get_monthly_statements`; they cannot download the whole attribution record. Preserve coverage, currencies, missing values, statement versions and each section's actual date window. [Record limits](https://plainrouter.com/docs/signals/records-and-statements).
+
+[Automations](https://plainrouter.com/docs/actions/automations) require separate authorization. Ask refuses agent create/update/turn-on instead of queuing approval. Full permits admitted authoring; Custom (dashboard Auto, API `auto`) checks automation and underlying-action permissions. Creation saves off; update and turn-on need the current revision ID. Enabled automations continue across mode changes while their authorizing access remains valid. Turn off explicitly to stop future checks; follow resulting actions through exact provider verification.

@@ -171,3 +171,9 @@ Follow [Inbox and current disposition](/actions/review-proposals#current-disposi
 - **Arrival counts are missing or do not match clicks:** distinguish `null` from `0`, inspect matching tags and freshness, and compare one hierarchy level over the same dates. Do not add the workspace's unmatched count to a filtered ad total.
 
 Tool names and input contracts are published in the [Plainrouter MCP server card](https://plainrouter.com/.well-known/mcp/server-card.json); response fields are defined in the [public OpenAPI contract](https://plainrouter.com/openapi.json). For live image/video asset selection, use the separate [creative-library workflow](/actions/creative-workflow).
+
+## Inspect revisions to past-day Meta totals
+
+Set `include_revisions: true` on `get_inventory_metrics` (or `include_revisions=1` on its REST equivalent) to read retained account-total changes for previously fully read days. First reads, incomplete days and unchanged re-reads are not revisions. No revision history exists for dates before it was recorded.
+
+The `revisions` block contains `rows`, `count` and `capped`, newest first, with at most 100 rows and a shared response-size limit. It has no continuation cursor; narrow the date range when capped. Object filters do not narrow these account-level revisions. Read timestamps describe when provider reads began, so completion order can make them appear out of order. A revision records a changed Meta claim, not a changed independently counted outcome. [Frozen statements preserve their own snapshot](/signals/records-and-statements).

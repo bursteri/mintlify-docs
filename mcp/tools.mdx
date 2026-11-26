@@ -20,6 +20,7 @@ Collection tools return bounded pages of complete rows. A short page can reflect
 | --- | --- |
 | `list_workspaces`, `get_cookie_scan` | Pass top-level `next_cursor` as integer `cursor`; inspect `total` and `truncated`. |
 | `get_conversion_journeys` | Pass `pagination.next_cursor` as opaque `cursor` with the same workspace, dates, model, lookback, level, kinds and limit. |
+| `get_monthly_statements` | Inspect `has_more`; narrow `from`/`to` month bounds. There is no cursor. |
 | `get_account_inventory` | Pass `next_cursor` as `after_id`; defaults to 25 objects. |
 | `get_inventory_metrics` | Pass the opaque top-level `next_cursor` as `cursor` with the same filters and `include_changes`; inspect each collection under `pagination`. |
 | `list_actions` | Pass `meta.next_cursor` as `cursor`, keeping account, status and `limit`; `meta.next_page_arguments` supplies the next arguments. |
@@ -42,6 +43,7 @@ The server version is separate from the MCP protocol revision. For custom client
 | `get_consent_rates` | Read-only, idempotent | Read recorded Analytics and Marketing choices and recent receipts. |
 | `get_install_instructions` | Read-only, idempotent | Read managed-hostname installation material and stored first-arrival state. |
 | `get_conversion_journeys` | Read-only, idempotent | Read retained journey credit and separate Meta claims; [guide](/signals/conversion-journeys). |
+| `get_monthly_statements` | Read-only, idempotent | Read frozen month/version totals, hashes and coverage; [guide](/signals/records-and-statements). |
 | `get_cac_by_channel` | Read-only, idempotent | Compare stored spend with earned conversions by currency; [guide](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). |
 | `get_signal_quality` | Read-only, idempotent | Read scoped delivery outcomes, gaps, retained identity and journey coverage; [guide](/signals/health-and-performance#how-do-i-read-signal-quality-through-mcp). |
 | `get_trial_proof` | Read-only, idempotent | Follow Stripe trial cohorts to first payment with mature samples and uncertainty; [guide](/signals/trial-to-paid). |
@@ -69,6 +71,10 @@ The server version is separate from the MCP protocol revision. For custom client
 | `upload-asset` | Idempotent proposal write | Stage a JPEG or PNG and create a governed upload proposal. |
 | `duplicate-ad-with-creative` | Idempotent proposal write | Propose a copy created and verified paused of a source Meta ad with a selected asset. |
 | `revoke_grant` | Idempotent authorization write | Revoke an authorized grant in the caller's workspace. |
+
+## Automations tools
+
+`actions.automations.list`, `actions.automations.show` and `actions.automations.checks` read stored automations and results. `actions.automations.create`, `actions.automations.update`, `actions.automations.turn-on` and `actions.automations.turn-off` manage configuration. They do not write to Meta inline. Ask refuses agent create/update/turn-on; Full permits admitted authoring and Custom checks explicit permissions. Existing enabled runs have their own authorization. Read the [Automations guide](/actions/automations#author-through-mcp) before calling a write tool.
 
 ## Which test and legacy tools are retired?
 

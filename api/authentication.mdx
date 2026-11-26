@@ -22,6 +22,7 @@ Yes. Workspace and Management key authentication checks the issuing person's ver
 | --- | --- | --- | --- |
 | Send or read Signal data | REST, TypeScript SDK, Python SDK, Ruby SDK, Go SDK, or CLI | Server secret | One workspace and its Signals resources |
 | Call Plainrouter tools as an agent | MCP or an authorized workspace route | Workspace key | Fixed selected workspace set, role-capped tier per workspace, and an eligible account selected per account-scoped call |
+| Read supported stored reports with restricted access | [Reporting rows and reads](/api/reporting) | Reporting-preset Workspace key | Selected workspaces and its four report/inventory operations; current role and grants still apply |
 | Submit or inspect Actions | [Actions API](/api/actions) and [MCP Actions reads](/mcp/tools#read-actions-and-policy) | Read or Write Workspace key: `read-actions` for reads, `propose-actions` for previews/proposals | One authorized workspace per call and selected eligible account |
 | List accessible workspaces and manage your workspace keys | [Management API](#how-do-i-use-the-management-api) | Management key | Limited by its owner's current access and role; not an MCP credential |
 | Discover the approved agent context | `GET /api/v1/agent/context` | OAuth management credential | Read-only account discovery |

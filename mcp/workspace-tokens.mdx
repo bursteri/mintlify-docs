@@ -147,3 +147,7 @@ Use Read for supported Signals, account, or creative reads. Actions record reads
 ### You cannot open Workspace keys
 
 Confirm you are the owner or a current member of the selected workspace's team. Write issuance requires update permission; you cannot list or delete another member's workspace keys from this page. **Management keys** is a different settings page and does not supply MCP execution credentials.
+
+## Restrict a key to reports
+
+The **Reporting** preset is a narrow Read Workspace key issued through the management API. It admits supported report and retained-inventory operations while excluding feedback, diagnostic writes, Actions and grant revocation. The dashboard currently offers general Read and Write, so follow [Reporting key issuance](/api/reporting) for the preset. Reporting keys can use their permitted MCP report tools; they cannot download the complete attribution record.

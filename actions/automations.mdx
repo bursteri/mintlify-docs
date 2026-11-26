@@ -1,0 +1,49 @@
+---
+title: "Schedule advertising automations"
+sidebarTitle: "Automations"
+description: "Create scheduled Meta advertising checks, inspect their evidence and results, and manage automation authority in the dashboard or MCP."
+---
+
+Automations check saved conditions on a schedule and perform the action you authorized when those conditions pass. They use stored account data and deterministic checks; an AI agent does not decide what to do at each run. They are separate from [account rules](/actions/account-rules) and one-off [agent proposals](/actions/review-proposals).
+
+## Create an automation in the dashboard
+
+Owners and admins can manage automations; other team members can read them. Select the intended workspace and Meta account, then open **Automations → New automation**.
+
+1. Name the automation and select a campaign, ad set or ad scope. Choose all eligible objects or specific Meta object IDs.
+2. Choose **pause**, **start**, **duplicate**, **raise budget**, **lower budget** or **report**. Budget changes and duplication support campaigns and ad sets. A copied object starts paused.
+3. Add conditions and choose whether all or any must pass. Available measures include spend, arrivals, cost per arrival, conversions, cost per conversion and age. Select the reporting window shown for each condition.
+4. Set the schedule, days and per-item frequency limit. Schedules use the Meta account's timezone. Interval choices include hourly, every six hours and daily; specific times use quarter-hour slots.
+5. Choose **Save, leave off** to retain the definition without running it, or **Save and turn on** to authorize future checks. Read any refusal: a saved automation can remain off when turning it on is refused.
+
+Budget changes use a percentage from 1–50, with a ceiling for raises or a floor for reductions. Duplication allows 1–5 copies and can pause the original. Each check can change at most 25 items per account; candidate and response limits also apply. A supported action is still subject to account eligibility, provider state and execution checks.
+
+## Read checks and missing evidence
+
+Open the automation to inspect its current revision, state, recent checks, reasons and resulting actions. Saving a definition makes no immediate Meta change. Turning it on schedules later checks; it does not establish that a condition passed or a write landed.
+
+Arrival and conversion conditions need Plainrouter URL-tag evidence covering the relevant window. Recent or missing tags, incomplete reads and unavailable measurements can prevent a decision. Conversion conditions use qualified, verified conversions. Missing values are not zero. Check [tag coverage](/actions/account-inventory#check-plainrouter-ad-tag-coverage) and [conversion choices](/signals/conversions) before relying on a low count.
+
+Follow resulting actions through their receipts and exact provider verification. A successful check or a matching condition is not proof of a completed provider write or improved performance. A newly raised automation alert queues an email to the team owner; use the automation's displayed reason and history to investigate.
+
+## Author through MCP
+
+Use a Workspace key with the applicable automation grants. Read access and current workspace membership permit the read tools; authoring needs Write access issued by a person who can update the workspace. A Reporting key does not authorize automation tools.
+
+All seven tool names start with `actions.automations.`. Use the suffix below to select the operation.
+
+| Tool suffix | Purpose |
+| --- | --- |
+| `list` | List account automations. |
+| `show` | Read a definition and its revisions. |
+| `checks` | Inspect stored checks and their results. |
+| `create` | Save a new automation **off**. |
+| `update` | Save a revision using `expected_revision_id`. |
+| `turn-on` | Enable the expected revision using `expected_revision_id`. |
+| `turn-off` | Stop future checks; permitted in every agent mode. |
+
+Confirm workspace and internal `account_id` before authoring. Use automation and revision IDs returned by Plainrouter; object selections inside the definition use Meta IDs. Fetch the current definition before an edit. If `automation_revision_stale` is returned, read the new revision and review it before retrying. Follow each tool's returned continuation fields and the [published input schemas](https://plainrouter.com/.well-known/mcp/server-card.json).
+
+**Ask refuses agent create, update and turn-on calls**; it does not place those configuration requests in Inbox. **Full** permits admitted authoring. **Custom** (currently labeled **Auto** in Agent rules, API value `auto`) requires the matching automation permission; enabling an automation also checks permissions for its underlying action.
+
+Once authorized and turned on, an automation runs in every agent mode. Changing the agent mode alone does not turn it off. Its authorizing access must remain valid: expiry, revocation, a lost required role or an unavailable bound connection can stop it. Use **turn off** when you intend to stop future checks. Turning off does not undo earlier provider changes. [Agent rules and execution safety](/actions/policies-and-safety).

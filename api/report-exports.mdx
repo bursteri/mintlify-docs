@@ -12,6 +12,8 @@ Send the Workspace key as `Authorization: Bearer <workspace-key>` and `Accept: a
 
 The workspace in the URL must belong to the key's authorized set. Account selection, when provided, must remain inside that workspace and any older account-bound restriction. Use Plainrouter's internal `account_id`, not the external Meta ad account ID. The `/admin/` path segment does not change these reads into Management-key operations.
 
+For a restricted report integration, use a [Reporting key and flat tables](/api/reporting). General Read keys also admit certain diagnostics and feedback writes, so Read is not a reports-only preset. Frozen statements and complete downloads have [separate record limits](/signals/records-and-statements).
+
 ## Available reporting reads
 
 All paths below follow `https://plainrouter.com/api/v1`.
@@ -21,6 +23,9 @@ All paths below follow `https://plainrouter.com/api/v1`.
 | `GET /workspaces/{workspace}/admin/conversion-journeys` | `get_conversion_journeys` | [Journey filters, credit models and pagination](/signals/conversion-journeys). |
 | `GET /workspaces/{workspace}/admin/cac-by-channel` | `get_cac_by_channel` | [Cost per earned conversion and currency limits](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). |
 | `GET /workspaces/{workspace}/admin/arrivals-comparison` | `get_arrivals_comparison` | [Reporting windows, claims and unavailable evidence](/signals/health-and-performance). |
+| `GET /workspaces/{workspace}/admin/monthly-statements` | `get_cac_by_channel` | [Frozen month/version totals and coverage](/signals/records-and-statements). |
+| `GET /workspaces/{workspace}/admin/attribution-record` | Seven required read operations | [Complete-file authorization, limits and section hashes](/signals/records-and-statements#download-a-whole-attribution-record). |
+| `GET /workspaces/{workspace}/admin/report-rows/{table}` | Channel-cost or arrivals grant for the selected table | [Three supported flat report tables](/api/reporting). |
 | `GET /workspaces/{workspace}/admin/audit-events` | `get_audit_events` | Paged workspace audit-event JSON. |
 | `GET /workspaces/{workspace}/admin/audit-events/verify` | `verify_audit_events` | Checks continuity and supported hashes in the current stored audit snapshot. |
 

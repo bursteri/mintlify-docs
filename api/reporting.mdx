@@ -1,0 +1,65 @@
+---
+title: "Connect reports with a Reporting key"
+sidebarTitle: "Reporting keys and rows"
+description: "Issue a restricted Reporting Workspace key, list its authorized workspaces and read flat channel, monthly-statement and arrivals tables."
+---
+
+Use the **Reporting** Workspace-key preset for an integration that only needs supported stored reports. It is narrower than a general Read key, which also admits some feedback and diagnostic writes. Keep the key in your integration's protected server-side credential store.
+
+## Issue the restricted key
+
+Reporting is an API issuance preset; the dashboard's Workspace keys form currently offers Read and Write. Use a separately stored **Management key** to create the Reporting key through the [management API](/api/authentication#how-do-i-use-the-management-api):
+
+```http
+POST /api/v1/workspaces/42/tokens HTTP/1.1
+Host: plainrouter.com
+Authorization: Bearer <management-key>
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Client reports",
+  "preset": "reporting",
+  "expires_in_days": 90,
+  "workspace_ids": [42]
+}
+```
+
+Replace the workspace with one the issuer can access. `preset: "reporting"` selects Read tier; if you also send `tier`, it must be `read`. Expiry accepts 30, 90, 365 or `"never"`. Save the returned key securely and give **that Reporting key** to the report integration. The Management key remains separate and must not be installed as the report credential.
+
+The preset restricts operations to `get_arrivals_comparison`, `get_cac_by_channel`, `get_account_inventory` and `get_inventory_metrics`. It also permits `get_monthly_statements` through its channel-cost grant and the matching scoped report routes. It cannot submit feedback, write an ingestion diagnostic, manage Actions or grants, or download the whole attribution record. It can use its permitted MCP report tools; the preset is not a blanket MCP prohibition. Current role, grant, expiry and account restrictions still apply.
+
+## Let the integration select a workspace
+
+With the Reporting key, request `GET /api/v1/workspaces`. This lists only the credential's live authorized workspaces, with `workspace_id`, `workspace_name`, nullable `ad_account_name` and effective `tier`.
+
+The first page defaults to 25; `limit` accepts 1–100. Pass the returned integer `next_cursor` as `cursor` until it is null. Inspect `total` and `truncated`. A null account name does not grant access to every Meta account. Use a returned workspace ID in report URLs; this directory cannot widen the key's scope.
+
+## Read a flat report table
+
+All three routes are GET reads below `https://plainrouter.com/api/v1/workspaces/{workspace}/admin/report-rows`. Send `Authorization: Bearer <reporting-key>` and `Accept: application/json`.
+
+| Table path | Rows and parameters |
+| --- | --- |
+| `/channels` | One row per channel and currency. Uses the [channel-cost read's date, model, lookback and conversion-kind filters](/signals/conversion-journeys#how-do-i-read-cost-per-earned-conversion). |
+| `/monthly-statements` | One row per frozen statement line. Optional `from`/`to` use `YYYY-MM`; `limit` is 1–24. Preserve `has_more` and narrow month bounds when needed. |
+| `/arrivals-window` | One row for the selected fixed window, **not a daily series**. Use `days=7`, `30` or `90`, or `months=12`; omit both for seven days. Do not send both. |
+
+An illustrative stored read is:
+
+```http
+GET /api/v1/workspaces/42/admin/report-rows/arrivals-window?days=30 HTTP/1.1
+Host: plainrouter.com
+Authorization: Bearer <reporting-key>
+Accept: application/json
+```
+
+Responses include `table`, `generated_at` and `rows`; monthly rows also expose `has_more`. Optional account selection uses Plainrouter's internal account ID and must satisfy the underlying report's binding. Unknown query parameters are refused. Write whole-number parameters plainly, without leading zeros, spaces, decimal points or exponents; unsupported values return validation errors.
+
+Keep decimal amounts and currency together. Preserve nulls, unavailable reasons, coverage and counted-versus-claimed distinctions when building a chart. Do not turn missing evidence into zero or sum currencies without an explicit conversion basis. These tables flatten existing readers; they do not refresh Meta or create a new measurement.
+
+## Freshness and integration limits
+
+Table responses can reuse an authorized internal cache, defaulting to 15 minutes. Inspect `generated_at` and the underlying report's observation and coverage fields. Authorization is checked before cached data is returned. HTTP responses are private and `no-store`; the internal cache is not a public HTTP cache or a freshness guarantee.
+
+Use the [published OpenAPI contract](https://plainrouter.com/openapi.json) for exact fields and supported filters. These routes provide data for your own connector; they do not establish a released Google or other vendor connector. For nested evidence, use [reporting exports](/api/report-exports); for frozen records and the whole-file download, see [records and statements](/signals/records-and-statements).

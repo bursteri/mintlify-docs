@@ -63,3 +63,11 @@ A browser sign-in and an [MCP Workspace key or OAuth connection](/mcp/setup) are
 ## Where can I read the security policy or report a concern?
 
 Read the [public security policy](https://plainrouter.com/security) and its [security contact record](https://plainrouter.com/.well-known/security.txt). Follow that policy for reporting a concern; never include account credentials or recovery material. The workspace's [Actions audit history](/actions/audit-log) records advertising decisions and receipts; it is not a general account-security event export.
+
+## Where can I inspect sign-ins and security changes?
+
+Open **Settings → Security log**. **My activity** shows your own sign-ins and account changes, including available device and IP details. The **Team** tab is available only to the team owner; it includes authorized team security history and an **Export CSV** control. Admin membership alone does not grant that owner-only access.
+
+The team view can filter by event type, person, workspace and date range. Security history is retained for 13 months. CSV exports contain at most 50,000 event rows, with a notice when more match. They are limited to six per minute per owner and team; honor the displayed limit and use narrower filters for large histories. Downloaded files can contain account, device and address details, so store them privately. This security log is separate from the advertising Actions audit chain.
+
+Plainrouter also sends security emails for supported account and team access changes. Use the recorded event and current settings to investigate an unexpected change. Email delivery is not proof that every event was observed, and a notification does not grant an agent authority to change access.

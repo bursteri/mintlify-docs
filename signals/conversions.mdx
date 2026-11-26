@@ -51,3 +51,7 @@ Supported proposal evidence also freezes its `conversion_definition`, including 
 | A renewal adds revenue but not a Purchase conversion | Check whether **Subscribed** is selected and whether the payment belongs to a subscription. |
 | An older proposal differs from today's dashboard | Read its frozen conversion definition and evidence window. Do not silently replace them with current settings. |
 | Workspace count exists but a channel has no credit | Inspect retained [conversion journeys](/signals/conversion-journeys); a counted event does not establish an observed advertising touch. |
+
+## Review conversion-choice history
+
+Changing the workspace's selected conversion events records `workspace.conversion_events.updated` in the [workspace audit history](/actions/audit-log). Keep the definition used for a report with its result: a later choice can change live reporting while a [frozen monthly statement](/signals/records-and-statements) retains its captured definition and totals.

@@ -61,6 +61,7 @@
               "signals/conversion-journeys",
               "signals/trial-to-paid",
               "signals/event-volume",
+              "signals/records-and-statements",
               "signals/health-and-performance"
             ]
           },
@@ -79,6 +80,7 @@
             "pages": [
               "actions/overview",
               "actions/account-inventory",
+              "actions/automations",
               "actions/creative-workflow",
               "actions/review-proposals",
               "actions/policies-and-safety",
@@ -250,11 +252,17 @@
                 },
                 "pages": [
                   "api/report-exports",
+                  "api/reporting",
                   "GET /workspaces/{workspace}/admin/conversion-journeys",
                   "GET /workspaces/{workspace}/admin/cac-by-channel",
                   "GET /workspaces/{workspace}/admin/arrivals-comparison",
                   "GET /workspaces/{workspace}/admin/audit-events",
-                  "GET /workspaces/{workspace}/admin/audit-events/verify"
+                  "GET /workspaces/{workspace}/admin/audit-events/verify",
+                  "GET /workspaces/{workspace}/admin/monthly-statements",
+                  "GET /workspaces/{workspace}/admin/attribution-record",
+                  "GET /workspaces/{workspace}/admin/report-rows/channels",
+                  "GET /workspaces/{workspace}/admin/report-rows/monthly-statements",
+                  "GET /workspaces/{workspace}/admin/report-rows/arrivals-window"
                 ]
               },
               {

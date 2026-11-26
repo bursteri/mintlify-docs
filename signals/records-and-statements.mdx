@@ -1,0 +1,53 @@
+---
+title: "Keep monthly statements and attribution records"
+sidebarTitle: "Records and statements"
+description: "Read frozen monthly totals and download a complete attribution record with section hashes, coverage and explicit reporting limits."
+---
+
+Use monthly statements for frozen totals and an attribution-record download for a portable file of retained evidence. Counted outcomes, Meta claims and provider receipts remain separate evidence. Neither file proves causal attribution or advertising performance.
+
+## What does a monthly statement retain?
+
+On paid plans, Plainrouter can freeze a closed Meta-account-local month 28 days after that month ends, while the whole month remains inside retained history. Free's 30-day history does not retain the whole month until that freeze point. Upgrading does not recover swept history or guarantee a historical backfill.
+
+A statement records its month, version, timezone, freeze time, conversion-definition version and selected conversion events. It keeps counted arrivals, conversions, journey credit and value separately from stored Meta spend, clicks, Purchase claims, metric revisions and activity coverage. Later conversion-choice edits do not recount the frozen statement.
+
+Read `coverage` with the totals. A counted record may cover the whole month, part of it, none or an unknown span. Zero is not proof of complete observation. Currency amounts remain in their stated units; do not add different currencies into one total. [Understand journey credit and coverage](/signals/conversion-journeys).
+
+## Read statements through MCP or REST
+
+Use `get_monthly_statements` or:
+
+```http
+GET /api/v1/workspaces/42/admin/monthly-statements?from=2026-09&to=2026-09&limit=12 HTTP/1.1
+Host: plainrouter.com
+Authorization: Bearer <workspace-key>
+Accept: application/json
+```
+
+Replace `42` with an authorized workspace. The key needs `get_cac_by_channel`; the [Reporting preset](/api/reporting) includes this operation. `from` and `to` are optional `YYYY-MM` month bounds. `limit` defaults to 12 and accepts 1–24. Results are newest month/version first. Inspect `has_more`; there is no cursor. Use narrower month bounds to read a complete interval rather than treating a capped response as the entire history.
+
+Statements retain `counted_hash` and `meta_hash`. Meta details can later be hidden or blanked after provider disconnection, account removal or data deletion. A response can therefore contain `meta: null`, a `meta_note` and blanking metadata while retaining counted totals and both original hashes. An account-bound key can also be unable to see another account's Meta details. Read the reason rather than interpreting absence as zero.
+
+## Download a whole attribution record
+
+Use a Read or Write Workspace key whose active grant includes **all seven** operations: `get_audit_events`, `verify_audit_events`, `get_conversion_journeys`, `get_cac_by_channel`, `get_arrivals_comparison`, `get_inventory_metrics` and `read-actions`. A Reporting key is insufficient.
+
+```http
+GET /api/v1/workspaces/42/admin/attribution-record?from=2026-09-01&to=2026-09-30 HTTP/1.1
+Host: plainrouter.com
+Authorization: Bearer <workspace-key>
+Accept: application/json
+```
+
+Both dates are required, inclusive whole days in the bound account's timezone, or UTC without a Meta account. The JSON file includes monthly statements, arrivals, conversion journeys, channel costs, retained Meta metrics/revisions/activity, receipts, audit events and a current audit verification result. Its manifest names each section's timezone, row counts and SHA-256 hash.
+
+**Inspect each section's actual window.** Arrivals uses a supported fixed trailing window, whose `covers` dates can lie partly or wholly outside the requested dates. The audit verification checks the current stored chain, not only events in the requested range. Missing provider evidence and redaction limits remain visible.
+
+Plainrouter builds the complete file before sending it. A request exceeding a section or range limit is refused rather than returning a successful partial file. Default limits are 366 days, 25,000 rows per section and 2,000 receipts. Shorten the range on a limit error. Downloads are limited to one per minute per workspace and a bounded number of simultaneous builds; honor `Retry-After` on `429`.
+
+## What do the hashes establish?
+
+Preserve the original JSON and manifest in controlled storage. Hashes describe the recorded bytes under the response's stated canonical JSON rules. They do not create an external signature, prove that Meta's claims are correct or establish that every event was observed. A blanked Meta section cannot be recomputed from the remaining details.
+
+The full download can contain visitor-linked identifiers, merchant-supplied text and actor details. Apply the same access controls as for the underlying data. Read the [audit export and verification limits](/api/report-exports#what-does-audit-verification-establish) before using a valid hash chain as evidence.

@@ -7,6 +7,8 @@ Open **Settings → Agent rules** to choose how agents may act in the selected w
 
 Changing these settings requires current permission to update the workspace. Members with view access can inspect them. A Workspace key cannot change the workspace's agent mode. A listed permission does not enable an unavailable product operation.
 
+The current dashboard labels the permission-based **Custom** mode **Auto**; its API value remains `auto`. In this guide, Custom refers to that same mode.
+
 ## Execution mode
 
 | Mode | Agent proposals |
@@ -76,3 +78,7 @@ The current Agent rules page focuses on mode and agent permissions. The former A
 A supported MCP proposal writes a Plainrouter proposal and can read provider state; it does not itself perform the final Meta mutation. Created ad copies remain paused until a separate admitted activation action. Video upload execution remains unavailable. New requests refuse retired action types even when an older SDK enum contains them. [Supported actions and refusals](/actions/overview#supported-action-types).
 
 Landed still requires a durable provider receipt and exact verification for every action in the batch. Full mode, an approval or a successful write response alone does not establish Landed or a performance improvement.
+
+## How do Automations use agent mode?
+
+[Automations](/actions/automations) have separate authoring and run authorization. Ask refuses agent create, update and turn-on requests rather than queuing them in Inbox. Custom checks the relevant automation and action permissions; Full permits admitted authoring. Turning off is available in every mode. An already authorized, enabled automation keeps running across mode changes while its authorizing access remains valid. Turn it off explicitly to stop future checks.
